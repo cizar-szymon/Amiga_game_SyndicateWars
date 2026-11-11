@@ -135,6 +135,7 @@
 #include "frame_sprani.h"
 #include "game.h"
 #include "asm_coverage.h"
+#include "bmcrater.h"
 #include "game_data.h"
 #include "game_speed.h"
 #include "hud_target.h"
@@ -841,12 +842,6 @@ void check_mouse_overvehicle(struct Thing *p_thing, ubyte target_assign)
         p_locplayer->Target = p_thing->ThingOffset;
         p_locplayer->TargetType = target_assign;
     }
-}
-
-void process_map_craters(void)
-{
-    asm volatile ("call ASM_process_map_craters\n"
-        :  :  : "eax" );
 }
 
 ubyte get_engine_inputs(void)

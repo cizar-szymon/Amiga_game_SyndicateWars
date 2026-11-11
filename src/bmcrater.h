@@ -43,6 +43,9 @@ void create_crater(short tile_x, short tile_y, short depth);
 
 void quick_crater(int tl_cent_x, int tl_cent_z, int size);
 
+void process_map_crater(ubyte crater);
+void process_map_craters(void);
+
 /******************************************************************************/
 #ifdef __cplusplus
 }

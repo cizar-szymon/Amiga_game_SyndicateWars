@@ -23,12 +23,14 @@
 #include "bigmap.h"
 #include "game.h"
 #include "swlog.h"
+#include "fncheck.h"
 /******************************************************************************/
 
 #define MAP_CRATERS_COUNT 128
 
 /******************************************************************************/
 
+extern ubyte map_crater_first;
 extern ubyte map_crater_next;
 extern struct MapCreater map_craters[MAP_CRATERS_COUNT];
 
@@ -310,6 +312,45 @@ void quick_crater(int tl_cent_x, int tl_cent_z, int size)
             }
         }
     }
+}
+
+/** Progress the crater with given index by one step (still in asm).
+ */
+void process_map_crater(ubyte crater)
+{
+    asm volatile ("call ASM_process_map_crater\n"
+        : : "a" ((u32)crater) : "cc", "memory");
+}
+
+#ifdef SW_FNCHK
+static void process_map_craters_asm(void)
+{
+    asm volatile ("call ASM_process_map_craters\n"
+        : : : "eax", "cc", "memory");
+}
+#endif
+
+static void process_map_craters_c(void)
+{
+    ubyte crater;
+
+    // The loop index wraps at the sign bit, which is MAP_CRATERS_COUNT.
+    // process_map_crater() may move map_crater_first; the loop ends at
+    // map_crater_next, read again on every step.
+    crater = map_crater_first;
+    while (crater != map_crater_next)
+    {
+        process_map_crater(crater);
+        crater++;
+        if ((sbyte)crater < 0)
+            crater = 0;
+    }
+}
+
+void process_map_craters(void)
+{
+    FNCHK_VOID("process_map_craters", process_map_craters_asm(),
+      process_map_craters_c());
 }
 
 /******************************************************************************/

@@ -5,6 +5,8 @@
 # Output: build/x86-<kind>/src/syndwarsfx.exe
 #   release - reference build
 #   debug   - -g -O0, verbose error.log
+#   check   - remade C functions run next to their asm originals, results
+#             compared (src/fncheck.c), fncheck.log in the game directory
 #   cov     - asm coverage: every asm function marks itself as executed,
 #             asm_coverage.txt written on exit (tools/amiga/asm_cov_filter.py)
 set -e
@@ -19,6 +21,8 @@ case "$kind" in
   debug)
     FLAGS="$FLAGS -g -O0 -Wall"
     export CPPFLAGS="-DDEBUG -D__DEBUG" ;;
+  check)
+    export CPPFLAGS="-DSW_FNCHK" ;;
   cov)
     export CPPFLAGS="-DSW_ASM_COVERAGE"
     MAKEVARS=(CCAS="bash \"$REPO/tools/amiga/ccas_cov.sh\"") ;;

@@ -79482,7 +79482,8 @@ is_that_a_fluid_texture:	/* was 0x088FF0 */
 
 
 /*----------------------------------------------------------------*/
-process_map_crater:	/* 0x08907C */
+GLOBAL_FUNC(ASM_process_map_crater)	/* 0x08907C */
+process_map_crater:
 /*----------------------------------------------------------------*/
 		push   %ebx
 		push   %ecx

@@ -18,17 +18,19 @@ if ($Shot -ne "" -and -not $p.HasExited) {
 using System; using System.Runtime.InteropServices;
 public class W { [StructLayout(LayoutKind.Sequential)] public struct R { public int L, T, Ri, B; }
   [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr h, out R r);
-  [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h); }
+  [DllImport("user32.dll")] public static extern bool PrintWindow(IntPtr h, IntPtr hdc, uint flags); }
 "@
+    # Only the game window, also when covered by other windows (PW_RENDERFULLCONTENT).
     $p.Refresh()
     $h = $p.MainWindowHandle
-    [W]::SetForegroundWindow($h) | Out-Null
-    Start-Sleep -Milliseconds 300
     $r = New-Object W+R
     [W]::GetWindowRect($h, [ref]$r) | Out-Null
     $w = $r.Ri - $r.L; $hh = $r.B - $r.T
     $bmp = New-Object System.Drawing.Bitmap $w, $hh
-    [System.Drawing.Graphics]::FromImage($bmp).CopyFromScreen($r.L, $r.T, 0, 0, $bmp.Size)
+    $gr = [System.Drawing.Graphics]::FromImage($bmp)
+    $hdc = $gr.GetHdc()
+    [W]::PrintWindow($h, $hdc, 2) | Out-Null
+    $gr.ReleaseHdc($hdc)
     $bmp.Save($Shot)
 }
 if (-not $p.HasExited) {

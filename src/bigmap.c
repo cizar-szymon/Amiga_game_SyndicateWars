@@ -29,6 +29,7 @@
 
 #include "game_data.h"
 #include "swlog.h"
+#include "fncheck.h"
 /******************************************************************************/
 const struct Direction angle_direction[] = {
     {   0,  256},
@@ -256,14 +257,27 @@ ushort floor_texture_at_point(MapCoord cor_x, MapCoord cor_z)
     return floor_texture_at_tile(tile_x, tile_z);
 }
 
-int alt_at_point(short x, short z)
+#ifdef SW_FNCHK
+static int alt_at_point_asm(short x, short z)
 {
-#if 1
     int ret;
     asm volatile ("call ASM_alt_at_point\n"
-        : "=r" (ret) : "a" (x), "d" (z));
+        : "=a" (ret) : "a" (x), "d" (z) : "cc");
     return ret;
-#else
+}
+#endif
+
+static int alt_at_point_c(short x, short z);
+
+int alt_at_point(short x, short z)
+{
+    int ret;
+    FNCHK_PURE("alt_at_point", ret, alt_at_point_asm(x, z), alt_at_point_c(x, z));
+    return ret;
+}
+
+static int alt_at_point_c(short x, short z)
+{
     struct MyMapElement *p_mapel;
     short tile_x, tile_z;
     int alt0, alt1, alt2, alt3;
@@ -313,7 +327,6 @@ int alt_at_point(short x, short z)
         }
     }
     return alt0 << 8;
-#endif
 }
 
 int alt_at_point_under_height(int cor_x, int cor_z, int h)

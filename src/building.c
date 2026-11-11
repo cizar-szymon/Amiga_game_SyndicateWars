@@ -40,6 +40,7 @@
 #include "vehtraffic.h"
 #include "weapon.h"
 #include "swlog.h"
+#include "fncheck.h"
 /******************************************************************************/
 ubyte dome_open_speed = 4;
 
@@ -138,7 +139,8 @@ TbBool building_can_transform_open(ThingIdx bldng)
     return (p_building->SubType == SubTT_BLD_DOME);
 }
 
-struct Thing *create_building_thing(int x, int y, int z, ushort obj, ushort nobj, ushort a6)
+#ifdef SW_FNCHK
+static struct Thing *create_building_thing_asm(int x, int y, int z, ushort obj, ushort nobj, ushort a6)
 {
     struct Thing *ret;
     // Pushed through a register holding them: a "g" operand may be placed
@@ -152,9 +154,89 @@ struct Thing *create_building_thing(int x, int y, int z, ushort obj, ushort nobj
       "push 4(%5)\n"
       "push 0(%5)\n"
       "call ASM_create_building_thing\n"
-        : "=r" (ret)
+        : "=a" (ret)
         : "a" (x), "d" (y), "b" (z), "c" (obj), "S" (stkargs)
         : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Move thing of given index from the empty list to the used list, so that
+ * a level can re-create a thing at its original index. Returns 0 if the
+ * index is above the limit or the thing is already in use.
+ */
+static ushort get_new_thing_with_index(ushort thing)
+{
+    struct Thing *p_thing;
+    ThingIdx used;
+
+    if (thing > THINGS_LIMIT)
+        return 0;
+    p_thing = &things[thing];
+
+    for (used = things_used_head; used != 0; used = things[(ushort)used].LinkChild)
+    {
+        if ((ushort)used == thing)
+            return 0;
+    }
+
+    if (thing == (ushort)things_empty_head)
+    {
+        things_empty_head = p_thing->LinkChild;
+        things[p_thing->LinkChild].LinkParent = 0;
+    }
+    else
+    {
+        if (p_thing->LinkParent != 0)
+            things[p_thing->LinkParent].LinkChild = p_thing->LinkChild;
+        if (p_thing->LinkChild != 0)
+            things[p_thing->LinkChild].LinkParent = p_thing->LinkParent;
+    }
+    things[(ushort)things_used_head].LinkParent = thing;
+    p_thing->LinkParent = 0;
+    p_thing->LinkChild = things_used_head;
+    things_used_head = thing;
+    things_used++;
+    p_thing->Flag = 0;
+    p_thing->Flag2 = 0;
+    return 1;
+}
+
+/** Create a building thing for objects `obj` .. `obj`+`nobj`-1, at given
+ * index `a6` if possible (when it is not negative), else at any free one.
+ */
+static struct Thing *create_building_thing_c(int x, int y, int z, ushort obj, ushort nobj, ushort a6)
+{
+    struct Thing *p_building;
+    ushort thing, i;
+
+    thing = a6;
+    if (((short)a6 < 0) || (get_new_thing_with_index(a6) == 0))
+        thing = get_new_thing();
+
+    p_building = &things[thing];
+    p_building->Type = TT_BUILDING;
+    p_building->X = x << 8;
+    p_building->Z = z << 8;
+    p_building->U.UObject.Angle = 0;
+    p_building->Y = y;
+    p_building->U.UObject.Object = obj;
+    if ((nobj == 0) || (nobj > 250))
+        nobj = 1;
+    p_building->U.UObject.NumbObjects = nobj;
+    p_building->Health = 8024;
+    for (i = 0; i < nobj; i++)
+        game_objects[obj + i].ThingNo = thing;
+    add_node_thing(thing);
+    return p_building;
+}
+
+struct Thing *create_building_thing(int x, int y, int z, ushort obj, ushort nobj, ushort a6)
+{
+    struct Thing *ret;
+    FNCHK_RET("create_building_thing", ret,
+      create_building_thing_asm(x, y, z, obj, nobj, a6),
+      create_building_thing_c(x, y, z, obj, nobj, a6));
     return ret;
 }
 

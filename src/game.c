@@ -783,10 +783,120 @@ void load_level_wrap(short level, short missi, ubyte reload)
         unkn_f_pressed_func();
 }
 
-void update_map_thing_and_traffic_refs(void)
+#ifdef SW_FNCHK
+static void update_map_thing_and_traffic_refs_asm(void)
 {
     asm volatile ("call ASM_update_map_thing_and_traffic_refs\n"
-        :  :  : "eax" );
+        :  :  : "eax", "cc", "memory");
+}
+#endif
+
+/** Convert thing references stored in the level file (as original thing
+ * indexes) to current thing indexes: links between buildings, traffic
+ * things and traffic nodes; then set ThingOffset of buildings and traffic.
+ */
+static void update_map_thing_and_traffic_refs_c(void)
+{
+    ThingIdx thing;
+    ushort node;
+    int k;
+
+    for (thing = things_used_head; thing > 0; thing = things[thing].LinkChild)
+    {
+        struct Thing *p_thing;
+
+        p_thing = &things[thing];
+        if (p_thing->Type != TT_BUILDING)
+            continue;
+        if (p_thing->SubType == SubTT_BLD_BEZIER_ROAD) {
+            if (p_thing->U.UObject.PrevThing > 0)
+                p_thing->U.UObject.PrevThing = search_things_for_index(p_thing->U.UObject.PrevThing);
+            if (p_thing->U.UObject.NextThing > 0)
+                p_thing->U.UObject.NextThing = search_things_for_index(p_thing->U.UObject.NextThing);
+        } else {
+            if (p_thing->U.UObject.PrevThing != 0)
+                p_thing->U.UObject.PrevThing = search_things_for_index(p_thing->U.UObject.PrevThing);
+            if (p_thing->U.UObject.NextThing != 0)
+                p_thing->U.UObject.NextThing = search_things_for_index(p_thing->U.UObject.NextThing);
+        }
+    }
+
+    for (thing = sthings_used_head; thing < 0; thing = sthings[thing].LinkChild)
+    {
+        struct SimpleThing *p_sthing;
+
+        p_sthing = &sthings[thing];
+        if (p_sthing->Type != SmTT_TRAFFIC)
+            continue;
+        for (k = 0; k < 4; k++)
+        {
+            if (p_sthing->U.UTraffic.Link[k] != 0)
+                p_sthing->U.UTraffic.Link[k] = search_things_for_index(p_sthing->U.UTraffic.Link[k]);
+        }
+    }
+
+    for (node = 1; node < next_traffic_node; node++)
+    {
+        struct TrafficNode *p_tnode;
+
+        for (k = 0; k < 4; k++)
+        {
+            p_tnode = &game_traffic_nodes[node];
+            if (p_tnode->UTraffic.Link[k] > 0)
+            {
+                short idx;
+                idx = search_things_for_index(p_tnode->UTraffic.Link[k]);
+                game_traffic_nodes[node].UTraffic.Link[k] = idx;
+            }
+        }
+        p_tnode = &game_traffic_nodes[node];
+        if (p_tnode->GateLink != 0)
+        {
+            short idx;
+            idx = search_things_for_index(p_tnode->GateLink);
+            game_traffic_nodes[node].GateLink = idx;
+        }
+    }
+
+    for (thing = things_used_head; thing > 0; thing = things[thing].LinkChild)
+    {
+        if (things[thing].Type == TT_BUILDING)
+            things[thing].ThingOffset = thing;
+    }
+    for (thing = sthings_used_head; thing < 0; thing = sthings[thing].LinkChild)
+    {
+        if (sthings[thing].Type == SmTT_TRAFFIC)
+            sthings[thing].ThingOffset = thing;
+    }
+
+    // Only the first building with this flag gets the token set.
+    for (thing = things_used_head; thing > 0; thing = things[thing].LinkChild)
+    {
+        struct Thing *p_thing;
+
+        p_thing = &things[thing];
+        if ((p_thing->Type == TT_BUILDING) && ((p_thing->Flag & 0x10000000) != 0))
+        {
+            p_thing->U.UObject.Token = 3;
+            p_thing->U.UObject.TokenDir = 1;
+            break;
+        }
+    }
+
+    for (node = 1; node < next_object_face4; node++)
+    {
+        struct SingleObjectFace4 *p_face;
+
+        p_face = &game_object_faces4[node];
+        if ((p_face->GFlags & FGFlg_Unkn10) != 0)
+            p_face->WalkHeader = 0;
+    }
+}
+
+void update_map_thing_and_traffic_refs(void)
+{
+    FNCHK_VOID("update_map_thing_and_traffic_refs", update_map_thing_and_traffic_refs_asm(),
+      update_map_thing_and_traffic_refs_c());
 }
 
 #ifdef SW_FNCHK

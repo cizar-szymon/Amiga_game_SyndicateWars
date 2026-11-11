@@ -18,6 +18,7 @@ st="$1"; shift
   echo "#include \"people.h\""
   echo "#include \"scanner.h\""
   echo "#include \"player.h\""
+  echo "#include \"vehtraffic.h\""
   echo 'int main(void) {'
   echo "  printf(\"sizeof(%s) = %u\\n\", \"$st\", (unsigned)sizeof($st));"
   for f in "$@"; do

@@ -29,6 +29,11 @@
 #include "thing_fire.h"
 #include "vehicle.h"
 #include "weapon.h"
+#include "game.h"
+#include "fncheck.h"
+#include <stdlib.h>
+
+extern ushort word_17FA58[400];
 
 /******************************************************************************/
 /** Problematic tile for mapwho debug.
@@ -826,11 +831,97 @@ ThingIdx find_person_which_can_be_persuaded_now(short X, short Z, ushort R,
     return thing;
 }
 
-short find_nearest_from_group(struct Thing *p_person, ushort group, ubyte no_persuaded)
+/** Nearest person of the playable groups (network game; still in asm).
+ */
+static short find_nearest_player(struct Thing *p_person)
+{
+    short ret;
+    asm volatile ("call ASM_find_nearest_player\n"
+        : "=a" (ret) : "a" (p_person) : "cc", "memory");
+    return ret;
+}
+
+#ifdef SW_FNCHK
+static short find_nearest_from_group_asm(struct Thing *p_person, ushort group, ubyte no_persuaded)
 {
     short ret;
     asm volatile ("call ASM_find_nearest_from_group\n"
-        : "=r" (ret) : "a" (p_person), "d" (group), "b" (no_persuaded));
+        : "=a" (ret) : "a" (p_person), "d" (group), "b" (no_persuaded) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Approximate distance used by the group searches: the longer axis plus
+ * half of the shorter one, in map coords.
+ */
+static u32 find_nearest_dist(struct Thing *p_person, struct Thing *p_thing)
+{
+    s32 dx, dz;
+
+    dx = abs(p_person->X - p_thing->X) >> 8;
+    dz = abs(p_person->Z - p_thing->Z) >> 8;
+    if (dx <= dz)
+        return dz + (dx >> 1);
+    else
+        return dx + (dz >> 1);
+}
+
+/** Find the person of given group nearest to `p_person`; also people of
+ * that group persuaded by the players, unless `no_persuaded`.
+ */
+static short find_nearest_from_group_c(struct Thing *p_person, ushort group, ubyte no_persuaded)
+{
+    ThingIdx thing;
+    u32 dist, dist_best;
+    short best;
+    short i;
+
+    if (in_network_game && (group == 0))
+        return find_nearest_player(p_person);
+
+    best = 0;
+    dist_best = 0xFFFFFFFF;
+    for (thing = same_type_head[256 + group]; thing != 0;
+      thing = things[thing].LinkSameGroup)
+    {
+        struct Thing *p_thing;
+
+        p_thing = &things[thing];
+        if (no_persuaded && ((p_thing->Flag & TngF_Persuaded) != 0))
+            continue;
+        if ((p_thing->Flag & TngF_Destroyed) != 0)
+            continue;
+        dist = find_nearest_dist(p_person, p_thing);
+        if (dist < dist_best) {
+            dist_best = dist;
+            best = thing;
+        }
+    }
+    if (no_persuaded)
+        return best;
+
+    for (i = 1; i < (int)word_1531DA; i++)
+    {
+        struct Thing *p_thing;
+
+        p_thing = &things[word_17FA58[i]];
+        if (p_thing->U.UPerson.EffectiveGroup != group)
+            continue;
+        dist = find_nearest_dist(p_person, p_thing);
+        if (dist < dist_best) {
+            dist_best = dist;
+            best = p_thing->ThingOffset;
+        }
+    }
+    return best;
+}
+
+short find_nearest_from_group(struct Thing *p_person, ushort group, ubyte no_persuaded)
+{
+    short ret;
+    FNCHK_RET("find_nearest_from_group", ret,
+      find_nearest_from_group_asm(p_person, group, no_persuaded),
+      find_nearest_from_group_c(p_person, group, no_persuaded));
     return ret;
 }
 

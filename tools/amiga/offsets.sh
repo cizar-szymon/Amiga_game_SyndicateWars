@@ -16,6 +16,8 @@ st="$1"; shift
   echo '#include "game_data.h"'
   echo "#include \"game_options.h\""
   echo "#include \"people.h\""
+  echo "#include \"scanner.h\""
+  echo "#include \"player.h\""
   echo 'int main(void) {'
   echo "  printf(\"sizeof(%s) = %u\\n\", \"$st\", (unsigned)sizeof($st));"
   for f in "$@"; do

@@ -26,6 +26,11 @@
 /******************************************************************************/
 
 struct Triangulation triangulation[TRIANGULATIONS_COUNT];
+
+#if defined(__i386__)
+/* The asm copies triangulation states as 60-byte blocks. */
+_Static_assert(sizeof(struct Triangulation) == 60, "struct Triangulation size");
+#endif
 int triangulation_initied = 0;
 
 /******************************************************************************/
@@ -64,10 +69,22 @@ void triangulation_initialize(void)
     triangulation_initied = 1;
 }
 
+/** Make given triangulation the current one: triangulation[0] is the working
+ * copy; it is stored back into the slot of the previously selected one,
+ * then filled from the newly selected slot.
+ */
 void triangulation_select(int trglno)
 {
+#if 0
     asm volatile ("call ASM_triangulation_select\n"
-        : : "a" (trglno));
+        : : "a" (trglno) : "cc", "memory");
+#endif
+    if (trglno == selected_triangulation_no)
+        return;
+    if (selected_triangulation_no != -1)
+        triangulation[selected_triangulation_no] = triangulation[0];
+    selected_triangulation_no = trglno;
+    triangulation[0] = triangulation[trglno];
 }
 
 void triangulation_clear_enter_into_solid(void)

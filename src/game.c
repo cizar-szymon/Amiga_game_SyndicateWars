@@ -476,10 +476,53 @@ void load_prim_quad(void)
         test_open(100);
 }
 
-void bang_set_detail(int a1)
+/** Explosion detail table (asm data): circle and sphere parameters + mask,
+ * 21 32-bit values.
+ */
+extern s32 bangdetail[21];
+extern s32 minimum_explode_size;
+extern u32 minimum_explode_and;
+extern s32 minimum_explode_depth;
+
+#ifdef SW_FNCHK
+static void bang_set_detail_asm(int a1)
 {
     asm volatile ("call ASM_bang_set_detail\n"
-        : : "a" (a1));
+        : : "a" (a1) : "cc", "memory");
+}
+#endif
+
+/** Set explosion detail: 0 - high detail, 1 - low detail, others - no change.
+ */
+static void bang_set_detail_c(int a1)
+{
+    static const s32 detail_hi[21] = {
+        0x200, 4, 0xE3, 9, 0x78, 0x11, 0x46, 0x1D,
+        0x100, 2, 3, 0x80, 4, 5, 0x80, 4,
+        8, 0x66, 5, 0xD, 1,
+    };
+    static const s32 detail_lo[21] = {
+        0x2AA, 3, 0x199, 5, 0xBA, 0xB, 0x78, 0x11,
+        0x100, 2, 3, 0x100, 2, 3, 0x80, 4,
+        5, 0x80, 4, 8, 3,
+    };
+
+    if (a1 == 0) {
+        memcpy(bangdetail, detail_hi, sizeof(bangdetail));
+        minimum_explode_and = 0x1F;
+        minimum_explode_depth = 1;
+        minimum_explode_size = 0x1BC;
+    } else if (a1 == 1) {
+        memcpy(bangdetail, detail_lo, sizeof(bangdetail));
+        minimum_explode_and = 0xF;
+        minimum_explode_size = 0x457;
+        minimum_explode_depth = 2;
+    }
+}
+
+void bang_set_detail(int a1)
+{
+    FNCHK_VOID("bang_set_detail", bang_set_detail_asm(a1), bang_set_detail_c(a1));
 }
 
 /** Remains of some Bf debug stuff.
@@ -2806,10 +2849,66 @@ short test_single_mission(short missi)
     return ret;
 }
 
-void post_process_blips(void)
+extern ushort data_1c8468;
+
+#ifdef SW_FNCHK
+static void post_process_blips_asm(void)
 {
     asm volatile ("call ASM_post_process_blips\n"
-        :  :  : "eax" );
+        :  :  : "eax", "cc", "memory");
+}
+#endif
+
+/** Scanner beep: the closer the nearest big blip to the directly controlled
+ * agent, the more often the beep is played.
+ */
+static void post_process_blips_c(void)
+{
+    struct Thing *p_agent;
+    PlayerInfo *p_locplayer;
+    int cor_x, cor_z, dist_min;
+    int interval, i;
+
+    p_locplayer = &players[local_player_no];
+    p_agent = &things[p_locplayer->DirectControl[0]];
+    cor_x = p_agent->X >> 8;
+    cor_z = p_agent->Z >> 8;
+
+    dist_min = 0x7FFFFFFF;
+    // The original checks one blip less than the array has.
+    for (i = 0; i < SCANNER_BIG_BLIP_COUNT - 1; i++)
+    {
+        struct BigBlip *p_blip;
+        int dx, dz, dist;
+
+        p_blip = &ingame.Scanner.BigBlip[i];
+        if (p_blip->Period == 0)
+            continue;
+        dx = abs((p_blip->X >> 8) - cor_x);
+        dz = abs((p_blip->Z >> 8) - cor_z);
+        if (dx <= dz)
+            dist = dz + (dx >> 1);
+        else
+            dist = dx + (dz >> 1);
+        if (dist < dist_min)
+            dist_min = dist;
+    }
+
+    interval = (dist_min >> 9) + 2;
+    if ((ingame.Flags & GamF_NoScannerBeep) != 0)
+        return;
+    if (ingame.TrackThing != 0)
+        return;
+    if ((int)data_1c8468++ <= interval)
+        return;
+    if (interval < 60)
+        play_sample_using_heap(0, 0x5E, 0x7F, 0x40, 0x64, 0, 3);
+    data_1c8468 = 0;
+}
+
+void post_process_blips(void)
+{
+    FNCHK_VOID("post_process_blips", post_process_blips_asm(), post_process_blips_c());
 }
 
 short test_missions(ubyte flag)
@@ -4482,11 +4581,50 @@ void init_screen_boxes(void)
     init_equip_screen_shapes();
 }
 
-void move_camera(int x, int y, int z)
+#ifdef SW_FNCHK
+static void move_camera_asm(int x, int y, int z)
 {
     asm volatile (
       "call ASM_move_camera\n"
-        : : "a" (x), "d" (y), "b" (z));
+        : : "a" (x), "d" (y), "b" (z) : "cc", "memory");
+}
+#endif
+
+/** Move the engine camera towards given point (or the tracked thing),
+ * by 1/8 of the distance, but at least 5 and at most 512 units.
+ */
+static void move_camera_c(int x, int y, int z)
+{
+    s32 dx, dy, dz, dist, speed;
+
+    if (ingame.TrackThing != 0)
+    {
+        struct Thing *p_track;
+
+        p_track = &things[(ushort)ingame.TrackThing];
+        x = p_track->X >> 8;
+        y = p_track->Y >> 8;
+        z = p_track->Z >> 8;
+    }
+    dx = x - engn_xc;
+    dy = y - engn_yc;
+    dz = z - engn_zc;
+    dist = LbSqrL((u32)dx * (u32)dx + (u32)dz * (u32)dz + (u32)dy * (u32)dy);
+    speed = dist / 8;
+    if (speed > 512)
+        speed = 512;
+    else if (speed < 5)
+        speed = 5;
+    if (dist <= 16)
+        return;
+    engn_xc += (s32)((u32)dx * (u32)speed) / dist;
+    engn_yc += (s32)((u32)dy * (u32)speed) / dist;
+    engn_zc += (s32)((u32)dz * (u32)speed) / dist;
+}
+
+void move_camera(int x, int y, int z)
+{
+    FNCHK_VOID("move_camera", move_camera_asm(x, y, z), move_camera_c(x, y, z));
 }
 
 void track_player(int thing)

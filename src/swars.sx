@@ -29342,7 +29342,8 @@ GLOBAL_FUNC(ASM_is_group_all_persuaded_by_me)	/* 0x0557D4 */
 
 
 /*----------------------------------------------------------------*/
-find_nearest_player:	/* 0x0558B8 */
+GLOBAL_FUNC(ASM_find_nearest_player)	/* 0x0558B8 */
+find_nearest_player:
 /*----------------------------------------------------------------*/
 		push   %ebx
 		push   %ecx

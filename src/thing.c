@@ -51,6 +51,8 @@
 #include "vehicle.h"
 #include "game.h"
 #include "swlog.h"
+#include "fncheck.h"
+#include <string.h>
 /******************************************************************************/
 #pragma pack(1)
 
@@ -338,10 +340,55 @@ void move_mapwho(struct Thing *p_thing, int x, int y, int z)
         : : "a" (p_thing), "d" (x), "b" (y), "c" (z));
 }
 
-void init_just_things(void)
+#ifdef SW_FNCHK
+static void init_just_things_asm(void)
 {
     asm volatile ("call ASM_init_just_things\n"
-        :  :  : "eax" );
+        :  :  : "eax", "cc", "memory");
+}
+#endif
+
+/** Clear all things and sthings and chain them into the empty lists.
+ */
+static void init_just_things_c(void)
+{
+    short i;
+
+    // sthings use negative indices; the empty list goes -1, -2, ...
+    for (i = 1; i < STHINGS_LIMIT; i++)
+    {
+        struct SimpleThing *p_sthing;
+
+        p_sthing = &sthings[-i];
+        memset(p_sthing, 0, sizeof(struct SimpleThing));
+        p_sthing->LinkParent = -(i - 1);
+        p_sthing->ThingOffset = -i;
+        p_sthing->LinkChild = -(i + 1);
+    }
+    sthings_empty_head = -1;
+    sthings_used_head = 0;
+
+    for (i = 1; i < THINGS_LIMIT; i++)
+    {
+        struct Thing *p_thing;
+
+        p_thing = &things[i];
+        memset(p_thing, 0, sizeof(struct Thing));
+        p_thing->LinkParent = i - 1;
+        p_thing->ThingOffset = i;
+        p_thing->LinkChild = i + 1;
+    }
+    things_empty_head = 1;
+    things_used_head = 0;
+    things_used = 0;
+    sthings_used = 0;
+    // The original also marks the entry just past the array.
+    things[THINGS_LIMIT].ThingOffset = THINGS_LIMIT;
+}
+
+void init_just_things(void)
+{
+    FNCHK_VOID("init_just_things", init_just_things_asm(), init_just_things_c());
 }
 
 void init_things(void)
@@ -1538,11 +1585,60 @@ TbBool thing_is_pickup_item(ThingIdx thing)
     return thing_type_is_pickup_item(p_sthing->Type);
 }
 
-TbResult delete_node(struct Thing *p_thing)
+/** Map coordinate in range for the `mapwho` lists (tile 0..127, as in asm). */
+static inline TbBool mapwho_coord_in_range(s32 cor)
+{
+    return ((cor >> 8) >= 0) && ((cor >> 8) < 0x8000);
+}
+
+static inline struct MyMapElement *mapwho_mapel(s32 cor_x, s32 cor_z)
+{
+    return &game_my_big_map[MAP_TILE_WIDTH * (cor_z >> 16) + (cor_x >> 16)];
+}
+
+/** Set the `Parent` of a thing or sthing (by sign of the index). */
+static inline void mapwho_set_parent(ThingIdx thing, short parent)
+{
+    if (thing > 0)
+        things[thing].Parent = parent;
+    else if (thing < 0)
+        sthings[thing].Parent = parent;
+}
+
+#ifdef SW_FNCHK
+static TbResult delete_node_asm(struct Thing *p_thing)
 {
     TbResult ret;
     asm volatile ("call ASM_delete_node\n"
-        : "=r" (ret) : "a" (p_thing));
+        : "=a" (ret) : "a" (p_thing) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Remove a thing (or sthing - same leading fields) from its `mapwho` list. */
+static TbResult delete_node_c(struct Thing *p_thing)
+{
+    if (!mapwho_coord_in_range(p_thing->X) || !mapwho_coord_in_range(p_thing->Z))
+        return 0;
+
+    if (p_thing->Parent > 0)
+        things[p_thing->Parent].Next = p_thing->Next;
+    else if (p_thing->Parent < 0)
+        sthings[p_thing->Parent].Next = p_thing->Next;
+    else
+        mapwho_mapel(p_thing->X, p_thing->Z)->Child = p_thing->Next;
+
+    mapwho_set_parent(p_thing->Next, p_thing->Parent);
+
+    p_thing->Parent = 0;
+    p_thing->Next = 0;
+    return 0;
+}
+
+TbResult delete_node(struct Thing *p_thing)
+{
+    TbResult ret;
+    FNCHK_RET("delete_node", ret, delete_node_asm(p_thing), delete_node_c(p_thing));
     return ret;
 }
 
@@ -1554,17 +1650,81 @@ TbResult delete_snode(struct SimpleThing *p_sthing)
     return ret;
 }
 
-void add_node_thing(ThingIdx new_thing)
+#ifdef SW_FNCHK
+static void add_node_thing_asm(ThingIdx new_thing)
 {
     asm volatile ("call ASM_add_node_thing\n"
-        : : "a" (new_thing));
+        : : "a" (new_thing) : "cc", "memory");
+}
+#endif
+
+/** Put a thing at the head of the `mapwho` list of its map tile.
+ * The index is taken as unsigned, like in the original.
+ */
+static void add_node_thing_c(ThingIdx new_thing)
+{
+    struct Thing *p_thing;
+    struct MyMapElement *p_mapel;
+
+    p_thing = &things[(ushort)new_thing];
+    p_thing->Parent = 0;
+    if (!mapwho_coord_in_range(p_thing->X) || !mapwho_coord_in_range(p_thing->Z))
+        return;
+    p_mapel = mapwho_mapel(p_thing->X, p_thing->Z);
+    p_thing->Next = p_mapel->Child;
+    mapwho_set_parent(p_thing->Next, new_thing);
+    p_mapel->Child = new_thing;
+}
+
+void add_node_thing(ThingIdx new_thing)
+{
+    FNCHK_VOID("add_node_thing", add_node_thing_asm(new_thing),
+      add_node_thing_c(new_thing));
+}
+
+#ifdef SW_FNCHK
+static short get_new_thing_asm(void)
+{
+    short ret;
+    asm volatile ("call ASM_get_new_thing\n"
+        : "=a" (ret) : : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Take a thing from the head of the empty list and put it at the head
+ * of the used list. Returns 0 if the limit is reached.
+ */
+static short get_new_thing_c(void)
+{
+    struct Thing *p_thing;
+    ushort new_thing, used_head, next_empty;
+
+    if (things_used > THINGS_LIMIT - 5)
+        return 0;
+    new_thing = (ushort)things_empty_head;
+    used_head = (ushort)things_used_head;
+
+    things[used_head].LinkParent = new_thing;
+    p_thing = &things[new_thing];
+    p_thing->LinkParent = 0;
+    p_thing->Flag = 0;
+    next_empty = (ushort)p_thing->LinkChild;
+    p_thing->Flag2 = 0;
+    p_thing->U.UPerson.Flag3 = 0;
+    p_thing->LinkChild = used_head;
+    things[next_empty].LinkParent = 0;
+    things_used++;
+
+    things_used_head = new_thing;
+    things_empty_head = next_empty;
+    return new_thing;
 }
 
 short get_new_thing(void)
 {
     short ret;
-    asm volatile ("call ASM_get_new_thing\n"
-        : "=r" (ret) : );
+    FNCHK_RET("get_new_thing", ret, get_new_thing_asm(), get_new_thing_c());
     return ret;
 }
 
@@ -1574,17 +1734,78 @@ void remove_thing(short tngno)
         : : "a" (tngno));
 }
 
-void add_node_sthing(ThingIdx new_thing)
+#ifdef SW_FNCHK
+static void add_node_sthing_asm(ThingIdx new_thing)
 {
     asm volatile ("call ASM_add_node_sthing\n"
-        : : "a" (new_thing));
+        : : "a" (new_thing) : "cc", "memory");
+}
+#endif
+
+/** Put an sthing at the head of the `mapwho` list of its map tile.
+ */
+static void add_node_sthing_c(ThingIdx new_thing)
+{
+    struct SimpleThing *p_sthing;
+    struct MyMapElement *p_mapel;
+
+    p_sthing = &sthings[new_thing];
+    p_sthing->Parent = 0;
+    if (!mapwho_coord_in_range(p_sthing->X) || !mapwho_coord_in_range(p_sthing->Z))
+        return;
+    p_mapel = mapwho_mapel(p_sthing->X, p_sthing->Z);
+    p_sthing->Next = p_mapel->Child;
+    mapwho_set_parent(p_sthing->Next, new_thing);
+    p_mapel->Child = new_thing;
+}
+
+void add_node_sthing(ThingIdx new_thing)
+{
+    FNCHK_VOID("add_node_sthing", add_node_sthing_asm(new_thing),
+      add_node_sthing_c(new_thing));
+}
+
+#ifdef SW_FNCHK
+static short get_new_sthing_asm(void)
+{
+    short ret;
+    asm volatile ("call ASM_get_new_sthing\n"
+        : "=a" (ret) : : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Take an sthing from the head of the empty list and put it at the head
+ * of the used list. Returns 0 if the limit is reached.
+ */
+static short get_new_sthing_c(void)
+{
+    struct SimpleThing *p_sthing;
+    ThingIdx new_thing, used_head, next_empty;
+
+    if (sthings_used > STHINGS_LIMIT - 5)
+        return 0;
+    new_thing = sthings_empty_head;
+    used_head = sthings_used_head;
+
+    sthings[used_head].LinkParent = new_thing;
+    p_sthing = &sthings[new_thing];
+    p_sthing->LinkParent = 0;
+    next_empty = p_sthing->LinkChild;
+    p_sthing->Flag = 0;
+    p_sthing->LinkChild = used_head;
+    sthings[next_empty].LinkParent = 0;
+    sthings_used++;
+
+    sthings_used_head = new_thing;
+    sthings_empty_head = next_empty;
+    return new_thing;
 }
 
 short get_new_sthing(void)
 {
     short ret;
-    asm volatile ("call ASM_get_new_sthing\n"
-        : "=r" (ret) : );
+    FNCHK_RET("get_new_sthing", ret, get_new_sthing_asm(), get_new_sthing_c());
     return ret;
 }
 

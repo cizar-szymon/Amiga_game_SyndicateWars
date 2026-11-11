@@ -34,13 +34,15 @@
 #include "player.h"
 #include "swlog.h"
 #include "thing.h"
+#include "fncheck.h"
 /******************************************************************************/
 
 struct Thing thing_on_face;
 
 /******************************************************************************/
 
-ubyte check_big_point_triangle(int x, int y, int ux, int uy, int vx, int vy, int wx, int wy)
+#ifdef SW_FNCHK
+static ubyte check_big_point_triangle_asm(int x, int y, int ux, int uy, int vx, int vy, int wx, int wy)
 {
     ubyte ret;
     // Pushed through a register holding them: a "g" operand may be placed
@@ -58,9 +60,58 @@ ubyte check_big_point_triangle(int x, int y, int ux, int uy, int vx, int vy, int
       "push 4(%5)\n"
       "push 0(%5)\n"
       "call ASM_check_big_point_triangle\n"
-        : "=r" (ret)
+        : "=a" (ret)
         : "a" (x), "d" (y), "b" (ux), "c" (uy), "S" (stkargs)
         : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Check whether point (x,y) lies within triangle (u,v,w).
+ *
+ * Computes the barycentric coordinates of the point in 8.8 fixed point:
+ * t along edge u->v and s along edge u->w; the point is inside if both are
+ * non-negative and their sum is below 1.0 (256). Products and shifts wrap
+ * at 32 bits and divisions truncate toward zero, like the original.
+ */
+static ubyte check_big_point_triangle_c(int x, int y, int ux, int uy, int vx, int vy, int wx, int wy)
+{
+    s32 dvx, dvy, dwx, dwy;
+    s32 num, den, t, s;
+
+    dvx = vx - ux;
+    dvy = vy - uy;
+    dwx = wx - ux;
+    dwy = wy - uy;
+
+    num = (s32)((u32)(y - uy) * (u32)dwx + (u32)(ux - x) * (u32)dwy);
+    den = (s32)((u32)dvy * (u32)dwx - (u32)dvx * (u32)dwy);
+    if (den == 0)
+        return 0;
+    t = (s32)((u32)num << 8) / den;
+    if (t < 0)
+        return 0;
+
+    if (dwx != 0) {
+        num = (s32)(((u32)x << 8) - ((u32)ux << 8) - (u32)dvx * (u32)t);
+        s = num / dwx;
+    } else {
+        num = (s32)(((u32)y << 8) - ((u32)uy << 8) - (u32)dvy * (u32)t);
+        s = num / dwy;
+    }
+    if (s < 0)
+        return 0;
+    if (s + t >= 256)
+        return 0;
+    return 1;
+}
+
+ubyte check_big_point_triangle(int x, int y, int ux, int uy, int vx, int vy, int wx, int wy)
+{
+    ubyte ret;
+    FNCHK_PURE("check_big_point_triangle", ret,
+      check_big_point_triangle_asm(x, y, ux, uy, vx, vy, wx, wy),
+      check_big_point_triangle_c(x, y, ux, uy, vx, vy, wx, wy));
     return ret;
 }
 

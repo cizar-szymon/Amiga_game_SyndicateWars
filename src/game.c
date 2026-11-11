@@ -746,10 +746,90 @@ void update_map_thing_and_traffic_refs(void)
         :  :  : "eax" );
 }
 
-void unkn_lights_processing(void)
+#ifdef SW_FNCHK
+static void unkn_lights_processing_asm(void)
 {
     asm volatile ("call ASM_unkn_lights_processing\n"
-        :  :  : "eax" );
+        :  :  : "eax", "cc", "memory");
+}
+#endif
+
+/** Light command target: thing index stored at offset 0x12 (little endian,
+ * as loaded from the level file).
+ */
+static short light_command_target(ushort lcmd)
+{
+    const ubyte *p;
+
+    p = game_light_commands[lcmd].lcfld_0;
+    return (short)(p[0x12] | (p[0x13] << 8));
+}
+
+/** Remove light command `lcmd`: lights pointing at later commands are moved
+ * down by one, later commands shifted down. Returns the new command count.
+ */
+static ushort remove_light_command(ushort lcmd, ushort cmd_count)
+{
+    ushort i;
+
+    for (i = 1; i < next_full_light; i++)
+    {
+        struct FullLight *p_flight;
+
+        p_flight = &game_full_lights[i];
+        if ((ushort)p_flight->Command > lcmd)
+            p_flight->Command--;
+    }
+    for (i = lcmd; i < cmd_count; i++)
+        game_light_commands[i] = game_light_commands[i + 1];
+    return cmd_count - 1;
+}
+
+/** Drop light commands which refer to lights or scenery things which
+ * do not exist, and light references to commands out of range.
+ */
+static void unkn_lights_processing_c(void)
+{
+    ushort cmd_count, lcmd;
+    ushort i;
+
+    cmd_count = next_light_command;
+    for (i = 0; i < next_full_light; i++)
+    {
+        struct FullLight *p_flight;
+
+        p_flight = &game_full_lights[i];
+        if ((ushort)p_flight->Command > cmd_count)
+            p_flight->Command = 0;
+    }
+
+    for (lcmd = 1; lcmd < cmd_count; lcmd++)
+    {
+        short target;
+        TbBool valid;
+
+        target = light_command_target(lcmd);
+        if (target >= 0) {
+            valid = (target <= next_full_light);
+        } else if (target < -1500) {
+            valid = false;
+        } else {
+            ushort lhead;
+            lhead = sthings[target].U.UScenery.LightHead;
+            valid = (lhead != 0) && (lhead <= next_full_light);
+        }
+        if (!valid) {
+            cmd_count = remove_light_command(lcmd, cmd_count);
+            lcmd--; // check the command shifted into this place
+        }
+    }
+    next_light_command = cmd_count;
+}
+
+void unkn_lights_processing(void)
+{
+    FNCHK_VOID("unkn_lights_processing", unkn_lights_processing_asm(),
+      unkn_lights_processing_c());
 }
 
 void change_current_map(ushort mapno)
@@ -1319,10 +1399,252 @@ void blind_progress_game(ulong nturns)
     }
 }
 
-void map_lights_update(void)
+#ifdef SW_FNCHK
+static void map_lights_update_asm(void)
 {
     asm volatile ("call ASM_map_lights_update\n"
-        :  :  : "eax" );
+        :  :  : "eax", "cc", "memory");
+}
+#endif
+
+/** Scale a chain of quick lights by `ratio`/256; links pointing past the
+ * last light are cut.
+ */
+static void scale_quick_light_chain_cut(ushort qlight, short ratio)
+{
+    while ((qlight != 0) && (qlight < next_quick_light))
+    {
+        struct QuickLight *p_qlight;
+
+        p_qlight = &game_quick_lights[qlight];
+        p_qlight->Ratio = ((int)p_qlight->Ratio * ratio) >> 8;
+        if (p_qlight->NextQuick >= next_quick_light)
+            p_qlight->NextQuick = 0;
+        qlight = p_qlight->NextQuick;
+    }
+}
+
+/** Dim the lighting of one corner of an object face near the map edge.
+ * face > 0: SingleObjectFace3, face < 0: SingleObjectFace4 (index -face).
+ * `amount` 0..256 is mapped to the ratio 0..140.
+ */
+static void unkn_obj_faces4_lights_func_10(short face, ushort corner, int amount)
+{
+    int ratio;
+
+    if (amount < 0)
+        amount = 0;
+    if (amount > 256)
+        amount = 256;
+    ratio = (amount * 140) >> 8;
+
+    if (face > 0)
+    {
+        struct SingleObjectFace3 *p_face;
+        ushort *p_light;
+        short *p_shade;
+
+        p_face = &game_object_faces3[face];
+        switch (corner)
+        {
+        case 0: p_light = &p_face->Light0; p_shade = &p_face->Shade0; break;
+        case 1: p_light = &p_face->Light1; p_shade = &p_face->Shade1; break;
+        case 2: p_light = &p_face->Light2; p_shade = &p_face->Shade2; break;
+        default: return;
+        }
+        scale_quick_light_chain_cut(*p_light, ratio);
+        *p_shade = ((int)(ushort)*p_shade * ratio) >> 8;
+    }
+    else if (face < 0)
+    {
+        struct SingleObjectFace4 *p_face;
+        short *p_light;
+        short *p_shade;
+
+        p_face = &game_object_faces4[-face];
+        switch (corner)
+        {
+        case 0: p_light = &p_face->Light0; p_shade = &p_face->Shade0; break;
+        case 1: p_light = &p_face->Light1; p_shade = &p_face->Shade1; break;
+        case 2: p_light = &p_face->Light2; p_shade = &p_face->Shade2; break;
+        case 3: p_light = &p_face->Light3; p_shade = &p_face->Shade3; break;
+        default: return;
+        }
+        scale_quick_light_chain_cut((ushort)*p_light, ratio);
+        *p_shade = ((int)(ushort)*p_shade * ratio) >> 8;
+    }
+}
+
+/** Fade of tile ambient light by `fade`/256 (clamped 0..256); returns the
+ * fade used.
+ */
+static short map_edge_fade_tile(struct MyMapElement *p_mapel, short fade)
+{
+    if (fade < 0)
+        fade = 0;
+    if (fade > 256)
+        fade = 256;
+    p_mapel->Ambient = ((int)fade * p_mapel->Ambient) >> 8;
+    return fade;
+}
+
+/** Set the ratio of all quick lights in a tile chain. */
+static void map_edge_set_tile_lights(struct MyMapElement *p_mapel, ushort ratio)
+{
+    ushort qlight;
+
+    qlight = p_mapel->Shade;
+    while ((qlight != 0) && (qlight < next_quick_light))
+    {
+        game_quick_lights[qlight].Ratio = ratio;
+        qlight = game_quick_lights[qlight].NextQuick;
+    }
+}
+
+/** Dim the light of object face corners which lie near the map edge. */
+static void map_edge_fade_face_corner(short face, ushort corner, int cor_x, int cor_z)
+{
+    if (cor_x < 0x600)
+        unkn_obj_faces4_lights_func_10(face, corner, cor_x - 0x100);
+    if (cor_x > 0x7A00)
+        unkn_obj_faces4_lights_func_10(face, corner, 0x500 - (cor_x - 0x7900));
+    if (cor_z < 0x600)
+        unkn_obj_faces4_lights_func_10(face, corner, cor_z - 0x100);
+    if (cor_z > 0x7A00)
+        unkn_obj_faces4_lights_func_10(face, corner, 0x500 - (cor_z - 0x7900));
+}
+
+/** Check if object of a face belongs to a building which should get dimmed. */
+static TbBool map_edge_face_object_dims(ushort object)
+{
+    struct Thing *p_thing;
+    short thing;
+
+    thing = game_objects[object].ThingNo;
+    if ((thing <= 0) || (thing >= THINGS_LIMIT))
+        return false;
+    p_thing = &things[thing];
+    if (p_thing->Type != TT_BUILDING)
+        return false;
+    if (p_thing->SubType == 0x20)
+        return false;
+    return true;
+}
+
+/** Darken the map near its edges: tile ambient light, quick lights of
+ * tiles and of building faces.
+ */
+static void map_lights_update_c(void)
+{
+    ushort tile_x, tile_z;
+    short fade;
+    ushort face;
+
+    // West edge: tile lights scaled
+    for (tile_x = 0; tile_x < 6; tile_x++)
+    {
+        for (tile_z = 0; tile_z < MAP_TILE_HEIGHT; tile_z++)
+        {
+            struct MyMapElement *p_mapel;
+            ushort qlight;
+
+            p_mapel = &game_my_big_map[MAP_TILE_WIDTH * tile_z + tile_x];
+            fade = map_edge_fade_tile(p_mapel, -70 + 70 * tile_x);
+            qlight = p_mapel->Shade;
+            while ((qlight != 0) && (qlight < next_quick_light))
+            {
+                struct QuickLight *p_qlight;
+
+                p_qlight = &game_quick_lights[qlight];
+                p_qlight->Ratio = ((int)p_qlight->Ratio * fade) >> 8;
+                qlight = p_qlight->NextQuick;
+            }
+        }
+    }
+    // East edge: tile lights switched off
+    for (tile_x = 123; tile_x < MAP_TILE_WIDTH; tile_x++)
+    {
+        for (tile_z = 0; tile_z < MAP_TILE_HEIGHT; tile_z++)
+        {
+            struct MyMapElement *p_mapel;
+
+            p_mapel = &game_my_big_map[MAP_TILE_WIDTH * tile_z + tile_x];
+            map_edge_fade_tile(p_mapel, 140 - 70 * (tile_x - 123));
+            map_edge_set_tile_lights(p_mapel, 0);
+        }
+    }
+    // South edge
+    for (tile_x = 0; tile_x < MAP_TILE_WIDTH; tile_x++)
+    {
+        for (tile_z = 122; tile_z < MAP_TILE_HEIGHT; tile_z++)
+        {
+            struct MyMapElement *p_mapel;
+
+            p_mapel = &game_my_big_map[MAP_TILE_WIDTH * tile_z + tile_x];
+            map_edge_fade_tile(p_mapel, (short)((5 - (tile_z - 121)) * 70));
+            map_edge_set_tile_lights(p_mapel, 0);
+        }
+    }
+    // North edge
+    for (tile_x = 0; tile_x < MAP_TILE_WIDTH; tile_x++)
+    {
+        for (tile_z = 0; tile_z < 6; tile_z++)
+        {
+            struct MyMapElement *p_mapel;
+
+            p_mapel = &game_my_big_map[MAP_TILE_WIDTH * tile_z + tile_x];
+            map_edge_fade_tile(p_mapel, (short)((tile_z - 1) * 70));
+            map_edge_set_tile_lights(p_mapel, 0);
+        }
+    }
+
+    // Triangle faces of buildings
+    for (face = 1; face < next_object_face3; face++)
+    {
+        struct SingleObjectFace3 *p_face;
+        struct SingleObject *p_sobj;
+        ushort corner;
+
+        p_face = &game_object_faces3[face];
+        if (!map_edge_face_object_dims(p_face->Object))
+            continue;
+        for (corner = 0; corner < 3; corner++)
+        {
+            struct SinglePoint *p_pt;
+
+            p_face = &game_object_faces3[face];
+            p_sobj = &game_objects[p_face->Object];
+            p_pt = &game_object_points[(ushort)p_face->PointNo[corner]];
+            map_edge_fade_face_corner(face, corner,
+              p_pt->X + p_sobj->MapX, p_pt->Z + p_sobj->MapZ);
+        }
+    }
+    // Quad faces of buildings
+    for (face = 1; face < next_object_face4; face++)
+    {
+        struct SingleObjectFace4 *p_face;
+        struct SingleObject *p_sobj;
+        ushort corner;
+
+        p_face = &game_object_faces4[face];
+        if (!map_edge_face_object_dims(p_face->Object))
+            continue;
+        for (corner = 0; corner < 4; corner++)
+        {
+            struct SinglePoint *p_pt;
+
+            p_face = &game_object_faces4[face];
+            p_sobj = &game_objects[p_face->Object];
+            p_pt = &game_object_points[(ushort)p_face->PointNo[corner]];
+            map_edge_fade_face_corner(-(short)face, corner,
+              p_pt->X + p_sobj->MapX, p_pt->Z + p_sobj->MapZ);
+        }
+    }
+}
+
+void map_lights_update(void)
+{
+    FNCHK_VOID("map_lights_update", map_lights_update_asm(), map_lights_update_c());
 }
 
 /** Link a train track piece to the station nearby: find the station and

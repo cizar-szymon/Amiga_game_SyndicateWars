@@ -136,6 +136,10 @@
 #include "game.h"
 #include "asm_coverage.h"
 #include "bmcrater.h"
+#include "fncheck.h"
+#include "people.h"
+
+extern struct Animation animations[2];
 #include "game_data.h"
 #include "game_speed.h"
 #include "hud_target.h"
@@ -1113,10 +1117,39 @@ void init_syndwars(void)
     setup_heaps(SHSC_GameSndAutoQ, language_3str);
 }
 
-void setup_host_sub6(void)
+#ifdef SW_FNCHK
+static void setup_host_sub6_asm(void)
 {
     asm volatile ("call ASM_setup_host_sub6\n"
-        :  :  : "eax" );
+        :  :  : "eax", "cc", "memory");
+}
+#endif
+
+/** Reset the two embedded FLI animation slots.
+ */
+static void setup_host_sub6_c(void)
+{
+    int k;
+
+    for (k = 0; k < 2; k++)
+    {
+        struct Animation *p_anim;
+
+        p_anim = &animations[k];
+        p_anim->FrameNumber = 0;
+        p_anim->Flags = 0;
+        p_anim->Type = 0;
+        p_anim->Xpos = 0;
+        p_anim->Ypos = 0;
+        p_anim->anfield_4 = 0;
+        p_anim->FileHandle = INVALID_FILE;
+        p_anim->Filename[0] = '\0';
+    }
+}
+
+void setup_host_sub6(void)
+{
+    FNCHK_VOID("setup_host_sub6", setup_host_sub6_asm(), setup_host_sub6_c());
 }
 
 void setup_debug_obj_trace(void)
@@ -1292,10 +1325,91 @@ void map_lights_update(void)
         :  :  : "eax" );
 }
 
-void func_74934(void)
+/** Link a train track piece to the station nearby: find the station and
+ * two of its quad faces, store them in ComHead/ComCur of both the track
+ * and the station. Returns 1 if both faces were found.
+ */
+static ushort train_related_func_01(struct Thing *p_track)
+{
+    struct Thing *p_station;
+    ThingIdx station;
+    ushort face;
+
+    station = search_for_station(p_track->X >> 8, p_track->Z >> 8);
+    if (station == 0)
+        return 0;
+    p_station = &things[station];
+
+    face = search_object_for_qface(p_station->U.UObject.Object, 4, 2, 0);
+    if (face == 0)
+        return 0;
+    p_track->U.UObject.ComHead = face;
+    p_station->U.UObject.ComHead = face;
+
+    // The second search continues after the first face found.
+    face = search_object_for_qface(p_station->U.UObject.Object, 4, 2, face);
+    if (face == 0)
+        return 0;
+    p_track->U.UObject.ComCur = face;
+    p_station->U.UObject.ComCur = face;
+    p_station->GotoThingIndex = p_track->ThingOffset;
+    return 1;
+}
+
+#ifdef SW_FNCHK
+static void func_74934_asm(void)
 {
     asm volatile ("call ASM_func_74934\n"
-        :  :  : "eax" );
+        :  :  : "eax", "cc", "memory");
+}
+#endif
+
+/** For every train track end piece on the map, find a station it leads to.
+ * Sets the train mode flag if any track is connected to a station.
+ */
+static void func_74934_c(void)
+{
+    short tile_x, tile_z;
+
+    for (tile_x = 0; tile_x < MAP_TILE_WIDTH; tile_x++)
+    {
+        for (tile_z = 0; tile_z < MAP_TILE_HEIGHT; tile_z++)
+        {
+            ThingIdx thing;
+
+            thing = game_my_big_map[MAP_TILE_WIDTH * tile_z + tile_x].Child;
+            while (thing != 0)
+            {
+                if (thing > 0)
+                {
+                    struct Thing *p_thing;
+
+                    p_thing = &things[thing];
+                    if ((p_thing->Type == TT_BUILDING)
+                      && (p_thing->SubType == SubTT_BLD_TRAINTRK)
+                      && ((p_thing->Flag & TngF_Unkn08000000) == 0)
+                      && ((p_thing->U.UObject.NextThing == 0)
+                        || (p_thing->U.UObject.PrevThing == 0)))
+                    {
+                        p_thing->U.UObject.ComHead = 0;
+                        p_thing->U.UObject.ComCur = 0;
+                        if (train_related_func_01(p_thing))
+                            ingame.TrainMode |= 0x02;
+                    }
+                    thing = p_thing->Next;
+                }
+                else
+                {
+                    thing = sthings[thing].Next;
+                }
+            }
+        }
+    }
+}
+
+void func_74934(void)
+{
+    FNCHK_VOID("func_74934", func_74934_asm(), func_74934_c());
 }
 
 void init_crater_textures(void)
@@ -1305,11 +1419,68 @@ void init_crater_textures(void)
     return;
 }
 
-void find_the_tall_buildings(void)
+/** Height of the highest point of a 3D object (at least 0).
+ */
+static int calc_object_height(ushort object)
+{
+    struct SingleObject *p_sobj;
+    int pt, height;
+
+    p_sobj = &game_objects[object];
+    height = 0;
+    for (pt = p_sobj->StartPoint; pt <= p_sobj->EndPoint; pt++)
+    {
+        if (game_object_points[pt].Y > height)
+            height = game_object_points[pt].Y;
+    }
+    return height;
+}
+
+#ifdef SW_FNCHK
+static void find_the_tall_buildings_asm(void)
 {
     asm volatile ("call ASM_find_the_tall_buildings\n"
-        :  :  : "eax" );
-    return;
+        :  :  : "eax", "cc", "memory");
+}
+#endif
+
+/** Store the height of every building on the map in its BHeight.
+ */
+static void find_the_tall_buildings_c(void)
+{
+    short tile_x, tile_z;
+
+    for (tile_x = 0; tile_x < MAP_TILE_WIDTH; tile_x++)
+    {
+        for (tile_z = 0; tile_z < MAP_TILE_HEIGHT; tile_z++)
+        {
+            ThingIdx thing;
+
+            thing = game_my_big_map[MAP_TILE_WIDTH * tile_z + tile_x].Child;
+            while (thing != 0)
+            {
+                if (thing > 0)
+                {
+                    struct Thing *p_thing;
+
+                    p_thing = &things[thing];
+                    if (p_thing->Type == TT_BUILDING)
+                        p_thing->U.UObject.BHeight = calc_object_height(p_thing->U.UObject.Object);
+                    thing = p_thing->Next;
+                }
+                else
+                {
+                    thing = sthings[thing].Next;
+                }
+            }
+        }
+    }
+}
+
+void find_the_tall_buildings(void)
+{
+    FNCHK_VOID("find_the_tall_buildings", find_the_tall_buildings_asm(),
+      find_the_tall_buildings_c());
 }
 
 //TODO change ret type to ThingIdx, when no longer used in ASM
@@ -1321,11 +1492,57 @@ int create_train_carriage(short cor_dx, short cor_dy, short cor_dz, short otype)
     return ret;
 }
 
-struct Thing *find_unused_train_track(void)
+#ifdef SW_FNCHK
+static struct Thing *find_unused_train_track_asm(void)
 {
     struct Thing *ret;
     asm volatile ("call ASM_find_unused_train_track\n"
-        : "=r" (ret) : );
+        : "=a" (ret) : : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Find the next train track end connected to a station, which does not
+ * have a train yet. Tracks are counted along the used things list; the ones
+ * already given trains (ingame.fld_unkC59 of them) are skipped.
+ */
+static struct Thing *find_unused_train_track_c(void)
+{
+    ThingIdx thing;
+    ushort remain, count;
+
+    thing = things_used_head;
+    remain = things_used;
+    count = 0;
+    while (thing > 0)
+    {
+        struct Thing *p_thing;
+
+        remain--;
+        if (remain == 0xFFFF)
+            break;
+        p_thing = &things[thing];
+        if ((p_thing->Type == TT_BUILDING)
+          && (p_thing->SubType == SubTT_BLD_TRAINTRK)
+          && (p_thing->U.UObject.PrevThing == 0)
+          && ((p_thing->Flag & TngF_Unkn08000000) == 0)
+          && (p_thing->U.UObject.ComCur != 0)
+          && (p_thing->U.UObject.ComHead != 0))
+        {
+            count++;
+            if ((int)count > ingame.fld_unkC59)
+                return p_thing;
+        }
+        thing = p_thing->LinkChild;
+    }
+    return NULL;
+}
+
+struct Thing *find_unused_train_track(void)
+{
+    struct Thing *ret;
+    FNCHK_RET("find_unused_train_track", ret, find_unused_train_track_asm(),
+      find_unused_train_track_c());
     return ret;
 }
 void create_train_for_each_track(void)
@@ -1369,11 +1586,34 @@ void create_train_for_each_track(void)
     }
 }
 
-void init_my_paths(void)
+#ifdef SW_FNCHK
+static void init_my_paths_asm(void)
 {
     asm volatile ("call ASM_init_my_paths\n"
-        :  :  : "eax" );
-    return;
+        :  :  : "eax", "cc", "memory");
+}
+#endif
+
+/** Chain all paths into the free list; path 0 is never used.
+ */
+static void init_my_paths_c(void)
+{
+    ushort i;
+
+    for (i = 0; i < 1599; i++)
+    {
+        my_paths[i].Next = i + 1;
+        my_paths[i].Flag = 0;
+    }
+    my_paths[1599].Flag = 0;
+    my_paths[1599].Next = 0;
+    head_my_path = 1;
+    path_count = 1;
+}
+
+void init_my_paths(void)
+{
+    FNCHK_VOID("init_my_paths", init_my_paths_asm(), init_my_paths_c());
 }
 
 void init_level_unknsub01_person(struct Thing *p_person)

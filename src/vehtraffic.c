@@ -28,6 +28,7 @@
 #include "thing.h"
 #include "vehicle.h"
 #include "swlog.h"
+#include "fncheck.h"
 /******************************************************************************/
 struct TrafficNode *game_traffic_nodes = NULL;
 ushort next_traffic_node = 1;
@@ -536,10 +537,137 @@ void VNAV_preprocess_bezier_turns(ulong nturns)
     }
 }
 
-void VNAV_init_new_traffic_system(void)
+/** Second list of traffic start nodes: [0] is the count, entries at 1..16.
+ */
+extern s32 data_1c84f4[17];
+
+#ifdef SW_FNCHK
+static void VNAV_init_new_traffic_system_asm(void)
 {
     asm volatile ("call ASM_VNAV_init_new_traffic_system\n"
-        :  :  : "eax" );
+        :  :  : "eax", "cc", "memory");
+}
+#endif
+
+/** Check if any traffic node links to node `node` (stored as -node).
+ */
+static TbBool traffic_node_has_link_from(ushort node)
+{
+    ushort n;
+    int k;
+
+    for (n = 1; n < next_traffic_node; n++)
+    {
+        for (k = 0; k < 4; k++)
+        {
+            if (game_traffic_nodes[n].UTraffic.Link[k] == -(int)node)
+                return true;
+        }
+    }
+    return false;
+}
+
+/** Prepare traffic nodes: clear runtime flags, mark dead ends and nodes
+ * no other node leads to, and build the lists of start nodes.
+ * Node Flags 0xFF means an unused node.
+ */
+static void VNAV_init_new_traffic_system_c(void)
+{
+    ushort n;
+    int k;
+
+    dword_1C8470 = 0;
+    data_1c84f4[0] = 0;
+
+    for (n = 1; n < next_traffic_node; n++)
+    {
+        struct TrafficNode *p_tnode;
+
+        p_tnode = &game_traffic_nodes[n];
+        if (p_tnode->Flags == 0xFF)
+            continue;
+        p_tnode->Flags &= 0xFE3F;
+    }
+    // Nodes without links out
+    for (n = 1; n < next_traffic_node; n++)
+    {
+        struct TrafficNode *p_tnode;
+
+        p_tnode = &game_traffic_nodes[n];
+        if (p_tnode->Flags == 0xFF)
+            continue;
+        for (k = 0; k < 4; k++) {
+            if (p_tnode->UTraffic.Link[k] != 0)
+                break;
+        }
+        if (k == 4)
+            p_tnode->Flags |= 0x0080;
+    }
+    // Nodes without links in - starting points
+    for (n = 1; n < next_traffic_node; n++)
+    {
+        struct TrafficNode *p_tnode;
+
+        p_tnode = &game_traffic_nodes[n];
+        if (p_tnode->Flags == 0xFF)
+            continue;
+        if ((p_tnode->Flags & 0x0600) != 0)
+            continue;
+        if (traffic_node_has_link_from(n))
+            continue;
+        p_tnode->Flags |= 0x0100;
+        if (dword_1C8470 != 32)
+            dword_1C8474[dword_1C8470++] = n;
+    }
+    // Isolated nodes are dropped
+    for (n = 1; n < next_traffic_node; n++)
+    {
+        struct TrafficNode *p_tnode;
+
+        p_tnode = &game_traffic_nodes[n];
+        if (p_tnode->Flags == 0xFF)
+            continue;
+        if (((p_tnode->Flags & 0x0080) != 0) && ((p_tnode->Flags & 0x0100) != 0))
+            p_tnode->Flags = 0xFF;
+    }
+    // Second kind of starting points
+    for (n = 1; n < next_traffic_node; n++)
+    {
+        struct TrafficNode *p_tnode;
+
+        p_tnode = &game_traffic_nodes[n];
+        if (p_tnode->Flags == 0xFF)
+            continue;
+        if ((p_tnode->Flags & 0x0200) == 0)
+            continue;
+        if ((p_tnode->Flags & 0x0400) != 0)
+            continue;
+        if (traffic_node_has_link_from(n))
+            continue;
+        p_tnode->Flags |= 0x0100;
+        if (data_1c84f4[0] < 16) {
+            data_1c84f4[0]++;
+            data_1c84f4[data_1c84f4[0]] = n;
+        }
+    }
+    for (n = 1; n < next_traffic_node; n++)
+    {
+        struct TrafficNode *p_tnode;
+
+        p_tnode = &game_traffic_nodes[n];
+        if (p_tnode->Flags == 0xFF)
+            continue;
+        if ((p_tnode->Flags & 0x8000) == 0)
+            continue;
+        for (k = 0; k < 4; k++)
+            p_tnode->UTraffic.Flags[k] |= 0x40;
+    }
+}
+
+void VNAV_init_new_traffic_system(void)
+{
+    FNCHK_VOID("VNAV_init_new_traffic_system", VNAV_init_new_traffic_system_asm(),
+      VNAV_init_new_traffic_system_c());
 }
 
 void traffic_unkn_func_01(void)

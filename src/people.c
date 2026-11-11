@@ -7788,10 +7788,20 @@ void person_find_next_state(struct Thing *p_person)
     person_init_command(p_person, PCmd_USE_WEAPON);
 }
 
+extern ushort word_1AA678;
+
+/** Targeting decisions of people, spread over game turns.
+ * flag 1 (level start) only resets the progress counter; this part is C,
+ * the per-turn part is still asm (world simulation stage).
+ */
 void people_intel(ubyte flag)
 {
+    if (flag == 1) {
+        word_1AA678 = 0;
+        return;
+    }
     asm volatile ("call ASM_people_intel\n"
-        : : "a" (flag));
+        : : "a" (flag) : "cc", "memory");
 }
 
 void process_person(struct Thing *p_person)

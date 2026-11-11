@@ -114114,9 +114114,9 @@ data_1c42f6:
 		.fill   0x6
 GLOBAL (crater_unkn_texture_flags)	/* 0x1C42FC */
 		.short  0x0
-data_1c42fe:
+GLOBAL (data_1c42fe)
 		.short  0x0
-data_1c4300:
+GLOBAL (data_1c4300)
 		.short  0x0
 data_1c4302:
 		.short  0x0
@@ -114209,7 +114209,7 @@ GLOBAL (dword_1C8470)	/* 0x1C8470 */
 		.long	0x0
 GLOBAL (dword_1C8474)	/* 0x1C8474 */
 		.fill   0x80
-data_1c84f4:
+GLOBAL (data_1c84f4)	/* 0x1C84F4 */
 		.long	0x0
 data_1c84f8:
 		.fill   0x40

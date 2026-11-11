@@ -1887,11 +1887,147 @@ void func_74934(void)
     FNCHK_VOID("func_74934", func_74934_asm(), func_74934_c());
 }
 
-void init_crater_textures(void)
+extern ushort data_1c42fe;
+extern ushort data_1c4300;
+
+/** Index of the animated texture using given floor texture, or 0.
+ * The search starts at index 10, like in the original.
+ */
+static short is_animating(short tmap)
+{
+    short i;
+
+    if (tmap == 0)
+        return 0;
+    for (i = 10; i < (int)next_anim_tmap; i++)
+    {
+        if ((int)game_anim_tmaps[i].Texture == tmap)
+            return i;
+    }
+    return 0;
+}
+
+/** Rotate texture coordinates of a floor texture by one corner.
+ */
+static void rotate_floor_texture_coords(int tex)
+{
+    struct SingleFloorTexture *p_tex;
+    ubyte x1, y1;
+
+    p_tex = &game_textures[tex];
+    x1 = p_tex->TMapX1;
+    y1 = p_tex->TMapY1;
+    p_tex->TMapX1 = p_tex->TMapX2;
+    p_tex->TMapY1 = p_tex->TMapY2;
+    p_tex->TMapX2 = p_tex->TMapX3;
+    p_tex->TMapY2 = p_tex->TMapY3;
+    p_tex->TMapX3 = p_tex->TMapX4;
+    p_tex->TMapY3 = p_tex->TMapY4;
+    p_tex->TMapX4 = x1;
+    p_tex->TMapY4 = y1;
+}
+
+/** Rotate a floor texture by 90 degrees; for animated ones, all frames.
+ */
+static void rotate_texture(short tex)
+{
+    short anim;
+    int frame;
+
+    if (tex == 0)
+        return;
+    anim = is_animating(tex & 0x3FFF);
+    if (anim == 0) {
+        rotate_floor_texture_coords(tex);
+        return;
+    }
+    for (frame = 0; frame <= (sbyte)game_anim_tmaps[anim].field_23; frame++)
+        rotate_floor_texture_coords(game_anim_tmaps[anim].TMap[frame]);
+}
+
+/** Set texture coordinates and page of a floor texture. */
+static void set_floor_texture(ushort tex, ubyte page, const ubyte *coords)
+{
+    struct SingleFloorTexture *p_tex;
+
+    p_tex = &game_textures[tex];
+    p_tex->Page = page;
+    p_tex->TMapX1 = coords[0];
+    p_tex->TMapY1 = coords[1];
+    p_tex->TMapX2 = coords[2];
+    p_tex->TMapY2 = coords[3];
+    p_tex->TMapX3 = coords[4];
+    p_tex->TMapY3 = coords[5];
+    p_tex->TMapX4 = coords[6];
+    p_tex->TMapY4 = coords[7];
+}
+
+/** Add a copy of the last floor texture, rotated by 90 degrees. */
+static void add_rotated_copy_of_last_floor_texture(void)
+{
+    ushort tex;
+
+    tex = next_floor_texture;
+    game_textures[tex] = game_textures[tex - 1];
+    next_floor_texture = tex + 1;
+    rotate_texture(tex);
+}
+
+#ifdef SW_FNCHK
+static void init_crater_textures_asm(void)
 {
     asm volatile ("call ASM_init_crater_textures\n"
-        :  :  : "eax" );
-    return;
+        :  :  : "eax", "cc", "memory");
+}
+#endif
+
+/** Add floor textures used for craters: the crater tile, and 8 kinds of
+ * crater edge tiles, each in 4 rotations.
+ */
+static void init_crater_textures_c(void)
+{
+    static const struct {
+        ubyte page;
+        ubyte coords[8];
+    } crater_edge[] = {
+        {2, {0xDF, 0x20, 0xDF, 0x3F, 0xC0, 0x3F, 0xC0, 0x20}},
+        {2, {0xC0, 0x60, 0xDF, 0x60, 0xDF, 0x7F, 0xC0, 0x7F}},
+        {0, {0xE0, 0x20, 0xFF, 0x20, 0xFF, 0x3F, 0xE0, 0x3F}},
+        {0, {0xC0, 0x20, 0xDF, 0x20, 0xDF, 0x3F, 0xC0, 0x3F}},
+        {2, {0xFF, 0x20, 0xFF, 0x3F, 0xE0, 0x3F, 0xE0, 0x20}},
+        {2, {0xE0, 0x60, 0xFF, 0x60, 0xFF, 0x7F, 0xE0, 0x7F}},
+        {0, {0xE0, 0x60, 0xFF, 0x60, 0xFF, 0x7F, 0xE0, 0x7F}},
+        {0, {0xC0, 0x60, 0xDF, 0x60, 0xDF, 0x7F, 0xC0, 0x7F}},
+    };
+    static const ubyte crater_coords[8] = {0x20, 0x60, 0x3F, 0x60, 0x3F, 0x7F, 0x20, 0x7F};
+    ushort tex;
+    int i, k;
+
+    tex = next_floor_texture;
+    set_floor_texture(tex, 0, crater_coords);
+    crater_unkn_texture_flags = tex;
+
+    tex++;
+    for (i = 0; i < 8; i++)
+    {
+        set_floor_texture(tex, crater_edge[i].page, crater_edge[i].coords);
+        if (i == 0) {
+            data_1c42fe = tex;
+        } else if (i == 4) {
+            // This one is also stored rotated
+            data_1c4300 = tex;
+            rotate_texture(tex);
+        }
+        next_floor_texture = tex + 1;
+        for (k = 0; k < 3; k++)
+            add_rotated_copy_of_last_floor_texture();
+        tex = next_floor_texture;
+    }
+}
+
+void init_crater_textures(void)
+{
+    FNCHK_VOID("init_crater_textures", init_crater_textures_asm(), init_crater_textures_c());
 }
 
 /** Height of the highest point of a 3D object (at least 0).
@@ -2951,11 +3087,124 @@ void compound_mission_immediate_start_next(void)
     restart_back_into_mission(missi);
 }
 
-short test_single_mission(short missi)
+#ifdef SW_FNCHK
+static short test_single_mission_asm(short missi)
 {
     short ret;
     asm volatile ("call ASM_test_single_mission\n"
-        : "=r" (ret) : "a" (missi));
+        : "=a" (ret) : "a" (missi) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Test objectives of a mission on the current map and level.
+ * Success objectives are tested in banks of priority (BankTest); when all
+ * of the current bank pass, the bank advances. Returns 1 if all success
+ * objectives are done, -1 if the mission failed, 0 otherwise.
+ */
+static short test_single_mission_c(short missi)
+{
+    struct Mission *p_missi;
+    ushort level, objectv, iter;
+    ushort n_total, n_done, n_tested, n_passed, n_failed;
+    ushort n_prio3_ok, n_prio3_not;
+
+    level = ((int)(ushort)current_level - 1) % 15 + 1;
+    p_missi = &mission_list[missi];
+    n_failed = 0;
+    n_prio3_ok = 0;
+    n_prio3_not = 0;
+    n_tested = 0;
+    n_passed = 0;
+    n_total = 0;
+    n_done = 0;
+
+    iter = 0;
+    for (objectv = p_missi->SuccessHead; objectv != 0;
+      objectv = game_used_objectives[objectv].Next)
+    {
+        struct Objective *p_objectv;
+
+        if (iter++ >= 100)
+            break;
+        p_objectv = &game_used_objectives[objectv];
+        if (p_objectv->Level != level)
+            continue;
+        if (p_objectv->Map != current_map)
+            continue;
+        if (p_objectv->Pri == p_missi->BankTest)
+        {
+            short res;
+
+            n_tested++;
+            res = test_objective(objectv, 1);
+            n_total++;
+            if (res < 0) {
+                n_failed++;
+            } else if (res > 0) {
+                n_passed++;
+                n_done++;
+            }
+        }
+        else if (p_objectv->Pri > p_missi->BankTest)
+        {
+            n_total++;
+        }
+        else
+        {
+            n_done++;
+            n_total++;
+        }
+    }
+    if ((n_tested == n_passed) && (n_tested > 0))
+        p_missi->BankTest++;
+    if ((n_done == n_total) && (n_total > 0))
+        return 1;
+
+    iter = 0;
+    for (objectv = p_missi->FailHead; objectv != 0;
+      objectv = game_used_objectives[objectv].Next)
+    {
+        struct Objective *p_objectv;
+        short res;
+
+        if (iter++ >= 90)
+            break;
+        p_objectv = &game_used_objectives[objectv];
+        if (p_objectv->Level != level)
+            continue;
+        if (p_objectv->Map != current_map)
+            continue;
+        if ((byte_1C844F != 0) && ((lbShift & 0x01) != 0))
+            res = test_objective(objectv, 1);
+        else
+            res = test_objective(objectv, 0);
+        p_objectv = &game_used_objectives[objectv];
+        p_objectv->Status = 0;
+        if (p_objectv->Pri == 3) {
+            if (res > 0)
+                n_prio3_ok++;
+            else
+                n_prio3_not++;
+        } else if (res > 0) {
+            if (p_objectv->ObjText != 0)
+                ingame.fld_unkCB5 = p_objectv->ObjText;
+            n_failed++;
+            break;
+        }
+    }
+    if ((n_prio3_ok != 0) && (n_prio3_not == 0))
+        return -1;
+    if (n_failed != 0)
+        return -1;
+    return 0;
+}
+
+short test_single_mission(short missi)
+{
+    short ret;
+    FNCHK_RET("test_single_mission", ret, test_single_mission_asm(missi),
+      test_single_mission_c(missi));
     return ret;
 }
 

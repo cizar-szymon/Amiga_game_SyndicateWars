@@ -15,3 +15,8 @@ ltmain.sh
 missing
 *~
 test-driver
+
+# Amiga port: game data (never commit)
+/Syndicate Wars/
+autom4te.cache/
+/build/

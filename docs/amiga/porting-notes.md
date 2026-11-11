@@ -32,6 +32,29 @@ Sposób portowania według `PORTING_PLAN.md`: **D (port ze źródeł)** z etapem
 - Gra bez wpisu w rejestrze czyta dane i zapisy z bieżącego katalogu (`sys_get_data_path`).
 - Wersja: `syndwarsfx ver 0.3.8.4599`, okno „Syndicate Wars Fan Expansion”, 640×480.
 
+## 11.11.2026 — pokrycie asm w misji (pomiar na żywo)
+
+Build `tools/amiga/build_x86.sh cov`: przy każdej etykiecie funkcji asm `movl $1, znacznik`
+(nie zmienia flag ani rejestrów; `tools/amiga/asm_cov_filter.py` przez `CCAS=tools/amiga/ccas_cov.sh`),
+`src/asm_coverage.c` zbiera trafienia według faz pętli `game_process` i zapisuje `asm_coverage.txt`.
+Raport: `tools/amiga/cov_report.py`. Wynik: `asm-coverage-mission1.md`.
+
+Misja 1 (`-q -W -m 0,1`), 40 s bez sterowania (636 klatek), agenci stoją, przechodnie i ruch uliczny działają:
+
+| faza | funkcje asm | instrukcje |
+|---|---:|---:|
+| init (wczytanie misji) | 39 | 4 293 |
+| **draw (rysowanie widoku misji)** | **3** | **186** |
+| things (symulacja świata) | 57 | 8 552 |
+| other (pakiety, kamera, test misji) | 10 | 962 |
+| razem | 95 | 12 723 |
+
+**Wniosek:** renderer misji jest praktycznie cały w C. W rysowaniu zostały tylko `alt_at_point`,
+`check_big_point_triangle` i `process_map_craters`. Widok misji na Amidze wymaga przepisania ok.
+4,5 tys. instrukcji (init + draw), a nie 56 tys. Symulacja świata dochodzi potem, według pokrycia
+kolejnych scenariuszy (walka, pojazdy, perswadotron). Uwaga: pokrycie z jednego biegu bez walki,
+pozostałe ścieżki (broń, eksplozje, pojazdy) trzeba jeszcze zmierzyć.
+
 ## Otwarte ryzyka
 
 - Ok. 56,5 tys. żywych instrukcji x86 logiki gry (`swars.sx`) — główny koszt etapu A.

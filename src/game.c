@@ -134,6 +134,7 @@
 #include "dos.h"
 #include "frame_sprani.h"
 #include "game.h"
+#include "asm_coverage.h"
 #include "game_data.h"
 #include "game_speed.h"
 #include "hud_target.h"
@@ -6170,6 +6171,7 @@ void game_process(void)
         if (ingame.DisplayMode == DpM_PURPLEMNU) {
             LOGDBG("id=%d  trial alloc = %d turn %lu", 0, triangulation, gameturn);
         }
+        asm_cov_phase(ACP_INPUT);
         input();
         update_tick_time();
         // Faces thrown by an explosion can hit people once they land, so they
@@ -6178,7 +6180,9 @@ void game_process(void)
         if ((ingame.DisplayMode == DpM_ENGINEPLY)
           && ((ingame.Flags & TngF_ProgressAction) != 0))
             process_explode();
+        asm_cov_phase((ingame.DisplayMode == DpM_PURPLEMNU) ? ACP_MENU : ACP_DRAW);
         draw_game();
+        asm_cov_phase(ACP_OTHER);
         debug_trace_turn_bound(gameturn);
         load_packet();
         if ( ((active_flags_general_unkn01 & 0x8000) != 0) !=
@@ -6188,7 +6192,11 @@ void game_process(void)
         if ((ingame.DisplayMode == DpM_ENGINEPLY)
           || (ingame.DisplayMode == DpM_UNKN_1)
           || (ingame.DisplayMode == DpM_UNKN_3B))
+        {
+            asm_cov_phase(ACP_THINGS);
             process_things();
+            asm_cov_phase(ACP_OTHER);
+        }
         if (debug_hud_things) {
             bad_tile_debug();
             things_debug_hud();

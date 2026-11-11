@@ -105,6 +105,8 @@ syndwarsfx_SOURCES = \
 	guitext.c \
 	guitext.h \
 	game.c \
+	asm_coverage.c \
+	asm_coverage.h \
 	game_bstype.h \
 	game_data.c \
 	game_data.h \

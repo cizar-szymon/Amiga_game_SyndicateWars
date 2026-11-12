@@ -14,7 +14,7 @@ Sposób portowania według `PORTING_PLAN.md`: **D (port ze źródeł)** z etapem
 | A0. Kolejność konwersji | ⏳ do akceptacji użytkownika |
 | A0. Test grywalności wersji referencyjnej (użytkownik) | ✅ 11.11.2026 „działa, gra się dobrze” |
 | A1. Konwersja asm → C: wczytanie i rysowanie misji 1 | ✅ ~35 funkcji, fncheck 0 różnic |
-| A1. Konwersja asm → C: symulacja świata (process_things) | ⏳ 12.11.2026: 9 z 29 (bez dźwięku), fncheck 0 różnic na nagraniu misji 1 |
+| A1. Konwersja asm → C: symulacja świata (process_things) | ⏳ 12.11.2026: 14 z 29 (bez dźwięku), fncheck 0 różnic na nagraniu misji 1 |
 | A2. Kolejność bajtów: mapa, poziom, prymitywy, sprite'y, animacje, FLI, WAD | ✅ (misja 1) |
 | B1. Build Amigi (Docker, bebbo gcc), warstwa bflibrary m68k-amigaos | ✅ |
 | B1. Misja 1 na Amidze | ✅ 12.11.2026: Amiga 1 (Warp 1260) ~5 kl./s, obraz zgodny z PC |
@@ -208,3 +208,12 @@ liczb < 2^31 obcięcie ilorazu `double` = iloraz całkowity), z wersją bez FPU.
 - Amiga 1 po tej grupie: 68k 71,9 ms/turę (`things` 7,6 ms), ARM 30,2 ms/turę – stabilnie. Zaślepki
   jeszcze trafiane (bez dźwięku): `calc_lighting`, `mem_group_arrived_square2`, `player_weapon_time`,
   `process_gate1`, `process_smoke_generator`, `people_intel`, `person_goto_point`, `process_wander`.
+- Dalej (0 różnic): `calc_lighting`, `player_weapon_time`, `process_smoke_generator`,
+  `mem_group_arrived_square2`, `process_wander` (odczyt `word_1AA390` – w oryginale górna połowa
+  32-bitowego odczytu `word_1AA38E`; zmienne leżą w danych asm w oryginalnym układzie).
+- **Błąd upstreamu:** `check_for_other_people_on_tile()` miała niezainicjowane `found` – zderzenia ludzi
+  zależały od stosu (funkcja C porównana sama ze sobą: 897 różnic). Oryginał trzyma jeden wynik dla
+  9 pól, zerowany raz; poprawione (commit `37f57ed7`). Wniosek: przy niejasnych różnicach najpierw test
+  „C kontra C” (ta sama funkcja po obu stronach `FNCHK_*`).
+- Zostały trafiane na Amidze: `person_goto_point` (~460 linii, z lokalną `do_next_navigate_index`),
+  `people_intel`, `process_gate1`.

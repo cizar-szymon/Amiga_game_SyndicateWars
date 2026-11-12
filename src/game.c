@@ -7265,6 +7265,27 @@ void game_process_orbital_station_explode(void)
     }
 }
 
+/** game_update() followed by a present of the same picture by the caller.
+ * Amiga port: the idle handler (screen_idle_update) does not present it from
+ * the event processing as well, which showed every picture twice per turn.
+ * Idle presents while sleeping for the next turn still happen. */
+static void game_update_before_present(void)
+{
+#if defined(SW_AMIGA)
+    extern TbBool screen_idle_skip_present;
+
+    /* as game_update_full(true) */
+    display_unlock();
+    screen_idle_skip_present = true;
+    game_handle_sdl_events();
+    screen_idle_skip_present = false;
+    wait_next_gameturn();
+    display_lock();
+#else
+    game_update();
+#endif
+}
+
 void game_process(void)
 {
     debug_multicolor_sprite(193);
@@ -7327,12 +7348,12 @@ void game_process(void)
 
         if (ingame.DisplayMode == DpM_PURPLEMNU)
         {
-            game_update();
+            game_update_before_present();
             swap_wscreen();
         }
         else if (!skip_redraw_this_turn())
         {
-            game_update();
+            game_update_before_present();
             AMIGA_PROF_BEGIN(5);
             LbScreenSwapClear(0);
             AMIGA_PROF_END(5);

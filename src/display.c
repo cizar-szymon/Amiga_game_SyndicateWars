@@ -104,9 +104,21 @@ void swap_wscreen(void)
     }
 }
 
+#if defined(SW_AMIGA)
+/** Amiga port: set by game_update() around its own event processing, after
+ * which the game loop presents the screen anyway. Presenting it from the idle
+ * handler there too showed every picture twice (one more copy to the card
+ * per game turn). Idle presents while sleeping for the next turn stay. */
+TbBool screen_idle_skip_present = false;
+#endif
+
 TbBool screen_idle_update(void)
 {
     //TODO when this gets modified to run it separate thread, it should only run if screen not locked
+#if defined(SW_AMIGA)
+    if (screen_idle_skip_present)
+        return true;
+#endif
     swap_wscreen();
     return true;
 }

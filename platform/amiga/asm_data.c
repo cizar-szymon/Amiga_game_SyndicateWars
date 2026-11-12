@@ -79,6 +79,8 @@ TrCoord fringe_x2; /* bfariadne\src\trfringe.c, 4 bytes */
 TrCoord fringe_y[256]; /* bfariadne\src\trfringe.c, 1024 bytes */
 TrCoord fringe_y1; /* bfariadne\src\trfringe.c, 4 bytes */
 TrCoord fringe_y2; /* bfariadne\src\trfringe.c, 4 bytes */
+short g_fat_data[1034]; /* struct Path g_fat_data, src\people.c */
+short g_nav_data[1034]; /* struct Path g_nav_data, src\people.c */
 short hmhead[2]; /* struct HeapMgrHeader * hmhead, src\sound.c */
 ulong ipx_got_player_send_packet_count[8]; /* src\network.c, 32 bytes */
 ulong ipx_send_packet_count[8][8]; /* src\network.c, 256 bytes */

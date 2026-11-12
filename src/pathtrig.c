@@ -1300,6 +1300,151 @@ int tri_path_init8(int triA, int triB, struct Path *p_path, int ax8,
     return ret;
 }
 
+/** Octile length of a vector, as the original: the longer component and
+ * half of the shorter one. */
+static s32 oct_len(s32 x, s32 y)
+{
+    s32 ax, ay;
+
+    ax = abs32w(x);
+    ay = abs32w(y);
+    if (ay >= ax)
+        return ay + (ax >> 1);
+    return ax + (ay >> 1);
+}
+
+/** Vector scaled to length 256 (octile), unchanged when it has no length. */
+static void oct_unit(s32 *p_x, s32 *p_y)
+{
+    s32 len;
+
+    len = oct_len(*p_x, *p_y);
+    if (len == 0)
+        return;
+    *p_x = (s32)((u32)*p_x << 8) / len;
+    *p_y = (s32)((u32)*p_y << 8) / len;
+}
+
+#ifdef SW_FNCHK
+static void fatter_than_nothing_asm(struct Path *p_src, struct Path *p_dst, int fat)
+{
+    asm volatile ("call ASM_fatter_than_nothing\n"
+        : "+a" (p_src), "+d" (p_dst), "+b" (fat)
+        :
+        : "cc", "memory");
+}
+#endif
+
+/** Copies a path moving its way points away from the corners by `fat`
+ * (the path of a wider walker): the inner points go along the bisector of
+ * the turn, a sharp turn gets an extra point.
+ */
+static void fatter_than_nothing_c(struct Path *p_src, struct Path *p_dst, int fat)
+{
+    s32 prev_x, prev_y;
+    int k, n;
+
+    p_dst->ax8 = p_src->ax8;
+    p_dst->ay8 = p_src->ay8;
+    p_dst->bx8 = p_src->bx8;
+    p_dst->by8 = p_src->by8;
+    p_dst->PathLength = p_src->PathLength;
+    prev_x = p_src->ax8;
+    prev_y = p_src->ay8;
+    n = 0;
+    for (k = 0; k < p_src->PathLength - 1; k++)
+    {
+        struct WayPoint *p_wp, *p_nx;
+        s32 u1x, u1y, u2x, u2y, dot, cross, len;
+
+        p_wp = &p_src->WayPoints[k];
+        p_nx = &p_src->WayPoints[k+1];
+        u1x = sub32w(p_wp->x8, prev_x);
+        u1y = sub32w(p_wp->y8, prev_y);
+        u2x = sub32w(p_nx->x8, p_wp->x8);
+        u2y = sub32w(p_nx->y8, p_wp->y8);
+        len = oct_len(u1x, u1y);
+        if (len == 0)
+            len = 1;
+        u1x = (s32)((u32)u1x << 8) / len;
+        u1y = (s32)((u32)u1y << 8) / len;
+        len = oct_len(u2x, u2y);
+        if (len == 0)
+            len = 1;
+        u2x = (s32)((u32)u2x << 8) / len;
+        u2y = (s32)((u32)u2y << 8) / len;
+        dot = (s32)((u32)mul32w(u1x, u2x) + (u32)mul32w(u1y, u2y));
+        cross = (s32)((u32)mul32w(u1x, u2y) - (u32)mul32w(u1y, u2x));
+
+        if (dot < -20000)
+        {
+            s32 a, b;
+
+            // a turn back: two points, around the corner
+            if (cross > 0) {
+                a = sub32w(-u2y, u2x);
+                b = sub32w(u2x, u2y);
+            } else {
+                a = sub32w(u1x, u1y);
+                b = (s32)((u32)u1x + (u32)u1y);
+            }
+            oct_unit(&a, &b);
+            a = mul32w(a, fat);
+            b = mul32w(b, fat);
+            p_dst->WayPoints[n].x8 = (s32)((u32)p_wp->x8 + (u32)a);
+            p_dst->WayPoints[n].y8 = (s32)((u32)p_wp->y8 + (u32)b);
+            n++;
+            p_dst->PathLength++;
+            if (cross < 0) {
+                a = sub32w(-u2y, u2x);
+                b = sub32w(u2x, u2y);
+            } else {
+                a = sub32w(u1x, u1y);
+                b = (s32)((u32)u1y + (u32)u1x);
+            }
+            oct_unit(&a, &b);
+            a = mul32w(a, fat);
+            b = mul32w(b, fat);
+            p_dst->WayPoints[n].x8 = (s32)((u32)p_wp->x8 + (u32)a);
+            p_dst->WayPoints[n].y8 = (s32)((u32)p_wp->y8 + (u32)b);
+        }
+        else
+        {
+            s32 a, b, nx, ny;
+            struct MyMapElement *p_mapel;
+
+            a = sub32w(u1x, u2x);
+            b = sub32w(u1y, u2y);
+            oct_unit(&a, &b);
+            a = mul32w(a, fat);
+            b = mul32w(b, fat);
+            nx = (s32)((u32)p_wp->x8 + (u32)a);
+            ny = (s32)((u32)p_wp->y8 + (u32)b);
+            p_mapel = &game_my_big_map[((ny >> 16) << 7) + (nx >> 16)];
+            if ((p_mapel->Flags2 & 0x04) != 0) {
+                // half the distance; the original adds the x offset to y too
+                a >>= 1;
+                p_dst->WayPoints[n].x8 = (s32)((u32)p_wp->x8 + (u32)a);
+                p_dst->WayPoints[n].y8 = (s32)((u32)p_wp->y8 + (u32)a);
+            } else {
+                p_dst->WayPoints[n].x8 = nx;
+                p_dst->WayPoints[n].y8 = ny;
+            }
+        }
+        prev_x = p_wp->x8;
+        prev_y = p_wp->y8;
+        n++;
+    }
+    p_dst->WayPoints[n].x8 = p_src->WayPoints[k].x8;
+    p_dst->WayPoints[n].y8 = p_src->WayPoints[k].y8;
+}
+
+void fatter_than_nothing(struct Path *p_src, struct Path *p_dst, int fat)
+{
+    FNCHK_VOID("fatter_than_nothing", fatter_than_nothing_asm(p_src, p_dst, fat),
+      fatter_than_nothing_c(p_src, p_dst, fat));
+}
+
 void path_init8_unkn3(struct Path *p_path, int ax8, int ay8, int bx8, int by8, int a6)
 {
 #if 0

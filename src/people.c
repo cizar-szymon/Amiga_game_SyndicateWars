@@ -237,6 +237,9 @@ extern short word_1AA38E;
 extern short word_1AA390;
 extern short word_1AA392;
 short person_move(struct Thing *p_person);
+extern u32 nav_stats__ThisTurn;
+extern s32 gamep_unknval_14;
+void count_fnavs(TbBool now_draw);
 extern short word_1AA394;
 
 short unkn01_thing_idx = 0;
@@ -2515,12 +2518,186 @@ void set_xz_for_tri(struct SingleObjectFace3 *p_face, int *x, int *z)
     *z = p_obj->MapZ + (p_pt1->Z + p_pt0->Z + p_pt2->Z) / 3;
 }
 
+/* Paths of the navigation, in the asm data: the found path and the path
+ * moved away from walls, which is given to the walker. */
+extern struct Path g_nav_data;
+extern struct Path g_fat_data;
+
+void set_xz_for_quad210(struct SingleObjectFace4 *p_face, int *x, int *z)
+{
+    asm volatile ("call ASM_set_xz_for_quad210\n"
+        : "+a" (p_face), "+d" (x), "+b" (z) : : "cc", "memory");
+}
+
+void set_xz_for_quad_unkn03(struct SingleObjectFace4 *p_face, int *x, int *z)
+{
+    asm volatile ("call ASM_set_xz_for_quad_unkn03\n"
+        : "+a" (p_face), "+d" (x), "+b" (z) : : "cc", "memory");
+}
+
+#ifdef SW_FNCHK
+static void use_nav_data_asm(struct Thing *p_thing)
+{
+    asm volatile ("call ASM_use_nav_data\n"
+        : : "a" (p_thing) : "cc", "memory");
+}
+#endif
+
+/** Gives the path in g_fat_data to a thing: way points stored in records
+ * of 4 taken from the free list of my_paths. With too few free records
+ * the thing gets no path.
+ */
+static void use_nav_data_c(struct Thing *p_thing)
+{
+    ushort rec, nxt;
+    int i;
+
+    if (p_thing->U.UPerson.PathIndex != 0)
+        unkn_path_func_001(p_thing, 0);
+    if ((g_fat_data.PathLength >> 2) + path_count > 0x63C) {
+        // the original only formats a message about it
+        p_thing->U.UPerson.PathIndex = 0;
+        return;
+    }
+    rec = head_my_path;
+    p_thing->U.UPerson.PathIndex = rec;
+    my_paths[rec].Flag = (ubyte)g_fat_data.PathLength;
+    nxt = my_paths[rec].Next;
+    my_paths[rec].Next = 0;
+    path_count++;
+    for (i = 0; (ushort)i < g_fat_data.PathLength; i++)
+    {
+        if (((i & 3) == 0) && (i > 3))
+        {
+            my_paths[rec].Next = nxt;
+            rec = nxt;
+            nxt = my_paths[rec].Next;
+            my_paths[rec].Next = 0;
+            path_count++;
+            my_paths[rec].Flag = (ubyte)g_fat_data.PathLength;
+        }
+        my_paths[rec].X[i & 3] = g_fat_data.WayPoints[i].x8 >> 8;
+        my_paths[rec].Z[i & 3] = g_fat_data.WayPoints[i].y8 >> 8;
+    }
+    p_thing->PathOffset = 0;
+    head_my_path = nxt;
+}
+
+void use_nav_data(struct Thing *p_thing)
+{
+    FNCHK_VOID("use_nav_data", use_nav_data_asm(p_thing), use_nav_data_c(p_thing));
+}
+
+#ifdef SW_FNCHK
+static ushort build_navigate_path_asm(struct Thing *p_thing, int x, int z, int face)
+{
+    int ret;
+    asm volatile ("call ASM_build_navigate_path\n"
+        : "=a" (ret), "+d" (x), "+b" (z), "+c" (face)
+        : "a" (p_thing) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Path straight to the target point (when no route was found). */
+static void navigate_path_direct(struct Thing *p_thing, s32 x8, s32 z8)
+{
+    g_fat_data.ax8 = p_thing->X;
+    g_fat_data.ay8 = p_thing->Z;
+    g_fat_data.bx8 = x8;
+    g_fat_data.by8 = z8;
+    g_fat_data.WayPoints[0].x8 = x8;
+    g_fat_data.WayPoints[0].y8 = z8;
+    g_fat_data.PathLength = 1;
+    use_nav_data(p_thing);
+    count_fnavs(0);
+    p_thing->Flag2 |= (TgF2_Unkn00020000 | TgF2_Unkn0040);
+}
+
+/** Finds a path for a thing to point (x,z) and gives it to the thing.
+ * Returns 1 when a path was found (or the point is in the same zip area),
+ * 0 otherwise.
+ */
+static ushort build_navigate_path_c(struct Thing *p_thing, int x, int z, int face)
+{
+    s32 tx, tz;
+    ubyte zip;
+
+    tx = (short)x;
+    tz = (short)z;
+    if ((p_thing->Flag2 & TgF2_Unkn0008) == 0)
+        p_thing->U.UPerson.BumpCount = 0;
+    if (((p_thing->Flag & TngF_PlayerAgent) == 0) &&
+      ((p_thing->Flag2 & TgF2_Unkn00020000) != 0)) {
+        p_thing->Flag2 |= (TgF2_Unkn00020000 | TgF2_Unkn0040);
+        return 0;
+    }
+    if ((p_thing->Flag & TngF_InVehicle) != 0)
+        return 0;
+    p_thing->U.UPerson.LastDist = 32000;
+    if (((p_thing->X >> 8) < 0) || ((p_thing->X >> 8) >= 0x8000) ||
+      ((p_thing->Z >> 8) < 0) || ((p_thing->Z >> 8) >= 0x8000) ||
+      (tx < 0) || (tx >= 0x8000) || (tz < 0) || (tz >= 0x8000))
+    {
+        p_thing->U.UPerson.PathIndex = 0;
+        p_thing->Flag2 |= (TgF2_Unkn00020000 | TgF2_Unkn0040);
+        return 0;
+    }
+    zip = game_my_big_map[((p_thing->Z >> 16) << 7) + (p_thing->X >> 16)].Zip;
+    if ((zip != 0) && (game_my_big_map[((tz >> 8) << 7) + (tx >> 8)].Zip == zip))
+    {
+        // the same zip area: straight there
+        g_fat_data.PathLength = 1;
+        g_fat_data.WayPoints[0].x8 = tx << 8;
+        g_fat_data.WayPoints[0].y8 = tz << 8;
+        gamep_unknval_14++;
+        use_nav_data(p_thing);
+        return 1;
+    }
+    if (p_thing->U.UPerson.OnFace != 0)
+    {
+        int fx, fz;
+        short tri;
+        short face_no;
+
+        face_no = p_thing->U.UPerson.OnFace;
+        if (face_no > 0) {
+            struct SingleObjectFace3 *p_face3 = &game_object_faces3[face_no];
+            tri = p_face3->UnknTringl;
+            set_xz_for_tri(p_face3, &fx, &fz);
+        } else if ((p_thing->Flag & TngF_Unkn0020) != 0) {
+            struct SingleObjectFace4 *p_face4 = &game_object_faces4[-face_no];
+            tri = p_face4->UnknTringl2;
+            set_xz_for_quad210(p_face4, &fx, &fz);
+        } else {
+            struct SingleObjectFace4 *p_face4 = &game_object_faces4[-face_no];
+            tri = p_face4->UnknTringl1;
+            set_xz_for_quad_unkn03(p_face4, &fx, &fz);
+        }
+        nav_stats__ThisTurn++;
+        tri_path_init8(tri, -1, &g_nav_data, fx << 8, fz << 8, tx << 8, tz << 8, -2);
+    }
+    else
+    {
+        nav_stats__ThisTurn++;
+        path_init8_thing(&g_nav_data, p_thing->X, p_thing->Z, tx << 8, tz << 8, -2);
+    }
+    if ((ushort)g_nav_data.PathLength == 0) {
+        navigate_path_direct(p_thing, tx << 8, tz << 8);
+        return 0;
+    }
+    fatter_than_nothing(&g_nav_data, &g_fat_data, 0x80);
+    use_nav_data(p_thing);
+    unkn_path_func_001(p_thing, 1);
+    return 1;
+}
+
 ushort build_navigate_path(struct Thing *p_thing, int x, int z, int face)
 {
     ushort ret;
-    asm volatile (
-      "call ASM_build_navigate_path\n"
-        : "=r" (ret) : "a" (p_thing), "d" (x), "b" (z), "c" (face));
+
+    FNCHK_RET("build_navigate_path", ret, build_navigate_path_asm(p_thing, x, z, face),
+      build_navigate_path_c(p_thing, x, z, face));
     return ret;
 }
 

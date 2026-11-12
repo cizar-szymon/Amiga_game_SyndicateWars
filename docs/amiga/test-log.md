@@ -6,3 +6,4 @@
 | 11.11.2026 | j.w. | j.w. | użytkownik | **działa, gra się dobrze** – wersja referencyjna zaakceptowana jako wzorzec |
 | 12.11.2026 | `be21c421`, build/amiga/SyndWars (bebbo gcc 6.5.0b, -m68060 -O2) | WinUAE A1200 68060 + JIT, RTG uaegfx 640x480x8 | Claude | misja 1 (`-q -m 0,1`): obraz zgodny z PC (agenci, budynki, HUD, skaner), ~48 kl./s (emulator - nie jest pomiarem wydajności); Ctrl-C kończy grę |
 | 12.11.2026 | j.w. | **Amiga 1: A1200 + Warp 1260, 68060**, AmigaOS 3.2.2.1, RTG Warpa | Claude | misja 1: obraz zgodny z PC, **~5 kl./s** (log co 5 s, 330 klatek w 73 s); świat zamrożony (symulacja = zaślepki asm), bez dźwięku; Ctrl-C kończy grę |
+| 12.11.2026 (noc) | `16044029` | Amiga 1: A1200 + Warp 1260, 68060, RTG Warpa | Claude | misja 1 po optymalizacji: **84 ms na klatkę (~12 kl./s, 60 klatek w 5 s)**, było 218 ms; tryb sprawdzania szybkich ścieżek 0 różnic; zrzut zgodny z wcześniejszym; świat nadal zamrożony, bez dźwięku |

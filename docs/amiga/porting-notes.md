@@ -18,7 +18,7 @@ Sposób portowania według `PORTING_PLAN.md`: **D (port ze źródeł)** z etapem
 | A2. Kolejność bajtów: mapa, poziom, prymitywy, sprite'y, animacje, FLI, WAD | ✅ (misja 1) |
 | B1. Build Amigi (Docker, bebbo gcc), warstwa bflibrary m68k-amigaos | ✅ |
 | B1. Misja 1 na Amidze | ✅ 12.11.2026: Amiga 1 (Warp 1260) ~5 kl./s, obraz zgodny z PC |
-| B3. Optymalizacja | ⏳ następny krok: pomiar podziału czasu klatki |
+| B3. Optymalizacja | ⏳ 12.11.2026: 218 → 84 ms na klatkę (4,6 → ~12 kl./s), tabela niżej |
 
 ## 11.11.2026 — start
 
@@ -78,3 +78,59 @@ Znalezione śladem faz pętli (`AMIGA_STEP`, `platform/amiga/phase_trace.c`) i k
 
 Pomiar: Amiga 1 (A1200 + Warp 1260, 68060) ~5 kl./s w misji 1, 640x480x8, świat zamrożony.
 WinUAE z JIT (`C:/amiga-dev/winuae/SyndWars_A1200_OS32_net_jit.uae`, bez MMU) - testy funkcjonalne.
+
+## 12.11.2026 (noc) — optymalizacja widoku misji na Amidze 1
+
+Pomiar zawsze tak samo: `sh tools/amiga/prof_a1.sh` (build, wgranie do `WorkSD:Games/SyndWars`,
+misja 1 `-q -m 0,1`, 30–40 s, ostatni raport profilera z `error.log`). Amiga 1: A1200 + Warp 1260,
+68060, RTG Warpa, 640x480x8. Świat zamrożony (symulacja = zaślepki asm), bez dźwięku.
+
+Narzędzia:
+- profiler slotów (`platform/amiga/prof.c`): sloty co klatkę zawsze; dokładne (per trójkąt, typ
+  elementu listy, tryb `trig`) tylko z `SetEnv SyndWarsProf 2` — **jeden odczyt E-clock kosztuje
+  ok. 15 µs**, dokładny profil dokłada ok. 20 ms na klatkę;
+- **profiler próbkujący** (`platform/amiga/sampler.c`, `SetEnv SyndWarsSample 1`): proces
+  o priorytecie 5 co 1 ms kopiuje zapisany kontekst zadania gry (`tc_SPReg`), PC jest w słowie 31
+  (wcześniej rejestry FPU); `tools/amiga/samples.py RAM:SyndWars-samples.bin nm.txt` daje udział
+  funkcji. Funkcje `static` nie mają symboli — są liczone do poprzedniego symbolu globalnego
+  (np. pętle odcinków gpoly jako `_gpoly_divtable`);
+- tryb sprawdzania (`SetEnv SyndWarsCheck 1`): każda szybka ścieżka liczona też wzorcowo w C
+  i porównywana (odcinki gpoly, kroki krawędzi, odcinki trybów 6/10).
+
+| zmiana | klatka [ms] | sprawdzenie |
+|---|---:|---|
+| start (C po konwersji, `-O2 -m68060`) | 218 | — |
+| pętla odcinka gpoly w asm 68k (ADD/ADDX zamiast bajtowych przeniesień w C) | 126 | check: 0 różnic |
+| `CopyMemQuick` dla całej klatki zamiast pętli wierszy | 122 | zrzut |
+| software pipelining pętli odcinka | 114,5 | check: 1,4 mln odcinków, 0 różnic |
+| dokładne sloty profilera tylko na żądanie (koszt odczytu E-clock) | 107,2 | — |
+| własne `__muldi3` (libgcc ma 64-bit MULU.L = pułapka 060), mieszanie skanera w zmiennych lokalnych, odcinki gpoly po 2 piksele z przeplotem | 104,9 | PC: 20 mln mnożeń 0 różnic; check 0 |
+| kroki krawędzi gpoly (`incr4/decr4/incr3/decr3`) w asm | 100,4 | check: 1,8 mln kroków, 0 różnic |
+| odcinki `trig` trybów 6 (uszkodzenia podłogi) i 10 (cienie postaci) w asm | 97,2 | check: 131 tys. odcinków, 0 różnic |
+| `draw_drawlist_2` pomija puste kubełki (24 000 na klatkę, 2 wywołania i 2 dzielenia każdy); `asm_stub_hit` bez `strcmp` przy każdym wywołaniu | **83,5** | zrzut zgodny |
+| własne `__divdi3/__moddi3`, `mul_shift16_sign_pad_lo` bez mnożenia 64-bit | 84,0 (szum) | PC: 0 różnic |
+| areny pamięci wyrównane do 16 B (bufor ekranu był przesunięty o 8 → MOVE16 nie działał: kopia 9,7 ms zamiast 5,8) | 84,0 | log adresu |
+
+Próby nieudane:
+- zapis odcinka długimi słowami (4 piksele w rejestrze) — wolniej (42,0 zamiast 39,6 ms rasteryzacji):
+  zapis bajtów do Fast RAM nie jest wąskim gardłem;
+- maska indeksu tekstury (eksperyment: tekstura w 256 B) — wolniej, czyli chybienia cache tekstury
+  też nie; pętla odcinka jest ograniczona łańcuchem zależności (przeniesienia ADDX, indeks → odczyt);
+- `-O2` z wklejoną wstawką asm do rasteryzatora: gcc 6.5 „internal compiler error” w reload —
+  funkcje odcinków są `noinline`.
+
+Podział klatki 84 ms (sloty, bez próbkowania): rysowanie 70 ms, w tym widok 3D 44,6 ms
+(piksele gpoly ok. 26 ms: 176 tys. pikseli, 6578 odcinków, 212 trójkątów), `draw_things` 9 ms,
+podłoga 6,3 ms (2080 punktów siatki), HUD 9,9 ms (skaner 6,8: mapa 3,5 + kropki 2,8);
+kopia na kartę 5,8 ms (granica zapisu do VRAM ~55 MB/s), czyszczenie 2,1 ms, `things` 3,6 ms.
+
+Profil próbkujący (po zmianach): pętle odcinków gpoly 31%, system (kopia na kartę, timer) 11%,
+`transform_shpoint` 5,5% (3800 wywołań na klatkę, 2080 z podłogi), rasteryzatory gpoly 7,9%
+(narzut na linię), mieszanie mapy skanera 4%, `draw_object_faces` + widoczność ścian ok. 4%.
+
+Zostało do zrobienia (kolejność według zysku):
+- rasteryzator gpoly (`shaded_nobound`/`bound`) z całą pętlą linii w asm — ok. 3–5 ms;
+- pętla mieszania mapy skanera w asm — ok. 1,5 ms;
+- `transform_shpoint` i budowanie listy ścian obiektów;
+- uwaga: zaślepki symulacji (`process_*`, `people_intel`, ale też **`calc_lighting`** i **`arctan`**)
+  są wywoływane co turę — po ich konwersji czas `things` wzrośnie.

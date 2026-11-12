@@ -585,6 +585,12 @@ main (int argc, char **argv)
     ingame.LowerMemoryUse = 0;
     ingame.Flags = 0;
     setup_log();
+#if defined(SW_AMIGA)
+    {
+        void amiga_sampler_start(void);
+        amiga_sampler_start();
+    }
+#endif
     JoyDriverInit();
 
     if (!process_options(&argc, &argv))

@@ -80,14 +80,41 @@ void draw_drawlist_2(void)
     ushort *p_bucket;
     ushort dihead;
     short n;
+    int every, next_fx;
+
+    // Same order of drawing as calling scene_post_effect_for_bucket() and
+    // draw_drawitem_2() for each of the 24000 buckets, but most buckets are
+    // empty, and the rain / snow effect only draws at multiples of `every`
+    // (its interval is set at level start). Two divisions and two calls per
+    // bucket cost ~10% of the frame time on a 68060.
+    switch (gamep_scene_effect_type)
+    {
+    case ScEff_RAIN:
+    case ScEff_SNOW:
+        every = 8 * 1000 / gamep_scene_effect_intensity;
+        break;
+    default:
+        every = -1;
+        break;
+    }
+    if (every > 0)
+        next_fx = (BUCKETS_COUNT-1) - ((BUCKETS_COUNT-1) % every);
+    else
+        next_fx = -1;
 
     p_bucket = &buckets[BUCKETS_COUNT-1];
     for (n = BUCKETS_COUNT-1; n >= 0; n--)
     {
         dihead = *p_bucket;
-        *p_bucket = 0;
-        scene_post_effect_for_bucket(n);
-        draw_drawitem_2(dihead);
+        if (n == next_fx) {
+            *p_bucket = 0;
+            scene_post_effect_for_bucket(n);
+            next_fx -= every;
+        }
+        if (dihead != 0) {
+            *p_bucket = 0;
+            draw_drawitem_2(dihead);
+        }
         p_bucket--;
     }
 }

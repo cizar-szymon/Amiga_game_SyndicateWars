@@ -26,11 +26,17 @@ void asm_cov_phase(int phase);
 void amiga_phase_trace(int phase);
 #define asm_cov_phase(phase) amiga_phase_trace(phase)
 #define AMIGA_STEP(n) amiga_phase_trace(100 + (n))
+void amiga_prof_begin(int slot);
+void amiga_prof_end(int slot);
+#define AMIGA_PROF_BEGIN(n) amiga_prof_begin(n)
+#define AMIGA_PROF_END(n) amiga_prof_end(n)
 #else
 #define asm_cov_phase(phase) ((void)0)
 #endif
 #ifndef AMIGA_STEP
 #define AMIGA_STEP(n) ((void)0)
+#define AMIGA_PROF_BEGIN(n) ((void)0)
+#define AMIGA_PROF_END(n) ((void)0)
 #endif
 
 #endif

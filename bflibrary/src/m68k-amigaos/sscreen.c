@@ -424,6 +424,10 @@ static void fps_draw(UBYTE *base, ULONG bpr, unsigned long value)
     }
 }
 
+void amiga_prof_begin(int slot);
+void amiga_prof_end(int slot);
+void amiga_prof_frame(void);
+
 static void fps_count(void)
 {
     TbClockMSec now;
@@ -482,11 +486,20 @@ static TbResult amiga_present(void)
     if (h > (ULONG)amiga_screen->Height)
         h = amiga_screen->Height;
     fps_count();
+    amiga_prof_frame();
+    amiga_prof_begin(30);
     lock = LockBitMapTags(amiga_screen->RastPort.BitMap,
       LBMI_BASEADDRESS, (ULONG)&base, LBMI_BYTESPERROW, (ULONG)&bpr, TAG_DONE);
     if (lock == NULL)
         return Lb_FAIL;
     src = lbDisplay.WScreen;
+    if ((bpr == w) && ((ULONG)lbDisplay.GraphicsScreenWidth == w))
+    {
+        // One block: a large CopyMem bursts (55 MB/s on a Warp, WarpBench),
+        // much faster than a copy loop per row
+        CopyMemQuick((APTR)src, (APTR)base, w * h);
+        h = 0;
+    }
     for (y = 0; y < h; y++)
     {
         const ULONG *s = (const ULONG *)src;
@@ -503,6 +516,7 @@ static TbResult amiga_present(void)
     }
     fps_draw(base, bpr, amiga_fps_last);
     UnLockBitMap(lock);
+    amiga_prof_end(30);
     return Lb_SUCCESS;
 }
 
@@ -521,7 +535,9 @@ TbResult LbScreenSwapClear(TbPixel colour)
     TbResult ret;
 
     ret = LbScreenSwap();
+    amiga_prof_begin(31);
     LbScreenClear(colour);
+    amiga_prof_end(31);
     return ret;
 }
 

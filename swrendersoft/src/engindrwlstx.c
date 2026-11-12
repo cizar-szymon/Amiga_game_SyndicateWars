@@ -159,6 +159,11 @@ void draw_drawitem_1(ushort dihead)
     }
 }
 
+#if defined(SW_AMIGA)
+void amiga_prof_item_begin(void);
+void amiga_prof_item_end(int type);
+#endif
+
 void draw_drawitem_2(ushort dihead)
 {
     struct DrawItem *p_itm;
@@ -176,6 +181,9 @@ void draw_drawitem_2(ushort dihead)
       if (i > BUCKET_ITEMS_MAX)
           break;
       p_itm = &game_draw_list[iidx];
+#if defined(SW_AMIGA)
+      amiga_prof_item_begin();
+#endif
       switch (p_itm->Type)
       {
       case DrIT_ObFace3Txtr:
@@ -260,6 +268,9 @@ void draw_drawitem_2(ushort dihead)
       default:
           break;
       }
+#if defined(SW_AMIGA)
+      amiga_prof_item_end(p_itm->Type);
+#endif
     }
 }
 /******************************************************************************/

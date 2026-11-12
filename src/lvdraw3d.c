@@ -1243,15 +1243,17 @@ void engine_draw_whole_screen_top_down(void)
     int pos_beg_x, pos_beg_z;
     int tlcount_x, tlcount_z;
 
-    AMIGA_STEP(21);
+    AMIGA_PROF_BEGIN(20);
     camera_setup_view(&pos_beg_x, &pos_beg_z, &rend_beg_x, &rend_beg_z, &tlcount_x, &tlcount_z);
-    AMIGA_STEP(22);
+    AMIGA_PROF_END(20);
+    AMIGA_PROF_BEGIN(21);
 
     if ((ingame.Flags & GamF_RenderScene) != 0)
     {
         engine_draw_things(pos_beg_x, pos_beg_z, rend_beg_x, rend_beg_z, tlcount_x, tlcount_z);
     }
-    AMIGA_STEP(23);
+    AMIGA_PROF_END(21);
+    AMIGA_PROF_BEGIN(22);
 
     if ((ingame.Flags & GamF_RenderScene) != 0)
     {
@@ -1263,7 +1265,7 @@ void engine_draw_whole_screen_top_down(void)
             lvdraw_do_floor();
         }
     }
-    AMIGA_STEP(24);
+    AMIGA_PROF_END(22);
 
     if (word_1552F8 != 36 && !byte_1C8444)
     {
@@ -1277,12 +1279,15 @@ void engine_draw_whole_screen_top_down(void)
     p_locplayer = &players[local_player_no];
     if ((ingame.Flags & GamF_RenderScene) != 0)
     {
+        AMIGA_PROF_BEGIN(23);
         draw_explode();
-        AMIGA_STEP(25);
+        AMIGA_PROF_END(23);
+        AMIGA_PROF_BEGIN(24);
         draw_screen();
-        AMIGA_STEP(26);
+        AMIGA_PROF_END(24);
+        AMIGA_PROF_BEGIN(25);
         draw_hud(p_locplayer->DirectControl[0]);
-        AMIGA_STEP(27);
+        AMIGA_PROF_END(25);
         if (in_network_game)
             draw_netplayer_name_text_over_thing();
         if (debug_hud_collision)

@@ -63,8 +63,26 @@ const long add_to_edi[] = {
   0,-15,-14,-13,-12,-11,-10, -9, -8, -7, -6, -5, -4, -3, -2, -1,
 };
 
+#if defined(SW_AMIGA)
+void amiga_prof_mode_begin(void);
+void amiga_prof_mode_end(int mode);
+static void trig_inner(struct PolyPoint *point_a, struct PolyPoint *point_b,
+  struct PolyPoint *point_c);
+
 void trig(struct PolyPoint *point_a, struct PolyPoint *point_b,
   struct PolyPoint *point_c)
+{
+    amiga_prof_mode_begin();
+    trig_inner(point_a, point_b, point_c);
+    amiga_prof_mode_end(vec_mode);
+}
+
+static void trig_inner(struct PolyPoint *point_a, struct PolyPoint *point_b,
+  struct PolyPoint *point_c)
+#else
+void trig(struct PolyPoint *point_a, struct PolyPoint *point_b,
+  struct PolyPoint *point_c)
+#endif
 {
     struct PolyPoint *opt_a;
     struct PolyPoint *opt_b;

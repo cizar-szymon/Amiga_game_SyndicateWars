@@ -16,7 +16,9 @@ import os
 import re
 import sys
 
-RE_ASM = re.compile(r"\b(?:asm|__asm__)\s+(?:volatile|__volatile__)?\s*\(")
+# Only the upstream spelling `asm`: the port's own 68k inline asm uses
+# `__asm__` and must stay.
+RE_ASM = re.compile(r"\basm\s+(?:volatile|__volatile__)?\s*\(")
 
 
 def find_close(text, pos):

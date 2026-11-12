@@ -1158,9 +1158,7 @@ void process_engine_unk3(void)
     get_engine_inputs();
     mech_gameturn_reinit();
     process_map_craters();
-    AMIGA_STEP(11);
     engine_draw_whole_screen_top_down();
-    AMIGA_STEP(12);
 
     // Which frame of an animated texture is on screen is not part of the game
     // state - no simulation code reads it. Advanced here, after the frame was
@@ -3878,18 +3876,22 @@ void show_game_engine(void)
 
     p_locplayer = &players[local_player_no];
     dcthing = p_locplayer->DirectControl[0];
-    AMIGA_STEP(1);
+    AMIGA_PROF_BEGIN(10);
     process_view_inputs(dcthing);// inlined call gengine_ctrl
-    AMIGA_STEP(2);
+    AMIGA_PROF_END(10);
+    AMIGA_PROF_BEGIN(11);
     compute_scanner_zoom();
     camera_apply_velocity();
-    AMIGA_STEP(3);
+    AMIGA_PROF_END(11);
+    AMIGA_PROF_BEGIN(12);
     prepare_drawlist();
-    AMIGA_STEP(4);
+    AMIGA_PROF_END(12);
+    AMIGA_PROF_BEGIN(13);
     prepare_mouse_on_map();
-    AMIGA_STEP(5);
+    AMIGA_PROF_END(13);
+    AMIGA_PROF_BEGIN(14);
     process_engine_unk3();
-    AMIGA_STEP(6);
+    AMIGA_PROF_END(14);
 }
 
 TbResult clear_vecs_screen(TbPixel colour)
@@ -7281,7 +7283,10 @@ void game_process(void)
         if (ingame.DisplayMode == DpM_PURPLEMNU) {
             LOGDBG("id=%d  trial alloc = %d turn %lu", 0, triangulation, gameturn);
         }
+        AMIGA_PROF_END(0);
+        AMIGA_PROF_BEGIN(0);
         asm_cov_phase(ACP_INPUT);
+        AMIGA_PROF_BEGIN(1);
         input();
         update_tick_time();
         // Faces thrown by an explosion can hit people once they land, so they
@@ -7290,8 +7295,11 @@ void game_process(void)
         if ((ingame.DisplayMode == DpM_ENGINEPLY)
           && ((ingame.Flags & TngF_ProgressAction) != 0))
             process_explode();
+        AMIGA_PROF_END(1);
         asm_cov_phase((ingame.DisplayMode == DpM_PURPLEMNU) ? ACP_MENU : ACP_DRAW);
+        AMIGA_PROF_BEGIN(2);
         draw_game();
+        AMIGA_PROF_END(2);
         asm_cov_phase(ACP_OTHER);
         debug_trace_turn_bound(gameturn);
         load_packet();
@@ -7304,7 +7312,9 @@ void game_process(void)
           || (ingame.DisplayMode == DpM_UNKN_3B))
         {
             asm_cov_phase(ACP_THINGS);
+            AMIGA_PROF_BEGIN(3);
             process_things();
+            AMIGA_PROF_END(3);
             asm_cov_phase(ACP_OTHER);
         }
         if (debug_hud_things) {
@@ -7323,7 +7333,9 @@ void game_process(void)
         else if (!skip_redraw_this_turn())
         {
             game_update();
+            AMIGA_PROF_BEGIN(5);
             LbScreenSwapClear(0);
+            AMIGA_PROF_END(5);
         }
 
         update_unkn_changing_colors();

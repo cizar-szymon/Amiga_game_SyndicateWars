@@ -439,6 +439,235 @@ static TbPixel gpoly_pixel_noshade(struct gpoly_blends *p_bld, const struct gpol
     return ret_l;
 }
 
+/******************************************************************************/
+// Span loops. The rasterizers restore the blend state after each span, so a
+// span only reads its start state. Same results as gpoly_pixel_shaded() and
+// gpoly_pixel_noshade() repeated n times.
+
+static void gpoly_span_shaded_c(ubyte *o, int n, const struct gpoly_blends *p_bld,
+  const struct gpoly_factors *p_inc)
+{
+    u32 b0, b2, s1, s2;
+    ubyte v, s3;
+
+    b0 = p_bld->B[0];
+    b2 = p_bld->B[2];
+    v = (ubyte)(p_bld->B[1] >> 8);
+    s1 = p_inc->S[1];
+    s2 = p_inc->S[2];
+    s3 = (ubyte)p_inc->S[3];
+    for (; n > 0; n--)
+    {
+        ubyte shade, texel;
+        u32 nb, t;
+        ubyte c;
+
+        shade = (ubyte)(b2 >> 8);
+        texel = vec_map[(v << PITCH_SH) | (ubyte)b0];
+        nb = b2 + s1;
+        c = (nb < b2);
+        b2 = nb;
+        t = b0 + c;
+        nb = t + s2;
+        c = (nb < t);
+        b0 = nb;
+        v = (ubyte)(v + c + s3);
+        *o++ = pixmap.fade_table[(shade << 8) | texel];
+    }
+}
+
+static void gpoly_span_noshade_c(ubyte *o, int n, const struct gpoly_blends *p_bld,
+  const struct gpoly_factors *p_inc)
+{
+    u32 b0, b2, s1, s2;
+    ubyte v, s3;
+
+    b0 = p_bld->B[0];
+    b2 = p_bld->B[2];
+    v = (ubyte)(p_bld->B[1] >> 8);
+    s1 = p_inc->S[1];
+    s2 = p_inc->S[2];
+    s3 = (ubyte)p_inc->S[3];
+    for (; n > 0; n--)
+    {
+        u32 nb, t;
+        ubyte c;
+
+        *o++ = vec_map[(v << PITCH_SH) | (ubyte)b0];
+        nb = b2 + s1;
+        c = (nb < b2);
+        b2 = nb;
+        t = b0 + c;
+        nb = t + s2;
+        c = (nb < t);
+        b0 = nb;
+        v = (ubyte)(v + c + s3);
+    }
+}
+
+#if defined(__mc68000__) || defined(__m68k__)
+/* 68060: the carry chain maps to ADD.L / ADDX; all state in registers.
+ * add.l s1,b2 sets X = c1; moveq keeps X; addx.l 0,b0 adds c1 (its own carry
+ * is replaced by the next add, as in the C version); add.l s2,b0 sets
+ * X = c2; addx.b s3,v adds both. */
+static void gpoly_span_shaded_68k(ubyte *o, int n, const struct gpoly_blends *p_bld,
+  const struct gpoly_factors *p_inc)
+{
+    register u32 b0 __asm__("d0") = p_bld->B[0];
+    register u32 b2 __asm__("d1") = p_bld->B[2];
+    register u32 v __asm__("d2") = (ubyte)(p_bld->B[1] >> 8);
+    register u32 s1 __asm__("d3") = p_inc->S[1];
+    register u32 s2 __asm__("d4") = p_inc->S[2];
+    register u32 s3 __asm__("d5") = (ubyte)p_inc->S[3];
+    register ubyte *out __asm__("a0") = o;
+    register ubyte *end __asm__("a1") = o + n;
+    register const ubyte *map __asm__("a2") = vec_map;
+    register const ubyte *fade __asm__("a3") = pixmap.fade_table;
+
+    __asm__ volatile (
+        /* software pipelined: the texel and shade index of the next pixel
+         * are formed at the end of each iteration, and the fade table read
+         * comes several instructions after the texel read */
+        "    moveq #0,%%d6\n"
+        "    moveq #0,%%d7\n"
+        "    move.w %[v],%%d6\n"
+        "    lsl.w #8,%%d6\n"
+        "    move.b %[b0],%%d6\n"
+        "    move.w %[b2],%%d7\n"
+        "    clr.b %%d7\n"
+        "1:  move.b (%[map],%%d6.l),%%d7\n"
+        "    add.l %[s1],%[b2]\n"
+        "    moveq #0,%%d6\n"
+        "    addx.l %%d6,%[b0]\n"
+        "    add.l %[s2],%[b0]\n"
+        "    addx.b %[s3],%[v]\n"
+        "    move.b (%[fade],%%d7.l),(%[out])+\n"
+        "    move.w %[v],%%d6\n"
+        "    lsl.w #8,%%d6\n"
+        "    move.b %[b0],%%d6\n"
+        "    move.w %[b2],%%d7\n"
+        "    clr.b %%d7\n"
+        "    cmp.l %[end],%[out]\n"
+        "    bcs.s 1b\n"
+        : [b0] "+d" (b0), [b2] "+d" (b2), [v] "+d" (v), [out] "+a" (out)
+        : [s1] "d" (s1), [s2] "d" (s2), [s3] "d" (s3), [end] "a" (end),
+          [map] "a" (map), [fade] "a" (fade)
+        : "d6", "d7", "cc", "memory");
+}
+
+static void gpoly_span_noshade_68k(ubyte *o, int n, const struct gpoly_blends *p_bld,
+  const struct gpoly_factors *p_inc)
+{
+    register u32 b0 __asm__("d0") = p_bld->B[0];
+    register u32 b2 __asm__("d1") = p_bld->B[2];
+    register u32 v __asm__("d2") = (ubyte)(p_bld->B[1] >> 8);
+    register u32 s1 __asm__("d3") = p_inc->S[1];
+    register u32 s2 __asm__("d4") = p_inc->S[2];
+    register u32 s3 __asm__("d5") = (ubyte)p_inc->S[3];
+    register ubyte *out __asm__("a0") = o;
+    register ubyte *end __asm__("a1") = o + n;
+    register const ubyte *map __asm__("a2") = vec_map;
+
+    __asm__ volatile (
+        "    moveq #0,%%d6\n"
+        "1:  move.w %[v],%%d6\n"
+        "    lsl.w #8,%%d6\n"
+        "    move.b %[b0],%%d6\n"
+        "    move.b (%[map],%%d6.l),(%[out])+\n"
+        "    add.l %[s1],%[b2]\n"
+        "    moveq #0,%%d6\n"
+        "    addx.l %%d6,%[b0]\n"
+        "    add.l %[s2],%[b0]\n"
+        "    addx.b %[s3],%[v]\n"
+        "    cmp.l %[end],%[out]\n"
+        "    bcs.s 1b\n"
+        : [b0] "+d" (b0), [b2] "+d" (b2), [v] "+d" (v), [out] "+a" (out)
+        : [s1] "d" (s1), [s2] "d" (s2), [s3] "d" (s3), [end] "a" (end),
+          [map] "a" (map)
+        : "d6", "cc", "memory");
+}
+
+#if defined(SW_AMIGA)
+/* Check mode (ENV:SyndWarsCheck exists): every span is also drawn by the C
+ * version into a buffer and compared; differences are logged. */
+static int gpoly_check_mode = -1;
+static unsigned long gpoly_check_spans, gpoly_check_fails;
+
+int amiga_check_enabled(void);
+
+static void gpoly_span_check(ubyte *o, int n, const struct gpoly_blends *p_bld,
+  const struct gpoly_factors *p_inc, int shaded)
+{
+    static ubyte ref[1024];
+    int i;
+
+    if (n > (int)sizeof(ref))
+        return;
+    if (shaded)
+        gpoly_span_shaded_c(ref, n, p_bld, p_inc);
+    else
+        gpoly_span_noshade_c(ref, n, p_bld, p_inc);
+    gpoly_check_spans++;
+    for (i = 0; i < n; i++) {
+        if (ref[i] != o[i]) {
+            if (gpoly_check_fails < 20)
+                LOGERR("span %lu (%s, n=%d) differs at %d: asm %d C %d",
+                  gpoly_check_spans, shaded ? "shaded" : "noshade", n, i, (int)o[i], (int)ref[i]);
+            gpoly_check_fails++;
+            break;
+        }
+    }
+    if ((gpoly_check_spans & 0xFFFF) == 0)
+        LOGWARN("gpoly check: %lu spans, %lu different", gpoly_check_spans, gpoly_check_fails);
+}
+#endif
+#endif
+
+#if defined(SW_AMIGA)
+extern unsigned long amiga_prof_pixels, amiga_prof_spans;
+#endif
+
+static inline void gpoly_span_shaded(ubyte *o, int n, const struct gpoly_blends *p_bld,
+  const struct gpoly_factors *p_inc)
+{
+#if defined(__mc68000__) || defined(__m68k__)
+#if defined(SW_AMIGA)
+    amiga_prof_pixels += n;
+    amiga_prof_spans++;
+#endif
+    gpoly_span_shaded_68k(o, n, p_bld, p_inc);
+#if defined(SW_AMIGA)
+    if (gpoly_check_mode < 0)
+        gpoly_check_mode = amiga_check_enabled();
+    if (gpoly_check_mode)
+        gpoly_span_check(o, n, p_bld, p_inc, 1);
+#endif
+#else
+    gpoly_span_shaded_c(o, n, p_bld, p_inc);
+#endif
+}
+
+static inline void gpoly_span_noshade(ubyte *o, int n, const struct gpoly_blends *p_bld,
+  const struct gpoly_factors *p_inc)
+{
+#if defined(__mc68000__) || defined(__m68k__)
+#if defined(SW_AMIGA)
+    amiga_prof_pixels += n;
+    amiga_prof_spans++;
+#endif
+    gpoly_span_noshade_68k(o, n, p_bld, p_inc);
+#if defined(SW_AMIGA)
+    if (gpoly_check_mode < 0)
+        gpoly_check_mode = amiga_check_enabled();
+    if (gpoly_check_mode)
+        gpoly_span_check(o, n, p_bld, p_inc, 0);
+#endif
+#else
+    gpoly_span_noshade_c(o, n, p_bld, p_inc);
+#endif
+}
+
+
 static void gpoly_stb_drw_incr4(struct gpoly_blends *p_bld, const struct gpoly_factors *p_inc)
 {
     int loc_2d;
@@ -1079,12 +1308,7 @@ void gpoly_rasterize_shaded_bound(struct gpoly_state *st)
                 // gpoly_countdown[], which no compiler can unroll.
                 o = &loc_0F4[curr_X];
                 range_remain = range_len;
-                while (range_remain > 0)
-                {
-                    *o = gpoly_pixel_shaded(&bld, &st->incB);
-                    o++;
-                    range_remain--;
-                }
+                gpoly_span_shaded(o, range_remain, &bld, &st->incB);
             }
             range_end = loc_128 + loc_0F8;
             curr_X -= (loc_0FC >> 16);
@@ -1214,12 +1438,7 @@ void gpoly_rasterize_shaded_nobound(struct gpoly_state *st)
                 // gpoly_countdown[], which no compiler can unroll.
                 o = &loc_0F4[range_beg_scr];
                 range_remain = range_len;
-                while (range_remain > 0)
-                {
-                    *o = gpoly_pixel_shaded(&bld, &st->incB);
-                    o++;
-                    range_remain--;
-                }
+                gpoly_span_shaded(o, range_remain, &bld, &st->incB);
             }
             range_beg = loc_12C + loc_0FC;
             range_end = loc_128 + loc_0F8;
@@ -1359,12 +1578,7 @@ void gpoly_rasterize_noshade_bound(struct gpoly_state *st)
                 // gpoly_countdown[], which no compiler can unroll.
                 o = &loc_0F4[curr_X];
                 range_remain = range_len;
-                while (range_remain > 0)
-                {
-                    *o = gpoly_pixel_noshade(&bld, &st->incB);
-                    o++;
-                    range_remain--;
-                }
+                gpoly_span_noshade(o, range_remain, &bld, &st->incB);
             }
             range_beg = loc_12C + loc_0FC;
             range_end = loc_128 + loc_0F8;
@@ -1495,12 +1709,7 @@ void gpoly_rasterize_noshade_nobound(struct gpoly_state *st)
                 // gpoly_countdown[], which no compiler can unroll.
                 o = &loc_0F4[curr_X];
                 range_remain = range_len;
-                while (range_remain > 0)
-                {
-                    *o = gpoly_pixel_noshade(&bld, &st->incB);
-                    o++;
-                    range_remain--;
-                }
+                gpoly_span_noshade(o, range_remain, &bld, &st->incB);
             }
             range_beg = loc_12C + loc_0FC;
             range_end = loc_128 + loc_0F8;

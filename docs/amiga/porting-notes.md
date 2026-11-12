@@ -146,3 +146,42 @@ Zostało do zrobienia (kolejność według zysku):
 - czyszczenie bufora 2,1 ms i kopia na kartę 5,8 ms (granica szybkości VRAM);
 - uwaga: zaślepki symulacji (`process_*`, `people_intel`, ale też **`calc_lighting`** i **`arctan`**)
   są wywoływane co turę — po ich konwersji czas `things` wzrośnie.
+
+## 12.11.2026 (rano) — 320×200, Amiga 2, błąd pamięci
+
+- **320×200 domyślnie na Amidze** (`set_default_gfx_settings`, tylko m68k; F8 i menu opcji
+  dalej przełączają, zapisane ustawienia gracza mają pierwszeństwo). Misja 1 na Amidze 1:
+  640×480 77 ms → 320×200 **37,0 ms** (27 kl./s). Zrzut 320×200 zgodny.
+- Pomiary przeniesione na **Amigę 2** (A4000 + Warp 7060): ten sam build 36,8 ms (Amiga 1: 37,0).
+  Dane gry w `WorkSD:Games/SyndWars` (paczki `pack_data.py` + `config.ini`, bez którego gra
+  szuka danych na CD). Skrypty: `TARGET=amiga2`. Uwaga: w `amiga_remote.py run` średnik to
+  komentarz AmigaDOS — jedno polecenie na wywołanie.
+- **Profil z funkcjami `static`**: plik wykonywalny Amigi ma tylko symbole globalne, więc
+  próbki z funkcji statycznych trafiały do poprzedniej globalnej (np. 15% „`gpoly_init_state`”
+  to `gpoly_lines_shaded_68k`). `tools/amiga/nm_statics.py` dokłada symbole statyczne z plików
+  `.o` (przesunięcie względem globalnego symbolu tego samego pliku).
+- **Dzielenie 64/32** (`__divdi3` z dzielnikiem 32-bit i szerszą dzielną: kropki i linie
+  skanera) szło pętlą 64 kroków; teraz dwa sprzętowe `DIVU.L` 32/32 na cyfrach 16-bit
+  (Hacker's Delight, `divlu`). PC: 37 mln losowych par + przypadki brzegowe, 0 różnic.
+  Kropki skanera 2,7 → 2,1 ms, klatka 36,8 → 36,5 ms.
+- **Błąd portu: `low_trans_grey_bright_limit[]` miała 1 bajt zamiast 256** (`asm_data.c`,
+  tablica bez rozmiaru i bez inicjalizatora). Inicjalizacja sprite'ów wypełnia 256 bajtów, więc
+  przy starcie misji nadpisywała 255 bajtów zmiennych za nią (dane BAT, `signal_count`,
+  `map_crater_next`, `datagram_backup`, `dword_1C6DE8`, `data_1c8468`, liczniki profilera,
+  początek `joy`). Wykryte, bo nowa flaga profilera w tym miejscu zmieniała się sama; zrzut
+  pamięci pokazał rampę 0..63. Poprawione w `asm_data.c` i w `gen_asm_data.py`.
+- **Profiler tylko na żądanie** (`ENV:SyndWarsProf`: brak = sam średni czas klatki, 1 = sloty,
+  2 = sloty dokładne; `prof_a1.sh PROF=1|2`). Sloty kosztowały ok. 1,7 ms na klatkę.
+
+Wynik (Amiga 2, 320×200, misja 1, bez profilera): **34,8 ms na klatkę, 28,7 kl./s**.
+
+Profil próbkujący 320×200 (z symbolami statycznymi): `gpoly_lines_shaded_68k` 14%,
+`transform_shpoint` 8% (punkty podłogi i obiektów; kod gcc dobry, dominuje dzielenie
+perspektywy ~38 taktów), system 6% (kopia na kartę 1,2 ms), `engine_draw_things` 4% (przejście
+kafli w kolejności z, chybienia cache), `draw_object_faces` 3,6%, `lvdraw_do_floor` 3,5%,
+`object_face_get_visible_max_depth` 3,2%, `shpoint_compute_coord_y` 2,7%, `draw_drawlist_2` 2,4%.
+
+Dalsze możliwości (każda ~0,5–1 ms): podłoga — przyrostowe iloczyny obrotu wzdłuż wiersza
+(dokładne, suma przed przesunięciem rośnie o stałą), wysokość i transformacja w jednej pętli;
+dzielenie perspektywy w FPU równolegle z częścią całkowitą (wynik dokładny: dla dodatnich
+liczb < 2^31 obcięcie ilorazu `double` = iloraz całkowity), z wersją bez FPU.

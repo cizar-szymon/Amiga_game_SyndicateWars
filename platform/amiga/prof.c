@@ -103,7 +103,16 @@ void amiga_prof_frame(void)
         prof_report = now;
     if (now - prof_report < 5000)
         return;
-    LbWarnLog("prof: %lu frames in %lu ms\n", prof_frames, (ulong)(now - prof_report));
+    {
+        /* game turns in the same time: presents are also made while waiting
+         * for the next turn (screen_idle_update), so frames >= turns */
+        extern ulong gameturn;
+        static ulong turn_last;
+
+        LbWarnLog("prof: %lu frames, %lu game turns in %lu ms\n", prof_frames,
+          gameturn - turn_last, (ulong)(now - prof_report));
+        turn_last = gameturn;
+    }
     if (amiga_prof_level == 0) {
         ULONG per10 = (ULONG)(now - prof_report) * 10 / prof_frames;
 

@@ -110,6 +110,23 @@ ARM w 320×200 jest ~2,5× szybszy i ma zapas (~34 tur/s możliwe, gra trzyma 16
 na 68060 – jak w Quake II. Bez żadnej optymalizacji pod M7 (`-O2`, kod i dane w SDRAM, bez ITCM/SRAM).
 Pobranie klatki: 1,1 ms (64 KB), 5,2 ms (300 KB) – dziś ARM czeka na nie; podwójna strona ukryje ten czas.
 
+### Szybkie zyski (12.11.2026, Amiga 1)
+
+Miara: `busy per turn` (raport profilera na ARM, także bez slotów: czas tury bez czekania na następną),
+misja 1 bez ruchu, `tools/warp/measure.sh` (320×200, potem F8 → 640×480).
+
+| zmiana | 320×200 | 640×480 |
+|---|---:|---:|
+| start (`-O2`) | 31,6 ms | 64,8 ms |
+| `-O3` (domyślne w `build_arm.sh`) | 30,6 | 63,4 |
+| dwie strony z kopią klatki | 30,7 | 65,7 – **odrzucone**: kopia w SDRAM kosztuje tyle co pobranie |
+| `WScreen` w render area (bez write-allocate), pobieranie prosto z niego | 29,1 | 58,5 |
+| klatka wysłana zaraz po narysowaniu (68k pobiera w czasie symulacji i czekania) | 29,9–30,4 | **54,0** |
+
+640×480 ma teraz pełne 16 tur/s z zapasem ~8 ms; 320×200 ~30 ms z 62. Obraz (misja w obu rozdzielczościach,
+menu) sprawdzony zrzutami. Dalej: profil funkcji na ARM (brak próbkowania – sloty) i pamięć na chipie
+(ITCM 32 KB, SRAM 64+16 KB) dla najgorętszych pętli i tablic.
+
 ## Pamięć ARM (szacunek z kodu, do zmierzenia)
 
 Okno 14 MB (obraz programu + bss + stos + arena) i render area 8 MB.

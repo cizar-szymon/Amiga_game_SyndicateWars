@@ -11,6 +11,7 @@
  */
 /******************************************************************************/
 #include <time.h>
+#include <stdint.h>
 #include "bftime.h"
 #include "bfwindows.h"
 #include <stdlib.h>
@@ -23,9 +24,14 @@ TbClockMSec LbTimerClock(void)
     return w_millis();
 }
 
+/** Time spent waiting for the next game turn, in core cycles / 64 (read
+ * and reset by the profiler report: the work per turn is the rest). */
+uint32_t w_idle_units;
+
 TbBool LbSleepUntil(TbClockMSec endtime)
 {
     TbClockMSec currclk;
+    uint32_t c0 = w_cycles();
 
     currclk = LbTimerClock();
     if (endtime > currclk + 1000)
@@ -42,6 +48,7 @@ TbBool LbSleepUntil(TbClockMSec endtime)
         wl_poll();
         currclk = LbTimerClock();
     }
+    w_idle_units += (w_cycles() - c0) >> 6;
     return true;
 }
 

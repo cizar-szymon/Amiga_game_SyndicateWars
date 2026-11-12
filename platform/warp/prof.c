@@ -103,8 +103,20 @@ void amiga_prof_frame(void)
         extern ulong gameturn;
         static ulong turn_last;
 
+        extern uint32_t w_idle_units;
+        ulong turns = gameturn - turn_last;
+        ulong idle_ms = (ulong)((uint64_t)w_idle_units * 1000u / (w_cpu_hz >> 6));
+        ulong elapsed = (ulong)(now - prof_report);
+
         LbWarnLog("prof: %lu frames, %lu game turns in %lu ms\n", prof_frames,
-          gameturn - turn_last, (ulong)(now - prof_report));
+          turns, elapsed);
+        // the ARM's own measure: the time not spent waiting for the next turn
+        if (turns != 0) {
+            ulong busy10 = (elapsed > idle_ms ? elapsed - idle_ms : 0) * 10 / turns;
+            LbWarnLog("prof:   busy per turn      %4lu.%lu ms (idle %lu ms)\n",
+              busy10 / 10, busy10 % 10, idle_ms);
+        }
+        w_idle_units = 0;
         turn_last = gameturn;
     }
     if (amiga_prof_level == 0) {

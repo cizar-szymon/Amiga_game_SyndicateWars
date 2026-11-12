@@ -3514,6 +3514,16 @@ TbBool game_setup(void)
         LOGERR("Initial loading of mission sprite files failed.");
         ret = false;
     }
+#if defined(SW_WARP)
+    // Warp ARM: draw into the board's render area (no write-allocate), which
+    // the 68k also fetches from; the block allocated above is kept for
+    // LbDataFreeAll() in game_reset()
+    {
+        extern ubyte *warp_wscreen_relocate(ubyte *wscreen, ulong bytes);
+        lbDisplay.WScreen = warp_wscreen_relocate(lbDisplay.WScreen,
+          MAX_SUPPORTED_SCREEN_WIDTH*(MAX_SUPPORTED_SCREEN_HEIGHT+1));
+    }
+#endif
     // Animation tables are little endian files
     if (melement_ani != NULL)
         lb_le_fix_struct(melement_ani, mele_ani_end - melement_ani,
@@ -7325,6 +7335,14 @@ void game_process(void)
         AMIGA_PROF_BEGIN(2);
         draw_game();
         AMIGA_PROF_END(2);
+#if defined(SW_WARP)
+        // Warp ARM: the frame is fetched by the 68k during the simulation
+        // and the wait for the next turn; the swap below only finishes it
+        if ((ingame.DisplayMode != DpM_PURPLEMNU) && !skip_redraw_this_turn()) {
+            extern void warp_present_early(void);
+            warp_present_early();
+        }
+#endif
         asm_cov_phase(ACP_OTHER);
         debug_trace_turn_bound(gameturn);
         load_packet();
@@ -7427,6 +7445,12 @@ void game_reset(void)
 {
     host_reset();
     free_texturemaps();
+#if defined(SW_WARP)
+    {
+        extern ubyte *warp_wscreen_restore(void);
+        lbDisplay.WScreen = warp_wscreen_restore();
+    }
+#endif
     LbDataFreeAll(missionspr_load_files);
 }
 

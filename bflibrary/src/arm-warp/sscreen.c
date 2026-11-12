@@ -246,8 +246,11 @@ TbResult LbScreenClearGraphicsWindow(TbPixel colour)
     return Lb_SUCCESS;
 }
 
+static TbBool warp_early_finish(void);
+
 TbResult LbScreenClear(TbPixel colour)
 {
+    warp_early_finish();
     if (lbDisplay.WScreen == NULL)
         return Lb_FAIL;
     LbMemorySet(lbDisplay.WScreen, colour, lbDisplay.GraphicsScreenHeight *
@@ -308,7 +311,11 @@ ulong LbScreenSetWScreenInVideo(ulong flag)
 }
 
 /******************************************************************************/
-// Present: the 68k fetches WScreen straight into its screen bitmap
+// Present: the 68k fetches WScreen straight into its screen bitmap; the ARM
+// waits for it (a copy to a second page costs as much as the fetch: the
+// SDRAM moves ~50-60 MB/s either way).
+// WScreen itself lives in the render area (warp_wscreen_relocate()): stores
+// that miss the cache go straight out instead of reading the line first.
 
 void amiga_prof_begin(int slot);
 void amiga_prof_end(int slot);
@@ -316,12 +323,33 @@ void amiga_prof_frame(void);
 
 uint32_t warp_fetch_us_sum, warp_fetch_frames;
 
-static TbResult warp_present(void)
+static ubyte *warp_wscreen_game;
+
+ubyte *warp_wscreen_relocate(ubyte *wscreen, ulong bytes)
+{
+    /* after the file transfer buffer at the start of the render area */
+    ubyte *buf = (ubyte *)wl_env->renderArena + SWL_XFER_BYTES;
+
+    if ((wscreen == NULL) || (SWL_XFER_BYTES + bytes > wl_env->renderArenaSize))
+        return wscreen;
+    warp_wscreen_game = wscreen;
+    memset(buf, 0, bytes);
+    LOGSYNC("WScreen %p -> render area %p, %lu bytes", wscreen, buf, (unsigned long)bytes);
+    return buf;
+}
+
+ubyte *warp_wscreen_restore(void)
+{
+    ubyte *w = warp_wscreen_game;
+    warp_wscreen_game = NULL;
+    return (w != NULL) ? w : lbDisplay.WScreen;
+}
+
+static TbResult warp_present(int wait)
 {
     static const ubyte *registered;
     static uint32_t registered_bytes;
-    struct { uint16_t w, h; uint32_t pitch; } fr;
-    uint32_t bytes;
+    uint32_t bytes, pitch;
     long w, h;
 
     if ((warp_screen_w == 0) || (lbDisplay.WScreen == NULL))
@@ -334,30 +362,59 @@ static TbResult warp_present(void)
         h = warp_screen_h;
     amiga_prof_frame();
     amiga_prof_begin(30);
-    bytes = (uint32_t)lbDisplay.GraphicsScreenWidth * (uint32_t)h;
+    pitch = (uint32_t)lbDisplay.GraphicsScreenWidth;
+    bytes = pitch * (uint32_t)h;
     if ((lbDisplay.WScreen != registered) || (bytes > registered_bytes)) {
         if (wl_env->bufRegister(SWL_BUF_SCREEN, lbDisplay.WScreen, (bytes + 15) & ~15u) != 0)
             LOGWARN("bufRegister screen %p %lu failed", lbDisplay.WScreen, (unsigned long)bytes);
         registered = lbDisplay.WScreen;
         registered_bytes = bytes;
     }
-    fr.w = (uint16_t)w;
-    fr.h = (uint16_t)h;
-    fr.pitch = (uint32_t)lbDisplay.GraphicsScreenWidth;
-    wl_frame_begin();
-    wl_send(SWL_FRAME, &fr, sizeof(fr));
-    warp_fetch_us_sum += wl_frame_wait();
+    wl_frame_send(SWL_BUF_SCREEN, w, h, pitch);
+    if (wait)
+        warp_fetch_us_sum += wl_frames_wait(0);
     warp_fetch_frames++;
     amiga_prof_end(30);
     return Lb_SUCCESS;
+}
+
+/* Early present (game loop, SW_WARP): the turn's frame goes to the 68k
+ * right after it is drawn, and the 68k fetches it while the ARM runs the
+ * simulation and waits for the next turn.  Nothing draws into WScreen in
+ * between; the next swap only waits for the fetch to end (and clears). */
+static int warp_early_pending;
+
+void warp_present_early(void)
+{
+    if (warp_early_pending)
+        return;
+    LbMouseOnBeginSwap();
+    if (warp_present(0) == Lb_SUCCESS)
+        warp_early_pending = 1;
+    else
+        LbMouseOnEndSwap();
+}
+
+/** Ends an early present; returns true if there was one. */
+static TbBool warp_early_finish(void)
+{
+    if (!warp_early_pending)
+        return false;
+    amiga_prof_begin(30);
+    warp_fetch_us_sum += wl_frames_wait(0);
+    amiga_prof_end(30);
+    LbMouseOnEndSwap();
+    warp_early_pending = 0;
+    return true;
 }
 
 TbResult LbScreenSwap(void)
 {
     TbResult ret;
 
+    warp_early_finish();
     LbMouseOnBeginSwap();
-    ret = warp_present();
+    ret = warp_present(1);
     LbMouseOnEndSwap();
     return ret;
 }
@@ -366,7 +423,10 @@ TbResult LbScreenSwapClear(TbPixel colour)
 {
     TbResult ret;
 
-    ret = LbScreenSwap();
+    if (warp_early_finish())
+        ret = Lb_SUCCESS;       /* this frame is on the screen already */
+    else
+        ret = LbScreenSwap();
     amiga_prof_begin(31);
     LbScreenClear(colour);
     amiga_prof_end(31);

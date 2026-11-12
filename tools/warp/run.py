@@ -33,13 +33,14 @@ def main():
     ap.add_argument("--amiga2", action="store_true")
     ap.add_argument("--secs", type=float, default=40)
     ap.add_argument("--keep", action="store_true")
+    ap.add_argument("--f8", type=float, default=0, help="press F8 (640x480) after this many seconds")
     # the options of this script first; everything after them goes to the game
     # as it is (argparse would reorder "-q -m 0,1")
     argv = sys.argv[1:]
     mine = []
-    while argv and argv[0] in ("--amiga2", "--keep", "--secs"):
+    while argv and argv[0] in ("--amiga2", "--keep", "--secs", "--f8"):
         mine.append(argv.pop(0))
-        if mine[-1] == "--secs":
+        if mine[-1] in ("--secs", "--f8"):
             mine.append(argv.pop(0))
     a = ap.parse_args(mine)
     a.args = argv
@@ -57,7 +58,16 @@ def main():
     best = ""
     t0 = time.time()
     alive = True
+    f8_done = False
     while time.time() - t0 < a.secs:
+        if a.f8 and not f8_done and time.time() - t0 >= a.f8:
+            try:
+                ag.activate("Syndicate Wars ARM")
+                time.sleep(0.2)
+                ag.key(ar.KEYS["f8"], 100)
+            except Exception:
+                pass
+            f8_done = True
         try:
             rc, out = ag.run("Type RAM:swarm-log.txt")
         except Exception:

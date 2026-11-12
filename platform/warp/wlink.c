@@ -12,7 +12,8 @@ static uint32_t in_len;
 
 static volatile int result_ready;
 static int32_t result_val, result_extra;
-static volatile int frame_done;
+/* frames sent and fetched by the 68k (FRAME / FRAME_DONE, in order) */
+static uint32_t frames_sent, frames_done;
 static uint32_t frame_fetch_us;
 int wl_quit;
 
@@ -27,7 +28,7 @@ void wl_init(const WarpExtEnv *env)
     in_len = 0;
     evq_head = evq_tail = 0;
     result_ready = 0;
-    frame_done = 1;
+    frames_sent = frames_done = 0;
     wl_quit = 0;
 }
 
@@ -92,7 +93,7 @@ static void dispatch(unsigned type, const uint8_t *p, unsigned len)
         break;
     case SWL_FRAME_DONE:
         frame_fetch_us = len >= 4 ? (uint32_t)rd32(p) : 0;
-        frame_done = 1;
+        frames_done++;
         break;
     case SWL_QUIT:
         wl_quit = 1;
@@ -160,14 +161,21 @@ int wl_request(unsigned type, const void *a, unsigned alen, const void *b, unsig
     return result_val;
 }
 
-void wl_frame_begin(void)
+void wl_frame_send(uint32_t buf, unsigned w, unsigned h, uint32_t pitch)
 {
-    frame_done = 0;
+    struct { uint16_t w, h; uint32_t pitch, buf; } fr;
+
+    fr.w = (uint16_t)w;
+    fr.h = (uint16_t)h;
+    fr.pitch = pitch;
+    fr.buf = buf;
+    frames_sent++;
+    wl_send(SWL_FRAME, &fr, sizeof(fr));
 }
 
-uint32_t wl_frame_wait(void)
+uint32_t wl_frames_wait(unsigned max_pending)
 {
-    while (!frame_done) {
+    while (frames_sent - frames_done > max_pending) {
         if (wl_env->stopRequested()) {
             wl_quit = 1;
             break;

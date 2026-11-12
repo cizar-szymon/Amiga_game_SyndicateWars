@@ -233,10 +233,11 @@ static ULONG ms_since(struct DateStamp *a)
       + (now.ds_Tick - a->ds_Tick) * 20L);
 }
 
-static void do_frame(const UBYTE *p)
+static void do_frame(const UBYTE *p, UWORD len)
 {
     UWORD w = rd16(p), h = rd16(p + 2);
     ULONG pitch = rd32(p + 4);
+    ULONG buf = len >= 12 ? rd32(p + 8) : SWL_BUF_SCREEN;
     APTR lock;
     UBYTE *base = NULL;
     ULONG bpr = 0, us = 0;
@@ -249,13 +250,13 @@ static void do_frame(const UBYTE *p)
         if (lock) {
             zxreq();
             if (pitch == w) {
-                rc = extFetch(SWL_BUF_SCREEN, 0, base, w, h, bpr, &xreq);
+                rc = extFetch(buf, 0, base, w, h, bpr, &xreq);
                 us = xreq.boardUs;
             } else {
                 ULONG y;
                 for (y = 0; y < h; y++) {
                     zxreq();
-                    rc = extFetch(SWL_BUF_SCREEN, y * pitch, base + y * bpr, w, 1, bpr, &xreq);
+                    rc = extFetch(buf, y * pitch, base + y * bpr, w, 1, bpr, &xreq);
                     us += xreq.boardUs;
                 }
             }
@@ -413,7 +414,7 @@ static void handle(UWORD type, const UBYTE *p, UWORD len)
         set_palette(p);
         break;
     case SWL_FRAME:
-        do_frame(p);
+        do_frame(p, len);
         break;
     case SWL_FOPEN: do_fopen(p, len); break;
     case SWL_FREAD: do_fread(p); break;

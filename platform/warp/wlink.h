@@ -28,9 +28,11 @@ void wl_poll(void);
 /** Sends a request (a then b as payload) and waits for its RESULT. */
 int wl_request(unsigned type, const void *a, unsigned alen, const void *b, unsigned blen,
   int32_t *extra);
-void wl_frame_begin(void);
-/** Waits for FRAME_DONE; returns the board's fetch time in us. */
-uint32_t wl_frame_wait(void);
+/** Sends FRAME: the 68k fetches w x h bytes, pitch apart, of buffer buf. */
+void wl_frame_send(uint32_t buf, unsigned w, unsigned h, uint32_t pitch);
+/** Waits until at most max_pending frames are not fetched yet; returns
+ * the board's time of the last fetch in us. */
+uint32_t wl_frames_wait(unsigned max_pending);
 int wl_next_event(WlEvent *e);
 void wl_log(const char *text);
 

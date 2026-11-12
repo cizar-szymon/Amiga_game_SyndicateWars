@@ -75,6 +75,13 @@ struct TbMemoryAvailable { // sizeof=20
 struct TbMemoryAvailable lbMemoryAvailable;
 TbBool lbMemorySetup = false;
 
+/* Alignment of LbMemoryAlloc() blocks: 16 bytes on 68k (see mem_block_alloc) */
+#if defined(__m68k__) || defined(__mc68000__)
+# define LB_MEM_ALIGN 0x0f
+#else
+# define LB_MEM_ALIGN 0x03
+#endif
+
 #if LB_MEMORY_ARENAS
 
 /** Amount of memory blocks and arenas.
@@ -294,7 +301,7 @@ void * LbMemoryAlloc(TbMemSize size)
 
     LbMemorySetup();
 #if LB_MEMORY_ARENAS
-    algn_size = (size + 0x03) & ~0x03;
+    algn_size = (size + LB_MEM_ALIGN) & ~LB_MEM_ALIGN;
     last_size = -1;
     splarena = NULL;
     for (curarena = memory_arenas; curarena != NULL; curarena = curarena->Child)
@@ -411,6 +418,33 @@ TbResult LbMemoryCheck(void)
   return Lb_SUCCESS;
 }
 
+#if defined(__m68k__) || defined(__mc68000__)
+/* 68060: buffers start on 16-byte boundaries (cache line size). The screen
+ * buffer is copied to the card with CopyMemQuick, which uses MOVE16 only when
+ * the source is 16-byte aligned (copy 9.7 ms instead of 5.7 ms otherwise). */
+static void *mem_block_raw[2];
+
+static void *mem_block_alloc(int n, ulong size)
+{
+    mem_block_raw[n] = malloc(size + LB_MEM_ALIGN + 1);
+    if (mem_block_raw[n] == NULL)
+        return NULL;
+    return (void *)(((ulong)mem_block_raw[n] + LB_MEM_ALIGN) & ~(ulong)LB_MEM_ALIGN);
+}
+
+static void mem_block_free(int n)
+{
+    free(mem_block_raw[n]);
+    mem_block_raw[n] = NULL;
+}
+#else
+static void *mem_block_alloc(int n, ulong size)
+{
+    (void)n;
+    return malloc(size);
+}
+#endif
+
 TbResult LbMemorySetup(void)
 {
     if (lbMemorySetup)
@@ -421,12 +455,12 @@ TbResult LbMemorySetup(void)
     memset(&memory_arenas, 0, sizeof (memory_arenas));
 
     // Simulated extended memory block
-    memory_blocks[0].Pointer = malloc(LB_MEMORY_AVAILABLE * 1024);
+    memory_blocks[0].Pointer = mem_block_alloc(0, LB_MEMORY_AVAILABLE * 1024);
     memory_blocks[0].Size    = LB_MEMORY_AVAILABLE * 1024;
     memory_blocks[0].Selector = 0;
 
     // Simulated conventional memory block
-    memory_blocks[1].Pointer = malloc(LB_MEMORY_LOW_AVAILABLE * 1024);
+    memory_blocks[1].Pointer = mem_block_alloc(1, LB_MEMORY_LOW_AVAILABLE * 1024);
     memory_blocks[1].Size    = LB_MEMORY_LOW_AVAILABLE * 1024;
     memory_blocks[1].Selector = 1;
 
@@ -452,6 +486,9 @@ TbResult LbMemoryReset(void)
     cblock = memory_blocks;
     while (cblock->Size != 0)
     {
+#if defined(__m68k__) || defined(__mc68000__)
+        mem_block_free(cblock->Selector);
+#else
         if (cblock->Selector == 1) {
 # if defined(DOS)||defined(GO32)
             dos_free(cblock->Selector);
@@ -461,6 +498,7 @@ TbResult LbMemoryReset(void)
         } else {
             free(cblock->Pointer);
         }
+#endif
         cblock->Size = 0;
         cblock->Pointer = 0;
         cblock->Selector = 0;

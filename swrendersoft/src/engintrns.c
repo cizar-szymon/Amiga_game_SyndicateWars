@@ -55,8 +55,14 @@ s32 mul_shift16_sign_pad_lo(s32 ar1, s32 ar2)
     return bw_rotl32(tmp, 16);
 #elif !defined(__i386__)
     /* edx:eax = ar1*ar2; ax = dx; rol 16 - the result is bits 16..47 of the
-     * 64-bit product. */
-    return (s32)(((s64)ar1 * ar2) >> 16);
+     * 64-bit product, (s32)(((s64)ar1 * ar2) >> 16). Built from 16-bit halves
+     * with 32-bit multiplies only, as 64-bit products are slow on m68k
+     * (a library call, and the 68060 traps on 32x32->64 MULS.L). */
+    s32 ah = ar1 >> 16, bh = ar2 >> 16;
+    u32 al = (u32)ar1 & 0xFFFF, bl = (u32)ar2 & 0xFFFF;
+
+    return (s32)(((u32)(ah * bh) << 16) + (u32)(ah * (s32)bl)
+      + (u32)((s32)al * bh) + ((al * bl) >> 16));
 #else
     s32 ret, hi;
     /* The asm overwrites both eax and edx, so both have to be outputs with the

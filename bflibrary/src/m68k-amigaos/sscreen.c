@@ -493,6 +493,14 @@ static TbResult amiga_present(void)
     if (lock == NULL)
         return Lb_FAIL;
     src = lbDisplay.WScreen;
+    {
+        static const UBYTE *logged_src;
+        if (src != logged_src) {
+            logged_src = src;
+            LbWarnLog("present: WScreen %08lx (mod 16 = %lu), VRAM %08lx, bpr %lu\n",
+              (ULONG)src, (ULONG)src & 15, (ULONG)base, bpr);
+        }
+    }
     if ((bpr == w) && ((ULONG)lbDisplay.GraphicsScreenWidth == w))
     {
         // One block: a large CopyMem bursts (55 MB/s on a Warp, WarpBench),

@@ -25,7 +25,7 @@ int BAT_score; /* src\bat.c, 4 bytes */
 ubyte * BAT_screen; /* src\bat.c, 4 bytes */
 int BAT_state; /* src\bat.c, 4 bytes */
 short IPXHandler[2]; /* struct TbIPXHandler * IPXHandler, src\network.c */
-short IPXPlayer[23]; /* struct TbIPXPlayer IPXPlayer, src\network.c */
+short IPXPlayer[135]; /* struct TbIPXPlayer IPXPlayer, src\network.c */
 ulong NetTimeoutTicks = 4294967295;
 struct MovingPoint SCANNER_arcpoint[SCANNER_ARC_COUNT * SCANNER_POINTS_PER_ARC]; /* src\scanner.h, 320 bytes */
 short SCANNER_bbpadds[64]; /* struct BbpAdds SCANNER_bbpadds[SCANNER_BBP_ADDS_COUNT], src\scanner.c */
@@ -55,7 +55,7 @@ int bat_unknvalB_max; /* src\bat.c, 4 bytes */
 int bat_unknvalB_min; /* src\bat.c, 4 bytes */
 ubyte byte_1C844F; /* src\lvobjctv.h, 1 bytes */
 ubyte byte_1DD8F8; /* src\weapon.c, 4 bytes */
-short com_dev[0]; /* struct ComHandlerInfo com_dev[4], src\network.c */
+short com_dev[232]; /* struct ComHandlerInfo com_dev[4], src\network.c */
 ushort crater_unkn_texture_flags; /* src\bigmap.h, 2 bytes */
 short current_level; /* src\game.h, 4 bytes */
 ushort current_map; /* src\game.h, 2 bytes */
@@ -64,7 +64,7 @@ ushort data_1c4300; /* src\game.c, 2 bytes */
 ushort data_1c8468; /* src\game.c, 2 bytes */
 s32 data_1c84f4[17]; /* src\vehtraffic.c, 4 bytes */
 s32 data_1dd91c; /* src\vehtraffic.h, 4 bytes */
-short datagram_backup[2]; /* struct IPXDatagramBackup datagram_backup[8], src\network.c */
+short datagram_backup[2200]; /* struct IPXDatagramBackup datagram_backup[8], src\network.c */
 s32 dword_152E38[5] = {-1, -1, -1, -1, -1};
 ubyte * dword_1C6DE4; /* src\game_sprts.h, 4 bytes */
 ubyte * dword_1C6DE8; /* src\game_sprts.h, 4 bytes */
@@ -88,14 +88,17 @@ short link__MapColVectEmptyHead; /* src\pathtrig.c, 10 bytes */
 ubyte low_trans_grey_bright_limit[256]; /* swrendersoft\include\app_sprite.h, 256 bytes */
 ubyte map_crater_first; /* src\bmcrater.c, 1 bytes */
 ubyte map_crater_next; /* src\bmcrater.c, 1 bytes */
-short map_craters[1]; /* struct MapCreater map_craters[MAP_CRATERS_COUNT], src\bmcrater.c */
+short map_craters[512]; /* struct MapCreater map_craters[MAP_CRATERS_COUNT], src\bmcrater.c */
 ubyte master_glare[][2] = {0, 1, 1, 2, 3, 1, 4, 2, 6, 2, 0, 0, 8, 2, 10, 2, 12, 4, 16, 2, 18, 1, 19, 2, 21, 4, 25, 2, 27, 2, 0, 0, 0, 0, 0, 0, 29, 2, 0, 0, 0, 0, 31, 1, 32, 2, 34, 2, 36, 2, 0, 0, 0, 0, 0, 0, 38, 1, 0, 0, 0, 0, 39, 2};
 short netunkst_1E81E0[514]; /* struct TbUnknCommSt netunkst_1E81E0, src\network.c */
 char panel_objective_text[360]; /* src\hud_panel.c, 360 bytes */
 ubyte player_loggon; /* src\network.c, 3 bytes */
-short redo_scanner[1]; /* struct rectangle redo_scanner[128], src\scanner.c */
+short redo_scanner[256]; /* struct rectangle redo_scanner[128], src\scanner.c */
 s32 redo_scanner_first; /* src\scanner.c, 4 bytes */
 s32 redo_scanner_last; /* src\scanner.c, 4 bytes */
+short route_fwd_path[1034]; /* struct Path route_fwd_path, src\pathtrig.c */
+s32 route_heap[257]; /* src\pathtrig.c, 0 bytes */
+s32 route_heap_end; /* src\pathtrig.c, 0 bytes */
 short sample_table[2]; /* struct SampleTable * sample_table, src\sound.c */
 long samples_in_bank; /* src\sound.c, 4 bytes */
 ubyte save_crypto_data_state[3]; /* src\game_save.c, 1 bytes */

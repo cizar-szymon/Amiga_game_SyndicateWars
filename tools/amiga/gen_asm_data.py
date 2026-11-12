@@ -36,12 +36,16 @@ def asm_data_image(names):
     """Return {name: (bytes or None, reason)} from the .sx data sections."""
     want = set(names)
     res = {}
+    # bytes of each symbol up to the next GLOBAL label: a local label inside
+    # an array of structs is a field, not the end of the array
+    span_len = {}
     for f in inv.ASM_FILES:
         text = open(os.path.join(inv.ROOT, f), encoding="latin-1").read()
         text = re.sub(r"/\*.*?\*/", lambda mc: "\n" * mc.group(0).count("\n"), text, flags=re.S)
         lines = text.split("\n")
         section = "text"
         cur = None
+        span = None
         for line in lines:
             line = re.sub(r"/\*.*?\*/", "", line)
             line = line.split("#")[0] if not ('"' in line) else line
@@ -50,6 +54,7 @@ def asm_data_image(names):
             if m:
                 section = m.group(2) or m.group(1)
                 cur = None
+                span = None
                 continue
             m = inv.RE_GLOBAL.match(line) or inv.RE_LABEL.match(line)
             if m:
@@ -57,10 +62,15 @@ def asm_data_image(names):
                 cur = name if (name in want and section != "text") else None
                 if cur is not None:
                     res[cur] = [bytearray(), None]
+                    span = cur
+                    span_len[span] = 0
+                elif inv.RE_GLOBAL.match(line) or name in want:
+                    span = None
                 continue
-            if cur is None or not s:
+            if (cur is None and span is None) or not s:
                 continue
-            img = res[cur]
+            img = res[cur] if cur is not None else [bytearray(), None]
+            before = len(img[0])
             m = re.match(r"\.(byte|short|word|long|int|fill|space|zero|skip|ascii|string|asciz|align)\b\s*(.*)", s)
             if not m:
                 img[1] = f"unknown line: {s}"
@@ -95,6 +105,10 @@ def asm_data_image(names):
                     pass   # alignment between symbols, not part of the data
             except ValueError:
                 img[1] = f"symbolic value: {s}"
+            if span is not None:
+                span_len[span] += len(img[0]) - before
+    for n in res:
+        res[n].append(span_len.get(n, len(res[n][0])))
     return res
 
 
@@ -163,7 +177,7 @@ def main():
            '#include "asm_data_types.h"', ""]
     manual = []
     for n in sorted(names):
-        img, err = data[n]
+        img, err, span_len = data[n]
         if n not in decls:
             manual.append(f"{n}: no extern declaration ({len(img)} bytes)")
             continue
@@ -173,7 +187,12 @@ def main():
         if zero and where.endswith(".c") and typ.startswith("struct"):
             # type private to a .c file: same size, zeroed
             # short elements: word alignment (the maximum of the Amiga hunk format)
-            out.append(f"short {n}[{(len(img) + 1) // 2}]; /* {decl}, {where} */")
+            size = len(img)
+            if "*" not in typ:
+                # a struct or an array of structs: up to the next global
+                # symbol (local labels inside are its fields)
+                size = max(size, span_len)
+            out.append(f"short {n}[{(size + 1) // 2}]; /* {decl}, {where} */")
             continue
         if zero and dims == "[]":
             # "T n[];" without an initializer is a 1-element array: give the

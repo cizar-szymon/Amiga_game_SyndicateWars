@@ -14,7 +14,7 @@ Sposób portowania według `PORTING_PLAN.md`: **D (port ze źródeł)** z etapem
 | A0. Kolejność konwersji | ⏳ do akceptacji użytkownika |
 | A0. Test grywalności wersji referencyjnej (użytkownik) | ✅ 11.11.2026 „działa, gra się dobrze” |
 | A1. Konwersja asm → C: wczytanie i rysowanie misji 1 | ✅ ~35 funkcji, fncheck 0 różnic |
-| A1. Konwersja asm → C: symulacja świata (process_things) | ⏳ 12.11.2026: 15 z 29 (bez dźwięku), fncheck 0 różnic na nagraniu misji 1 (poza stanem sterownika dźwięku) |
+| A1. Konwersja asm → C: symulacja świata (process_things) | ⏳ 12.11.2026: 15 z 29 (bez dźwięku) + 8 funkcji wyszukiwania ścieżek, fncheck 0 różnic na nagraniu misji 1 (poza stanem sterownika dźwięku) |
 | A2. Kolejność bajtów: mapa, poziom, prymitywy, sprite'y, animacje, FLI, WAD | ✅ (misja 1) |
 | B1. Build Amigi (Docker, bebbo gcc), warstwa bflibrary m68k-amigaos | ✅ |
 | B1. Misja 1 na Amidze | ✅ 12.11.2026: Amiga 1 (Warp 1260) ~5 kl./s, obraz zgodny z PC |
@@ -223,3 +223,17 @@ liczb < 2^31 obcięcie ilorazu `double` = iloraz całkowity), z wersją bez FPU.
 - Amiga 2 po tej funkcji: 78,1 ms/turę ze slotami, `things` 14,9 ms. Nowe trafiane zaślepki (ludzie
   idą teraz po ścieżkach): `build_navigate_path`, `two4_line_intersection`, `create_scale_effect`,
   `process_im_shoved`; dalej `people_intel`, `process_gate1`, `BAT_unknsub_20` i dźwięk.
+- **Wyszukiwanie ścieżek** (`049612d0`, 0 różnic): `two4_line_intersection`, `triangle_contains8`,
+  `triangle_findSE8`, `pointed_at8`, `route_to_path` (+ `edge_points8`, `fov_region`),
+  `ma_triangle_route_3` (+ przeszukiwanie z kopcem `triangle_route_do_unkn5`; `unkn6` to ten sam kod),
+  `path_init8_thing`, `tri_path_init8`. Wewnętrzne etykiety asm wołane z asm: eksport `ASM_*` i most
+  `ac_*` (`conf/wrappers_game.conf`). Kopiec `heap`: wierzchołek to `heap[1]` (`data_1c30c0` w asm).
+- Zostało do nawigacji: `build_navigate_path` (na Amidze nadal zaślepka – nowa nawigacja jeszcze
+  nie pracuje), `use_nav_data`, `fatter_than_nothing`, `set_xz_for_quad210/_unkn03`.
+- **Błąd portu (Amiga): za małe struktury z danych asm.** `gen_asm_data.py` kończył dane symbolu na
+  każdej etykiecie, także wewnętrznej (pole struktury), więc `map_craters` miało 2 bajty zamiast 1024
+  (kratery po wybuchach nadpisywały zmienne za tablicą), `redo_scanner` 2 z 512, `datagram_backup`
+  4 z 4400, `com_dev` 0, `IPXPlayer` 46 z 271. Teraz struktura dostaje rozmiar do następnego symbolu
+  globalnego (`6ba54116`).
+- `tools/amiga/offsets.sh -size` nie działa (opcja tylko w opisie).
+- Amiga 1 po tych zmianach: 78,9 ms/turę (sloty), `things` 14,9 ms; zrzut poprawny.

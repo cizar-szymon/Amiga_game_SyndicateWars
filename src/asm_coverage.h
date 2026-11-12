@@ -21,8 +21,16 @@ enum AsmCovPhase {
 
 #ifdef SW_ASM_COVERAGE
 void asm_cov_phase(int phase);
+#elif defined(SW_AMIGA)
+/* Amiga port bring-up: trace of the game loop phases (platform/amiga) */
+void amiga_phase_trace(int phase);
+#define asm_cov_phase(phase) amiga_phase_trace(phase)
+#define AMIGA_STEP(n) amiga_phase_trace(100 + (n))
 #else
 #define asm_cov_phase(phase) ((void)0)
+#endif
+#ifndef AMIGA_STEP
+#define AMIGA_STEP(n) ((void)0)
 #endif
 
 #endif

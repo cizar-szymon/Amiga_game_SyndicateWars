@@ -17,6 +17,7 @@
  */
 /******************************************************************************/
 #include "lvdraw3d.h"
+#include "asm_coverage.h"
 
 #include <assert.h>
 #include <limits.h>
@@ -488,8 +489,37 @@ void engine_draw_things(int pos_beg_x, int pos_beg_z, int rend_beg_x, int rend_b
                     }
                 }
                 thing = p_mapel->Child;
+#if defined(SW_AMIGA)
+                int amiga_guard = 0;
+#endif
                 while (thing != 0)
                 {
+#if defined(SW_AMIGA)
+                    // bring-up check: endless mapwho chains
+                    if (++amiga_guard > 2000) {
+                        static int amiga_reports = 0;
+                        if (amiga_reports++ < 4) {
+                            ThingIdx t2 = p_mapel->Child;
+                            int k;
+                            LOGERR("mapwho chain loops at tile (%d,%d), first %d",
+                              MAPCOORD_TO_TILE(pos_x), MAPCOORD_TO_TILE(pos_z), (int)t2);
+                            for (k = 0; (k < 6) && (t2 != 0) && (t2 > -STHINGS_LIMIT) && (t2 < THINGS_LIMIT); k++) {
+                                if (t2 > 0) {
+                                    LOGERR("  thing %d type %d sub %d next %d X %ld Z %ld", (int)t2,
+                                      (int)things[t2].Type, (int)things[t2].SubType, (int)things[t2].Next,
+                                      (long)things[t2].X, (long)things[t2].Z);
+                                    t2 = things[t2].Next;
+                                } else {
+                                    LOGERR("  sthing %d type %d sub %d next %d X %ld Z %ld", (int)t2,
+                                      (int)sthings[t2].Type, (int)sthings[t2].SubType, (int)sthings[t2].Next,
+                                      (long)sthings[t2].X, (long)sthings[t2].Z);
+                                    t2 = sthings[t2].Next;
+                                }
+                            }
+                        }
+                        break;
+                    }
+#endif
                     if (thing > 0)
                     {
                         struct Thing *p_thing;
@@ -1213,12 +1243,15 @@ void engine_draw_whole_screen_top_down(void)
     int pos_beg_x, pos_beg_z;
     int tlcount_x, tlcount_z;
 
+    AMIGA_STEP(21);
     camera_setup_view(&pos_beg_x, &pos_beg_z, &rend_beg_x, &rend_beg_z, &tlcount_x, &tlcount_z);
+    AMIGA_STEP(22);
 
     if ((ingame.Flags & GamF_RenderScene) != 0)
     {
         engine_draw_things(pos_beg_x, pos_beg_z, rend_beg_x, rend_beg_z, tlcount_x, tlcount_z);
     }
+    AMIGA_STEP(23);
 
     if ((ingame.Flags & GamF_RenderScene) != 0)
     {
@@ -1230,6 +1263,7 @@ void engine_draw_whole_screen_top_down(void)
             lvdraw_do_floor();
         }
     }
+    AMIGA_STEP(24);
 
     if (word_1552F8 != 36 && !byte_1C8444)
     {
@@ -1244,8 +1278,11 @@ void engine_draw_whole_screen_top_down(void)
     if ((ingame.Flags & GamF_RenderScene) != 0)
     {
         draw_explode();
+        AMIGA_STEP(25);
         draw_screen();
+        AMIGA_STEP(26);
         draw_hud(p_locplayer->DirectControl[0]);
+        AMIGA_STEP(27);
         if (in_network_game)
             draw_netplayer_name_text_over_thing();
         if (debug_hud_collision)

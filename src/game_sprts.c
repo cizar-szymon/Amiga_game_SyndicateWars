@@ -132,6 +132,8 @@ static inline TbResult load_sprites_with_detail(ubyte *p_dat, ubyte **pp_dat_end
 
     sprintf(locstr, "%s/%s%hd-%hd.tab", dir, name, styleno, detail);
     len = LbFileLoadAt(locstr, p_spr);
+    if (len != -1)
+        LbSpriteTabFixEndian((struct TbSprite *)p_spr, (struct TbSprite *)(p_spr + len));
     if (len == -1) {
         ret = Lb_FAIL;
         LbMemorySet(p_spr, 0, p_spr_end - p_spr);
@@ -529,6 +531,8 @@ TbResult load_multicolor_sprites(const char *dir)
     assert(m_sprites_data_end + 512 >= m_sprites_data + len);
     sprintf(locstr, "%s/mspr-%d.tab", dir, ingame.TrenchcoatPreference);
     len = LbFileLoadAt(locstr, m_sprites);
+    if (len != -1)
+        LbSpriteTabFixEndian(m_sprites, (struct TbSprite *)((ubyte *)m_sprites + len));
     if (len == -1) {
         ret = Lb_FAIL;
         len = 128 * sizeof(struct TbSprite);

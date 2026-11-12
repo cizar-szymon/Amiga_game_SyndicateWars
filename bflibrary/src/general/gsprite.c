@@ -19,6 +19,7 @@
  */
 /******************************************************************************/
 #include "bfsprite.h"
+#include "bfendian.h"
 
 #include "privbflog.h"
 
@@ -59,6 +60,24 @@ TbResult LbSpriteSetupAll(TbSetupSprite t_setup[])
     }
     LOGSYNC("initiated %d SetupSprite lists", idx);
     return Lb_SUCCESS;
+}
+
+void LbSpriteTabFixEndian(TbSprite *start, const TbSprite *end)
+{
+#if LB_BIG_ENDIAN
+    struct TbSprite *sprt;
+
+    for (sprt = start; sprt < end; sprt++)
+    {
+        sprt->Data = (TbSpriteData)lb_swap32((u32)sprt->Data);
+#ifdef SPRITE_FORMAT_V2
+        LE_FIX16(sprt->SWidth);
+        LE_FIX16(sprt->SHeight);
+#endif
+    }
+#else
+    (void)start; (void)end;
+#endif
 }
 
 TbResult LbSpriteReset(TbSprite *start, const TbSprite *end, const unsigned char *data)

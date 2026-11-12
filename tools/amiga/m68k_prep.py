@@ -100,7 +100,8 @@ def transform(text):
             end += 1
         body = text[m.end():close]
         parts = split_top(body, ":")
-        code = "".join(re.findall(r'"((?:[^"\\]|\\.)*)"', parts[0]))
+        code = " ".join(re.findall(r'"((?:[^"\\]|\\.)*)"', parts[0]))
+        code = code.replace("\\n", " ").replace("\\t", " ")
         call = re.search(r"\b(?:call|jmp)\s+(\w+)", code)
         name = call.group(1) if call else "inline:" + code.strip().split("\\n")[0][:40]
         assigns = []

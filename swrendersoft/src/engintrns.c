@@ -53,6 +53,10 @@ s32 mul_shift16_sign_pad_lo(s32 ar1, s32 ar2)
     tmp = (ar1 * ar2) & 0xFFFF0000;
     tmp |= ((ar1 * (s64)ar2) >> 32) & 0xFFFF;
     return bw_rotl32(tmp, 16);
+#elif !defined(__i386__)
+    /* edx:eax = ar1*ar2; ax = dx; rol 16 - the result is bits 16..47 of the
+     * 64-bit product. */
+    return (s32)(((s64)ar1 * ar2) >> 16);
 #else
     s32 ret, hi;
     /* The asm overwrites both eax and edx, so both have to be outputs with the

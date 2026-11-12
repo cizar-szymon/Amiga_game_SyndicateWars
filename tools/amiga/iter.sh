@@ -17,8 +17,10 @@ else
   GDIR="WorkSD:Games/SyndWars"
 fi
 if [ "$2" != "--no-build" ]; then
-  sh tools/amiga/build_amiga.sh 2>&1 | tail -1
-  [ -f build/amiga/SyndWars ] || exit 1
+  rm -f build/amiga/SyndWars
+  sh tools/amiga/build_amiga.sh > build/amiga/build.log 2>&1
+  tail -1 build/amiga/build.log
+  [ -f build/amiga/SyndWars ] || { tail -15 build/amiga/build.log; exit 1; }
 fi
 if [ "$TARGET" = "winuae" ]; then
   cp build/amiga/SyndWars "Syndicate Wars/syndwarsfx/SyndWars" || exit 1
@@ -37,4 +39,4 @@ if [ -n "$SHOT" ]; then $AR shot "$SHOT" > /dev/null; fi
 $AR run "Type RAM:sw-out.txt" | tail -${LINES_OUT:-25}
 echo "--- stubs called:"
 $AR run "Type RAM:SyndWars-stubs.txt" | head -${LINES_STUBS:-40}
-$AR stop SyndWars > /dev/null 2>&1
+[ -n "$NOSTOP" ] || $AR stop SyndWars > /dev/null 2>&1

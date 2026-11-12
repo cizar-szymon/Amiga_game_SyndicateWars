@@ -17,6 +17,9 @@
  */
 /******************************************************************************/
 #include "lvfiles.h"
+#include "lvendian.h"
+#include "bfendian.h"
+#include "data_layouts.h"
 
 #include <assert.h>
 #include <string.h>
@@ -214,6 +217,7 @@ ulong load_level_pc_handle(TbFileHandle lev_fh)
     mech_initialized = 0;
     fmtver = 0;
     LbFileRead(lev_fh, &fmtver, sizeof(u32));
+    LE_FIX32(fmtver);
 
     if (fmtver >= 1)
     {
@@ -224,6 +228,7 @@ ulong load_level_pc_handle(TbFileHandle lev_fh)
 
         count = 0;
         LbFileRead(lev_fh, &count, 2);
+        LE_FIX16(count);
 
         LOGSYNC("Level fmtver=%lu n_things=%hd", fmtver, count);
         for (i = 0; i < count; i++)
@@ -239,7 +244,10 @@ ulong load_level_pc_handle(TbFileHandle lev_fh)
             if (fmtver >= 13) {
                 assert(sizeof(struct Thing) == 168);
                 LbFileRead(lev_fh, p_thing, sizeof(struct Thing));
+                thing_fix_endian(p_thing, 1);
             } else {
+                if (LB_BIG_ENDIAN)
+                    LOGERR("Old level format %lu not converted on big endian", (ulong)fmtver);
                 struct ThingOldV9 s_oldthing;
                 assert(sizeof(s_oldthing) == 216); // the sizeof(Thing) was 216 since fmtver=2
                 LbFileRead(lev_fh, &s_oldthing, sizeof(s_oldthing));
@@ -331,6 +339,7 @@ ulong load_level_pc_handle(TbFileHandle lev_fh)
                     assert(next_local_mat < LOCAL_MATS_COUNT);
                     matx = next_local_mat++;
                     LbFileRead(lev_fh, &local_mats[matx], sizeof(struct M33));
+                    lb_le_fix_struct(&local_mats[matx], 1, sizeof(struct M33), LAYOUT_M33);
                     p_thing->U.UVehicle.MatrixIndex = matx;
                 }
 
@@ -389,6 +398,7 @@ ulong load_level_pc_handle(TbFileHandle lev_fh)
         }
     }
     LbFileRead(lev_fh, &next_command, sizeof(ushort));
+    LE_FIX16(next_command);
     limit = get_memory_ptr_allocated_count((void **)&game_commands);
     if ((limit >= 0) && (next_command > limit)) {
         LOGERR("Restricting \"%s\", wanted %d, limit %ld", "game_commands", (int)next_command, limit);
@@ -396,6 +406,7 @@ ulong load_level_pc_handle(TbFileHandle lev_fh)
     }
     assert(sizeof(struct Command) == 32);
     LbFileRead(lev_fh, game_commands, sizeof(struct Command) * next_command);
+    lb_le_fix_struct(game_commands, next_command, sizeof(struct Command), LAYOUT_Command);
 
     if (fmtver >= 2)
     {
@@ -410,6 +421,7 @@ ulong load_level_pc_handle(TbFileHandle lev_fh)
     {
         LbFileRead(lev_fh, engine_mem_alloc_ptr + engine_mem_alloc_size - 1320 - 33, 1320);
         LbFileRead(lev_fh, war_flags, 32 * sizeof(struct WarFlag));
+        lb_le_fix_struct(war_flags, 32, sizeof(struct WarFlag), LAYOUT_WarFlag);
     }
     for (k = 0; k < PEOPLE_GROUPS_LIMIT; k++)
     {
@@ -422,8 +434,10 @@ ulong load_level_pc_handle(TbFileHandle lev_fh)
     if (fmtver >= 3)
     {
         LbFileRead(lev_fh, &word_1531E0, sizeof(ushort));
+        LE_FIX16(word_1531E0);
         LbFileRead(lev_fh, engine_mem_alloc_ptr + engine_mem_alloc_size - 32000, 15 * word_1531E0);
         LbFileRead(lev_fh, &unkn3de_len, sizeof(ushort));
+        LE_FIX16(unkn3de_len);
         LbFileRead(lev_fh, engine_mem_alloc_ptr + engine_mem_alloc_size - 32000, unkn3de_len);
     }
     LOGSYNC("Level fmtver=%lu n_command=%hu word_1531E0=%hu unkn3de_len=%hu",
@@ -431,10 +445,14 @@ ulong load_level_pc_handle(TbFileHandle lev_fh)
     if (fmtver >= 4)
     {
         ulong count;
+        ushort count16;
         ThingIdx thing;
 
-        count = 0;
-        LbFileRead(lev_fh, &count, 2);
+        // the 2 bytes are read into a 16-bit variable (byte order)
+        count16 = 0;
+        LbFileRead(lev_fh, &count16, 2);
+        LE_FIX16(count16);
+        count = count16;
         for (i = count; i > 0; i--)
         {
             struct SimpleThing loc_thing;
@@ -444,6 +462,7 @@ ulong load_level_pc_handle(TbFileHandle lev_fh)
             p_thing = &sthings[thing];
             memcpy(&loc_thing, p_thing, 60);
             LbFileRead(lev_fh, p_thing, 60);
+            sthing_fix_endian(p_thing, 1);
 
             if (!is_level_stored_sthing(p_thing))
             {
@@ -496,6 +515,7 @@ ulong load_level_pc_handle(TbFileHandle lev_fh)
     if (fmtver >= 6)
     {
         LbFileRead(lev_fh, &game_level_unique_id, 2);
+        LE_FIX16(game_level_unique_id);
         if (game_level_unique_id < 1000)
             game_level_unique_id = 1000;
         if (game_level_unique_id > 9000)
@@ -504,8 +524,11 @@ ulong load_level_pc_handle(TbFileHandle lev_fh)
 
     if (fmtver >= 7) {
         LbFileRead(lev_fh, &next_used_lvl_objective, sizeof(ushort));
+        LE_FIX16(next_used_lvl_objective);
         assert(sizeof(struct Objective) == 32);
         n = LbFileRead(lev_fh, game_used_lvl_objectives, sizeof(struct Objective) * next_used_lvl_objective);
+        lb_le_fix_struct(game_used_lvl_objectives, next_used_lvl_objective,
+          sizeof(struct Objective), LAYOUT_Objective);
         if (n < (int)sizeof(struct Objective) * next_used_lvl_objective)
             LOGWARN("Array used_lvl_objectives truncated, got %d bytes", n);
     } else {
@@ -522,12 +545,14 @@ ulong load_level_pc_handle(TbFileHandle lev_fh)
         // but we don't know the speciifc fmtver range for that
         assert(sizeof(struct LevelMisc) == 22);
         n = LbFileRead(lev_fh, game_level_miscs, sizeof(struct LevelMisc) * 200);
+        lb_le_fix_struct(game_level_miscs, 200, sizeof(struct LevelMisc), LAYOUT_LevelMisc);
         if (n < (int)sizeof(struct LevelMisc) * 200)
             LOGWARN("Array level_miscs truncated, got %d bytes", n);
     }
 
     if (fmtver >= 16) {
         n = LbFileRead(lev_fh, &engn_cam_yaw, 4);
+        LE_FIX32(engn_cam_yaw);
         if (n < 4)
             LOGWARN("Field anglexz truncated, got %d bytes", n);
     }
@@ -1538,6 +1563,7 @@ void load_mad_pc_buffer(ubyte *mad_ptr, long rdsize)
     short i;
 
     shut_h = 100;
+    mad_buffer_fix_endian(mad_ptr, rdsize);
     fmtver = *(u32 *)mad_ptr;
     mad_ptr += 4;
 

@@ -19,6 +19,8 @@
 /******************************************************************************/
 #include <strings.h>
 #include "bfdata.h"
+#include <string.h>
+#include "bfsprite.h"
 
 #include "bfmemory.h"
 #include "bffile.h"
@@ -99,6 +101,13 @@ short LbDataLoad(struct TbLoadFiles *load_file)
     }
     if (load_file->SEnd != NULL)
       *(load_file->SEnd) = *(load_file->Start) + load_file->SLength;
+    // Sprite tables are little endian files
+    if (fname[0] != '*') {
+        size_t n = strlen(fname);
+        if ((n > 4) && (strcasecmp(fname + n - 4, ".tab") == 0))
+            LbSpriteTabFixEndian((TbSprite *)*(load_file->Start),
+              (TbSprite *)(*(load_file->Start) + load_file->SLength));
+    }
     return 1;
 }
 

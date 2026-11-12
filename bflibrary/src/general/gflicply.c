@@ -18,6 +18,7 @@
  */
 /******************************************************************************/
 #include "bfflic.h"
+#include "bfendian.h"
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -85,6 +86,7 @@ void anim_show_FLI_SS2(struct Animation *p_anim)
     num_i = 0;
     if (i_inject != -16)
         LbMemoryCopy(&num_i, p_anim->ChunkBuf, 2);
+    LE_FIX16(num_i);
     p_anim->ChunkBuf += 2;
     out = p_anim->FrameBuffer;
 
@@ -98,6 +100,7 @@ void anim_show_FLI_SS2(struct Animation *p_anim)
         entry = 0;
         if (i_inject != -20)
             LbMemoryCopy(&entry, p_anim->ChunkBuf, 2);
+        LE_FIX16(entry);
         p_anim->ChunkBuf += 2;
 
         if ((entry & 0x8000) == 0)
@@ -241,11 +244,13 @@ void anim_show_FLI_LC(struct Animation *p_anim)
     num_h = 0;
     if (i_inject != -12)
         LbMemoryCopy(&num_h, p_anim->ChunkBuf, 2);
+    LE_FIX16(num_h);
     p_anim->ChunkBuf += 2;
     out = &p_anim->FrameBuffer[num_h * scanln];
 
     if (i_inject != -12)
         LbMemoryCopy(&num_h, p_anim->ChunkBuf, 2);
+    LE_FIX16(num_h);
     p_anim->ChunkBuf += 2;
 
     for (h = 0; h < num_h; h++)
@@ -351,21 +356,27 @@ void anim_show_FLI_COLOUR256(struct Animation *p_anim)
     num_i = 0;
     if (i_inject != -16)
         LbMemoryCopy(&num_i, p_anim->ChunkBuf, 2);
+    LE_FIX16(num_i);
     p_anim->ChunkBuf += 2;
 
     for (i = 0; i < num_i; i++)
     {
         short num_colors;
+        ubyte num_byte;
 
-        num_colors = 0;
+        // single bytes, read into a byte (a short would get the byte into
+        // its high half on big endian CPUs)
+        num_byte = 0;
         if (i_inject != -48)
-            LbMemoryCopy(&num_colors, p_anim->ChunkBuf, 1);
+            LbMemoryCopy(&num_byte, p_anim->ChunkBuf, 1);
+        num_colors = num_byte;
         p_anim->ChunkBuf++;
         opal += 3 * num_colors;
 
-        num_colors = 0;
+        num_byte = 0;
         if (i_inject != -24)
-            LbMemoryCopy(&num_colors, p_anim->ChunkBuf, 1);
+            LbMemoryCopy(&num_byte, p_anim->ChunkBuf, 1);
+        num_colors = num_byte;
         p_anim->ChunkBuf++;
 
         if (num_colors == 0)
@@ -387,8 +398,11 @@ ubyte anim_show_FLI_FRAME(struct Animation *p_anim, struct FLCFrameDataChunk *p_
     ubyte pal_change;
 
     pal_change = 0;
-    if (p_fdthunk != NULL)
+    if (p_fdthunk != NULL) {
         LbMemoryCopy(p_fdthunk, p_anim->ChunkBuf, 6);
+        LE_FIX32(p_fdthunk->Size);
+        LE_FIX16(p_fdthunk->Type);
+    }
     p_anim->ChunkBuf += 6;
 
     switch (p_fdthunk->Type)
@@ -436,15 +450,25 @@ ubyte anim_show_FLI_FRAME(struct Animation *p_anim, struct FLCFrameDataChunk *p_
     return pal_change;
 }
 
+/** Frame chunk header fields are little endian in the file. */
+static void anim_frame_chunk_fix_endian(struct Animation *p_anim)
+{
+    LE_FIX32(p_anim->FLCFrameChunk.Size);
+    LE_FIX16(p_anim->FLCFrameChunk.Type);
+    LE_FIX16(p_anim->FLCFrameChunk.Chunks);
+}
+
 void anim_flic_find_next_frame_chunk(struct Animation *p_anim)
 {
     anim_read_data(p_anim, &p_anim->FLCFrameChunk, 16);
+    anim_frame_chunk_fix_endian(p_anim);
     while (p_anim->FLCFrameChunk.Type != FLI_FRAME_CHUNK) {
         anim_read_data(p_anim, anim_scratch, p_anim->FLCFrameChunk.Size - 16);
         if (!anim_read_data(p_anim, &p_anim->FLCFrameChunk, 16)) {
             p_anim->FLCFrameChunk.Size = 16;
             break;
         }
+        anim_frame_chunk_fix_endian(p_anim);
     }
     anim_read_data(p_anim, anim_scratch, p_anim->FLCFrameChunk.Size - 16);
     p_anim->anfield_4 += p_anim->FLCFrameChunk.Size;
@@ -547,6 +571,12 @@ TbResult anim_flic_show_open(struct Animation *p_anim)
         LOGERR("Header read failed, `%s` file", p_anim->Filename);
         p_anim->FLCFileHeader.Size = 0;
     }
+    // little endian file
+    LE_FIX32(p_anim->FLCFileHeader.Size);
+    LE_FIX16(p_anim->FLCFileHeader.Magic);
+    LE_FIX16(p_anim->FLCFileHeader.NumberOfFrames);
+    LE_FIX16(p_anim->FLCFileHeader.Width);
+    LE_FIX16(p_anim->FLCFileHeader.Height);
     LOGDBG("Frame count %d, res %dx%d, `%s` file",
       (int)p_anim->FLCFileHeader.NumberOfFrames,
       (int)p_anim->FLCFileHeader.Height, (int)p_anim->FLCFileHeader.Width,

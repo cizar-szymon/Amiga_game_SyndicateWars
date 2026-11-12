@@ -137,9 +137,15 @@
 #include "asm_coverage.h"
 #include "bmcrater.h"
 #include "fncheck.h"
+#include "bfendian.h"
+#include "data_layouts.h"
 #include "people.h"
 
 extern struct Animation animations[2];
+
+#if defined(SW_AMIGA)
+static void amiga_check_mapwho(const char *where);
+#endif
 #include "game_data.h"
 #include "game_speed.h"
 #include "hud_target.h"
@@ -530,6 +536,13 @@ void bang_set_detail(int a1)
 void debug_trace_setup(int place)
 {
     LOGDBG("reached place %d", place);
+#if defined(SW_AMIGA)
+    {
+        char where[32];
+        snprintf(where, sizeof(where), "trace place %d", place);
+        amiga_check_mapwho(where);
+    }
+#endif
 }
 
 /** Remains of some Bf debug stuff.
@@ -775,8 +788,9 @@ void load_level_wrap(short level, short missi, ubyte reload)
         mem_game[34].N = 3100;
     }
     read_primveh_obj(primvehobj_fname, 1);
-
+    amiga_check_mapwho("before load_level_pc");
     load_level_pc(level, missi, reload);
+    amiga_check_mapwho("after load_level_pc");
 
     // No idea what exactly pressing F during level load does
     if (is_key_pressed(KC_F, KMod_DONTCARE))
@@ -985,13 +999,36 @@ void unkn_lights_processing(void)
       unkn_lights_processing_c());
 }
 
+#if defined(SW_AMIGA)
+/** Amiga port bring-up: count map tiles whose mapwho head is not a valid index. */
+static void amiga_check_mapwho(const char *where)
+{
+    int i, bad, first;
+
+    bad = 0;
+    first = -1;
+    for (i = 0; i < MAP_TILE_WIDTH * MAP_TILE_HEIGHT; i++) {
+        short c = game_my_big_map[i].Child;
+        if ((c >= THINGS_LIMIT) || (c <= -STHINGS_LIMIT)) {
+            if (first < 0) first = i;
+            bad++;
+        }
+    }
+    LOGWARN("%s: %d bad mapwho heads (first tile %d)", where, bad, first);
+}
+#else
+#define amiga_check_mapwho(where) ((void)0)
+#endif
+
 void change_current_map(ushort mapno)
 {
     LbMouseChangeSprite(NULL);
     current_map = mapno;
     init_things();
     load_mad_pc(mapno);
+    amiga_check_mapwho("after load_mad_pc");
     fill_floor_textures();
+    amiga_check_mapwho("after fill_floor_textures");
 
     if (current_map == 11) // map011 Orbital Station
         render_floor_flags |= RendFlrF_NonPlanetary;
@@ -1121,8 +1158,9 @@ void process_engine_unk3(void)
     get_engine_inputs();
     mech_gameturn_reinit();
     process_map_craters();
-
+    AMIGA_STEP(11);
     engine_draw_whole_screen_top_down();
+    AMIGA_STEP(12);
 
     // Which frame of an animated texture is on screen is not part of the game
     // state - no simulation code reads it. Advanced here, after the frame was
@@ -3024,7 +3062,9 @@ void prep_single_mission(void)
         packet_read_whole_player_init();
     }
     init_game(0);
+    amiga_check_mapwho("prep: after init_game");
     preprogress_game_turns();
+    amiga_check_mapwho("prep: after preprogress_game_turns");
     if (!in_network_game)
     {
         if (PacketRecord_IsRecord()) {
@@ -3033,9 +3073,12 @@ void prep_single_mission(void)
         }
     }
     prep_multicolor_sprites();
+    amiga_check_mapwho("prep: after prep_multicolor_sprites");
     LbScreenClear(0);
     generate_shadows_for_multicolor_sprites();
+    amiga_check_mapwho("prep: after generate_shadows");
     adjust_mission_engine_to_video_mode();
+    amiga_check_mapwho("prep: after adjust_mission_engine");
 
     embanim_reinit(AniSl_BILLBOARD);
     embanim_do_next_frame(AniSl_BILLBOARD);
@@ -3469,6 +3512,14 @@ TbBool game_setup(void)
         LOGERR("Initial loading of mission sprite files failed.");
         ret = false;
     }
+    // Animation tables are little endian files
+    if (melement_ani != NULL)
+        lb_le_fix_struct(melement_ani, mele_ani_end - melement_ani,
+          sizeof(struct Element), LAYOUT_Element);
+    if (nstart_ani != NULL)
+        lb_le_fix16_array(nstart_ani, nstart_ani_end - nstart_ani);
+    if (frame != NULL)
+        lb_le_fix_struct(frame, frame_end - frame, sizeof(struct Frame), LAYOUT_Frame);
     if (!read_rules_file()) {
         LOGERR("Rules config file loading failed.");
         ret = false;
@@ -3827,13 +3878,18 @@ void show_game_engine(void)
 
     p_locplayer = &players[local_player_no];
     dcthing = p_locplayer->DirectControl[0];
+    AMIGA_STEP(1);
     process_view_inputs(dcthing);// inlined call gengine_ctrl
-
+    AMIGA_STEP(2);
     compute_scanner_zoom();
     camera_apply_velocity();
+    AMIGA_STEP(3);
     prepare_drawlist();
+    AMIGA_STEP(4);
     prepare_mouse_on_map();
+    AMIGA_STEP(5);
     process_engine_unk3();
+    AMIGA_STEP(6);
 }
 
 TbResult clear_vecs_screen(TbPixel colour)

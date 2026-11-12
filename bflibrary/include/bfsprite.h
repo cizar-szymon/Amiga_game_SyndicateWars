@@ -81,6 +81,12 @@ struct TiledSprite {
  */
 TbResult LbSpriteSetup(TbSprite *start, const TbSprite *end, const unsigned char * data);
 
+/** Convert a sprite table just loaded from a .tab file (little endian
+ * offsets and sizes) to CPU byte order. Nothing to do on little endian.
+ * Must be called once per loading, before LbSpriteSetup().
+ */
+void LbSpriteTabFixEndian(TbSprite *start, const TbSprite *end);
+
 /** Set up data pointers in all arrays of sprites from given setup list.
  */
 TbResult LbSpriteSetupAll(TbSetupSprite t_setup[]);

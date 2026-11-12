@@ -20,6 +20,8 @@
 #include <proto/timer.h>
 #include "bftime.h"
 #include "bfwindows.h"
+#include <stdlib.h>
+#include "privbflog.h"
 
 struct Device *TimerBase;
 static struct MsgPort *timer_port;
@@ -109,6 +111,8 @@ TbBool LbSleepUntil(TbClockMSec endtime)
     TbClockMSec currclk;
 
     currclk = LbTimerClock();
+    if (endtime > currclk + 1000)
+        LOGWARN("long sleep: now %lu until %lu", (unsigned long)currclk, (unsigned long)endtime);
     while ((currclk + LB_LARGE_DELAY_TIME) < endtime)
     {
         LbDoMultitasking();

@@ -22,6 +22,8 @@
 #include "bffile.h"
 #include "bfmath.h"
 #include "bfmemut.h"
+#include "bfendian.h"
+#include "data_layouts.h"
 
 #include "enginpritxtr.h"
 #include "enginprops.h"
@@ -61,7 +63,9 @@ void read_primveh_obj(const char *fname, int a2)
     fh = LbFileOpen(fname, Lb_FILE_MODE_READ_ONLY);
     if (fh == INVALID_FILE)
         return;
-    LbFileRead(fh, &firstval, sizeof(long));
+    // little endian file; long is 4 bytes on all supported targets
+    LbFileRead(fh, &firstval, 4);
+    LE_FIX32(firstval);
     if (firstval != 1)
     {
       LbFileRead(fh, &next_prim_object_point, sizeof(ushort));
@@ -71,12 +75,29 @@ void read_primveh_obj(const char *fname, int a2)
       LbFileRead(fh, &prim4_textures_count, sizeof(ushort));
       LbFileRead(fh, &prim_face_textures_count, sizeof(ushort));
       LbFileRead(fh, &prim_unknprop01, sizeof(ushort));
+      LE_FIX16(next_prim_object_point);
+      LE_FIX16(next_prim_object_face3);
+      LE_FIX16(next_prim_object_face4);
+      LE_FIX16(next_prim_object);
+      LE_FIX16(prim4_textures_count);
+      LE_FIX16(prim_face_textures_count);
+      LE_FIX16(prim_unknprop01);
       LbFileRead(fh, prim_object_points, sizeof(struct SinglePoint) * next_prim_object_point);
       LbFileRead(fh, prim_object_faces3, sizeof(struct SingleObjectFace3) * next_prim_object_face3);
       LbFileRead(fh, prim_object_faces4, sizeof(struct SingleObjectFace4) * next_prim_object_face4);
       LbFileRead(fh, prim_objects, sizeof(struct SingleObject) * next_prim_object);
       LbFileRead(fh, prim4_textures, sizeof(struct SingleFloorTexture) * prim4_textures_count);
       LbFileRead(fh, prim_face_textures, sizeof(struct SingleTexture) * prim_face_textures_count);
+      lb_le_fix_struct(prim_object_points, next_prim_object_point,
+        sizeof(struct SinglePoint), LAYOUT_SinglePoint);
+      lb_le_fix_struct(prim_object_faces3, next_prim_object_face3,
+        sizeof(struct SingleObjectFace3), LAYOUT_SingleObjectFace3);
+      lb_le_fix_struct(prim_object_faces4, next_prim_object_face4,
+        sizeof(struct SingleObjectFace4), LAYOUT_SingleObjectFace4);
+      lb_le_fix_struct(prim_objects, next_prim_object,
+        sizeof(struct SingleObject), LAYOUT_SingleObject);
+      lb_le_fix_struct(prim_face_textures, prim_face_textures_count,
+        sizeof(struct SingleTexture), LAYOUT_SingleTexture);
     }
     LbFileClose(fh);
 }

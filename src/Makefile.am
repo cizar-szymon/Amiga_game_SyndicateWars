@@ -136,6 +136,9 @@ syndwarsfx_SOURCES = \
 	lvobjctv.c \
 	lvobjctv.h \
 	lvfiles.c \
+	lvendian.c \
+	lvendian.h \
+	../swrendersoft/include/data_layouts.h \
 	lvfiles.h \
 	lvwalk.c \
 	lvwalk.h \

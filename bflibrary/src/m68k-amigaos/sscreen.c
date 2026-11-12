@@ -41,6 +41,7 @@
 #include "bfplanar.h"
 #include "svesa.h"
 #include "amiga_priv.h"
+#include "privbflog.h"
 
 struct Library *CyberGfxBase;
 
@@ -427,8 +428,17 @@ static void fps_count(void)
 {
     TbClockMSec now;
 
+    static unsigned long total_frames;
+    static TbClockMSec diag_last;
+
     now = LbTimerClock();
     fps_frames++;
+    total_frames++;
+    if ((now - diag_last >= 5000) || (total_frames <= 3)) {
+        LOGWARN("present %lu, clock %lu ms, fps %lu", total_frames,
+          (unsigned long)now, amiga_fps_last);
+        diag_last = now;
+    }
     if (now - fps_start >= 1000) {
         amiga_fps_last = (fps_frames * 1000 + (now - fps_start) / 2) / (now - fps_start);
         fps_frames = 0;

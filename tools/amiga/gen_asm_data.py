@@ -175,6 +175,17 @@ def main():
             # short elements: word alignment (the maximum of the Amiga hunk format)
             out.append(f"short {n}[{(len(img) + 1) // 2}]; /* {decl}, {where} */")
             continue
+        if zero and dims == "[]":
+            # "T n[];" without an initializer is a 1-element array: give the
+            # size of the asm data (low_trans_grey_bright_limit, 256 bytes,
+            # used to overwrite the 255 bytes of variables after it)
+            base = typ.replace("const ", "").strip()
+            if base not in SCALARS:
+                manual.append(f"{n}: {decl} ({where}): unsized array of non-scalar type")
+                continue
+            count = len(img) // SCALARS[base][1]
+            out.append(f"{typ} {n}[{count}]; /* {where}, {len(img)} bytes */")
+            continue
         if zero:
             out.append(f"{decl}; /* {where}, {len(img)} bytes */")
             continue

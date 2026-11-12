@@ -1423,7 +1423,7 @@ void gpoly_sta_md28(struct gpoly_state *st)
     }
 }
 
-void gpoly_rasterize_shaded_bound(struct gpoly_state *st)
+static void gpoly_rasterize_shaded_bound_c(struct gpoly_state *st)
 {
     GP_CNT(0);
     struct gpoly_blends bld;
@@ -1989,6 +1989,189 @@ void gpoly_rasterize_shaded_nobound(struct gpoly_state *st)
     gpoly_rasterize_shaded_nobound_68k(st);
 #else
     gpoly_rasterize_shaded_nobound_c(st);
+#endif
+}
+
+#if defined(__mc68000__) || defined(__m68k__)
+#define GP_DECR4_REGS(b0, b1, b2, p_inc) \
+    __asm__ ( \
+        "    sub.b %[s0],%[r1]\n" \
+        "    subx.l %[z],%[r2]\n" \
+        "    sub.l %[s1],%[r2]\n" \
+        "    subx.l %[z],%[r0]\n" \
+        "    sub.l %[s2],%[r0]\n" \
+        "    ror.w #8,%[r1]\n" \
+        "    subx.b %[s3],%[r1]\n" \
+        "    rol.w #8,%[r1]\n" \
+        : [r0] "+d" (b0), [r1] "+d" (b1), [r2] "+d" (b2) \
+        : [s0] "d" ((p_inc)->S[0]), [s1] "dm" ((p_inc)->S[1]), [s2] "dm" ((p_inc)->S[2]), \
+          [s3] "d" ((p_inc)->S[3]), [z] "d" (0) \
+        : "cc"); \
+    b1 &= 0xFFFF
+
+/* gpoly_rasterize_shaded_bound_c() with the blend state and edges in locals
+ * and the steps on registers; same steps in the same order. */
+static void gpoly_rasterize_shaded_bound_68k(struct gpoly_state *st)
+{
+    const struct gpoly_factors *incA, *incB;
+    struct gpoly_blends bld;
+    ubyte *out_ln;
+    u32 b0, b1, b2;
+    int range_beg, range_end, slope_beg, slope_end;
+    int ln_len, height, count, curr_X, curr_Y, pass;
+
+    ln_len = vec_screen_width;
+    incA = &st->incD;
+    incB = &st->incB;
+    if (st->var_134 < 0) {
+        slope_beg = st->ratioCA_X2Y;
+        slope_end = st->ratioBA_X2Y;
+    } else {
+        slope_beg = st->ratioBA_X2Y;
+        slope_end = st->ratioCA_X2Y;
+    }
+    b0 = st->bldA.B[0];
+    b1 = st->bldA.B[1];
+    b2 = st->bldA.B[2];
+    out_ln = &vec_screen[st->ptA.Y * vec_screen_width];
+    if (st->ptA.Y > vec_window_height)
+        return;
+
+    height = st->ptB.Y;
+    if (height > vec_window_height)
+        height = vec_window_height;
+    count = height - st->ptA.Y;
+    curr_X = st->ptA.X;
+    range_beg = st->ptA.X_prc;
+    range_end = st->ptA.X_prc;
+    curr_Y = (count == 0) ? 0 : st->ptA.Y;
+
+    for (pass = 2; ; )
+    {
+        for (; curr_Y < 0; curr_Y++)
+        {
+            GP_INCR4_REGS(b0, b1, b2, incA);
+            curr_X -= range_beg >> 16;
+            range_end += slope_end;
+            range_beg += slope_beg;
+            curr_X += range_beg >> 16;
+            out_ln += ln_len;
+            count--;
+            if (count == 0)
+                break;
+        }
+
+        for (; count > 0; count--)
+        {
+            int beg, len;
+
+            beg = range_beg >> 16;
+            if (beg < 0) {
+                for (; curr_X > 0; curr_X--) {
+                    GP_DECR4_REGS(b0, b1, b2, incB);
+                }
+                for (; curr_X < 0; curr_X++) {
+                    GP_INCR4_REGS(b0, b1, b2, incB);
+                }
+            } else {
+                for (; curr_X < beg; curr_X++) {
+                    GP_INCR4_REGS(b0, b1, b2, incB);
+                }
+                for (; curr_X > beg; curr_X--) {
+                    GP_DECR4_REGS(b0, b1, b2, incB);
+                }
+            }
+            height = range_end >> 16;
+            if (height > vec_window_width)
+                height = vec_window_width;
+            len = height - curr_X;
+            if (len > 0)
+            {
+                bld.B[0] = b0;
+                bld.B[1] = b1;
+                bld.B[2] = b2;
+                gpoly_span_shaded(&out_ln[curr_X], len, &bld, incB);
+            }
+            range_end += slope_end;
+            curr_X -= range_beg >> 16;
+            range_beg += slope_beg;
+            curr_X += range_beg >> 16;
+            GP_INCR4_REGS(b0, b1, b2, incA);
+            out_ln += ln_len;
+        }
+
+        pass--;
+        if (pass == 0)
+            break;
+
+        if (st->var_134 >= 0)
+        {
+            slope_beg = st->ratioCB_X2Y;
+            incA = &st->incC;
+            b0 = st->bldB.B[0];
+            b1 = st->bldB.B[1];
+            b2 = st->bldB.B[2];
+            curr_X = st->ptB.X;
+            range_beg = st->ptB.X_prc;
+        }
+        else
+        {
+            slope_end = st->ratioCB_X2Y;
+            range_end = st->ptB.X_prc;
+        }
+
+        height = st->ptC.Y;
+        if (height > vec_window_height)
+            height = vec_window_height;
+        count = height - st->ptB.Y;
+        if (count <= 0)
+            break;
+
+        curr_Y = st->ptB.Y;
+    }
+}
+#endif
+
+void gpoly_rasterize_shaded_bound(struct gpoly_state *st)
+{
+#if defined(__mc68000__) || defined(__m68k__)
+#if defined(SW_AMIGA)
+    /* Check mode: as gpoly_rasterize_shaded_nobound() */
+    if (gpoly_check_mode > 0)
+    {
+        static ubyte before[640 * 481], fast[640 * 481];
+        static unsigned long tris, fails;
+        int y0, y1;
+        ulong size;
+        ubyte *rows;
+
+        y0 = st->ptA.Y < 0 ? 0 : st->ptA.Y;
+        y1 = st->ptC.Y > vec_window_height ? vec_window_height : st->ptC.Y;
+        if ((y1 >= y0) && (y0 <= vec_window_height)
+          && ((ulong)(y1 - y0 + 1) * vec_screen_width <= sizeof(before)))
+        {
+            rows = &vec_screen[y0 * vec_screen_width];
+            size = (ulong)(y1 - y0 + 1) * vec_screen_width;
+            memcpy(before, rows, size);
+            gpoly_rasterize_shaded_bound_68k(st);
+            memcpy(fast, rows, size);
+            memcpy(rows, before, size);
+            gpoly_rasterize_shaded_bound_c(st);
+            tris++;
+            if (memcmp(fast, rows, size) != 0) {
+                if (fails < 20)
+                    LOGERR("shaded_bound triangle %lu differs (rows %d..%d)", tris, y0, y1);
+                fails++;
+            }
+            if ((tris & 0x3FF) == 0)
+                LOGWARN("bound rasterizer check: %lu triangles, %lu different", tris, fails);
+            return;
+        }
+    }
+#endif
+    gpoly_rasterize_shaded_bound_68k(st);
+#else
+    gpoly_rasterize_shaded_bound_c(st);
 #endif
 }
 

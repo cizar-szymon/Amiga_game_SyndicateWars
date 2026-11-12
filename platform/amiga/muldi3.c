@@ -47,6 +47,45 @@ long long __muldi3(long long u, long long v)
  * Others go through a shift-and-subtract loop (no 64-bit divide).
  * Same results as C division (quotient rounded toward zero, remainder with
  * the sign of the dividend); PC test: 5M random pairs, 0 differences. */
+/* (u1:u0) / v for u1 < v, quotient fits in 32 bits. Two 32/32 hardware
+ * divides on 16-bit digits (long division as in Hacker's Delight, "divlu"). */
+static uint32_t amiga_divlu(uint32_t u1, uint32_t u0, uint32_t v, uint32_t *r)
+{
+    const uint32_t b = 0x10000;
+    uint32_t un1, un0, vn1, vn0, q1, q0, un32, un21, un10, rhat;
+    int s;
+
+    s = __builtin_clz(v);
+    v <<= s;
+    vn1 = v >> 16;
+    vn0 = v & 0xFFFF;
+    un32 = (u1 << s) | (s ? (u0 >> (32 - s)) : 0);
+    un10 = u0 << s;
+    un1 = un10 >> 16;
+    un0 = un10 & 0xFFFF;
+
+    q1 = un32 / vn1;
+    rhat = un32 - q1 * vn1;
+    while ((q1 >= b) || (q1 * vn0 > b * rhat + un1)) {
+        q1--;
+        rhat += vn1;
+        if (rhat >= b)
+            break;
+    }
+    un21 = un32 * b + un1 - q1 * v;
+
+    q0 = un21 / vn1;
+    rhat = un21 - q0 * vn1;
+    while ((q0 >= b) || (q0 * vn0 > b * rhat + un0)) {
+        q0--;
+        rhat += vn1;
+        if (rhat >= b)
+            break;
+    }
+    *r = (un21 * b + un0 - q0 * v) >> s;
+    return q1 * b + q0;
+}
+
 static unsigned long long amiga_udivmod64(unsigned long long n,
   unsigned long long d, unsigned long long *rem)
 {
@@ -57,9 +96,19 @@ static unsigned long long amiga_udivmod64(unsigned long long n,
         *rem = 0;
         return 0;
     }
-    if (((n >> 32) == 0) && ((d >> 32) == 0)) {
-        *rem = (uint32_t)n % (uint32_t)d;
-        return (uint32_t)n / (uint32_t)d;
+    if ((d >> 32) == 0) {
+        uint32_t nh = n >> 32, nl = (uint32_t)n, dl = (uint32_t)d;
+        uint32_t qh, ql, r;
+
+        if (nh == 0) {
+            *rem = nl % dl;
+            return nl / dl;
+        }
+        /* 64/32: high word first, then the 64/32 step with nh < d */
+        qh = nh / dl;
+        ql = amiga_divlu(nh - qh * dl, nl, dl, &r);
+        *rem = r;
+        return ((unsigned long long)qh << 32) | ql;
     }
     if (n < d) {
         *rem = n;

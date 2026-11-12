@@ -2,7 +2,8 @@
 # One test iteration: build, install, run the game, show its output.
 # usage: sh tools/amiga/iter.sh [game args, default "-q -m 0,1"] [--no-build]
 # Target: WinUAE (default; game data dir mounted as SWARS:) or a real Amiga
-#   with TARGET=amiga1 (AmiAgent default config, WorkSD:Games/SyndWars).
+#   with TARGET=amiga1 (AmiAgent default config) or TARGET=amiga2
+#   (amiagent-2.cfg), both WorkSD:Games/SyndWars.
 # The game is started asynchronously; after WAIT seconds (default 40) its
 # output is shown and it gets Ctrl-C. If AmiAgent stops answering in WinUAE,
 # restart WinUAE (tools/amiga/winuae_restart.ps1).
@@ -12,6 +13,9 @@ TARGET=${TARGET:-winuae}
 if [ "$TARGET" = "winuae" ]; then
   AR="python tools/amiga_remote.py --config C:/amiga-dev/amiagent-winuae.cfg"
   GDIR="SWARS:"
+elif [ "$TARGET" = "amiga2" ]; then
+  AR="python tools/amiga_remote.py --config C:/amiga-dev/amiagent-2.cfg"
+  GDIR="WorkSD:Games/SyndWars"
 else
   AR="python tools/amiga_remote.py"
   GDIR="WorkSD:Games/SyndWars"

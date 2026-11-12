@@ -62,13 +62,19 @@ compile() {
   if $cmd -I"$(dirname "$src")" -c "$pp" -o "$obj" 2> "$obj.err"; then
     rm -f "$obj.err"
   else
+    rm -f "$obj"
     echo "FAIL $src"
   fi
 }
 export -f compile
 export CC CXX CFLAGS CXXFLAGS PP OBJ
 echo $SRCS | tr ' ' '\n' | grep . | xargs -P "$(nproc)" -I{} bash -c 'compile {}'
-echo "objects: $(ls $OBJ/*.o 2>/dev/null | wc -l), failed: $(ls $OBJ/*.err 2>/dev/null | wc -l)"
+NFAIL=$(ls $OBJ/*.err 2>/dev/null | wc -l)
+echo "objects: $(ls $OBJ/*.o 2>/dev/null | wc -l), failed: $NFAIL"
+if [ "$NFAIL" != "0" ]; then
+  for e in $OBJ/*.err; do echo "== $e"; grep -m3 "error" "$e"; done
+  exit 1
+fi
 
 # Link
 if $CXX -m68060 -noixemul -o "$OUT/SyndWars" $OBJ/*.o -lm 2> "$OUT/link.err"; then

@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "bftypes.h"
+#include "bfendian.h"
 
 #include "campaign.h"
 #include "game_data.h"
@@ -75,6 +76,8 @@ TbResult wadfile_find_index_entry(struct WADIndexEntry *fentry, const char *wadf
     if (nread != sizeof(struct WADIndexEntry))
         return Lb_FAIL;
 
+    LE_FIX32(fentry->Offset);
+    LE_FIX32(fentry->Length);
     return Lb_SUCCESS;
 }
 

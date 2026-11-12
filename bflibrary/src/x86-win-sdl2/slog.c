@@ -224,6 +224,15 @@ TbResult LbLog(struct TbLog *log, const char *fmt_str, va_list arg)
     }
     if (log->Prefix[0] != '\0')
         fprintf(file, "%s", log->Prefix);
+#if defined(SW_AMIGA)
+    {
+        // Amiga port diagnostics: a copy of each line on (unbuffered) stdout
+        va_list arg2;
+        va_copy(arg2, arg);
+        vprintf(fmt_str, arg2);
+        va_end(arg2);
+    }
+#endif
     vfprintf(file, fmt_str, arg);
     log->Position = ftell(file);
     fclose(file);

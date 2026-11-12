@@ -574,6 +574,10 @@ void read_conf_file(void)
 int
 main (int argc, char **argv)
 {
+#if defined(SW_AMIGA)
+    // Diagnostics of the port: lines must not be lost in a buffer on a crash
+    setvbuf(stdout, NULL, _IONBF, 0);
+#endif
     // the initial mode will be overwritten in game_setup()
     lbDisplay.ScreenMode = Lb_SCREEN_MODE_320_200_8;
     game_high_resolution = false;

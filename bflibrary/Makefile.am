@@ -70,6 +70,7 @@ libbullfrog_a_SOURCES = \
   src/general/gcircle.c \
   src/general/gdata.c \
   src/general/gendian.c \
+  src/general/gendianfix.c \
   src/general/gerrorlg.c \
   src/general/gexe_key.c \
   src/general/gfile.c \

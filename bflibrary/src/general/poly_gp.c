@@ -507,84 +507,137 @@ static void gpoly_span_noshade_c(ubyte *o, int n, const struct gpoly_blends *p_b
 
 #if defined(__mc68000__) || defined(__m68k__)
 /* 68060: the carry chain maps to ADD.L / ADDX; all state in registers.
- * add.l s1,b2 sets X = c1; moveq keeps X; addx.l 0,b0 adds c1 (its own carry
- * is replaced by the next add, as in the C version); add.l s2,b0 sets
- * X = c2; addx.b s3,v adds both. */
-static void gpoly_span_shaded_68k(ubyte *o, int n, const struct gpoly_blends *p_bld,
+ * add.l s1,b2 sets X = c1; addx.l zero,b0 adds c1 (its own carry is
+ * replaced by the next add, as in the C version); add.l s2,b0 sets
+ * X = c2; addx.b s3,v adds both. LSL sets X too, so it always comes before
+ * the add.l s1,b2 of the same pixel; MOVE does not touch X.
+ * Two pixels per loop pass, interleaved so that the two integer pipes of
+ * the 68060 can pair instructions and no table read is used right after
+ * the read that forms its index. The texel and shade index of a pixel are
+ * taken from the state before its step. A single pixel ends odd spans. */
+#define GP_ASM_STEP_A \
+        "    add.l %[s1],%[b2]\n"
+#define GP_ASM_STEP_B \
+        "    addx.l %[zero],%[b0]\n" \
+        "    add.l %[s2],%[b0]\n"
+#define GP_ASM_STEP_C \
+        "    addx.b %[s3],%[v]\n"
+
+__attribute__((noinline)) static void gpoly_span_shaded_68k(ubyte *o, int n, const struct gpoly_blends *p_bld,
   const struct gpoly_factors *p_inc)
 {
-    register u32 b0 __asm__("d0") = p_bld->B[0];
-    register u32 b2 __asm__("d1") = p_bld->B[2];
-    register u32 v __asm__("d2") = (ubyte)(p_bld->B[1] >> 8);
-    register u32 s1 __asm__("d3") = p_inc->S[1];
-    register u32 s2 __asm__("d4") = p_inc->S[2];
-    register u32 s3 __asm__("d5") = (ubyte)p_inc->S[3];
-    register ubyte *out __asm__("a0") = o;
-    register ubyte *end __asm__("a1") = o + n;
-    register const ubyte *map __asm__("a2") = vec_map;
-    register const ubyte *fade __asm__("a3") = pixmap.fade_table;
+    u32 b0 = p_bld->B[0];
+    u32 b2 = p_bld->B[2];
+    u32 v = (ubyte)(p_bld->B[1] >> 8);
+    const ubyte *s1 = (const ubyte *)p_inc->S[1];
+    const ubyte *s2 = (const ubyte *)p_inc->S[2];
+    u32 s3 = (ubyte)p_inc->S[3];
+    ubyte *out = o;
+    ubyte *end = o + n;
+    u32 pxb, zero;
 
     __asm__ volatile (
-        /* software pipelined: the texel and shade index of the next pixel
-         * are formed at the end of each iteration, and the fade table read
-         * comes several instructions after the texel read */
+        "    moveq #0,%[zero]\n"
         "    moveq #0,%%d6\n"
         "    moveq #0,%%d7\n"
-        "    move.w %[v],%%d6\n"
-        "    lsl.w #8,%%d6\n"
-        "    move.b %[b0],%%d6\n"
-        "    move.w %[b2],%%d7\n"
-        "    clr.b %%d7\n"
-        "1:  move.b (%[map],%%d6.l),%%d7\n"
-        "    add.l %[s1],%[b2]\n"
-        "    moveq #0,%%d6\n"
-        "    addx.l %%d6,%[b0]\n"
-        "    add.l %[s2],%[b0]\n"
-        "    addx.b %[s3],%[v]\n"
-        "    move.b (%[fade],%%d7.l),(%[out])+\n"
-        "    move.w %[v],%%d6\n"
-        "    lsl.w #8,%%d6\n"
-        "    move.b %[b0],%%d6\n"
-        "    move.w %[b2],%%d7\n"
-        "    clr.b %%d7\n"
+        "    moveq #0,%[pxb]\n"
+        "    subq.l #1,%[end]\n"
         "    cmp.l %[end],%[out]\n"
-        "    bcs.s 1b\n"
-        : [b0] "+d" (b0), [b2] "+d" (b2), [v] "+d" (v), [out] "+a" (out)
-        : [s1] "d" (s1), [s2] "d" (s2), [s3] "d" (s3), [end] "a" (end),
-          [map] "a" (map), [fade] "a" (fade)
+        "    bcc 4f\n"
+        /* pixel A: d6 texel index, d7 shade:texel */
+        "1:  move.w %[b2],%%d7\n"
+        "    move.w %[v],%%d6\n"
+        "    lsl.w #8,%%d6\n"
+        GP_ASM_STEP_A
+        "    clr.b %%d7\n"
+        "    move.b %[b0],%%d6\n"
+        GP_ASM_STEP_B
+        "    move.b (%[map],%%d6.l),%%d7\n"
+        GP_ASM_STEP_C
+        /* pixel B: d6 texel index, pxb shade:texel */
+        "    move.w %[b2],%[pxb]\n"
+        "    move.w %[v],%%d6\n"
+        "    lsl.w #8,%%d6\n"
+        GP_ASM_STEP_A
+        "    clr.b %[pxb]\n"
+        "    move.b %[b0],%%d6\n"
+        "    addx.l %[zero],%[b0]\n"
+        "    move.b (%[fade],%%d7.l),(%[out])+\n"
+        "    add.l %[s2],%[b0]\n"
+        "    move.b (%[map],%%d6.l),%[pxb]\n"
+        GP_ASM_STEP_C
+        "    move.b (%[fade],%[pxb].l),(%[out])+\n"
+        "    cmp.l %[end],%[out]\n"
+        "    bcs 1b\n"
+        "4:  addq.l #1,%[end]\n"
+        "    cmp.l %[end],%[out]\n"
+        "    bcc 9f\n"
+        /* last pixel of an odd span */
+        "    move.w %[b2],%%d7\n"
+        "    move.w %[v],%%d6\n"
+        "    lsl.w #8,%%d6\n"
+        "    clr.b %%d7\n"
+        "    move.b %[b0],%%d6\n"
+        "    move.b (%[map],%%d6.l),%%d7\n"
+        "    move.b (%[fade],%%d7.l),(%[out])+\n"
+        "9:\n"
+        : [b0] "+d" (b0), [b2] "+d" (b2), [v] "+d" (v), [out] "+a" (out),
+          [end] "+a" (end), [pxb] "=&d" (pxb), [zero] "=&d" (zero)
+        : [s1] "a" (s1), [s2] "a" (s2), [s3] "d" (s3),
+          [map] "a" (vec_map), [fade] "a" (pixmap.fade_table)
         : "d6", "d7", "cc", "memory");
 }
 
-static void gpoly_span_noshade_68k(ubyte *o, int n, const struct gpoly_blends *p_bld,
+__attribute__((noinline)) static void gpoly_span_noshade_68k(ubyte *o, int n, const struct gpoly_blends *p_bld,
   const struct gpoly_factors *p_inc)
 {
-    register u32 b0 __asm__("d0") = p_bld->B[0];
-    register u32 b2 __asm__("d1") = p_bld->B[2];
-    register u32 v __asm__("d2") = (ubyte)(p_bld->B[1] >> 8);
-    register u32 s1 __asm__("d3") = p_inc->S[1];
-    register u32 s2 __asm__("d4") = p_inc->S[2];
-    register u32 s3 __asm__("d5") = (ubyte)p_inc->S[3];
-    register ubyte *out __asm__("a0") = o;
-    register ubyte *end __asm__("a1") = o + n;
-    register const ubyte *map __asm__("a2") = vec_map;
+    u32 b0 = p_bld->B[0];
+    u32 b2 = p_bld->B[2];
+    u32 v = (ubyte)(p_bld->B[1] >> 8);
+    const ubyte *s1 = (const ubyte *)p_inc->S[1];
+    const ubyte *s2 = (const ubyte *)p_inc->S[2];
+    u32 s3 = (ubyte)p_inc->S[3];
+    ubyte *out = o;
+    ubyte *end = o + n;
+    u32 pxb, zero;
 
     __asm__ volatile (
+        "    moveq #0,%[zero]\n"
         "    moveq #0,%%d6\n"
+        "    subq.l #1,%[end]\n"
+        "    cmp.l %[end],%[out]\n"
+        "    bcc 4f\n"
         "1:  move.w %[v],%%d6\n"
+        "    lsl.w #8,%%d6\n"
+        GP_ASM_STEP_A
+        "    move.b %[b0],%%d6\n"
+        GP_ASM_STEP_B
+        "    move.b (%[map],%%d6.l),%%d7\n"
+        GP_ASM_STEP_C
+        "    move.w %[v],%%d6\n"
+        "    lsl.w #8,%%d6\n"
+        GP_ASM_STEP_A
+        "    move.b %[b0],%%d6\n"
+        "    addx.l %[zero],%[b0]\n"
+        "    move.b %%d7,(%[out])+\n"
+        "    add.l %[s2],%[b0]\n"
+        "    move.b (%[map],%%d6.l),%[pxb]\n"
+        GP_ASM_STEP_C
+        "    move.b %[pxb],(%[out])+\n"
+        "    cmp.l %[end],%[out]\n"
+        "    bcs 1b\n"
+        "4:  addq.l #1,%[end]\n"
+        "    cmp.l %[end],%[out]\n"
+        "    bcc 9f\n"
+        "    move.w %[v],%%d6\n"
         "    lsl.w #8,%%d6\n"
         "    move.b %[b0],%%d6\n"
         "    move.b (%[map],%%d6.l),(%[out])+\n"
-        "    add.l %[s1],%[b2]\n"
-        "    moveq #0,%%d6\n"
-        "    addx.l %%d6,%[b0]\n"
-        "    add.l %[s2],%[b0]\n"
-        "    addx.b %[s3],%[v]\n"
-        "    cmp.l %[end],%[out]\n"
-        "    bcs.s 1b\n"
-        : [b0] "+d" (b0), [b2] "+d" (b2), [v] "+d" (v), [out] "+a" (out)
-        : [s1] "d" (s1), [s2] "d" (s2), [s3] "d" (s3), [end] "a" (end),
-          [map] "a" (map)
-        : "d6", "cc", "memory");
+        "9:\n"
+        : [b0] "+d" (b0), [b2] "+d" (b2), [v] "+d" (v), [out] "+a" (out),
+          [end] "+a" (end), [pxb] "=&d" (pxb), [zero] "=&d" (zero)
+        : [s1] "a" (s1), [s2] "a" (s2), [s3] "d" (s3), [map] "a" (vec_map)
+        : "d6", "d7", "cc", "memory");
 }
 
 #if defined(SW_AMIGA)
@@ -667,6 +720,13 @@ static inline void gpoly_span_noshade(ubyte *o, int n, const struct gpoly_blends
 #endif
 }
 
+
+#if defined(SW_AMIGA)
+extern unsigned long amiga_prof_cnt[8];
+#define GP_CNT(i) (amiga_prof_cnt[i]++)
+#else
+#define GP_CNT(i) ((void)0)
+#endif
 
 static void gpoly_stb_drw_incr4(struct gpoly_blends *p_bld, const struct gpoly_factors *p_inc)
 {
@@ -1204,6 +1264,7 @@ void gpoly_sta_md28(struct gpoly_state *st)
 
 void gpoly_rasterize_shaded_bound(struct gpoly_state *st)
 {
+    GP_CNT(0);
     struct gpoly_blends bld;
     struct gpoly_blends bld_bkp;
     ubyte *out_ln;
@@ -1252,6 +1313,7 @@ void gpoly_rasterize_shaded_bound(struct gpoly_state *st)
     {
         for (;curr_Y < 0; curr_Y++)
         {
+            GP_CNT(5);
             gpoly_stb_drw_incr4(&bld, &st->incA);
             loc_0FC = range_beg;
             curr_X -= range_beg >> 16;
@@ -1278,18 +1340,22 @@ void gpoly_rasterize_shaded_bound(struct gpoly_state *st)
             {
                 for (; curr_X > 0; curr_X--) {
                     gpoly_stb_drw_decr4(&bld, &st->incB);
+                    GP_CNT(4);
                 }
                 for (; curr_X < 0; curr_X++) {
                     gpoly_stb_drw_incr4(&bld, &st->incB);
+                    GP_CNT(4);
                 }
             }
             else
             {
                 for (; curr_X < range_beg_scr; curr_X++) {
                     gpoly_stb_drw_incr4(&bld, &st->incB);
+                    GP_CNT(4);
                 }
                 for (; curr_X > range_beg_scr; curr_X--) {
                     gpoly_stb_drw_decr4(&bld, &st->incB);
+                    GP_CNT(4);
                 }
             }
             bld_bkp = bld;
@@ -1356,6 +1422,7 @@ void gpoly_rasterize_shaded_bound(struct gpoly_state *st)
 
 void gpoly_rasterize_shaded_nobound(struct gpoly_state *st)
 {
+    GP_CNT(1);
     struct gpoly_blends bld;
     struct gpoly_blends bld_bkp;
     ubyte *out_ln;
@@ -1404,6 +1471,7 @@ void gpoly_rasterize_shaded_nobound(struct gpoly_state *st)
     {
         for (;curr_Y < 0; curr_Y++)
         {
+            GP_CNT(5);
             gpoly_stb_drw_incr4(&bld, &st->incA);
             loc_0FC = range_beg;
             curr_X -= loc_0FC >> 16;
@@ -1483,6 +1551,7 @@ void gpoly_rasterize_shaded_nobound(struct gpoly_state *st)
 
 void gpoly_rasterize_noshade_bound(struct gpoly_state *st)
 {
+    GP_CNT(2);
     struct gpoly_blends bld;
     struct gpoly_blends bld_bkp;
     ubyte *out_ln;
@@ -1552,18 +1621,22 @@ void gpoly_rasterize_noshade_bound(struct gpoly_state *st)
             {
                 for (; curr_X > 0; curr_X--) {
                     gpoly_stb_drw_decr3(&bld, &st->incB);
+                    GP_CNT(4);
                 }
                 for (; curr_X < 0; curr_X++) {
                     gpoly_stb_drw_incr3(&bld, &st->incB);
+                    GP_CNT(4);
                 }
             }
             else
             {
                 for (; curr_X < range_beg_scr; curr_X++) {
                     gpoly_stb_drw_incr3(&bld, &st->incB);
+                    GP_CNT(4);
                 }
                 for (; curr_X > range_beg_scr; curr_X--) {
                     gpoly_stb_drw_decr3(&bld, &st->incB);
+                    GP_CNT(4);
                 }
             }
             bld_bkp = bld;
@@ -1622,6 +1695,7 @@ void gpoly_rasterize_noshade_bound(struct gpoly_state *st)
 
 void gpoly_rasterize_noshade_nobound(struct gpoly_state *st)
 {
+    GP_CNT(3);
     struct gpoly_blends bld;
     struct gpoly_blends bld_bkp;
     ubyte *out_ln;
@@ -1691,12 +1765,14 @@ void gpoly_rasterize_noshade_nobound(struct gpoly_state *st)
             {
                 for (; curr_X < range_beg_scr; curr_X++) {
                     gpoly_stb_drw_incr3(&bld, &st->incB);
+                    GP_CNT(4);
                 }
             }
             else
             {
                 for (; curr_X > range_beg_scr; curr_X--) {
                     gpoly_stb_drw_decr3(&bld, &st->incB);
+                    GP_CNT(4);
                 }
             }
             bld_bkp = bld;

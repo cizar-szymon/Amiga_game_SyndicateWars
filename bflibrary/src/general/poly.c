@@ -66,6 +66,9 @@ const long add_to_edi[] = {
 #if defined(SW_AMIGA)
 void amiga_prof_mode_begin(void);
 void amiga_prof_mode_end(int mode);
+void amiga_prof_begin(int slot);
+void amiga_prof_end(int slot);
+extern unsigned long amiga_prof_gpoly_tris;
 static void trig_inner(struct PolyPoint *point_a, struct PolyPoint *point_b,
   struct PolyPoint *point_c);
 
@@ -273,9 +276,17 @@ void draw_gpoly(struct PolyPoint *point_a, struct PolyPoint *point_b, struct Pol
     LOGNO("Pb(%ld,%ld,%ld)", point_b->X, point_b->Y, point_b->S);
     LOGNO("Pc(%ld,%ld,%ld)", point_c->X, point_c->Y, point_c->S);
 
+#if defined(SW_AMIGA)
+    amiga_prof_gpoly_tris++;
+    amiga_prof_begin(33);
+#endif
     start_type = gpoly_reorder_input_points(&point_a, &point_b, &point_c);
-    if (start_type == RendStart_NO)
+    if (start_type == RendStart_NO) {
+#if defined(SW_AMIGA)
+        amiga_prof_end(33);
+#endif
         return;
+    }
 
     gpoly_init_state(&st, point_a, point_b, point_c);
 
@@ -323,6 +334,10 @@ void draw_gpoly(struct PolyPoint *point_a, struct PolyPoint *point_b, struct Pol
         gpoly_sta_md28(&st);
         break;
     }
+#if defined(SW_AMIGA)
+    amiga_prof_end(33);
+    amiga_prof_begin(34);
+#endif
 
     switch (gpoly_mode)
     {
@@ -339,6 +354,9 @@ void draw_gpoly(struct PolyPoint *point_a, struct PolyPoint *point_b, struct Pol
             gpoly_rasterize_noshade_nobound(&st);
         break;
     }
+#if defined(SW_AMIGA)
+    amiga_prof_end(34);
+#endif
 }
 
 void poly_line(struct PolyPoint *point_a, struct PolyPoint *point_b)

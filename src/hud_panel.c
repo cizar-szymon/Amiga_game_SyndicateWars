@@ -16,6 +16,7 @@
  *     (at your option) any later version.
  */
 /******************************************************************************/
+#include "asm_coverage.h"
 #include "hud_panel.h"
 
 #include <assert.h>
@@ -2510,8 +2511,12 @@ void draw_new_panel(void)
             break;
         case PanT_Scanner:
             SCANNER_set_center_point(engn_xc, engn_zc, (2*LbFPMath_PI - 1) - ((engn_cam_yaw >> 5) & LbFPMath_AngleMask));
+            AMIGA_PROF_BEGIN(29);
+            AMIGA_PROF_BEGIN(15);
             SCANNER_process_turn();
+            AMIGA_PROF_END(15);
             SCANNER_draw_new_transparent();
+            AMIGA_PROF_END(29);
             break;
         case PanT_Objective:
             panel_objective_info_process_turn(panel);
@@ -2520,12 +2525,17 @@ void draw_new_panel(void)
         }
     }
 
+    AMIGA_PROF_BEGIN(19);
     players_chat_talk_process_turn();
     draw_players_chat();
 
     draw_panel_pickable_item();
 
-    if (!draw_weapons_panel(panel_wep))
+    AMIGA_PROF_END(19);
+    AMIGA_PROF_BEGIN(18);
+    TbBool wep_drawn = draw_weapons_panel(panel_wep);
+    AMIGA_PROF_END(18);
+    if (!wep_drawn)
     {
         if ((ingame.Flags & GamF_NaviPerfInfo) != 0) {
             uint y;

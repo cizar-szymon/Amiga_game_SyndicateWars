@@ -37,6 +37,7 @@
 #include "scandraw.h"
 #include "swlog.h"
 #include "thing.h"
+#include "asm_coverage.h"
 /******************************************************************************/
 
 struct Thing *mouse_over_unkn2_tng = NULL;
@@ -193,6 +194,7 @@ void draw_hud(int dcthing)
         return;
     }
 
+    AMIGA_PROF_BEGIN(26);
     show_goto_point(0);
     init_draw_target();
 
@@ -209,6 +211,7 @@ void draw_hud(int dcthing)
     }
 
     draw_hud_lock_target();
+    AMIGA_PROF_END(26);
 
     if (ingame.DisplayMode == 50)
     {
@@ -233,6 +236,7 @@ void draw_hud(int dcthing)
             }
         }
 
+        AMIGA_PROF_BEGIN(27);
         if (!PacketRecord_IsPlayback())
         {
           draw_hud_target_mouse(dcthing);
@@ -244,7 +248,10 @@ void draw_hud(int dcthing)
             if (!thing_is_destroyed(target))
                 draw_hud_target2(dcthing, target);
         }
+        AMIGA_PROF_END(27);
+        AMIGA_PROF_BEGIN(28);
         draw_new_panel();
+        AMIGA_PROF_END(28);
     }
 }
 

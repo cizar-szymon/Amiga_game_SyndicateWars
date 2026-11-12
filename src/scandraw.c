@@ -16,6 +16,7 @@
  *     (at your option) any later version.
  */
 /******************************************************************************/
+#include "asm_coverage.h"
 #include "scandraw.h"
 
 #include <stdlib.h>
@@ -516,13 +517,24 @@ void SCANNER_map_line_sample_blend(void)
     p_out = SCANNER_screenptr;
     n = SCANNER_ln_width;
 
+    {
+    // Same as LbBlendPixelLowTrans4Remap(pixmap.fade_table, 0, 1, col1, *p_out)
+    // with the tables in locals: stores through p_out (a char pointer) would
+    // otherwise force the compiler to reload every global per pixel.
+    const ubyte *bright = low_trans_grey_pal_bright;
+    const ubyte *limit = low_trans_grey_bright_limit;
+    const TbPixel *fade = pixmap.fade_table;
+    ubyte base = (ubyte)low_trans_grey_brightness;
+
     for (i = 0; i < n; i++)
     {
         TbPixel col1;
         u32 new_frac;
+        ubyte brig;
 
         col1 = SCANNER_data[tile_x][tile_z];
-        *p_out = LbBlendPixelLowTrans4Remap(pixmap.fade_table, 0, 1, col1, *p_out);
+        brig = limit[(ubyte)(base + bright[col1] + (bright[*p_out] >> 1))];
+        *p_out = fade[(brig << 8) | col1];
         p_out++;
 
         new_frac = frac_x + step_frac_x;
@@ -532,6 +544,7 @@ void SCANNER_map_line_sample_blend(void)
         new_frac = frac_z + step_frac_z;
         tile_z = tile_z + step_int_z + (new_frac < frac_z);
         frac_z = new_frac;
+    }
     }
 
     SCANNER_scr_x = ((frac_x >> 16) | ((u32)tile_x << 16));
@@ -575,16 +588,27 @@ void SCANNER_map_line_dim(void)
     n = SCANNER_ln_width;
     low_trans_grey_brightness = SCANNER_brig;
 
+    {
+    // Same as LbBlendPixelLowTrans4Remap(pixmap.fade_table, 4, 1, 0x49, *p_out)
+    // with the tables and steps in locals (see SCANNER_map_line_sample_blend).
+    const ubyte *bright = low_trans_grey_pal_bright;
+    const ubyte *limit = low_trans_grey_bright_limit;
+    const TbPixel *fade = &pixmap.fade_table[0x49];
+    ubyte base = (ubyte)(low_trans_grey_brightness + (low_trans_grey_pal_bright[0x49] >> 4));
+    s32 sh_y = SCANNER_nrp_sh_y, sh_x = SCANNER_nrp_sh_x;
+
     for (i = 0; i < n; i++)
     {
-        TbPixel col1;
+        ubyte brig;
 
-        col1 = 0x49;
-        *p_out = LbBlendPixelLowTrans4Remap(pixmap.fade_table, 4, 1, col1, *p_out);
+        brig = limit[(ubyte)(base + (bright[*p_out] >> 1))];
+        *p_out = fade[brig << 8];
         p_out++;
-
-        cu_x += SCANNER_nrp_sh_y;
-        cu_y += SCANNER_nrp_sh_x;
+    }
+    if (n > 0) {
+        cu_x += sh_y * n;
+        cu_y += sh_x * n;
+    }
     }
 
     SCANNER_scr_x = cu_x;
@@ -1974,13 +1998,19 @@ void SCANNER_draw_signals(void)
       ingame.Scanner.X2 - ingame.Scanner.X1 + 1,
       ingame.Scanner.Y2 - ingame.Scanner.Y1 + 1);
 
+    AMIGA_PROF_BEGIN(6);
     SCANNER_draw_blips(pos_mx, pos_mz, sh_x, sh_y);
+    AMIGA_PROF_END(6);
 
+    AMIGA_PROF_BEGIN(7);
     SCANNER_draw_arcs(pos_mx, pos_mz, sh_x, sh_y);
+    AMIGA_PROF_END(7);
 
     LbScreenLoadGraphicsWindow(&window_bkp);
 
+    AMIGA_PROF_BEGIN(8);
     SCANNER_draw_things_dots(pos_mx, pos_mz, sh_x, sh_y, pos_x1, pos_y1, range);
+    AMIGA_PROF_END(8);
 }
 
 void SCANNER_fe_draw_solid(void)
@@ -1993,8 +2023,12 @@ void SCANNER_fe_draw_solid(void)
 void SCANNER_draw_new_transparent(void)
 {
     SCANNER_update_shifts();
+    AMIGA_PROF_BEGIN(16);
     SCANNER_draw_new_transparent_map();
+    AMIGA_PROF_END(16);
+    AMIGA_PROF_BEGIN(17);
     SCANNER_draw_signals();
+    AMIGA_PROF_END(17);
     SCANNER_draw_area_frame();
 }
 

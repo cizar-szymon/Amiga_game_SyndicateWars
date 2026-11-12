@@ -5,6 +5,7 @@
 #include <exec/types.h>
 #include <devices/timer.h>
 #include <proto/timer.h>
+#include <proto/dos.h>
 #include "bftypes.h"
 #include "bflog.h"
 #include "bftime.h"
@@ -20,7 +21,12 @@ static const char *const prof_names[PROF_SLOTS] = {
     [13] = "mouse_on_map", [14] = "engine_unk3",
     [20] = "camera_setup", [21] = "draw_things", [22] = "floor",
     [23] = "explode", [24] = "draw_screen", [25] = "hud",
+    [26] = "hud_goto+lock", [27] = "hud_agents+target", [28] = "hud_panel", [29] = "scanner",
+    [6] = "scan_blips", [7] = "scan_arcs", [8] = "scan_dots",
+    [15] = "scanner_turn", [16] = "scanner_map", [17] = "scanner_signals",
+    [18] = "weapons_panel", [19] = "chat+pickable",
     [30] = "present_copy", [31] = "clear",
+    [33] = "gpoly_setup", [34] = "gpoly_raster",
 };
 
 static ULONG prof_start[PROF_SLOTS];
@@ -28,7 +34,8 @@ static ULONG prof_sum[PROF_SLOTS];
 static ULONG prof_frames;
 static TbClockMSec prof_report;
 static ULONG prof_freq;
-unsigned long amiga_prof_pixels, amiga_prof_spans;
+unsigned long amiga_prof_pixels, amiga_prof_spans, amiga_prof_gpoly_tris;
+unsigned long amiga_prof_cnt[8];
 
 static ULONG prof_now(void)
 {
@@ -43,13 +50,33 @@ static ULONG prof_now(void)
     return ev.ev_lo;
 }
 
+/* Fine profiling (slots >= 32, draw item types, render modes) reads the
+ * E-clock hundreds of times per frame, which costs several ms itself.
+ * It is on only when ENV:SyndWarsProf is set to 2. */
+static int prof_fine = -1;
+
+static int prof_fine_on(void)
+{
+    if (prof_fine < 0) {
+        char buf[4];
+        prof_fine = (GetVar((STRPTR)"SyndWarsProf", (STRPTR)buf, sizeof(buf), 0) >= 0)
+          && (buf[0] == '2');
+        LbWarnLog("prof: fine profiling %s\n", prof_fine ? "ON" : "off");
+    }
+    return prof_fine;
+}
+
 void amiga_prof_begin(int slot)
 {
+    if ((slot >= 32) && !prof_fine_on())
+        return;
     prof_start[slot] = prof_now();
 }
 
 void amiga_prof_end(int slot)
 {
+    if ((slot >= 32) && !prof_fine_on())
+        return;
     prof_sum[slot] += prof_now() - prof_start[slot];
 }
 
@@ -69,8 +96,16 @@ void amiga_prof_frame(void)
     if (now - prof_report < 5000)
         return;
     LbWarnLog("prof: %lu frames in %lu ms\n", prof_frames, (ulong)(now - prof_report));
-    LbWarnLog("prof:   gpoly %lu pixels, %lu spans per frame\n",
-      amiga_prof_pixels / prof_frames, amiga_prof_spans / prof_frames);
+    LbWarnLog("prof:   gpoly %lu pixels, %lu spans, %lu tris per frame\n",
+      amiga_prof_pixels / prof_frames, amiga_prof_spans / prof_frames,
+      amiga_prof_gpoly_tris / prof_frames);
+    amiga_prof_gpoly_tris = 0;
+    LbWarnLog("prof:   cnt sb %lu snb %lu nb %lu nnb %lu walk %lu ytop %lu %lu %lu\n",
+      amiga_prof_cnt[0] / prof_frames, amiga_prof_cnt[1] / prof_frames,
+      amiga_prof_cnt[2] / prof_frames, amiga_prof_cnt[3] / prof_frames,
+      amiga_prof_cnt[4] / prof_frames, amiga_prof_cnt[5] / prof_frames,
+      amiga_prof_cnt[6] / prof_frames, amiga_prof_cnt[7] / prof_frames);
+    for (i = 0; i < 8; i++) amiga_prof_cnt[i] = 0;
     amiga_prof_pixels = 0;
     amiga_prof_spans = 0;
     for (i = 0; i < PROF_SLOTS; i++)
@@ -99,11 +134,15 @@ static ULONG item_start;
 
 void amiga_prof_item_begin(void)
 {
+    if (!prof_fine_on())
+        return;
     item_start = prof_now();
 }
 
 void amiga_prof_item_end(int type)
 {
+    if (!prof_fine_on())
+        return;
     if ((type < 0) || (type >= PROF_ITEM_TYPES))
         type = 0;
     item_sum[type] += prof_now() - item_start;
@@ -136,11 +175,15 @@ static ULONG mode_start;
 
 void amiga_prof_mode_begin(void)
 {
+    if (!prof_fine_on())
+        return;
     mode_start = prof_now();
 }
 
 void amiga_prof_mode_end(int mode)
 {
+    if (!prof_fine_on())
+        return;
     if ((mode < 0) || (mode >= PROF_MODES))
         mode = 0;
     mode_sum[mode] += prof_now() - mode_start;
@@ -165,7 +208,6 @@ void amiga_prof_mode_report(ULONG frames)
     }
 }
 
-#include <proto/dos.h>
 /** Render check mode: ENV:SyndWarsCheck exists. */
 int amiga_check_enabled(void)
 {

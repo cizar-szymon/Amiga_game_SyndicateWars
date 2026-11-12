@@ -1832,11 +1832,15 @@ void should_i_get_item(struct Thing *p_person, struct SimpleThing *p_sthing)
         : : "a" (p_person), "d" (p_sthing));
 }
 
+/** Checks the things on one tile for check_for_other_people(). `found` is the
+ * result so far: the original kept one result for all the tiles, cleared once
+ * at the start (it was left uninitialised here, so the result depended on
+ * the stack contents).
+ */
 ThingIdx check_for_other_people_on_tile(int x, int y, int z,
-  short tile_x, short tile_z, struct Thing *p_person)
+  short tile_x, short tile_z, struct Thing *p_person, ThingIdx found)
 {
     ThingIdx thing;
-    ThingIdx found;
     uint k;
 
     thing = get_mapwho_thing_index(tile_x, tile_z);
@@ -2007,16 +2011,12 @@ short check_for_other_people(int x, int y, int z, struct Thing *p_person)
         for (dz = -1; dz <= 1; dz++)
         {
             short cur_tile_z;
-            ThingIdx found_on_tl;
-
             cur_tile_z = tile_z_center + dz;
             if ((cur_tile_z <= 0) || (cur_tile_z >= MAP_TILE_HEIGHT))
                 continue;
 
-            found_on_tl = check_for_other_people_on_tile(x, y, z,
-              cur_tile_x, cur_tile_z, p_person);
-            if (found_on_tl != 0)
-                found = found_on_tl;
+            found = check_for_other_people_on_tile(x, y, z,
+              cur_tile_x, cur_tile_z, p_person, found);
         }
     }
     return found;

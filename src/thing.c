@@ -33,6 +33,7 @@
 #include "command.h"
 #include "display.h"
 #include "engindrwlstx.h"
+#include "enginlights.h"
 #include "enginsngobjs.h"
 #include "enginsngtxtr.h"
 #include "frame_sprani.h"
@@ -458,11 +459,318 @@ int process_things_bang(int affected_max)
     return ret;
 }
 
-void unkn_update_lights(void)
+#ifdef SW_FNCHK
+static void unkn_update_lights_asm(void)
 {
     asm volatile ("call ASM_unkn_update_lights\n"
-        :  :  : "eax" );
-    return;
+        : : : "eax", "cc", "memory");
+}
+#endif
+
+/* Light commands are kept as the bytes of the level file; their 16-bit
+ * fields are little endian (see lvendian.c). */
+static inline ushort lcmd_get16(const ubyte *p, int offs)
+{
+    return (ushort)(p[offs] | (p[offs + 1] << 8));
+}
+
+static inline void lcmd_set16(ubyte *p, int offs, ushort val)
+{
+    p[offs] = (ubyte)val;
+    p[offs + 1] = (ubyte)(val >> 8);
+}
+
+/** Set the intensity of a light, or of the chain of lights of a scenery
+ * sthing (negative index), to `ratio`/256 of its true intensity.
+ * Remade from light_cmd_unkn_func_05.
+ */
+static void light_cmd_set_intensity(short lgt, ushort ratio)
+{
+    struct FullLight *p_flight;
+
+    if (lgt < 0)
+    {
+        short flight;
+
+        flight = sthings[lgt].U.UScenery.LightHead;
+        while (flight != 0)
+        {
+            if ((flight > (int)next_full_light) || (flight < 0))
+                break;
+            p_flight = &game_full_lights[flight];
+            p_flight->Intensity = (short)(((s32)ratio * p_flight->TrueIntensity) >> 8);
+            flight = p_flight->NextFull;
+        }
+    }
+    else
+    {
+        p_flight = &game_full_lights[lgt];
+        p_flight->Intensity = (short)(((s32)ratio * p_flight->TrueIntensity) >> 8);
+    }
+}
+
+/** Area light command: switched on (flag 0x20) while a person stands within
+ * the map rectangle given by the command, re-checked every few turns.
+ * Remade from light_cmd_unkn_func_06.
+ */
+static void light_cmd_check_people_in_area(ubyte *p_lcmd)
+{
+    int col, row;
+    TbBool found;
+
+    // the original tested `flags | 0x20`, always true
+    p_lcmd[0x14]--;
+    if ((sbyte)p_lcmd[0x14] <= 0)
+        p_lcmd[0] &= ~0x20;
+    if ((sbyte)p_lcmd[0x14] > 0)
+        return;
+
+    found = false;
+    for (col = p_lcmd[0xc]; col < p_lcmd[0xe]; col++)
+    {
+        for (row = p_lcmd[0xd]; row < p_lcmd[0xf]; row++)
+        {
+            short thing;
+
+            // out of the map: the original left without updating the command
+            if (col >= MAP_TILE_WIDTH)
+                return;
+            if (row >= MAP_TILE_HEIGHT)
+                return;
+            thing = game_my_big_map[row * MAP_TILE_WIDTH + col].Child;
+            if ((thing > 0) && (things[thing].Type == TT_PERSON)) {
+                found = true;
+                break;
+            }
+        }
+        if (found)
+            break;
+    }
+    p_lcmd[0x9] = 0;
+    if (found) {
+        p_lcmd[0x14] = 20;
+        p_lcmd[0] &= ~0x20;
+    } else {
+        p_lcmd[0x14] = 4;
+        p_lcmd[0] |= 0x20;
+    }
+}
+
+/** Random flicker (command type 1): on and off for a random number of turns
+ * between the two limits.
+ */
+static void light_cmd_flicker(ubyte *p_lcmd, short lgt)
+{
+    if ((p_lcmd[0] & 0x04) != 0)
+    {
+        p_lcmd[2]--;
+        if ((sbyte)p_lcmd[2] >= 0)
+            return;
+        if (p_lcmd[5] == p_lcmd[6]) {
+            p_lcmd[8] = p_lcmd[6];
+        } else {
+            int range = (int)p_lcmd[5] - (int)p_lcmd[6];
+            p_lcmd[8] = (ubyte)(p_lcmd[6] + (int)LbRandomAnyShort() % range);
+        }
+        p_lcmd[2] = p_lcmd[8];
+        light_cmd_set_intensity(lgt, p_lcmd[3]);
+        p_lcmd[0] = (p_lcmd[0] & 0xf9) | 0x02;
+    }
+    else if ((p_lcmd[0] & 0x02) != 0)
+    {
+        p_lcmd[2]--;
+        if ((sbyte)p_lcmd[2] >= 0)
+            return;
+        if (p_lcmd[5] == p_lcmd[6]) {
+            p_lcmd[7] = p_lcmd[6];
+        } else {
+            int range = (int)p_lcmd[5] - (int)p_lcmd[6];
+            p_lcmd[7] = (ubyte)(p_lcmd[6] + (int)LbRandomAnyShort() % range);
+        }
+        // the original restarts the counter from 0 here, not from the
+        // random value it has just drawn
+        p_lcmd[2] = 0;
+        light_cmd_set_intensity(lgt, p_lcmd[4]);
+        p_lcmd[0] = (p_lcmd[0] & 0xf9) | 0x04;
+    }
+}
+
+/** Pulse (command type 2): the ratio at 0xA goes up and down between the
+ * limits at 3 and 4, by the steps at 6 and 5.
+ */
+static void light_cmd_pulse(ubyte *p_lcmd, short lgt)
+{
+    ushort val;
+
+    if ((p_lcmd[0] & 0x08) != 0)
+    {
+        val = lcmd_get16(p_lcmd, 0xa) + p_lcmd[6];
+        lcmd_set16(p_lcmd, 0xa, val);
+        if ((short)val >= (int)p_lcmd[3]) {
+            lcmd_set16(p_lcmd, 0xa, p_lcmd[3]);
+            p_lcmd[0] &= ~0x08;
+        }
+    }
+    else
+    {
+        val = lcmd_get16(p_lcmd, 0xa) - p_lcmd[5];
+        lcmd_set16(p_lcmd, 0xa, val);
+        if ((short)val <= (int)p_lcmd[4]) {
+            lcmd_set16(p_lcmd, 0xa, p_lcmd[4]);
+            p_lcmd[0] |= 0x08;
+        }
+    }
+    light_cmd_set_intensity(lgt, lcmd_get16(p_lcmd, 0xa));
+}
+
+/** On/off with a counter (command type 6): on for the turns at 6, off for
+ * the turns at 5.
+ */
+static void light_cmd_blink(ubyte *p_lcmd, short lgt)
+{
+    if ((p_lcmd[0] & 0x04) != 0)
+    {
+        p_lcmd[2]--;
+        if ((sbyte)p_lcmd[2] >= 0)
+            return;
+        p_lcmd[8] = p_lcmd[6];
+        p_lcmd[2] = p_lcmd[6];
+        if ((sbyte)p_lcmd[6] > 0)
+            light_cmd_set_intensity(lgt, p_lcmd[3]);
+        p_lcmd[0] = (p_lcmd[0] & 0xf9) | 0x02;
+    }
+    else if ((p_lcmd[0] & 0x02) != 0)
+    {
+        p_lcmd[2]--;
+        if ((sbyte)p_lcmd[2] >= 0)
+            return;
+        p_lcmd[7] = p_lcmd[5];
+        p_lcmd[2] = p_lcmd[5];
+        if ((sbyte)p_lcmd[5] > 0)
+            light_cmd_set_intensity(lgt, p_lcmd[4]);
+        p_lcmd[0] = (p_lcmd[0] & 0xf9) | 0x04;
+    }
+}
+
+/** Follows an animated texture (command type 7): the light switches with the
+ * frames of the animation of the floor tile under it. The animation is found
+ * on the first call; without one the command becomes type 8 (nothing).
+ */
+static void light_cmd_anim_tmap(ubyte *p_lcmd, short lgt)
+{
+    short anim;
+
+    if ((short)lcmd_get16(p_lcmd, 0x10) >= (int)next_anim_tmap)
+        lcmd_set16(p_lcmd, 0x10, 0);
+    anim = (short)lcmd_get16(p_lcmd, 0x10);
+    if (anim != 0)
+    {
+        int frame;
+
+        frame = game_anim_tmaps[anim].field_22 + 1;
+        if ((p_lcmd[0] & 0x04) != 0)
+        {
+            if ((frame == p_lcmd[6]) || (frame == p_lcmd[5])) {
+                light_cmd_set_intensity(lgt, p_lcmd[3]);
+                p_lcmd[0] = (p_lcmd[0] & 0xf9) | 0x02;
+            }
+        }
+        else if ((p_lcmd[0] & 0x02) != 0)
+        {
+            if ((frame != p_lcmd[6]) && (frame != p_lcmd[5])) {
+                light_cmd_set_intensity(lgt, p_lcmd[4]);
+                p_lcmd[0] = (p_lcmd[0] & 0xf9) | 0x04;
+            }
+        }
+        return;
+    }
+    {
+        short tile;
+        ushort tex;
+
+        // map tile of the light (16-bit arithmetic, as the original)
+        if (lgt < 0) {
+            struct SimpleThing *p_sthing = &sthings[lgt];
+            tile = (short)(((ushort)(p_sthing->Z >> 16) << 7) + (ushort)(p_sthing->X >> 16));
+        } else {
+            struct FullLight *p_flight = &game_full_lights[lgt];
+            tile = (short)(((p_flight->Z >> 8) << 7) + (p_flight->X >> 8));
+        }
+        tex = game_my_big_map[tile].Texture & 0x3FFF;
+        anim = 0;
+        if (tex != 0)
+        {
+            for (anim = 10; anim < (int)next_anim_tmap; anim++)
+            {
+                if (game_anim_tmaps[anim].Texture == tex)
+                    break;
+            }
+            if (anim >= (int)next_anim_tmap)
+                anim = 0;
+        }
+        lcmd_set16(p_lcmd, 0x10, anim);
+        if (anim != 0)
+            return;
+        p_lcmd[1] = 8;
+        if (lgt < 0)
+            sthings[lgt].U.UScenery.LightHead = 0;
+        else
+            game_full_lights[lgt].Command = 0;
+    }
+}
+
+/** Run all light commands for this turn (flicker, pulse, blink, lights
+ * following animated textures, lights switched by people around).
+ * Remade from ASM_unkn_update_lights.
+ */
+static void unkn_update_lights_c(void)
+{
+    ushort lcmd;
+
+    for (lcmd = 1; lcmd < next_light_command; lcmd++)
+    {
+        ubyte *p_lcmd;
+        short lgt;
+
+        p_lcmd = game_light_commands[lcmd].lcfld_0;
+        lgt = (short)lcmd_get16(p_lcmd, 0x12);
+        // a light which belongs to another command is not driven by this one
+        if ((lgt <= 0) || (game_full_lights[lgt].Command == (short)lcmd))
+        {
+            switch (p_lcmd[1])
+            {
+            case 1:
+                light_cmd_flicker(p_lcmd, lgt);
+                break;
+            case 2:
+                light_cmd_pulse(p_lcmd, lgt);
+                break;
+            case 3:
+            case 4:
+            case 5:
+            case 8:
+                break;
+            case 6:
+                light_cmd_blink(p_lcmd, lgt);
+                break;
+            case 7:
+                light_cmd_anim_tmap(p_lcmd, lgt);
+                break;
+            default:
+                light_cmd_set_intensity(lgt, 0x100);
+                break;
+            }
+        }
+        if ((p_lcmd[0] & 0x10) != 0)
+            light_cmd_check_people_in_area(p_lcmd);
+        if ((p_lcmd[0] & 0x20) != 0)
+            light_cmd_set_intensity(lgt, 0);
+    }
+}
+
+void unkn_update_lights(void)
+{
+    FNCHK_VOID("unkn_update_lights", unkn_update_lights_asm(), unkn_update_lights_c());
 }
 
 int recalc_rocket_direction(struct Thing *p_rocket)

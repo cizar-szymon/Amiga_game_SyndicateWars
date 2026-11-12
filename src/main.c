@@ -1,4 +1,6 @@
+#if !defined(SW_AMIGA)
 #include <SDL.h>
+#endif
 #include <getopt.h>
 #include <stdlib.h>
 

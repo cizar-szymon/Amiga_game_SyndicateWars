@@ -261,6 +261,15 @@ void SyndFileNameTransform(char *out_fname, const char *inp_fname)
     // Add base path only if the input one is not absolute
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-truncation"
+#if defined(SW_AMIGA)
+    // AmigaDOS: a volume or assign name ends with ':', "/" there would mean
+    // the parent dir; any path with ':' is absolute.
+    if (strchr(fs_fname, ':') != NULL) {
+        snprintf(out_fname, FILENAME_MAX-1, "%s", fs_fname);
+    } else if ((base_dir[0] != '\0') && (base_dir[strlen(base_dir) - 1] == ':')) {
+        snprintf(out_fname, FILENAME_MAX-1, "%s%s", base_dir, fs_fname);
+    } else
+#endif
     if (fs_fname[0] == FS_SEP || (strlen(fs_fname) >= 2 && fs_fname[1] == ':')) {
         snprintf(out_fname, FILENAME_MAX-1, "%s", fs_fname);
     } else {

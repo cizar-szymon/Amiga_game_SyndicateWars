@@ -31,12 +31,16 @@ unsigned short const lbSqrTable[] = {
  */
 static inline void _BitScanReverse(ulong *y, ulong x)
 {
+#if defined(__i386__)
     asm ("bsrl     %1, %%eax;\n"
        "movl %%eax, (%0);\n"
        :  // output (none as we derefenence input pointer)
        :"r" (y), "r" (x)   // input
        :"%eax", "memory"   // clobbered
        );
+#else
+    *y = 31 - __builtin_clz((unsigned int)x);
+#endif
 }
 
 long LbSqrL(ulong x)

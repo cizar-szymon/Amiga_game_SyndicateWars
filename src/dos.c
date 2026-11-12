@@ -16,7 +16,11 @@
  *     (at your option) any later version.
  */
 /******************************************************************************/
+#if !defined(SW_AMIGA)
 #include <SDL.h>
+#else
+#include "bftime.h"
+#endif
 #include <ctype.h>
 #include <dirent.h>
 #include <errno.h>
@@ -203,7 +207,12 @@ int dos_setmode(int fd, int mode)
 
 uint32_t dos_clock(void)
 {
+#if !defined(SW_AMIGA)
     return ((uint64_t) SDL_GetTicks() * DOS_CLOCKS_PER_SEC / 1000);
+#else
+    // no 64-bit math on 68060: 1000 is a multiple of DOS_CLOCKS_PER_SEC
+    return LbTimerClock() / (1000 / DOS_CLOCKS_PER_SEC);
+#endif
 }
 
 static void replace_backslash_with_fs_separator(char *path)

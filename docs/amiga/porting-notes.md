@@ -13,9 +13,12 @@ Sposób portowania według `PORTING_PLAN.md`: **D (port ze źródeł)** z etapem
 | A0. Inwentaryzacja asm | ✅ wstępna (statyczna), `asm-inventory.md` |
 | A0. Kolejność konwersji | ⏳ do akceptacji użytkownika |
 | A0. Test grywalności wersji referencyjnej (użytkownik) | ✅ 11.11.2026 „działa, gra się dobrze” |
-| A1. Konwersja asm → C | – |
-| A2. Higiena przenośności (endianness, układ struktur) | – |
-| B. Amiga | – |
+| A1. Konwersja asm → C: wczytanie i rysowanie misji 1 | ✅ ~35 funkcji, fncheck 0 różnic |
+| A1. Konwersja asm → C: symulacja świata (process_things) | ⏳ ~57 funkcji |
+| A2. Kolejność bajtów: mapa, poziom, prymitywy, sprite'y, animacje, FLI, WAD | ✅ (misja 1) |
+| B1. Build Amigi (Docker, bebbo gcc), warstwa bflibrary m68k-amigaos | ✅ |
+| B1. Misja 1 na Amidze | ✅ 12.11.2026: Amiga 1 (Warp 1260) ~5 kl./s, obraz zgodny z PC |
+| B3. Optymalizacja | ⏳ następny krok: pomiar podziału czasu klatki |
 
 ## 11.11.2026 — start
 
@@ -60,3 +63,18 @@ pozostałe ścieżki (broń, eksplozje, pojazdy) trzeba jeszcze zmierzyć.
 - Ok. 56,5 tys. żywych instrukcji x86 logiki gry (`swars.sx`) — główny koszt etapu A.
   Upstream przepisuje ok. 30 funkcji miesięcznie; trzeba się z nim zgrać.
 - Brak (jeszcze) narzędzia do porównania stanu gry asm vs C po konwersji funkcji.
+
+## 12.11.2026 — misja 1 na Amidze
+
+Droga do pierwszego obrazu (kolejne awarie i ich przyczyny):
+1. brak `config.ini` (Data="Max") - gra szukała danych na „CD”;
+2. indeks WAD (`Offset`, `Length`) little endian - zły tekst celów (asercja);
+3. mapa `.mad` i poziom - konwersja przez `lvendian.c` + `data_layouts.h`;
+4. prymitywy pojazdów (`qdata/primveh.obj`) - skaner poza mapą;
+5. `mul_shift16_sign_pad_lo` (wstawka x86 bez `call`) zamieniona przez zaślepkę na 0;
+6. odtwarzacz FLI (billboardy) - nagłówki little endian, przepełnienie bufora
+   nadpisywało mapę (listy mapwho) -> nieskończona pętla w `engine_draw_things`.
+Znalezione śladem faz pętli (`AMIGA_STEP`, `platform/amiga/phase_trace.c`) i kontrolą list mapwho.
+
+Pomiar: Amiga 1 (A1200 + Warp 1260, 68060) ~5 kl./s w misji 1, 640x480x8, świat zamrożony.
+WinUAE z JIT (`C:/amiga-dev/winuae/SyndWars_A1200_OS32_net_jit.uae`, bez MMU) - testy funkcjonalne.

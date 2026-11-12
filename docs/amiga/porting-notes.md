@@ -18,7 +18,7 @@ Sposób portowania według `PORTING_PLAN.md`: **D (port ze źródeł)** z etapem
 | A2. Kolejność bajtów: mapa, poziom, prymitywy, sprite'y, animacje, FLI, WAD | ✅ (misja 1) |
 | B1. Build Amigi (Docker, bebbo gcc), warstwa bflibrary m68k-amigaos | ✅ |
 | B1. Misja 1 na Amidze | ✅ 12.11.2026: Amiga 1 (Warp 1260) ~5 kl./s, obraz zgodny z PC |
-| B3. Optymalizacja | ⏳ 12.11.2026: 218 → 84 ms na klatkę (4,6 → ~12 kl./s), tabela niżej |
+| B3. Optymalizacja | ⏳ 12.11.2026: 218 → 77 ms na klatkę (4,6 → 12,9 kl./s), tabela niżej |
 
 ## 11.11.2026 — start
 
@@ -110,6 +110,14 @@ Narzędzia:
 | `draw_drawlist_2` pomija puste kubełki (24 000 na klatkę, 2 wywołania i 2 dzielenia każdy); `asm_stub_hit` bez `strcmp` przy każdym wywołaniu | **83,5** | zrzut zgodny |
 | własne `__divdi3/__moddi3`, `mul_shift16_sign_pad_lo` bez mnożenia 64-bit | 84,0 (szum) | PC: 0 różnic |
 | areny pamięci wyrównane do 16 B (bufor ekranu był przesunięty o 8 → MOVE16 nie działał: kopia 9,7 ms zamiast 5,8) | 84,0 | log adresu |
+| rasteryzator `shaded_nobound` (165 z 212 trójkątów) ze stanem w rejestrach | 82,8 | check: trójkąt rysowany obiema wersjami, wiersze porównane, 0 różnic |
+| cała pętla linii trójkąta w asm (`gpoly_lines_shaded_68k`: odcinek + krawędzie + krok bez wywołania na linię) | 79,2 | check: ~8800 trójkątów, 0 różnic; widok 3D identyczny na zrzucie |
+| `gpoly_mul_rot_1/2`, `gpoly_get_uv_inc` bez iloczynu 64-bit (ok. 9 `__muldi3` na trójkąt) | 78,8 | PC: 30 mln par 0 różnic; zrzut |
+| rasteryzator `shaded_bound` (trójkąty przy krawędzi ekranu) ze stanem w rejestrach | 78,1 | check: 2048 trójkątów, 0 różnic |
+| pętla mieszania mapy skanera w asm (mapa skanera 3,5 → 2,5 ms) | **77,2** | check: piksele i stan końcowy każdej linii, 0 różnic |
+
+Pomiar końcowy (60 s): **77,3 ms na klatkę, 12,9 kl./s** (66 klatek w 5,1 s, stabilnie).
+Licznik pikseli gpoly w raporcie nie obejmuje już linii rysowanych przez `gpoly_lines_shaded_68k`.
 
 Próby nieudane:
 - zapis odcinka długimi słowami (4 piksele w rejestrze) — wolniej (42,0 zamiast 39,6 ms rasteryzacji):
@@ -129,8 +137,12 @@ Profil próbkujący (po zmianach): pętle odcinków gpoly 31%, system (kopia na 
 (narzut na linię), mieszanie mapy skanera 4%, `draw_object_faces` + widoczność ścian ok. 4%.
 
 Zostało do zrobienia (kolejność według zysku):
-- rasteryzator gpoly (`shaded_nobound`/`bound`) z całą pętlą linii w asm — ok. 3–5 ms;
-- pętla mieszania mapy skanera w asm — ok. 1,5 ms;
-- `transform_shpoint` i budowanie listy ścian obiektów;
+- pętla pikseli gpoly (ok. 25% klatki) — ograniczona łańcuchem zależności ADDX; dalsze próby
+  wymagają innego rozkładu instrukcji albo zmiany formatu stanu (z zachowaniem bitów wyniku);
+- `draw_things` 9 ms: przechodzenie kafli (`engine_draw_things`), ściany budynków
+  (`draw_object_faces`, `object_face_get_visible_max_depth`) — dużo drobnych kosztów;
+- podłoga 6,4 ms (2080 punktów siatki: wysokość, `transform_shpoint`, cień);
+- kropki skanera 2,8 ms (`map_coords_to_scanner`: 2 dzielenia 64-bit na obiekt);
+- czyszczenie bufora 2,1 ms i kopia na kartę 5,8 ms (granica szybkości VRAM);
 - uwaga: zaślepki symulacji (`process_*`, `people_intel`, ale też **`calc_lighting`** i **`arctan`**)
   są wywoływane co turę — po ich konwersji czas `things` wzrośnie.

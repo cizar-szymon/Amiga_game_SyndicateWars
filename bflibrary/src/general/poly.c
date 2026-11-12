@@ -69,12 +69,17 @@ void amiga_prof_mode_end(int mode);
 void amiga_prof_begin(int slot);
 void amiga_prof_end(int slot);
 extern unsigned long amiga_prof_gpoly_tris;
+extern int amiga_prof_level;
 static void trig_inner(struct PolyPoint *point_a, struct PolyPoint *point_b,
   struct PolyPoint *point_c);
 
 void trig(struct PolyPoint *point_a, struct PolyPoint *point_b,
   struct PolyPoint *point_c)
 {
+    if (amiga_prof_level < 2) {
+        trig_inner(point_a, point_b, point_c);
+        return;
+    }
     amiga_prof_mode_begin();
     trig_inner(point_a, point_b, point_c);
     amiga_prof_mode_end(vec_mode);

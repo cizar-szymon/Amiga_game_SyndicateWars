@@ -588,6 +588,9 @@ main (int argc, char **argv)
 #if defined(SW_AMIGA)
     {
         void amiga_sampler_start(void);
+        void amiga_prof_init(void);
+
+        amiga_prof_init();
         amiga_sampler_start();
     }
 #endif

@@ -162,6 +162,7 @@ void draw_drawitem_1(ushort dihead)
 #if defined(SW_AMIGA)
 void amiga_prof_item_begin(void);
 void amiga_prof_item_end(int type);
+extern int amiga_prof_level;
 #endif
 
 void draw_drawitem_2(ushort dihead)
@@ -182,7 +183,8 @@ void draw_drawitem_2(ushort dihead)
           break;
       p_itm = &game_draw_list[iidx];
 #if defined(SW_AMIGA)
-      amiga_prof_item_begin();
+      if (amiga_prof_level >= 2)
+          amiga_prof_item_begin();
 #endif
       switch (p_itm->Type)
       {
@@ -269,7 +271,8 @@ void draw_drawitem_2(ushort dihead)
           break;
       }
 #if defined(SW_AMIGA)
-      amiga_prof_item_end(p_itm->Type);
+      if (amiga_prof_level >= 2)
+          amiga_prof_item_end(p_itm->Type);
 #endif
     }
 }

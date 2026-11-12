@@ -50,32 +50,40 @@ static ULONG prof_now(void)
     return ev.ev_lo;
 }
 
-/* Fine profiling (slots >= 32, draw item types, render modes) reads the
- * E-clock hundreds of times per frame, which costs several ms itself.
- * It is on only when ENV:SyndWarsProf is set to 2. */
-static int prof_fine = -1;
+/* Profiling level from ENV:SyndWarsProf, read once at start:
+ * unset - only the frame count and average frame time every 5 s (the ~30
+ *   slots read the E-clock twice each, about 1 ms per frame);
+ * "1" (or any value but "2") - slots 0..31;
+ * "2" - also fine slots >= 32, draw item types and render modes (hundreds
+ *   of E-clock reads per frame, several ms). */
+int amiga_prof_level;
+
+void amiga_prof_init(void)
+{
+    char buf[4];
+
+    if (GetVar((STRPTR)"SyndWarsProf", (STRPTR)buf, sizeof(buf), 0) >= 0)
+        amiga_prof_level = (buf[0] == '2') ? 2 : 1;
+    else
+        amiga_prof_level = 0;
+    LbWarnLog("prof: level %d\n", amiga_prof_level);
+}
 
 static int prof_fine_on(void)
 {
-    if (prof_fine < 0) {
-        char buf[4];
-        prof_fine = (GetVar((STRPTR)"SyndWarsProf", (STRPTR)buf, sizeof(buf), 0) >= 0)
-          && (buf[0] == '2');
-        LbWarnLog("prof: fine profiling %s\n", prof_fine ? "ON" : "off");
-    }
-    return prof_fine;
+    return (amiga_prof_level >= 2);
 }
 
 void amiga_prof_begin(int slot)
 {
-    if ((slot >= 32) && !prof_fine_on())
+    if (amiga_prof_level < ((slot >= 32) ? 2 : 1))
         return;
     prof_start[slot] = prof_now();
 }
 
 void amiga_prof_end(int slot)
 {
-    if ((slot >= 32) && !prof_fine_on())
+    if (amiga_prof_level < ((slot >= 32) ? 2 : 1))
         return;
     prof_sum[slot] += prof_now() - prof_start[slot];
 }
@@ -96,6 +104,14 @@ void amiga_prof_frame(void)
     if (now - prof_report < 5000)
         return;
     LbWarnLog("prof: %lu frames in %lu ms\n", prof_frames, (ulong)(now - prof_report));
+    if (amiga_prof_level == 0) {
+        ULONG per10 = (ULONG)(now - prof_report) * 10 / prof_frames;
+
+        LbWarnLog("prof:   frame (avg)        %4lu.%lu ms\n", per10 / 10, per10 % 10);
+        prof_frames = 0;
+        prof_report = now;
+        return;
+    }
     LbWarnLog("prof:   gpoly %lu pixels, %lu spans, %lu tris per frame\n",
       amiga_prof_pixels / prof_frames, amiga_prof_spans / prof_frames,
       amiga_prof_gpoly_tris / prof_frames);

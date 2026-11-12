@@ -28,8 +28,9 @@ void amiga_phase_trace(int phase);
 #define AMIGA_STEP(n) amiga_phase_trace(100 + (n))
 void amiga_prof_begin(int slot);
 void amiga_prof_end(int slot);
-#define AMIGA_PROF_BEGIN(n) amiga_prof_begin(n)
-#define AMIGA_PROF_END(n) amiga_prof_end(n)
+extern int amiga_prof_level; /* platform/amiga/prof.c */
+#define AMIGA_PROF_BEGIN(n) do { if (amiga_prof_level) amiga_prof_begin(n); } while (0)
+#define AMIGA_PROF_END(n) do { if (amiga_prof_level) amiga_prof_end(n); } while (0)
 #else
 #define asm_cov_phase(phase) ((void)0)
 #endif

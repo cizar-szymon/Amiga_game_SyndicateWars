@@ -484,6 +484,160 @@ void SCANNER_map_line_sample(void)
     SCANNER_ln_width = n;
 }
 
+/** State of one scanner map blend scanline: tile = tile_x << 8 | tile_z
+ * (the index into SCANNER_data), fractions of both map coordinates.
+ */
+struct scanner_blend_state {
+    TbPixel *out;
+    u32 tile;
+    u32 frac_x, frac_z;
+};
+
+/** Blends n map pixels with the screen, as
+ * LbBlendPixelLowTrans4Remap(pixmap.fade_table, 0, 1, col1, *p_out)
+ * with the tables in locals: stores through p_out (a char pointer) would
+ * otherwise force the compiler to reload every global per pixel.
+ */
+static void scanner_blend_line_c(struct scanner_blend_state *sb, s32 n,
+  u32 step_frac_x, u32 step_frac_z, ubyte step_int_x, ubyte step_int_z)
+{
+    const ubyte *bright = low_trans_grey_pal_bright;
+    const ubyte *limit = low_trans_grey_bright_limit;
+    const TbPixel *fade = pixmap.fade_table;
+    ubyte base = (ubyte)low_trans_grey_brightness;
+    ubyte tile_x = (ubyte)(sb->tile >> 8), tile_z = (ubyte)sb->tile;
+    u32 frac_x = sb->frac_x, frac_z = sb->frac_z;
+    TbPixel *p_out = sb->out;
+    s32 i;
+
+    for (i = 0; i < n; i++)
+    {
+        TbPixel col1;
+        u32 new_frac;
+        ubyte brig;
+
+        col1 = SCANNER_data[tile_x][tile_z];
+        brig = limit[(ubyte)(base + bright[col1] + (bright[*p_out] >> 1))];
+        *p_out = fade[(brig << 8) | col1];
+        p_out++;
+
+        new_frac = frac_x + step_frac_x;
+        tile_x = tile_x + step_int_x + (new_frac < frac_x);
+        frac_x = new_frac;
+
+        new_frac = frac_z + step_frac_z;
+        tile_z = tile_z + step_int_z + (new_frac < frac_z);
+        frac_z = new_frac;
+    }
+    sb->out = p_out;
+    sb->tile = ((u32)tile_x << 8) | tile_z;
+    sb->frac_x = frac_x;
+    sb->frac_z = frac_z;
+}
+
+#if defined(__mc68000__) || defined(__m68k__)
+#if (SCANNER_MAPDATA_WIDTH != 256)
+#error scanner_blend_line_68k assumes 256 map columns
+#endif
+/** 68k version of scanner_blend_line_c(). The word register w holds
+ * tile_x:tile_z, the index into SCANNER_data; ADD.L of a fraction sets X,
+ * ADDX.B adds the integer step and carry to the low byte, ROR.W #8 (leaves X)
+ * brings tile_x down for its step. LSR/LSL set X, so they come before the
+ * fraction adds.
+ */
+__attribute__((noinline))
+static void scanner_blend_line_68k(struct scanner_blend_state *sb, s32 n,
+  u32 step_frac_x, u32 step_frac_z, ubyte step_int_x, ubyte step_int_z)
+{
+    TbPixel *out = sb->out;
+    u32 end = (u32)(sb->out + n);
+    u32 w = sb->tile & 0xFFFF;
+    u32 fx = sb->frac_x, fz = sb->frac_z;
+    u32 six = step_int_x, siz = step_int_z;
+    const ubyte *sfx = (const ubyte *)step_frac_x;
+    u32 sfz = step_frac_z;
+    ubyte base = (ubyte)low_trans_grey_brightness;
+
+    __asm__ volatile (
+        "1:  moveq #0,%%d6\n"
+        "    moveq #0,%%d7\n"
+        "    move.b (%[map],%[w].l),%%d6\n"
+        "    move.b (%[out]),%%d7\n"
+        "    move.b (%[bright],%%d7.l),%%d7\n"
+        "    lsr.b #1,%%d7\n"
+        "    add.b (%[bright],%%d6.l),%%d7\n"
+        "    add.b %[base],%%d7\n"
+        "    move.b (%[limit],%%d7.l),%%d7\n"
+        "    lsl.w #8,%%d7\n"
+        "    move.b %%d6,%%d7\n"
+        "    move.b (%[fade],%%d7.l),(%[out])+\n"
+        "    add.l %[sfx],%[fx]\n"
+        "    ror.w #8,%[w]\n"
+        "    addx.b %[six],%[w]\n"
+        "    ror.w #8,%[w]\n"
+        "    add.l %[sfz],%[fz]\n"
+        "    addx.b %[siz],%[w]\n"
+        "    cmp.l %[end],%[out]\n"
+        "    bcs 1b\n"
+        : [out] "+a" (out), [w] "+d" (w), [fx] "+d" (fx), [fz] "+d" (fz)
+        : [end] "d" (end), [six] "d" (six), [siz] "d" (siz), [sfx] "a" (sfx),
+          [sfz] "m" (sfz), [base] "m" (base),
+          [map] "a" (&SCANNER_data[0][0]), [bright] "a" (low_trans_grey_pal_bright),
+          [limit] "a" (low_trans_grey_bright_limit), [fade] "a" (pixmap.fade_table)
+        : "d6", "d7", "cc", "memory");
+    sb->out = out;
+    sb->tile = w & 0xFFFF;
+    sb->frac_x = fx;
+    sb->frac_z = fz;
+}
+
+#if defined(SW_AMIGA)
+int amiga_check_enabled(void);
+#endif
+#endif
+
+static void scanner_blend_line(struct scanner_blend_state *sb, s32 n,
+  u32 step_frac_x, u32 step_frac_z, ubyte step_int_x, ubyte step_int_z)
+{
+    if (n <= 0)
+        return;
+#if defined(__mc68000__) || defined(__m68k__)
+#if defined(SW_AMIGA)
+    {
+        static int check = -1;
+        static unsigned long lines, fails;
+
+        if (check < 0)
+            check = amiga_check_enabled();
+        if (check && (n <= 640)) {
+            static TbPixel before[640], fast[640];
+            struct scanner_blend_state ref = *sb;
+            TbPixel *o = sb->out;
+
+            memcpy(before, o, n);
+            scanner_blend_line_68k(sb, n, step_frac_x, step_frac_z, step_int_x, step_int_z);
+            memcpy(fast, o, n);
+            memcpy(o, before, n);
+            scanner_blend_line_c(&ref, n, step_frac_x, step_frac_z, step_int_x, step_int_z);
+            lines++;
+            if ((memcmp(fast, o, n) != 0) || (ref.out != sb->out) || (ref.tile != sb->tile)
+              || (ref.frac_x != sb->frac_x) || (ref.frac_z != sb->frac_z)) {
+                if (fails < 20)
+                    LOGERR("scanner blend line %lu (n=%d) differs", lines, (int)n);
+                fails++;
+            }
+            if ((lines & 0x3FFF) == 0)
+                LOGWARN("scanner blend check: %lu lines, %lu different", lines, fails);
+            return;
+        }
+    }
+#endif
+    scanner_blend_line_68k(sb, n, step_frac_x, step_frac_z, step_int_x, step_int_z);
+#else
+    scanner_blend_line_c(sb, n, step_frac_x, step_frac_z, step_int_x, step_int_z);
+#endif
+}
+
 /** Draws one scanner floor map scanline for the transparent map variant.
  *
  *  Samples `SCANNER_data` and blends it with what is already on screen.
@@ -518,33 +672,18 @@ void SCANNER_map_line_sample_blend(void)
     n = SCANNER_ln_width;
 
     {
-    // Same as LbBlendPixelLowTrans4Remap(pixmap.fade_table, 0, 1, col1, *p_out)
-    // with the tables in locals: stores through p_out (a char pointer) would
-    // otherwise force the compiler to reload every global per pixel.
-    const ubyte *bright = low_trans_grey_pal_bright;
-    const ubyte *limit = low_trans_grey_bright_limit;
-    const TbPixel *fade = pixmap.fade_table;
-    ubyte base = (ubyte)low_trans_grey_brightness;
+        struct scanner_blend_state sb;
 
-    for (i = 0; i < n; i++)
-    {
-        TbPixel col1;
-        u32 new_frac;
-        ubyte brig;
-
-        col1 = SCANNER_data[tile_x][tile_z];
-        brig = limit[(ubyte)(base + bright[col1] + (bright[*p_out] >> 1))];
-        *p_out = fade[(brig << 8) | col1];
-        p_out++;
-
-        new_frac = frac_x + step_frac_x;
-        tile_x = tile_x + step_int_x + (new_frac < frac_x);
-        frac_x = new_frac;
-
-        new_frac = frac_z + step_frac_z;
-        tile_z = tile_z + step_int_z + (new_frac < frac_z);
-        frac_z = new_frac;
-    }
+        sb.out = p_out;
+        sb.tile = ((u32)tile_x << 8) | tile_z;
+        sb.frac_x = frac_x;
+        sb.frac_z = frac_z;
+        scanner_blend_line(&sb, n, step_frac_x, step_frac_z, step_int_x, step_int_z);
+        p_out = sb.out;
+        tile_x = (ubyte)(sb.tile >> 8);
+        tile_z = (ubyte)sb.tile;
+        frac_x = sb.frac_x;
+        frac_z = sb.frac_z;
     }
 
     SCANNER_scr_x = ((frac_x >> 16) | ((u32)tile_x << 16));

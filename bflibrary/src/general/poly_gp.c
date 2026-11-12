@@ -472,13 +472,25 @@ static TbPixel gpoly_pixel_noshade(struct gpoly_blends *p_bld, const struct gpol
 }
 
 /******************************************************************************/
+#if defined(__arm__)
+/* ARM: the span loops as functions of their own - inlined into the big
+ * rasterizers they have too few registers and reload the tables per pixel */
+#define GP_SPAN_FN __attribute__((noinline))
+#else
+#define GP_SPAN_FN
+#endif
+
 // Span loops. The rasterizers restore the blend state after each span, so a
 // span only reads its start state. Same results as gpoly_pixel_shaded() and
 // gpoly_pixel_noshade() repeated n times.
 
-static void gpoly_span_shaded_c(ubyte *o, int n, const struct gpoly_blends *p_bld,
+GP_SPAN_FN static void gpoly_span_shaded_c(ubyte *o, int n, const struct gpoly_blends *p_bld,
   const struct gpoly_factors *p_inc)
 {
+    // the tables in locals: a byte store through o could alias the global
+    // pointers, so the compiler would load them again for every pixel
+    const ubyte *map = vec_map;
+    const ubyte *fade = pixmap.fade_table;
     u32 b0, b2, s1, s2;
     ubyte v, s3;
 
@@ -495,7 +507,7 @@ static void gpoly_span_shaded_c(ubyte *o, int n, const struct gpoly_blends *p_bl
         ubyte c;
 
         shade = (ubyte)(b2 >> 8);
-        texel = vec_map[(v << PITCH_SH) | (ubyte)b0];
+        texel = map[(v << PITCH_SH) | (ubyte)b0];
         nb = b2 + s1;
         c = (nb < b2);
         b2 = nb;
@@ -504,13 +516,14 @@ static void gpoly_span_shaded_c(ubyte *o, int n, const struct gpoly_blends *p_bl
         c = (nb < t);
         b0 = nb;
         v = (ubyte)(v + c + s3);
-        *o++ = pixmap.fade_table[(shade << 8) | texel];
+        *o++ = fade[(shade << 8) | texel];
     }
 }
 
-static void gpoly_span_noshade_c(ubyte *o, int n, const struct gpoly_blends *p_bld,
+GP_SPAN_FN static void gpoly_span_noshade_c(ubyte *o, int n, const struct gpoly_blends *p_bld,
   const struct gpoly_factors *p_inc)
 {
+    const ubyte *map = vec_map;
     u32 b0, b2, s1, s2;
     ubyte v, s3;
 
@@ -525,7 +538,7 @@ static void gpoly_span_noshade_c(ubyte *o, int n, const struct gpoly_blends *p_b
         u32 nb, t;
         ubyte c;
 
-        *o++ = vec_map[(v << PITCH_SH) | (ubyte)b0];
+        *o++ = map[(v << PITCH_SH) | (ubyte)b0];
         nb = b2 + s1;
         c = (nb < b2);
         b2 = nb;

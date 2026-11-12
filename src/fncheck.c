@@ -37,6 +37,7 @@ extern u32 engine_mem_alloc_size;
 struct FnStat {
     const char *name;
     unsigned long calls;
+    unsigned long seen;     /* all calls, also those not checked */
     unsigned long fails;
 };
 
@@ -56,6 +57,8 @@ struct FnChk {
     struct FnStat stat[FNCHK_MAX_FUNCS];
     int nstat;
     FILE *log;
+    char *only;             /* SW_FNCHK_ONLY, with commas at both ends */
+    unsigned long every;    /* SW_FNCHK_EVERY */
 };
 
 static struct FnChk *chk;
@@ -70,6 +73,19 @@ static void fnchk_init(void)
     chk = calloc(1, sizeof(*chk));
     chk->log = fopen("fncheck.log", "w");
     atexit(fnchk_summary);
+    {
+        const char *only = getenv("SW_FNCHK_ONLY");
+        const char *every = getenv("SW_FNCHK_EVERY");
+
+        if ((only != NULL) && (only[0] != '\0')) {
+            chk->only = malloc(strlen(only) + 3);
+            sprintf(chk->only, ",%s,", only);
+            fprintf(chk->log, "fncheck: only %s\n", only);
+        }
+        chk->every = (every != NULL) ? strtoul(every, NULL, 10) : 0;
+        if (chk->every > 1)
+            fprintf(chk->log, "fncheck: every %lu-th call after the first 1000\n", chk->every);
+    }
     fprintf(chk->log, "fncheck: data %p-%p bss %p-%p engine %p+%lu\n",
         fnchk_data_start, fnchk_data_end, fnchk_bss_start, fnchk_bss_end,
         engine_mem_alloc_ptr, (unsigned long)engine_mem_alloc_size);
@@ -112,14 +128,27 @@ static struct FnStat *fnchk_stat(const char *name)
     return &chk->stat[chk->nstat++];
 }
 
-TbBool fnchk_begin(void)
+static struct FnStat *fnchk_stat(const char *name);
+
+TbBool fnchk_begin(const char *name)
 {
+    struct FnStat *st;
     int i;
 
     if (depth != 0)
         return false;
     if (chk == NULL)
         fnchk_init();
+    st = fnchk_stat(name);
+    st->seen++;
+    if (chk->only != NULL) {
+        char key[64];
+        snprintf(key, sizeof(key), ",%s,", name);
+        if (strstr(chk->only, key) == NULL)
+            return false;
+    }
+    if ((chk->every > 1) && (st->seen > 1000) && (st->seen % chk->every) != 0)
+        return false;
     fnchk_update_regions();
     depth = 1;
     for (i = 0; i < chk->nreg; i++)
@@ -259,8 +288,8 @@ static void fnchk_summary(void)
 
     fprintf(chk->log, "SUMMARY\n");
     for (i = 0; i < chk->nstat; i++)
-        fprintf(chk->log, "  %-40s calls %8lu  fails %lu\n", chk->stat[i].name,
-            chk->stat[i].calls, chk->stat[i].fails);
+        fprintf(chk->log, "  %-40s calls %8lu  fails %lu  (of %lu)\n", chk->stat[i].name,
+            chk->stat[i].calls, chk->stat[i].fails, chk->stat[i].seen);
     fclose(chk->log);
 }
 

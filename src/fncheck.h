@@ -29,8 +29,12 @@ extern "C" {
 
 #ifdef SW_FNCHK
 
-/** Returns true if a check may start now (not nested inside another check). */
-TbBool fnchk_begin(void);
+/** Returns true if a check of `name` starts now: not nested inside another
+ * check, and selected by the environment - SW_FNCHK_ONLY=name1,name2,...
+ * checks only the listed functions (the rest run their C version alone),
+ * SW_FNCHK_EVERY=N checks each of the first 1000 calls of a function and
+ * then every N-th one. */
+TbBool fnchk_begin(const char *name);
 /** Asm version done: keep its result, restore the state from fnchk_begin(). */
 void fnchk_mid(void);
 /** C version done: compare with the asm result. Returns false on a difference. */
@@ -46,14 +50,14 @@ void fnchk_pure_result(const char *name, long ret_asm, long ret_c);
 
 /** Void function: asm statement, then C statement. */
 #define FNCHK_VOID(name, asm_stmt, c_stmt) do { \
-    if (fnchk_begin()) { \
+    if (fnchk_begin(name)) { \
         asm_stmt; fnchk_mid(); c_stmt; fnchk_end(name, 0, 0); \
     } else { c_stmt; } \
 } while (0)
 
 /** Function with a result: `res` gets the C result. */
 #define FNCHK_RET(name, res, asm_expr, c_expr) do { \
-    if (fnchk_begin()) { \
+    if (fnchk_begin(name)) { \
         long fnchk_ra_ = (long)(asm_expr); fnchk_mid(); \
         res = (c_expr); fnchk_end(name, fnchk_ra_, (long)(res)); \
     } else { res = (c_expr); } \

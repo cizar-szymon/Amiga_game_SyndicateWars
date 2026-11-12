@@ -17,6 +17,7 @@
  */
 /******************************************************************************/
 #include "weapon.h"
+#include "fncheck.h"
 
 #include "bfmath.h"
 #include "bfmemory.h"
@@ -4186,11 +4187,56 @@ int gun_out_anim(struct Thing *p_person, ubyte shoot_flag)
     }
 }
 
-ushort player_weapon_time(struct Thing *p_person)
+#ifdef SW_FNCHK
+static ushort player_weapon_time_asm(struct Thing *p_person)
 {
     ushort ret;
     asm volatile ("call ASM_player_weapon_time\n"
-        : "=r" (ret) : "a" (p_person));
+        : "=a" (ret) : "a" (p_person) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Counts down the weapon delays of a player's agent (the agent and the
+ * player taken from ComCur) and returns the delay of its current weapon;
+ * in a tank or a mech, the turn counter of the vehicle weapon instead.
+ */
+static ushort player_weapon_time_c(struct Thing *p_person)
+{
+    ushort plyr, plagent;
+    ushort wtype;
+
+    if ((p_person->Flag2 & TgF2_Unkn0800) != 0)
+        return 0;
+    plagent = p_person->U.UPerson.ComCur & 3;
+    plyr = p_person->U.UPerson.ComCur >> 2;
+    // all but the last weapon slot, as the original
+    for (wtype = 0; wtype < 31; wtype++)
+    {
+        ubyte *p_delay = &players[plyr].WepDelays[plagent][wtype];
+        if (*p_delay != 0)
+            (*p_delay)--;
+    }
+    if ((p_person->Flag & TngF_InVehicle) != 0)
+    {
+        struct Thing *p_vehicle;
+
+        p_vehicle = &things[p_person->U.UPerson.Vehicle];
+        if ((p_vehicle->SubType == SubTT_VEH_TANK) || (p_vehicle->SubType == SubTT_VEH_MECH))
+        {
+            if (p_person->U.UPerson.WeaponTurn > 0)
+                return p_person->U.UPerson.WeaponTurn - 1;
+            return 0;
+        }
+    }
+    return players[plyr].WepDelays[plagent][p_person->U.UPerson.CurrentWeapon];
+}
+
+ushort player_weapon_time(struct Thing *p_person)
+{
+    ushort ret;
+    FNCHK_RET("player_weapon_time", ret, player_weapon_time_asm(p_person),
+      player_weapon_time_c(p_person));
     return ret;
 }
 

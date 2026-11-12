@@ -6180,10 +6180,38 @@ void person_recoil(struct Thing *p_person)
         : : "a" (p_person));
 }
 
-void calc_lighting(struct Thing *p_person)
+#ifdef SW_FNCHK
+static void calc_lighting_asm(struct Thing *p_person)
 {
     asm volatile ("call ASM_calc_lighting\n"
-        : : "a" (p_person));
+        : : "a" (p_person) : "cc", "memory");
+}
+#endif
+
+/** Brightness of a person from the shades of the four corners of its map
+ * tile, interpolated over the triangle of the tile it stands on.
+ */
+static void calc_lighting_c(struct Thing *p_person)
+{
+    int tile, fx, fz, s00, s10, s01, s11, v;
+
+    tile = ((p_person->Z >> 16) << 7) + (p_person->X >> 16);
+    s00 = game_my_big_map[tile].ShadeR;
+    s10 = game_my_big_map[tile + 1].ShadeR;
+    s01 = game_my_big_map[tile + MAP_TILE_WIDTH].ShadeR;
+    s11 = game_my_big_map[tile + MAP_TILE_WIDTH + 1].ShadeR;
+    fx = (p_person->X >> 8) & 0xFF;
+    fz = (p_person->Z >> 8) & 0xFF;
+    if (fx + fz < 0x100)
+        v = s00 + (((s10 - s00) * fx) >> 8) + (((s01 - s00) * fz) >> 8);
+    else
+        v = s11 + (((s01 - s11) * (0x100 - fx)) >> 8) + (((s10 - s11) * (0x100 - fz)) >> 8);
+    p_person->U.UPerson.Brightness = (ubyte)v;
+}
+
+void calc_lighting(struct Thing *p_person)
+{
+    FNCHK_VOID("calc_lighting", calc_lighting_asm(p_person), calc_lighting_c(p_person));
 }
 
 void process_persuaded(struct Thing *p_person)

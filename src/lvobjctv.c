@@ -39,6 +39,7 @@
 #include "thing_search.h"
 #include "pepgroup.h"
 #include "player.h"
+#include "fncheck.h"
 #include "scanner.h"
 #include "scandraw.h"
 #include "game.h"
@@ -848,7 +849,8 @@ ubyte all_group_arrived_square(ushort group, short x, short z, short x2, int z2)
     return ret;
 }
 
-ubyte mem_group_arrived_square2(struct Thing *p_person, ushort group, short x, short z,
+#ifdef SW_FNCHK
+static ubyte mem_group_arrived_square2_asm(struct Thing *p_person, ushort group, short x, short z,
   int x2, int z2, int count)
 {
     ubyte ret;
@@ -865,9 +867,81 @@ ubyte mem_group_arrived_square2(struct Thing *p_person, ushort group, short x, s
       "push 4(%5)\n"
       "push 0(%5)\n"
       "call ASM_mem_group_arrived_square2\n"
-        : "=r" (ret)
+        : "=a" (ret)
         : "a" (p_person), "d" (group), "b" (x), "c" (z), "S" (stkargs)
         : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Is the person inside the rectangle (borders excluded), in map coordinates.
+ * The original compares with the corners taken as unsigned 16-bit values.
+ */
+static TbBool mem_person_in_square(struct Thing *p_person, int x1, int z1, int x2, int z2)
+{
+    int tx, tz;
+
+    if ((p_person->Flag & TngF_Destroyed) != 0)
+        return false;
+    tx = (short)(p_person->X >> 8);
+    tz = (short)(p_person->Z >> 8);
+    return (tx > x1) && (tx < x2) && (tz > z1) && (tz < z2);
+}
+
+/** Have at least `count` living members of the group (in a network game,
+ * group 0: of the playing players' groups) arrived in the rectangle.
+ * The count is checked after every member, also those not counted, so
+ * a count of 0 is met by the first member.
+ */
+static ubyte mem_group_arrived_square2_c(struct Thing *p_person, ushort group, short x, short z,
+  int x2, int z2, int count)
+{
+    int x1u, z1u, x2u, z2u;
+    ushort found, need;
+    ThingIdx thing;
+
+    x1u = (ushort)x;
+    z1u = (ushort)z;
+    x2u = (ushort)x2;
+    z2u = (ushort)z2;
+    need = (ushort)count;
+    found = 0;
+    if (in_network_game && (group == 0))
+    {
+        int plyr;
+
+        for (plyr = 0; plyr < 8; plyr++)
+        {
+            if ((ingame.InNetGame_UNSURE & (1 << plyr)) == 0)
+                continue;
+            for (thing = same_type_head[256 + level_def.PlayableGroups[plyr]]; thing > 0;
+              thing = things[thing].LinkSameGroup)
+            {
+                if (mem_person_in_square(&things[thing], x1u, z1u, x2u, z2u))
+                    found++;
+                if (found >= need)
+                    return 1;
+            }
+        }
+        return 0;
+    }
+    for (thing = same_type_head[256 + group]; thing > 0; thing = things[thing].LinkSameGroup)
+    {
+        if (mem_person_in_square(&things[thing], x1u, z1u, x2u, z2u))
+            found++;
+        if (found >= need)
+            return 1;
+    }
+    return 0;
+}
+
+ubyte mem_group_arrived_square2(struct Thing *p_person, ushort group, short x, short z,
+  int x2, int z2, int count)
+{
+    ubyte ret;
+    FNCHK_RET("mem_group_arrived_square2", ret,
+      mem_group_arrived_square2_asm(p_person, group, x, z, x2, z2, count),
+      mem_group_arrived_square2_c(p_person, group, x, z, x2, z2, count));
     return ret;
 }
 

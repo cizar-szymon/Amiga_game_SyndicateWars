@@ -1692,10 +1692,130 @@ static void gpoly_rasterize_shaded_nobound_c(struct gpoly_state *st)
         : "cc"); \
     b1 &= 0xFFFF
 
+/* All lines of one triangle part in asm: per line the span (same pixel loop
+ * as gpoly_span_shaded_68k), then the edge and blend steps. State in a
+ * struct addressed by a6; a5/a6 are saved by hand, so the compiler can keep
+ * its frame pointer. Offsets are checked below. */
+struct gp_lines {
+    u32 b0, b1, b2;         //  0  4  8
+    s32 rbeg, rend;         // 12 16
+    s32 sbeg, send;         // 20 24
+    ubyte *out;             // 28
+    s32 ln, count;          // 32 36
+    u32 ia[4];              // 40 44 48 52
+    u32 s1, s2, s3;         // 56 60 64
+    const ubyte *map;       // 68
+    const ubyte *fade;      // 72
+};
+typedef char gp_lines_size_check[(sizeof(struct gp_lines) == 76) ? 1 : -1];
+
+__attribute__((noinline))
+static void gpoly_lines_shaded_68k(struct gp_lines *L)
+{
+    __asm__ volatile (
+        "    move.l %[L],%%a0\n"
+        "    movem.l %%a5-%%a6,-(%%sp)\n"
+        "    move.l %%a0,%%a6\n"
+        "    move.l 68(%%a6),%%a2\n"
+        "    move.l 72(%%a6),%%a3\n"
+        "    move.l 56(%%a6),%%a4\n"
+        "    move.l 60(%%a6),%%a5\n"
+        "    move.l 64(%%a6),%%d5\n"
+        "    moveq #0,%%d4\n"
+        /* line: beg = rbeg >> 16, len = (rend >> 16) - beg */
+        "10: move.l 12(%%a6),%%d6\n"
+        "    swap %%d6\n"
+        "    ext.l %%d6\n"
+        "    move.l 16(%%a6),%%d7\n"
+        "    swap %%d7\n"
+        "    ext.l %%d7\n"
+        "    sub.l %%d6,%%d7\n"
+        "    ble 11f\n"
+        "    move.l 28(%%a6),%%a0\n"
+        "    add.l %%d6,%%a0\n"
+        "    lea (%%a0,%%d7.l),%%a1\n"
+        "    move.l (%%a6),%%d0\n"
+        "    move.l 8(%%a6),%%d1\n"
+        "    move.l 4(%%a6),%%d2\n"
+        "    lsr.w #8,%%d2\n"
+        "    and.l #255,%%d2\n"
+        /* span, as gpoly_span_shaded_68k: b0 d0, b2 d1, v d2 */
+        "    moveq #0,%%d6\n"
+        "    moveq #0,%%d7\n"
+        "    moveq #0,%%d3\n"
+        "    subq.l #1,%%a1\n"
+        "    cmp.l %%a1,%%a0\n"
+        "    bcc 4f\n"
+        "1:  move.w %%d1,%%d7\n"
+        "    move.w %%d2,%%d6\n"
+        "    lsl.w #8,%%d6\n"
+        "    add.l %%a4,%%d1\n"
+        "    clr.b %%d7\n"
+        "    move.b %%d0,%%d6\n"
+        "    addx.l %%d4,%%d0\n"
+        "    add.l %%a5,%%d0\n"
+        "    move.b (%%a2,%%d6.l),%%d7\n"
+        "    addx.b %%d5,%%d2\n"
+        "    move.w %%d1,%%d3\n"
+        "    move.w %%d2,%%d6\n"
+        "    lsl.w #8,%%d6\n"
+        "    add.l %%a4,%%d1\n"
+        "    clr.b %%d3\n"
+        "    move.b %%d0,%%d6\n"
+        "    addx.l %%d4,%%d0\n"
+        "    move.b (%%a3,%%d7.l),(%%a0)+\n"
+        "    add.l %%a5,%%d0\n"
+        "    move.b (%%a2,%%d6.l),%%d3\n"
+        "    addx.b %%d5,%%d2\n"
+        "    move.b (%%a3,%%d3.l),(%%a0)+\n"
+        "    cmp.l %%a1,%%a0\n"
+        "    bcs 1b\n"
+        "4:  addq.l #1,%%a1\n"
+        "    cmp.l %%a1,%%a0\n"
+        "    bcc 11f\n"
+        "    move.w %%d1,%%d7\n"
+        "    move.w %%d2,%%d6\n"
+        "    lsl.w #8,%%d6\n"
+        "    clr.b %%d7\n"
+        "    move.b %%d0,%%d6\n"
+        "    move.b (%%a2,%%d6.l),%%d7\n"
+        "    move.b (%%a3,%%d7.l),(%%a0)+\n"
+        /* edges */
+        "11: move.l 20(%%a6),%%d6\n"
+        "    add.l %%d6,12(%%a6)\n"
+        "    move.l 24(%%a6),%%d6\n"
+        "    add.l %%d6,16(%%a6)\n"
+        /* incr4 of the blend state with incA */
+        "    move.l (%%a6),%%d0\n"
+        "    move.l 4(%%a6),%%d1\n"
+        "    move.l 8(%%a6),%%d2\n"
+        "    add.b 43(%%a6),%%d1\n"
+        "    addx.l %%d4,%%d2\n"
+        "    add.l 44(%%a6),%%d2\n"
+        "    addx.l %%d4,%%d0\n"
+        "    add.l 48(%%a6),%%d0\n"
+        "    ror.w #8,%%d1\n"
+        "    move.l 52(%%a6),%%d6\n"
+        "    addx.b %%d6,%%d1\n"
+        "    rol.w #8,%%d1\n"
+        "    and.l #65535,%%d1\n"
+        "    move.l %%d0,(%%a6)\n"
+        "    move.l %%d1,4(%%a6)\n"
+        "    move.l %%d2,8(%%a6)\n"
+        "    move.l 32(%%a6),%%d6\n"
+        "    add.l %%d6,28(%%a6)\n"
+        "    subq.l #1,36(%%a6)\n"
+        "    bgt 10b\n"
+        "    movem.l (%%sp)+,%%a5-%%a6\n"
+        :
+        : [L] "g" (L)
+        : "d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7",
+          "a0", "a1", "a2", "a3", "a4", "cc", "memory");
+}
+
 static void gpoly_rasterize_shaded_nobound_68k(struct gpoly_state *st)
 {
     const struct gpoly_factors *incA;
-    struct gpoly_blends bld;
     ubyte *out_ln;
     u32 b0, b1, b2;
     int range_beg, range_end, slope_beg, slope_end;
@@ -1738,23 +1858,24 @@ static void gpoly_rasterize_shaded_nobound_68k(struct gpoly_state *st)
                 break;
         }
 
-        for (; count > 0; count--)
+        if (count > 0)
         {
-            int beg, len;
+            struct gp_lines L;
 
-            beg = range_beg >> 16;
-            len = (range_end >> 16) - beg;
-            if (len > 0)
-            {
-                bld.B[0] = b0;
-                bld.B[1] = b1;
-                bld.B[2] = b2;
-                gpoly_span_shaded(&out_ln[beg], len, &bld, &st->incB);
-            }
-            range_beg += slope_beg;
-            range_end += slope_end;
-            GP_INCR4_REGS(b0, b1, b2, incA);
-            out_ln += ln_len;
+            L.b0 = b0; L.b1 = b1; L.b2 = b2;
+            L.rbeg = range_beg; L.rend = range_end;
+            L.sbeg = slope_beg; L.send = slope_end;
+            L.out = out_ln; L.ln = ln_len; L.count = count;
+            L.ia[0] = incA->S[0]; L.ia[1] = incA->S[1];
+            L.ia[2] = incA->S[2]; L.ia[3] = incA->S[3];
+            L.s1 = st->incB.S[1]; L.s2 = st->incB.S[2];
+            L.s3 = (ubyte)st->incB.S[3];
+            L.map = vec_map; L.fade = pixmap.fade_table;
+            gpoly_lines_shaded_68k(&L);
+            b0 = L.b0; b1 = L.b1; b2 = L.b2;
+            range_beg = L.rbeg; range_end = L.rend;
+            out_ln = L.out;
+            count = 0;
         }
 
         pass--;

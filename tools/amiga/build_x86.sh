@@ -7,6 +7,8 @@
 #   debug   - -g -O0, verbose error.log
 #   check   - remade C functions run next to their asm originals, results
 #             compared (src/fncheck.c), fncheck.log in the game directory
+#   prof    - frame profiler: time per game turn of input, drawing, world
+#             simulation (process_things) etc., to error.log every 5 s
 #   cov     - asm coverage: every asm function marks itself as executed,
 #             asm_coverage.txt written on exit (tools/amiga/asm_cov_filter.py)
 set -e
@@ -23,6 +25,12 @@ case "$kind" in
     export CPPFLAGS="-DDEBUG -D__DEBUG" ;;
   check)
     export CPPFLAGS="-DSW_FNCHK" ;;
+  prof)
+    # same optimisation as the reference (none): with -O1 or -O2 the game
+    # ends at mission start (C and inline x86 asm do not mix there yet);
+    # PROF_OPT adds flags for experiments
+    FLAGS="$FLAGS $PROF_OPT"
+    export CPPFLAGS="-DSW_PCPROF" ;;
   cov)
     export CPPFLAGS="-DSW_ASM_COVERAGE"
     MAKEVARS=(CCAS="bash \"$REPO/tools/amiga/ccas_cov.sh\"") ;;

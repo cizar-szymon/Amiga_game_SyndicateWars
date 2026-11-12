@@ -93,4 +93,87 @@ void asm_cov_phase(int phase)
 }
 
 #endif
+
+#ifdef SW_PCPROF
+/* PC frame profiler (build_x86.sh prof): slots as in platform/amiga/prof.c,
+ * average per game turn written to error.log every 5 s. */
+#include <windows.h>
+#include "bflog.h"
+
+#define PC_PROF_SLOTS 48
+
+static const char *const pc_prof_names[PC_PROF_SLOTS] = {
+    [0] = "frame",
+    [1] = "input", [2] = "draw", [3] = "things", [4] = "other", [5] = "swap",
+    [6] = "scan_blips", [7] = "scan_arcs", [8] = "scan_dots",
+    [10] = "view_inputs", [11] = "scanner_zoom+cam", [12] = "prepare_drawlist",
+    [13] = "mouse_on_map", [14] = "engine_unk3",
+    [15] = "scanner_turn", [16] = "scanner_map", [17] = "scanner_signals",
+    [18] = "weapons_panel", [19] = "chat+pickable",
+    [20] = "camera_setup", [21] = "draw_things", [22] = "floor",
+    [23] = "explode", [24] = "draw_screen", [25] = "hud",
+    [26] = "hud_goto+lock", [27] = "hud_agents+target", [28] = "hud_panel", [29] = "scanner",
+    [30] = "present_copy", [31] = "clear",
+};
+
+static LONGLONG pc_prof_start[PC_PROF_SLOTS];
+static LONGLONG pc_prof_sum[PC_PROF_SLOTS];
+static LONGLONG pc_prof_max[PC_PROF_SLOTS];
+static LONGLONG pc_prof_report;
+static unsigned long pc_prof_turns;
+
+static LONGLONG pc_prof_now(void)
+{
+    LARGE_INTEGER t;
+    QueryPerformanceCounter(&t);
+    return t.QuadPart;
+}
+
+void pc_prof_begin(int slot)
+{
+    if ((slot < 0) || (slot >= PC_PROF_SLOTS))
+        return;
+    pc_prof_start[slot] = pc_prof_now();
+    if (slot == 0)
+    {
+        LARGE_INTEGER f;
+        int i;
+
+        QueryPerformanceFrequency(&f);
+        if (pc_prof_report == 0)
+            pc_prof_report = pc_prof_start[0];
+        pc_prof_turns++;
+        if (pc_prof_start[0] - pc_prof_report < 5 * f.QuadPart)
+            return;
+        LbWarnLog("prof: %lu turns in %lu ms\n", pc_prof_turns,
+          (unsigned long)((pc_prof_start[0] - pc_prof_report) * 1000 / f.QuadPart));
+        for (i = 0; i < PC_PROF_SLOTS; i++)
+        {
+            if (pc_prof_sum[i] == 0)
+                continue;
+            /* average and maximum per turn, in microseconds */
+            LbWarnLog("prof:   %-18s %7lu us avg %7lu us max\n",
+              pc_prof_names[i] ? pc_prof_names[i] : "?",
+              (unsigned long)(pc_prof_sum[i] * 1000000 / f.QuadPart / pc_prof_turns),
+              (unsigned long)(pc_prof_max[i] * 1000000 / f.QuadPart));
+            pc_prof_sum[i] = 0;
+            pc_prof_max[i] = 0;
+        }
+        pc_prof_turns = 0;
+        pc_prof_report = pc_prof_start[0];
+    }
+}
+
+void pc_prof_end(int slot)
+{
+    LONGLONG d;
+
+    if ((slot < 0) || (slot >= PC_PROF_SLOTS) || (pc_prof_start[slot] == 0))
+        return;
+    d = pc_prof_now() - pc_prof_start[slot];
+    pc_prof_sum[slot] += d;
+    if (pc_prof_max[slot] < d)
+        pc_prof_max[slot] = d;
+}
+#endif
 /******************************************************************************/

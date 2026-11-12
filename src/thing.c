@@ -52,6 +52,7 @@
 #include "vehicle.h"
 #include "game.h"
 #include "swlog.h"
+#include "asm_coverage.h"
 #include "fncheck.h"
 #include <string.h>
 /******************************************************************************/
@@ -1527,12 +1528,16 @@ void process_thing(struct Thing *p_thing, ThingIdx thing)
     switch (p_thing->Type)
     {
     case TT_VEHICLE:
+        AMIGA_PROF_BEGIN(39);
         process_vehicle(p_thing);
+        AMIGA_PROF_END(39);
         break;
     case TT_PERSON:
     case TT_UNKN4:
+        AMIGA_PROF_BEGIN(40);
         process_shield(p_thing);
         process_person(p_thing);
+        AMIGA_PROF_END(40);
         if ((p_thing->Flag & TngF_TriggerUse) != 0)
             p_thing->Flag2 |= TgF2_Unkn0400;
         else
@@ -1542,7 +1547,9 @@ void process_thing(struct Thing *p_thing, ThingIdx thing)
         process_rocket(p_thing);
         break;
     case TT_BUILDING:
+        AMIGA_PROF_BEGIN(41);
         process_building(p_thing);
+        AMIGA_PROF_END(41);
         break;
     case TT_LASER_GUIDED:
         process_laser_guided(p_thing);
@@ -1806,10 +1813,12 @@ void process_things(void)
 #if 0
     merged_noop_unkn1(gameturn);
 #endif
+    AMIGA_PROF_BEGIN(35);
     build_same_type_headers();
     ingame.fld_unkC4B = 0;
     unkn_update_lights();
     unkn_full_update_lights();
+    AMIGA_PROF_END(35);
 
     if (!execute_commands)
         return;
@@ -1827,6 +1836,7 @@ void process_things(void)
         int remain;
         ThingIdx thing, nxthing;
 
+        AMIGA_PROF_BEGIN(36);
         remain = things_used;
         for (thing = things_used_head; thing > 0; thing = nxthing)
         {
@@ -1846,6 +1856,7 @@ void process_things(void)
 
             process_thing(p_thing, thing);
         }
+        AMIGA_PROF_END(36);
     }
 
     if (execute_commands)
@@ -1854,6 +1865,7 @@ void process_things(void)
         int remain;
         ThingIdx thing, nxthing;
 
+        AMIGA_PROF_BEGIN(37);
         remain = sthings_used;
         for (thing = sthings_used_head; thing < 0; thing = nxthing)
         {
@@ -1867,11 +1879,14 @@ void process_things(void)
 
             process_sthing(p_sthing, thing);
         }
+        AMIGA_PROF_END(37);
     }
 
     if (execute_commands)
     {
+        AMIGA_PROF_BEGIN(38);
         people_intel(0);
+        AMIGA_PROF_END(38);
     }
     navi_onscreen_debug(1);
 }

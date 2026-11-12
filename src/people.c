@@ -60,6 +60,7 @@
 #include "sound.h"
 #include "thing.h"
 #include "fncheck.h"
+#include "asm_coverage.h"
 #include "thing_fire.h"
 #include "thing_onface.h"
 #include "thing_search.h"
@@ -1989,7 +1990,19 @@ ThingIdx check_for_other_people_on_tile(int x, int y, int z,
     return found;
 }
 
+static short check_for_other_people_body(int x, int y, int z, struct Thing *p_person);
+
 short check_for_other_people(int x, int y, int z, struct Thing *p_person)
+{
+    short ret;
+
+    AMIGA_PROF_BEGIN(48);
+    ret = check_for_other_people_body(x, y, z, p_person);
+    AMIGA_PROF_END(48);
+    return ret;
+}
+
+static short check_for_other_people_body(int x, int y, int z, struct Thing *p_person)
 {
     short tile_x_center, tile_z_center;
     short dx, dz;
@@ -7824,7 +7837,19 @@ ubyte create_intelligent_door(short col)
 
 /** Get collision vector which would collide with given thing at given position.
  */
+static short move_colide_on_tile_body(struct Thing *p_person, short tl_x, short tl_z, int speed_x, int speed_z);
+
 short move_colide_on_tile(struct Thing *p_person, short tl_x, short tl_z, int speed_x, int speed_z)
+{
+    short ret;
+
+    AMIGA_PROF_BEGIN(49);
+    ret = move_colide_on_tile_body(p_person, tl_x, tl_z, speed_x, speed_z);
+    AMIGA_PROF_END(49);
+    return ret;
+}
+
+static short move_colide_on_tile_body(struct Thing *p_person, short tl_x, short tl_z, int speed_x, int speed_z)
 {
     struct MyMapElement *p_mapel;
 
@@ -7947,7 +7972,19 @@ void set_thing_height_on_ground_mesh(struct Thing *p_person, int x, int z)
     move_mapwho(p_person, x, MAPCOORD_TO_PRCCOORD(new_alt, 0), z);
 }
 
+static short person_move_body(struct Thing *p_person);
+
 short person_move(struct Thing *p_person)
+{
+    short ret;
+
+    AMIGA_PROF_BEGIN(46);
+    ret = person_move_body(p_person);
+    AMIGA_PROF_END(46);
+    return ret;
+}
+
+static short person_move_body(struct Thing *p_person)
 {
     int speed_x, speed_z;
     int x, y, z;
@@ -8695,7 +8732,9 @@ void process_person(struct Thing *p_person)
         if (person_is_basic_civilian(p_person, false)
           || person_is_scientist(p_person, false))
         {
+            AMIGA_PROF_BEGIN(42);
             process_danger(p_person);
+            AMIGA_PROF_END(42);
         }
     }
 
@@ -8724,8 +8763,11 @@ void process_person(struct Thing *p_person)
 
     if ((p_person->Flag & (TngF_Unkn40000000|TngF_Destroyed)) != 0)
         p_person->Flag &= ~TngF_TriggerUse;
-    else
+    else {
+        AMIGA_PROF_BEGIN(43);
         process_weapon(p_person);
+        AMIGA_PROF_END(43);
+    }
 
     //TODO separate drawing from state update
     if ((debug_hud_collision) && (p_person->Y != 0))
@@ -8746,19 +8788,24 @@ void process_person(struct Thing *p_person)
     }
     else if ((p_person->Flag2 & TgF2_Unkn0008) != 0)
     {
+        AMIGA_PROF_BEGIN(44);
         process_wander(p_person);
+        AMIGA_PROF_END(44);
         if (p_person->U.UPerson.Timer2 == 1)
             p_person->Speed = 500 + (LbRandomAnyShort() % 700);
     }
     else
     {
+        AMIGA_PROF_BEGIN(45);
         switch (p_person->State & 0x7FFF)
         {
         case PerSt_NONE:
               person_find_next_state(p_person);
               break;
         case PerSt_GOTO_POINT:
+              AMIGA_PROF_BEGIN(47);
               person_goto_point(p_person);
+              AMIGA_PROF_END(47);
               if ((p_person->State == 0) &&
                 ((p_person->U.UPerson.Flag3 & PrsF3_Unkn04) != 0) &&
                 ((p_person->Flag & TngF_SelectedAgent) == 0))
@@ -8768,7 +8815,9 @@ void process_person(struct Thing *p_person)
               }
               break;
         case PerSt_WANDER:
+              AMIGA_PROF_BEGIN(44);
               process_wander(p_person);
+              AMIGA_PROF_END(44);
               break;
         case PerSt_WAIT:
               person_wait(p_person);
@@ -8867,6 +8916,7 @@ void process_person(struct Thing *p_person)
         default:
               break;
         }
+        AMIGA_PROF_END(45);
         calc_lighting(p_person);
         process_lighting_unkn1(p_person);
     }

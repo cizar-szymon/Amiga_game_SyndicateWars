@@ -12,7 +12,7 @@ typedef uint32_t ULONG;
 #include "bftime.h"
 
 
-#define PROF_SLOTS 48
+#define PROF_SLOTS 64
 
 static const char *const prof_names[PROF_SLOTS] = {
     [0] = "frame",
@@ -26,7 +26,12 @@ static const char *const prof_names[PROF_SLOTS] = {
     [15] = "scanner_turn", [16] = "scanner_map", [17] = "scanner_signals",
     [18] = "weapons_panel", [19] = "chat+pickable",
     [30] = "present_copy", [31] = "clear",
-    [33] = "gpoly_setup", [34] = "gpoly_raster",
+    [33] = "gpoly_setup", [34] = "gpoly_raster", [35] = "th_lights", [36] = "th_things",
+    [37] = "th_sthings", [38] = "th_people_intel",
+    [39] = "th_vehicle", [40] = "th_person", [41] = "th_building",
+    [42] = "p_danger", [43] = "p_weapon", [44] = "p_wander", [45] = "p_state",
+    [46] = "person_move", [47] = "p_goto_point",
+    [48] = "pm_other_people", [49] = "pm_colide_tile",
 };
 
 static ULONG prof_start[PROF_SLOTS];

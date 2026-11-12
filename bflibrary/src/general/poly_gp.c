@@ -728,7 +728,7 @@ extern unsigned long amiga_prof_cnt[8];
 #define GP_CNT(i) ((void)0)
 #endif
 
-static void gpoly_stb_drw_incr4(struct gpoly_blends *p_bld, const struct gpoly_factors *p_inc)
+static void gpoly_stb_drw_incr4_c(struct gpoly_blends *p_bld, const struct gpoly_factors *p_inc)
 {
     int loc_2d;
     ubyte a3b_h, a3b_l;
@@ -754,7 +754,7 @@ static void gpoly_stb_drw_incr4(struct gpoly_blends *p_bld, const struct gpoly_f
     p_bld->B[1] = (a3b_h << 8) | a3b_l;
 }
 
-static void gpoly_stb_drw_decr4(struct gpoly_blends *p_bld, const struct gpoly_factors *p_inc)
+static void gpoly_stb_drw_decr4_c(struct gpoly_blends *p_bld, const struct gpoly_factors *p_inc)
 {
     int loc_2d;
     ubyte a3b_h, a3b_l;
@@ -780,7 +780,7 @@ static void gpoly_stb_drw_decr4(struct gpoly_blends *p_bld, const struct gpoly_f
     p_bld->B[1] = (a3b_h << 8) | a3b_l;
 }
 
-static void gpoly_stb_drw_incr3(struct gpoly_blends *p_bld, const struct gpoly_factors *p_inc)
+static void gpoly_stb_drw_incr3_c(struct gpoly_blends *p_bld, const struct gpoly_factors *p_inc)
 {
     int loc_2d;
     ubyte a3b_h, a3b_l;
@@ -803,7 +803,7 @@ static void gpoly_stb_drw_incr3(struct gpoly_blends *p_bld, const struct gpoly_f
     p_bld->B[1] = (a3b_h << 8) | a3b_l;
 }
 
-static void gpoly_stb_drw_decr3(struct gpoly_blends *p_bld, const struct gpoly_factors *p_inc)
+static void gpoly_stb_drw_decr3_c(struct gpoly_blends *p_bld, const struct gpoly_factors *p_inc)
 {
     int loc_2d;
     ubyte a3b_h, a3b_l;
@@ -825,6 +825,128 @@ static void gpoly_stb_drw_decr3(struct gpoly_blends *p_bld, const struct gpoly_f
 
     p_bld->B[1] = (a3b_h << 8) | a3b_l;
 }
+
+#if defined(__mc68000__) || defined(__m68k__)
+/* Edge steps in 68k asm, same results as the _c versions above. The byte
+ * B[1] low (+S[0]) carries into B[2], B[2] into B[0], B[0] into the byte
+ * B[1] high (+S[3]). As in C, the carry of "x + previous carry" is dropped:
+ * addx with a zero register, then add of the factor sets X. ROR/ROL leave X
+ * alone, so the high byte of B[1] is turned to the low byte for the addx.b. */
+#define GP_STEP_ASM(insn_b, insn_x, insn_l, s0_line) \
+    __asm__ ( \
+        s0_line \
+        "    " insn_x ".l %[z],%[b2]\n" \
+        "    " insn_l ".l %[s1],%[b2]\n" \
+        "    " insn_x ".l %[z],%[b0]\n" \
+        "    " insn_l ".l %[s2],%[b0]\n" \
+        "    ror.w #8,%[b1]\n" \
+        "    " insn_x ".b %[s3],%[b1]\n" \
+        "    rol.w #8,%[b1]\n" \
+        : [b0] "+d" (b0), [b1] "+d" (b1), [b2] "+d" (b2) \
+        : [s0] "d" (p_inc->S[0]), [s1] "dm" (p_inc->S[1]), [s2] "dm" (p_inc->S[2]), \
+          [s3] "d" (p_inc->S[3]), [z] "d" (0) \
+        : "cc")
+
+/* incr3/decr3 have no S[0] step and start with the full add of S[1]. */
+static inline void gpoly_stb_drw_incr4_68k(struct gpoly_blends *p_bld, const struct gpoly_factors *p_inc)
+{
+    u32 b0 = p_bld->B[0], b1 = p_bld->B[1], b2 = p_bld->B[2];
+    GP_STEP_ASM("add", "addx", "add", "    add.b %[s0],%[b1]\n");
+    p_bld->B[0] = b0; p_bld->B[1] = b1 & 0xFFFF; p_bld->B[2] = b2;
+}
+
+static inline void gpoly_stb_drw_decr4_68k(struct gpoly_blends *p_bld, const struct gpoly_factors *p_inc)
+{
+    u32 b0 = p_bld->B[0], b1 = p_bld->B[1], b2 = p_bld->B[2];
+    GP_STEP_ASM("sub", "subx", "sub", "    sub.b %[s0],%[b1]\n");
+    p_bld->B[0] = b0; p_bld->B[1] = b1 & 0xFFFF; p_bld->B[2] = b2;
+}
+
+static inline void gpoly_stb_drw_incr3_68k(struct gpoly_blends *p_bld, const struct gpoly_factors *p_inc)
+{
+    u32 b0 = p_bld->B[0], b1 = p_bld->B[1], b2 = p_bld->B[2];
+    __asm__ (
+        "    add.l %[s1],%[b2]\n"
+        "    addx.l %[z],%[b0]\n"
+        "    add.l %[s2],%[b0]\n"
+        "    ror.w #8,%[b1]\n"
+        "    addx.b %[s3],%[b1]\n"
+        "    rol.w #8,%[b1]\n"
+        : [b0] "+d" (b0), [b1] "+d" (b1), [b2] "+d" (b2)
+        : [s1] "dm" (p_inc->S[1]), [s2] "dm" (p_inc->S[2]),
+          [s3] "d" (p_inc->S[3]), [z] "d" (0)
+        : "cc");
+    p_bld->B[0] = b0; p_bld->B[1] = b1 & 0xFFFF; p_bld->B[2] = b2;
+}
+
+static inline void gpoly_stb_drw_decr3_68k(struct gpoly_blends *p_bld, const struct gpoly_factors *p_inc)
+{
+    u32 b0 = p_bld->B[0], b1 = p_bld->B[1], b2 = p_bld->B[2];
+    __asm__ (
+        "    sub.l %[s1],%[b2]\n"
+        "    subx.l %[z],%[b0]\n"
+        "    sub.l %[s2],%[b0]\n"
+        "    ror.w #8,%[b1]\n"
+        "    subx.b %[s3],%[b1]\n"
+        "    rol.w #8,%[b1]\n"
+        : [b0] "+d" (b0), [b1] "+d" (b1), [b2] "+d" (b2)
+        : [s1] "dm" (p_inc->S[1]), [s2] "dm" (p_inc->S[2]),
+          [s3] "d" (p_inc->S[3]), [z] "d" (0)
+        : "cc");
+    p_bld->B[0] = b0; p_bld->B[1] = b1 & 0xFFFF; p_bld->B[2] = b2;
+}
+
+#if defined(SW_AMIGA)
+static unsigned long gpoly_check_steps, gpoly_check_step_fails;
+
+static void gpoly_step_check(const struct gpoly_blends *ref, const struct gpoly_blends *got,
+  const struct gpoly_blends *start, const struct gpoly_factors *p_inc, const char *name)
+{
+    gpoly_check_steps++;
+    if ((ref->B[0] != got->B[0]) || (ref->B[1] != got->B[1]) || (ref->B[2] != got->B[2])) {
+        if (gpoly_check_step_fails < 20)
+            LOGERR("%s step %lu differs: start %08lx %08lx %08lx inc %08lx %08lx %08lx %08lx"
+              " asm %08lx %08lx %08lx C %08lx %08lx %08lx", name, gpoly_check_steps,
+              (ulong)start->B[0], (ulong)start->B[1], (ulong)start->B[2],
+              (ulong)p_inc->S[0], (ulong)p_inc->S[1], (ulong)p_inc->S[2], (ulong)p_inc->S[3],
+              (ulong)got->B[0], (ulong)got->B[1], (ulong)got->B[2],
+              (ulong)ref->B[0], (ulong)ref->B[1], (ulong)ref->B[2]);
+        gpoly_check_step_fails++;
+    }
+    if ((gpoly_check_steps & 0xFFFF) == 0)
+        LOGWARN("gpoly step check: %lu steps, %lu different", gpoly_check_steps, gpoly_check_step_fails);
+}
+
+#define GP_STEP_WRAP(name) \
+static inline void gpoly_stb_drw_##name(struct gpoly_blends *p_bld, const struct gpoly_factors *p_inc) \
+{ \
+    if (gpoly_check_mode > 0) { \
+        struct gpoly_blends start = *p_bld, ref = *p_bld; \
+        gpoly_stb_drw_##name##_c(&ref, p_inc); \
+        gpoly_stb_drw_##name##_68k(p_bld, p_inc); \
+        gpoly_step_check(&ref, p_bld, &start, p_inc, #name); \
+        return; \
+    } \
+    gpoly_stb_drw_##name##_68k(p_bld, p_inc); \
+}
+#else
+#define GP_STEP_WRAP(name) \
+static inline void gpoly_stb_drw_##name(struct gpoly_blends *p_bld, const struct gpoly_factors *p_inc) \
+{ \
+    gpoly_stb_drw_##name##_68k(p_bld, p_inc); \
+}
+#endif
+#else
+#define GP_STEP_WRAP(name) \
+static inline void gpoly_stb_drw_##name(struct gpoly_blends *p_bld, const struct gpoly_factors *p_inc) \
+{ \
+    gpoly_stb_drw_##name##_c(p_bld, p_inc); \
+}
+#endif
+GP_STEP_WRAP(incr4)
+GP_STEP_WRAP(decr4)
+GP_STEP_WRAP(incr3)
+GP_STEP_WRAP(decr3)
 
 static void gpoly_convert_uv2(struct gpoly_factors *p_inc, uint u, uint v)
 {

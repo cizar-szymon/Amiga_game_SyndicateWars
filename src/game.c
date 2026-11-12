@@ -145,6 +145,8 @@ extern struct Animation animations[2];
 
 #if defined(SW_AMIGA)
 static void amiga_check_mapwho(const char *where);
+#else
+#define amiga_check_mapwho(where) ((void)0)
 #endif
 #include "game_data.h"
 #include "game_speed.h"
@@ -1016,8 +1018,6 @@ static void amiga_check_mapwho(const char *where)
     }
     LOGWARN("%s: %d bad mapwho heads (first tile %d)", where, bad, first);
 }
-#else
-#define amiga_check_mapwho(where) ((void)0)
 #endif
 
 void change_current_map(ushort mapno)

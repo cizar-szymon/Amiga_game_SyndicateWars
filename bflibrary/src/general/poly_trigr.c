@@ -555,6 +555,232 @@ void trig_render_md05(struct TrigLocalRend *tlr)
  * - wire fences
  * - cross bars
  */
+/******************************************************************************/
+// Span loops of render modes 6 and 10, taken out of trig_render_md06() and
+// trig_render_md10() unchanged (the _c versions), with 68k asm versions.
+// Map index colM = V << 8 | U; factorA = V fraction (high word) and
+// U fraction (low word); mode 6 also steps the shade (high word of factorB
+// is its fraction).
+
+static void trig_span_md10_c(ubyte *o, short pYa, ushort colM, long factorA,
+  const struct TrigLocalRend *tlr)
+{
+    ubyte *m = vec_map;
+    ubyte *f = pixmap.fade_table;
+    long lsh_var_54 = tlr->var_54 << 16;
+
+    for (; pYa > 0; pYa--, o++)
+    {
+        ushort colL, colH;
+        ushort colS;
+        ubyte factorA_carry;
+
+        if (m[colM]) {
+            colS = (vec_colour << 8) | (*o);
+            *o = f[colS];
+        }
+        factorA_carry = __CFADDS__(tlr->var_48, factorA);
+        factorA = (factorA & 0xFFFF0000) + ((tlr->var_48 + factorA) & 0xFFFF);
+        colL = ((tlr->var_48 >> 16) & 0xFF) + factorA_carry + colM;
+        factorA_carry = __CFADDL__(lsh_var_54, factorA);
+        factorA += lsh_var_54;
+        colH = (colM >> PITCH_SH) + ((tlr->var_54 >> 16) & 0xFF) + factorA_carry;
+
+        colM = ((colH & VB_MASK) << PITCH_SH) + (colL & UA_MASK);
+    }
+}
+
+static void trig_span_md06_c(ubyte *o, short n, ushort colM, long factorA,
+  ubyte shade, ulong shade_frac, const struct TrigLocalRend *tlr)
+{
+    ubyte *m = vec_map;
+    ubyte *f = pixmap.fade_table;
+    long lsh_var_54 = tlr->var_54 << 16;
+    long lsh_var_60 = tlr->var_60 << 16;
+    short pXa = (short)(shade << 8);
+    ulong factorB = (shade_frac & 0xFFFF0000) | (ushort)n;
+    long pY = (ushort)n;
+
+    for (; (pY & 0xFFFF) > 0; pY--, o++)
+    {
+        ushort colL, colH;
+        ubyte fct_carry;
+
+        pXa = (pXa & 0xFF00) | (m[colM] & 0xFF);
+        if (pXa & 0xFF)
+            *o = f[pXa];
+
+        fct_carry = __CFADDS__(tlr->var_48, factorA);
+        factorA = (factorA & 0xFFFF0000) | ((tlr->var_48 + factorA) & 0xFFFF);
+        colL = (tlr->var_48 >> 16) + fct_carry + colM;
+        fct_carry = __CFADDL__(lsh_var_54, factorA);
+        factorA += lsh_var_54;
+        colH = (tlr->var_54 >> 16) + fct_carry + (colM >> PITCH_SH);
+
+        colM = ((colH & VB_MASK) << PITCH_SH) + (colL & UA_MASK);
+
+        factorB = (factorB & 0xFFFF0000) | (pY & 0xFFFF);
+        fct_carry = __CFADDL__(lsh_var_60, factorB);
+        factorB += lsh_var_60;
+        pXa = (((pXa >> 8) + (tlr->var_60 >> 16) + fct_carry) << 8) | (pXa & 0xFF);
+        pY += lsh_var_60; // Very alarming. Bug, maybe?
+    }
+}
+
+#if defined(__mc68000__) || defined(__m68k__)
+#if (VEC_MAP_PITCH != 256) || (VB_MASK != 0xFF)
+#error 68k span loops assume a 256x256 texture page
+#endif
+/* U and V are the low and high byte of one word register (w); ADD.W/ADD.L of
+ * the fractions set X, ADDX.B adds integer step + carry to the byte, ROR.W #8
+ * brings the V byte down and back (ROR leaves X alone). The fade table index
+ * is unsigned, as in the original x86 code. */
+__attribute__((noinline))
+static void trig_span_md10_68k(ubyte *o, short n, ushort colM, long factorA,
+  const struct TrigLocalRend *tlr)
+{
+    u32 w = colM;
+    u32 fa = factorA;
+    u32 cl = (u32)vec_colour << 8;
+    u32 ui = (ubyte)(tlr->var_48 >> 16);
+    u32 vi = (ubyte)(tlr->var_54 >> 16);
+    u32 cnt = (u32)(ushort)n - 1;
+    const ubyte *ulo = (const ubyte *)tlr->var_48;
+    const ubyte *lsh = (const ubyte *)(tlr->var_54 << 16);
+    ubyte *out = o;
+
+    __asm__ volatile (
+        "1:  tst.b (%[map],%[w].l)\n"
+        "    beq 2f\n"
+        "    move.b (%[out]),%[cl]\n"
+        "    move.b (%[fade],%[cl].l),(%[out])\n"
+        "2:  addq.l #1,%[out]\n"
+        "    add.w %[ulo],%[fa]\n"
+        "    addx.b %[ui],%[w]\n"
+        "    add.l %[lsh],%[fa]\n"
+        "    ror.w #8,%[w]\n"
+        "    addx.b %[vi],%[w]\n"
+        "    ror.w #8,%[w]\n"
+        "    dbra %[cnt],1b\n"
+        : [w] "+d" (w), [fa] "+d" (fa), [cl] "+d" (cl), [cnt] "+d" (cnt),
+          [out] "+a" (out)
+        : [ui] "d" (ui), [vi] "d" (vi), [ulo] "a" (ulo), [lsh] "a" (lsh),
+          [map] "a" (vec_map), [fade] "a" (pixmap.fade_table)
+        : "cc", "memory");
+}
+
+__attribute__((noinline))
+static void trig_span_md06_68k(ubyte *o, short n, ushort colM, long factorA,
+  ubyte shade, ulong shade_frac, const struct TrigLocalRend *tlr)
+{
+    u32 w = colM;
+    u32 fa = factorA;
+    u32 sh = (u32)shade << 8;
+    u32 fb = shade_frac & 0xFFFF0000;
+    u32 ui = (ubyte)(tlr->var_48 >> 16);
+    u32 vi = (ubyte)(tlr->var_54 >> 16);
+    u32 si = (ubyte)(tlr->var_60 >> 16);
+    u32 cnt = (u32)(ushort)n - 1;
+    const ubyte *ulo = (const ubyte *)tlr->var_48;
+    const ubyte *lsh = (const ubyte *)(tlr->var_54 << 16);
+    const ubyte *lshs = (const ubyte *)(tlr->var_60 << 16);
+    ubyte *out = o;
+
+    __asm__ volatile (
+        "1:  move.b (%[map],%[w].l),%[sh]\n"
+        "    beq 2f\n"
+        "    move.b (%[fade],%[sh].l),(%[out])\n"
+        "2:  addq.l #1,%[out]\n"
+        "    add.w %[ulo],%[fa]\n"
+        "    addx.b %[ui],%[w]\n"
+        "    add.l %[lsh],%[fa]\n"
+        "    ror.w #8,%[w]\n"
+        "    addx.b %[vi],%[w]\n"
+        "    ror.w #8,%[w]\n"
+        "    add.l %[lshs],%[fb]\n"
+        "    ror.w #8,%[sh]\n"
+        "    addx.b %[si],%[sh]\n"
+        "    ror.w #8,%[sh]\n"
+        "    dbra %[cnt],1b\n"
+        : [w] "+d" (w), [fa] "+d" (fa), [sh] "+d" (sh), [fb] "+d" (fb),
+          [cnt] "+d" (cnt), [out] "+a" (out)
+        : [ui] "d" (ui), [vi] "d" (vi), [si] "d" (si),
+          [ulo] "a" (ulo), [lsh] "a" (lsh), [lshs] "a" (lshs),
+          [map] "a" (vec_map), [fade] "a" (pixmap.fade_table)
+        : "cc", "memory");
+}
+
+#if defined(SW_AMIGA)
+/* Check mode (ENV:SyndWarsCheck exists): each span is also drawn by the C
+ * loop on a copy of the screen line and compared. */
+int amiga_check_enabled(void);
+static int trig_check_mode = -1;
+static unsigned long trig_check_spans, trig_check_fails;
+
+static void trig_span_check(const ubyte *ref, const ubyte *o, int n, int mode)
+{
+    int i;
+
+    trig_check_spans++;
+    for (i = 0; i < n; i++) {
+        if (ref[i] != o[i]) {
+            if (trig_check_fails < 20)
+                LOGERR("trig mode %d span %lu (n=%d) differs at %d: asm %d C %d",
+                  mode, trig_check_spans, n, i, (int)o[i], (int)ref[i]);
+            trig_check_fails++;
+            break;
+        }
+    }
+    if ((trig_check_spans & 0x3FFF) == 0)
+        LOGWARN("trig check: %lu spans, %lu different", trig_check_spans, trig_check_fails);
+}
+#endif
+#endif
+
+static inline void trig_span_md10(ubyte *o, short n, ushort colM, long factorA,
+  const struct TrigLocalRend *tlr)
+{
+#if defined(__mc68000__) || defined(__m68k__)
+#if defined(SW_AMIGA)
+    if (trig_check_mode < 0)
+        trig_check_mode = amiga_check_enabled();
+    if (trig_check_mode && (n <= 1024)) {
+        static ubyte ref[1024];
+        memcpy(ref, o, n);
+        trig_span_md10_c(ref, n, colM, factorA, tlr);
+        trig_span_md10_68k(o, n, colM, factorA, tlr);
+        trig_span_check(ref, o, n, 10);
+        return;
+    }
+#endif
+    trig_span_md10_68k(o, n, colM, factorA, tlr);
+#else
+    trig_span_md10_c(o, n, colM, factorA, tlr);
+#endif
+}
+
+static inline void trig_span_md06(ubyte *o, short n, ushort colM, long factorA,
+  ubyte shade, ulong shade_frac, const struct TrigLocalRend *tlr)
+{
+#if defined(__mc68000__) || defined(__m68k__)
+#if defined(SW_AMIGA)
+    if (trig_check_mode < 0)
+        trig_check_mode = amiga_check_enabled();
+    if (trig_check_mode && (n <= 1024)) {
+        static ubyte ref[1024];
+        memcpy(ref, o, n);
+        trig_span_md06_c(ref, n, colM, factorA, shade, shade_frac, tlr);
+        trig_span_md06_68k(o, n, colM, factorA, shade, shade_frac, tlr);
+        trig_span_check(ref, o, n, 6);
+        return;
+    }
+#endif
+    trig_span_md06_68k(o, n, colM, factorA, shade, shade_frac, tlr);
+#else
+    trig_span_md06_c(o, n, colM, factorA, shade, shade_frac, tlr);
+#endif
+}
+
 void trig_render_md06(struct TrigLocalRend *tlr)
 {
     struct PolyPoint *pp;
@@ -640,30 +866,9 @@ void trig_render_md06(struct TrigLocalRend *tlr)
             pY = factorB & 0xFFFF;
         }
 
-        for (; (pY & 0xFFFF) > 0; pY--, o++)
-        {
-            ushort colL, colH;
-            ubyte fct_carry;
-
-            pXa = (pXa & 0xFF00) | (m[colM] & 0xFF);
-            if (pXa & 0xFF)
-                *o = f[pXa];
-
-            fct_carry = __CFADDS__(tlr->var_48, factorA);
-            factorA = (factorA & 0xFFFF0000) | ((tlr->var_48 + factorA) & 0xFFFF);
-            colL = (tlr->var_48 >> 16) + fct_carry + colM;
-            fct_carry = __CFADDL__(lsh_var_54, factorA);
-            factorA += lsh_var_54;
-            colH = (tlr->var_54 >> 16) + fct_carry + (colM >> PITCH_SH);
-
-            colM = ((colH & VB_MASK) << PITCH_SH) + (colL & UA_MASK);
-
-            factorB = (factorB & 0xFFFF0000) | (pY & 0xFFFF);
-            fct_carry = __CFADDL__(lsh_var_60, factorB);
-            factorB += lsh_var_60;
-            pXa = (((pXa >> 8) + (tlr->var_60 >> 16) + fct_carry) << 8) | (pXa & 0xFF);
-            pY += lsh_var_60; // Very alarming. Bug, maybe?
-        }
+        if ((pY & 0xFFFF) > 0)
+            trig_span_md06(o, (short)(pY & 0xFFFF), colM, factorA,
+              (ubyte)(pXa >> 8), factorB, tlr);
     }
 }
 
@@ -999,25 +1204,8 @@ void trig_render_md10(struct TrigLocalRend *tlr)
             colM = ((colH & VB_MASK) << PITCH_SH) + (colL & UA_MASK);
         }
 
-        for (; pYa > 0; pYa--, o++)
-        {
-            ushort colL, colH;
-            ushort colS;
-            ubyte factorA_carry;
-
-            if (m[colM]) {
-                colS = (vec_colour << 8) | (*o);
-                *o = f[colS];
-            }
-            factorA_carry = __CFADDS__(tlr->var_48, factorA);
-            factorA = (factorA & 0xFFFF0000) + ((tlr->var_48 + factorA) & 0xFFFF);
-            colL = ((tlr->var_48 >> 16) & 0xFF) + factorA_carry + colM;
-            factorA_carry = __CFADDL__(lsh_var_54, factorA);
-            factorA += lsh_var_54;
-            colH = (colM >> PITCH_SH) + ((tlr->var_54 >> 16) & 0xFF) + factorA_carry;
-
-            colM = ((colH & VB_MASK) << PITCH_SH) + (colL & UA_MASK);
-        }
+        if (pYa > 0)
+            trig_span_md10(o, pYa, colM, factorA, tlr);
     }
 }
 

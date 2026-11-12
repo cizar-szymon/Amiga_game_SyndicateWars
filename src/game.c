@@ -1009,6 +1009,10 @@ static void amiga_check_mapwho(const char *where)
 
     bad = 0;
     first = -1;
+    // before the engine memory is set up there is no map (a read from
+    // address 0 on: harmless on the 68k, a bus fault on the Warp ARM)
+    if (game_my_big_map == NULL)
+        return;
     for (i = 0; i < MAP_TILE_WIDTH * MAP_TILE_HEIGHT; i++) {
         short c = game_my_big_map[i].Child;
         if ((c >= THINGS_LIMIT) || (c <= -STHINGS_LIMIT)) {

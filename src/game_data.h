@@ -42,7 +42,11 @@ enum DirPlacement {
     DirPlace_None,
 };
 
+/* Warp ARM: in-memory tables only; packed, their pointers in initialised
+ * data would sit at odd addresses, which the extension loader cannot relocate */
+#if !defined(SW_WARP)
 #pragma pack(1)
+#endif
 
 typedef struct {
     char *directory;
@@ -59,7 +63,9 @@ typedef struct {
     ubyte dum3;
 } MemSystem;
 
+#if !defined(SW_WARP)
 #pragma pack()
+#endif
 
 extern PathInfo game_dirs[];
 extern char cd_drive[52];

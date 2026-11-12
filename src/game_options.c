@@ -535,9 +535,10 @@ void set_default_gfx_settings(void)
     game_gfx_advanced_lights = 1;
     game_billboard_movies = 1;
     game_gfx_deep_radar = 0;
-#if defined(__mc68000__) || defined(__m68k__)
+#if defined(__mc68000__) || defined(__m68k__) || defined(SW_WARP)
     /* Amiga port: 320x200 by default (68060: 27 fps vs 13 fps in 640x480,
-     * mission 1 on Amiga 1); F8 and the options menu still switch. */
+     * mission 1 on Amiga 1); F8 and the options menu still switch.
+     * The Warp ARM build starts the same way, for comparison. */
     game_high_resolution = false;
 #else
     game_high_resolution = true;

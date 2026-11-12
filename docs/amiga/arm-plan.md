@@ -74,6 +74,42 @@ Pętla 10M mnożeń-dodawań 45,2 ms (~2,2 cyklu na iterację), kopia 1 MB w SDR
 `extFetch` 64 KB do Fast RAM 1,1 ms (~60 MB/s, 0 błędnych bajtów), echo przez pierścienie i wyjście
 z kodem 42 – w porządku. Pamięci jest więcej, niż zakładał plan (19,4 MB zamiast 14).
 
+## Gra na ARM – pierwsze uruchomienie (12.11.2026, Amiga 1)
+
+Etapy 2–3 w wersji minimalnej: **cała obecna gra liczona na ARM** (te same źródła co wersja 68k, symulacja
+nadal zaślepiona), 68060 tylko wyświetla klatki, paletę, obsługuje pliki i wejście.
+
+- Budowa: `tools/warp/build_arm.sh` (AC6, ten sam zestaw plików co `build_amiga.sh`, `m68k_prep.py` usuwa asm
+  x86) → `build/warp/swcore.wxt` (695 KB, zapieczętowany); `tools/warp/build_host.sh` (vbcc) → `swhost`.
+  Uruchomienie: `python tools/warp/run.py [--amiga2] [--secs N] [--keep] -q -m 0,1` (log `RAM:swarm-log.txt`).
+- Warstwa ARM: `platform/warp/` (`wmain.c` wejście, `wlibc.c` sterta/pliki/stdio/getopt/czas, `wlink.c`
+  rekordy, `prof.c` profiler na liczniku cykli), `bflibrary/src/arm-warp/` (ekran, czas, zdarzenia,
+  klawiatura). Protokół `platform/warp/swlink.h`. Pliki czytane przez łącze (okna 64 KB, `extFeed`),
+  klatka: ARM rejestruje `WScreen`, 68k robi `extFetch` prosto do bitmapy ekranu.
+- Pułapki znalezione przy uruchamianiu: wpisy `.init_array` armlinka są względne; `#pragma pack(1)` ze
+  wskaźnikami w danych inicjowanych daje relokacje pod nieparzystym adresem (loader odmawia –
+  `PathInfo`/`MemSystem` bez pakowania w `SW_WARP`); odczyt spod adresu 0 (kontrola `mapwho` przed
+  przydziałem mapy) to na ARM błąd szyny i reset całej Amigi; `extFeed` wymaga co najmniej 32 bajtów.
+- Pamięć: sterta 18 044 KB, szczyt 16 960 KB (arena gry 16,5 MB w całości).
+
+Pomiar, misja 1, Amiga 1 (Warp 1260 Extreme, ARM 480 MHz / 68060 100 MHz), profiler poziom 1, czas na turę:
+
+| | 68060, 320×200 | ARM, 320×200 | ARM, 640×480 |
+|---|---:|---:|---:|
+| tury/s (limit 16) | 14,1 | 15,6 | 15,7 |
+| rysowanie (`draw`) | 60,0 ms | 24,4 ms | 50,8 ms |
+| – trójkąty (`draw_screen`) | 28,1 | 11,7 | 31,5 |
+| – obiekty (`draw_things`) | 12,9 | 5,6 | 7,7 |
+| – podłoga | 8,8 | 2,4 | 3,4 |
+| – HUD | 9,2 | 4,4 | 7,8 |
+| symulacja (`things`, zaślepiona) | 7,1 | 3,2 | 3,2 |
+| wyświetlenie (`swap`) | 3,4 | ~1,2 | 9,2 |
+| **praca na turę** | **71 ms** | **~29 ms** | **~63 ms** |
+
+ARM w 320×200 jest ~2,5× szybszy i ma zapas (~34 tur/s możliwe, gra trzyma 16); 640×480 na ARM ≈ 320×200
+na 68060 – jak w Quake II. Bez żadnej optymalizacji pod M7 (`-O2`, kod i dane w SDRAM, bez ITCM/SRAM).
+Pobranie klatki: 1,1 ms (64 KB), 5,2 ms (300 KB) – dziś ARM czeka na nie; podwójna strona ukryje ten czas.
+
 ## Pamięć ARM (szacunek z kodu, do zmierzenia)
 
 Okno 14 MB (obraz programu + bss + stos + arena) i render area 8 MB.

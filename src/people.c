@@ -236,6 +236,7 @@ sbyte burning_timer_delatas[] = {
 extern short word_1AA38E;
 extern short word_1AA390;
 extern short word_1AA392;
+short person_move(struct Thing *p_person);
 extern short word_1AA394;
 
 short unkn01_thing_idx = 0;
@@ -4414,10 +4415,217 @@ int person_goto_person_nav(struct Thing *p_person)
     return ret;
 }
 
-void person_goto_point(struct Thing *p_person)
+#ifdef SW_FNCHK
+static void person_goto_point_asm(struct Thing *p_person)
 {
     asm volatile ("call ASM_person_goto_point\n"
-        : : "a" (p_person));
+        : : "a" (p_person) : "cc", "memory");
+}
+#endif
+
+/** Move a person on to the next point of its path. When a path record
+ * (4 points) is used up it goes back to the free list; at the end of the
+ * path returns true and the person has no path any more.
+ * Remade from do_next_navigate_index.
+ */
+static TbBool do_next_navigate_index(struct Thing *p_person)
+{
+    ushort path, head;
+    ubyte offs;
+    struct MyPath *p_path;
+
+    if (p_person->U.UPerson.PathIndex == 0)
+        return true;
+    head = head_my_path;
+    path = (ushort)p_person->U.UPerson.PathIndex;
+    p_path = &my_paths[(short)path];
+    p_person->PathOffset++;
+    offs = p_person->PathOffset;
+    if (offs >= p_path->Flag)
+    {
+        my_paths[path].Next = head;
+        path_count--;
+        my_paths[path].Flag = 0;
+        p_person->U.UPerson.PathIndex = 0;
+        head_my_path = path;
+        return true;
+    }
+    if ((offs & 3) == 0)
+    {
+        ushort next;
+
+        my_paths[path].Flag = 0;
+        path_count--;
+        next = my_paths[path].Next;
+        my_paths[path].Next = head;
+        head = path;
+        p_person->U.UPerson.PathIndex = next;
+    }
+    head_my_path = head;
+    return false;
+}
+
+/** Vector from a person to its current path point, in map coordinates. */
+static void goto_path_point_delta(struct Thing *p_person, int *p_dx, int *p_dz)
+{
+    struct MyPath *p_path;
+    int k;
+
+    p_path = &my_paths[p_person->U.UPerson.PathIndex];
+    k = p_person->PathOffset & 3;
+    *p_dx = p_path->X[k] - (p_person->X >> 8);
+    *p_dz = p_path->Z[k] - (p_person->Z >> 8);
+}
+
+/** A person walking along its path to the goto point: on each point of the
+ * path a new direction and walk time (ComTimer), turned aside on collisions.
+ */
+static void person_goto_point_c(struct Thing *p_person)
+{
+    int dx, dz, dist;
+    short ret;
+
+    // with no path the original used the vector from the previous branch,
+    // which is always computed when there is a path; zero otherwise
+    dx = 0;
+    dz = 0;
+    if ((p_person->Flag & TngF_Unkn00020000) != 0)
+        p_person->U.UPerson.LastDist = 32000;
+    if (p_person->U.UPerson.PathIndex != 0)
+        unkn_path_func_001(p_person, 1);
+    if ((p_person->U.UPerson.AnimMode == ANIM_PERS_Unkn14) ||
+      (p_person->U.UPerson.AnimMode == ANIM_PERS_WEPHEAVY_Unkn15))
+    {
+        p_person->U.UPerson.AnimMode = gun_out_anim(p_person, 0);
+        p_person->StartFrame = people_frames[p_person->SubType][p_person->U.UPerson.AnimMode] - 1;
+        p_person->Frame = nstart_ani[people_frames[p_person->SubType][p_person->U.UPerson.AnimMode]
+          + p_person->U.UPerson.Angle];
+    }
+    if (p_person->U.UPerson.PathIndex != 0)
+    {
+        int adx, adz, lim;
+
+        goto_path_point_delta(p_person, &dx, &dz);
+        adx = (dx < 0) ? -dx : dx;
+        adz = (dz < 0) ? -dz : dz;
+        if (adx > adz)
+            dist = adx + (adz >> 1);
+        else
+            dist = adz + (adx >> 1);
+        // close enough to the point: the last one of the path counts from
+        // the person's command range
+        if (p_person->PathOffset + 1 < my_paths[p_person->U.UPerson.PathIndex].Flag) {
+            lim = 30;
+        } else {
+            lim = p_person->U.UPerson.ComRange << 6;
+            if (lim < 30)
+                lim = 30;
+        }
+        if ((dist < lim) ||
+          ((p_person->Speed > 0) && (dist >= p_person->U.UPerson.LastDist)))
+            p_person->U.UPerson.ComTimer = -100;
+        p_person->U.UPerson.LastDist = dist;
+    }
+    if (p_person->U.UPerson.ComTimer < 0)
+    {
+        ushort ang;
+
+        p_person->Flag &= ~TngF_Unkn00020000;
+        if (p_person->U.UPerson.PathIndex == 0)
+        {
+            build_navigate_path(p_person, p_person->U.UPerson.GotoX, p_person->U.UPerson.GotoZ, 0);
+            goto_path_point_delta(p_person, &dx, &dz);
+        }
+        dist = LbSqrL((u32)dx * (u32)dx + (u32)dz * (u32)dz);
+        if (dist == 0)
+            dist = 1;
+        if (p_person->U.UPerson.ComTimer == -100)
+        {
+            p_person->U.UPerson.LastDist = 32000;
+            if (do_next_navigate_index(p_person)) {
+                p_person->U.UPerson.PathIndex = 0;
+                p_person->State = 0;
+            } else {
+                goto_path_point_delta(p_person, &dx, &dz);
+                dist = LbSqrL((u32)dx * (u32)dx + (u32)dz * (u32)dz);
+            }
+        }
+        if (dist == 0)
+            dist = 1;
+        dx = (int)((u32)dx << 8) / dist;
+        dz = (int)((u32)dz << 8) / dist;
+        if (p_person->Speed < 16)
+            p_person->U.UPerson.ComTimer = 10;
+        else
+            p_person->U.UPerson.ComTimer = dist / (p_person->Speed >> 4);
+        p_person->VX = dx;
+        p_person->VZ = dz;
+        ang = (((ushort)arctan(dx, -dz) + 0x80) & 0x7FF) >> 8;
+        if (ang != p_person->U.UPerson.Angle)
+        {
+            ushort base;
+
+            base = people_frames[p_person->SubType][p_person->U.UPerson.AnimMode];
+            p_person->Frame -= nstart_ani[base + p_person->U.UPerson.Angle];
+            p_person->U.UPerson.Angle = ang;
+            p_person->Frame += nstart_ani[base + ang];
+        }
+        p_person->StartFrame = people_frames[p_person->SubType][p_person->U.UPerson.AnimMode] - 1;
+    }
+
+    p_person->U.UPerson.ComTimer--;
+    ret = person_move(p_person);
+    if (ret != 0)
+    {
+        if ((p_person->Flag & TngF_Destroyed) != 0)
+            return;
+        if ((p_person->Flag & TngF_Unkn00020000) != 0)
+        {
+            if (((p_person->Flag & TngF_Unkn01000000) != 0) && ((gameturn & 1) != 0)) {
+                p_person->U.UPerson.ComTimer = 2;
+                p_person->VX *= 2;
+                p_person->VZ *= 2;
+            } else {
+                p_person->U.UPerson.ComTimer = 3;
+                p_person->VX = -p_person->VX;
+                p_person->VZ = -p_person->VZ;
+            }
+        }
+        else if ((word_1AA392 == 0) && ((p_person->Flag2 & TgF2_Unkn0080) == 0))
+        {
+            p_person->Flag |= TngF_Unkn00020000;
+            p_person->U.UPerson.ComTimer = 3;
+            p_person->U.UPerson.BumpCount++;
+            if (((p_person->Flag & TngF_Unkn01000000) != 0) && ((gameturn & 1) != 0)) {
+                p_person->U.UPerson.ComTimer = 5;
+                p_person->VX = -p_person->VX;
+                p_person->VZ = -p_person->VZ;
+            } else if (ret < 0) {
+                // a quarter of the vector turned by 90 degrees; the original
+                // took the old VX as its low 16 bits
+                short vx = (short)p_person->VX;
+                p_person->VX = p_person->VZ >> 2;
+                p_person->VZ = (-(int)vx) >> 2;
+            } else {
+                short vx = (short)p_person->VX;
+                p_person->VX = p_person->VZ;
+                p_person->VZ = -(int)vx;
+            }
+        }
+    }
+    p_person->Timer1 -= fifties_per_gameturn;
+    if (p_person->Timer1 < 0)
+    {
+        p_person->Timer1 = p_person->StartTimer1;
+        p_person->Frame = frame[p_person->Frame].Next;
+    }
+    if ((p_person->State == 0) && ((p_person->Flag2 & TgF2_Unkn0001) != 0))
+        finalise_razor_wire(p_person);
+}
+
+void person_goto_point(struct Thing *p_person)
+{
+    FNCHK_VOID("person_goto_point", person_goto_point_asm(p_person), person_goto_point_c(p_person));
 }
 
 void person_goto_point_rel(struct Thing *p_person)
@@ -6177,7 +6385,6 @@ static void process_wander_asm(struct Thing *p_person)
 #endif
 
 extern short word_1AA390;
-short person_move(struct Thing *p_person);
 void process_wander_and_fly(struct Thing *p_person, struct Thing *p_vehicle);
 
 /** First frame of the animation of a person's current anim mode, for the

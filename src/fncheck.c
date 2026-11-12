@@ -31,7 +31,7 @@ extern void *engine_mem_alloc_ptr;
 extern u32 engine_mem_alloc_size;
 
 #define FNCHK_MAX_FUNCS 128
-#define FNCHK_MAX_REPORTS 3   /* detailed reports per function */
+#define FNCHK_MAX_REPORTS 20  /* detailed reports per function */
 #define FNCHK_MAX_RANGES 16   /* differing ranges listed per report */
 
 struct FnStat {

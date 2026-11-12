@@ -65,6 +65,15 @@ linker 6.13 wymaga pustego `void __arm_preinit_(void) { }` obok `__arm_relocate_
 L6085 (opcja przestarzała – wyłączyć `--diag_suppress=6085`). Nowszy AC6 tylko z kontem Arm – na razie
 nie potrzeba.
 
+## Pierwszy test na płycie (12.11.2026, Amiga 1, Warp 1260 Extreme)
+
+`tools/warp/exthello` (`build.sh`: AC6 → zapieczętowany `hello.wxt`, vbcc → `exthello`). Wynik: **działa**.
+cswarp.library 30.73, WarpExtEnv **v6**, ARM 480 MHz; okno **19 904 KB** (arena 19 832 KB), render
+area 8 192 KB; szybka pamięć: 32 KB ITCM (`$00008000`, exec+TCM), 64 KB + 16 KB SRAM (cache).
+Pętla 10M mnożeń-dodawań 45,2 ms (~2,2 cyklu na iterację), kopia 1 MB w SDRAM 20,4 ms (~51 MB/s),
+`extFetch` 64 KB do Fast RAM 1,1 ms (~60 MB/s, 0 błędnych bajtów), echo przez pierścienie i wyjście
+z kodem 42 – w porządku. Pamięci jest więcej, niż zakładał plan (19,4 MB zamiast 14).
+
 ## Pamięć ARM (szacunek z kodu, do zmierzenia)
 
 Okno 14 MB (obraz programu + bss + stos + arena) i render area 8 MB.

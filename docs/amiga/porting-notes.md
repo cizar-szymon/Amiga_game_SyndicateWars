@@ -228,8 +228,10 @@ liczb < 2^31 obcięcie ilorazu `double` = iloraz całkowity), z wersją bez FPU.
   `ma_triangle_route_3` (+ przeszukiwanie z kopcem `triangle_route_do_unkn5`; `unkn6` to ten sam kod),
   `path_init8_thing`, `tri_path_init8`. Wewnętrzne etykiety asm wołane z asm: eksport `ASM_*` i most
   `ac_*` (`conf/wrappers_game.conf`). Kopiec `heap`: wierzchołek to `heap[1]` (`data_1c30c0` w asm).
-- Zostało do nawigacji: `build_navigate_path` (na Amidze nadal zaślepka – nowa nawigacja jeszcze
-  nie pracuje), `use_nav_data`, `fatter_than_nothing`, `set_xz_for_quad210/_unkn03`.
+- `build_navigate_path` + `use_nav_data` + `fatter_than_nothing` (`cde51156`, 0 różnic w ok. 20 min
+  nagrania): nawigacja na Amidze działa. `set_xz_for_quad210/_unkn03` zostały w asm (misja 1 ich nie
+  używa – ludzie na czworokątnych ścianach), wołane przez wyeksportowane etykiety.
+- Przebiegi fncheck odtąd najwyżej 10 min (`timeout 600`) – decyzja użytkownika.
 - **Błąd portu (Amiga): za małe struktury z danych asm.** `gen_asm_data.py` kończył dane symbolu na
   każdej etykiecie, także wewnętrznej (pole struktury), więc `map_craters` miało 2 bajty zamiast 1024
   (kratery po wybuchach nadpisywały zmienne za tablicą), `redo_scanner` 2 z 512, `datagram_backup`

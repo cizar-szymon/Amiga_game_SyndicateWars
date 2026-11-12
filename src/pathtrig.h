@@ -78,6 +78,14 @@ void print_collision_vects(void);
 
 void unkn_path_func_001(struct Thing *p_thing, ubyte a2);
 
+/** Route through triangles between triA and triB, the shorter of the two
+ * search directions; returns its length or -1.
+ */
+s32 ma_triangle_route_3(int triA, int triB, s32 *p_route, s32 *p_cost);
+int path_init8_thing(struct Path *p_path, int ax8, int ay8, int bx8, int by8, int a6);
+int tri_path_init8(int triA, int triB, struct Path *p_path, int ax8,
+  int ay8, int bx8, int by8, int a8);
+
 /** Checks whether line segment (x1,y1)-(x2,y2) intersects segment (x3,y3)-(x4,y4).
  */
 TbBool two4_line_intersection(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4);

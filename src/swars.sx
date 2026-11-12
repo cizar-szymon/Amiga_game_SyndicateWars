@@ -76174,7 +76174,8 @@ triangle_route_do_unkn7:	/* 0x0857AC */
 
 
 /*----------------------------------------------------------------*/
-ma_triangle_route_3:	/* 0x085F18 */
+GLOBAL_FUNC(ASM_ma_triangle_route_3)	/* 0x085F18 */
+ma_triangle_route_3:
 /*----------------------------------------------------------------*/
 		push   %esi
 		push   %edi
@@ -77279,7 +77280,8 @@ GLOBAL_FUNC(ASM_route_to_path)	/* 0x086AB0 */
 
 
 /*----------------------------------------------------------------*/
-path_init8_thing:	/* 0x086E0C */
+GLOBAL_FUNC(ASM_path_init8_thing)	/* 0x086E0C */
+path_init8_thing:
 /*----------------------------------------------------------------*/
 		push   %esi
 		push   %edi
@@ -77338,7 +77340,7 @@ jump_86e7a:
 		mov    %eax,%edx
 		mov    $EXPORT_SYMBOL(tree_route),%ebx
 		mov    0x4(%esp),%eax
-		call   ma_triangle_route_3
+		call   ac_ma_triangle_route_3
 		mov    %eax,EXPORT_SYMBOL(tree_routelen)
 		cmp    $0xffffffff,%eax
 		je     jump_86ef8
@@ -77606,7 +77608,8 @@ GLOBAL_FUNC(ASM_path_init8_unkn3)	/* 0x087118 */
 
 
 /*----------------------------------------------------------------*/
-tri_path_init8:	/* 0x08723C */
+GLOBAL_FUNC(ASM_tri_path_init8)	/* 0x08723C */
+tri_path_init8:
 /*----------------------------------------------------------------*/
 		push   %esi
 		push   %edi
@@ -77675,7 +77678,7 @@ tri_path_init8:	/* 0x08723C */
 		mov    $EXPORT_SYMBOL(tree_routecost),%ecx
 		mov    %ebx,%eax
 		mov    $EXPORT_SYMBOL(tree_route),%ebx
-		call   ma_triangle_route_3
+		call   ac_ma_triangle_route_3
 		mov    %eax,EXPORT_SYMBOL(tree_routelen)
 		cmp    $0xffffffff,%eax
 		je     jump_8734d
@@ -98460,7 +98463,7 @@ GLOBAL_FUNC(ASM_build_navigate_path_to_person)	/* 0x0BFD00 */
 		push   %edx
 		movswl %di,%edx
 		sar    $0x10,%eax
-		call   tri_path_init8
+		call   ac_tri_path_init8
 	jump_c01ff:
 		cmpl   $0x0,EXPORT_SYMBOL(g_nav_data)+0x10
 		jne    jump_c026d
@@ -98657,7 +98660,7 @@ GLOBAL_FUNC(ASM_build_navigate_path_to_face)	/* 0x0C0298 */
 		push   %eax
 		movswl %cx,%eax
 		mov    0x18(%esp),%ecx
-		call   tri_path_init8
+		call   ac_tri_path_init8
 		cmpl   $0x0,EXPORT_SYMBOL(g_nav_data)+0x10
 		jne    jump_c04a3
 		mov    0x8(%esp),%eax
@@ -98838,7 +98841,7 @@ GLOBAL_FUNC(ASM_build_navigate_path_to_face_xz)	/* 0x0C04C8 */
 		movswl %ax,%edx
 		movswl %cx,%eax
 		mov    0x10(%esp),%ecx
-		call   tri_path_init8
+		call   ac_tri_path_init8
 		cmpl   $0x0,EXPORT_SYMBOL(g_nav_data)+0x10
 		jne    jump_c06a2
 		mov    (%esp),%eax
@@ -99061,7 +99064,7 @@ GLOBAL_FUNC(ASM_build_navigate_path)	/* 0x0C06D0 */
 		movswl %cx,%eax
 		mov    %ebx,%ecx
 		mov    $EXPORT_SYMBOL(g_nav_data),%ebx
-		call   tri_path_init8
+		call   ac_tri_path_init8
 		mov    EXPORT_SYMBOL(g_nav_data)+0x10,%ax
 		and    $0xffff,%eax
 		jne    jump_c0a61
@@ -99118,7 +99121,7 @@ GLOBAL_FUNC(ASM_build_navigate_path)	/* 0x0C06D0 */
 		push   %ebp
 		mov    0x18(%esi),%edx
 		mov    %edi,%ecx
-		call   path_init8_thing
+		call   ac_path_init8_thing
 		mov    EXPORT_SYMBOL(g_nav_data)+0x10,%ax
 		xor    %edx,%edx
 		mov    %ax,%dx
@@ -114081,12 +114084,15 @@ GLOBAL (last_swoosh_thing)	/* 0x1AABD8 */
 
 /* Path fwd_path;
  */
+GLOBAL (route_fwd_path)
 fwd_path:
 		.fill   0x814
+GLOBAL (route_heap)
 heap:	/* 0x1C30BC */
 		.long	0x0
 data_1c30c0:
 		.fill   0x400
+GLOBAL (route_heap_end)
 heap_end:	/* 0x1C34C0 */
 		.long	0x0
 dfs_node:	/* 0x1C34C4 */

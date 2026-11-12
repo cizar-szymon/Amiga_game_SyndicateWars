@@ -22,6 +22,7 @@
 #include "bfmath.h"
 #include "bfmemory.h"
 #include <assert.h>
+#include <stddef.h>
 #include <string.h>
 #include <limits.h>
 #include <stdlib.h>
@@ -45,6 +46,7 @@
 #include "trfringe.h"
 #include "delaunay.h"
 #include "swlog.h"
+#include "fncheck.h"
 /******************************************************************************/
 s32 Ex[100];
 s32 Ey[100];
@@ -138,86 +140,140 @@ static sbyte path_compare_multiplications(long mul1a, long mul1b, long mul2a, lo
     return 0;
 }
 
-TbBool triangle_contains8(int tri, int x, int y)
+#ifdef SW_FNCHK
+static TbBool triangle_contains8_asm(int tri, int x, int y)
 {
     TbBool ret;
     asm volatile ("call ASM_triangle_contains8\n"
         : "=r" (ret) : "a" (tri), "d" (x), "b" (y));
     return ret;
 }
+#endif
 
-int pointed_at8(TrFineCoord pt_x, TrFineCoord pt_y, int *r_tri, int *r_cor)
+/** Difference of two 32-bit values, wrapping as the original. */
+static inline s32 sub32w(s32 a, s32 b)
 {
-#if 1
-    int ret;
-    asm volatile ("call ASM_pointed_at8\n"
-        : "=r" (ret) : "a" (pt_x), "d" (pt_y), "b" (r_tri), "c" (r_cor));
-    return ret;
-#else
-    //TODO this does not work exactly like original
+    return (s32)((u32)a - (u32)b);
+}
+
+/** Whether point (x,y) (coordinates * 256) lies inside the triangle or on
+ * its edge: for each edge the 64-bit cross product must not be positive.
+ */
+static TbBool triangle_contains8_c(int tri, int x, int y)
+{
     struct TrTriangle *p_tri;
     struct TrPoint *p_pt;
+    s32 x0, y0, x1, y1, x2, y2;
 
-    TrTipId cor;
-    TrTriangId tri;
-    TrFineCoord ptAx, ptAy;
-    TrFineCoord ptBx, ptBy;
+    p_tri = &triangulation[0].Triangles[tri];
+    p_pt = &triangulation[0].Points[p_tri->point[0]];
+    x0 = (s32)((u32)p_pt->x << 8);
+    y0 = (s32)((u32)p_pt->y << 8);
+    p_pt = &triangulation[0].Points[p_tri->point[1]];
+    x1 = (s32)((u32)p_pt->x << 8);
+    y1 = (s32)((u32)p_pt->y << 8);
+    p_pt = &triangulation[0].Points[p_tri->point[2]];
+    x2 = (s32)((u32)p_pt->x << 8);
+    y2 = (s32)((u32)p_pt->y << 8);
+
+    if (path_compare_multiplications(sub32w(x1, x0), sub32w(y, y1),
+      sub32w(y1, y0), sub32w(x, x1)) > 0)
+        return false;
+    if (path_compare_multiplications(sub32w(x2, x1), sub32w(y, y2),
+      sub32w(y2, y1), sub32w(x, x2)) > 0)
+        return false;
+    if (path_compare_multiplications(sub32w(x0, x2), sub32w(y, y0),
+      sub32w(y0, y2), sub32w(x, x0)) > 0)
+        return false;
+    return true;
+}
+
+TbBool triangle_contains8(int tri, int x, int y)
+{
+    TbBool ret;
+
+    FNCHK_PURE("triangle_contains8", ret, triangle_contains8_asm(tri, x, y),
+      triangle_contains8_c(tri, x, y));
+    return ret;
+}
+
+#ifdef SW_FNCHK
+static int pointed_at8_asm(TrFineCoord pt_x, TrFineCoord pt_y, int *r_tri, int *r_cor)
+{
+    int ret;
+    asm volatile ("call ASM_pointed_at8\n"
+        : "=r" (ret) : "a" (pt_x), "d" (pt_y), "b" (r_tri), "c" (r_cor)
+        : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Walks around the corner `*r_cor` of triangle `*r_tri` (coordinates of
+ * the corner fixed), from one triangle sharing it to the next, until the one
+ * whose angle at the corner contains the direction to point (pt_x,pt_y).
+ * Sets that triangle and corner and returns the next corner index, or -1
+ * when the walk reaches an edge with no neighbour (the outputs unchanged).
+ */
+static int pointed_at8_c(TrFineCoord pt_x, TrFineCoord pt_y, int *r_tri, int *r_cor)
+{
+    struct TrTriangle *p_tri;
+    struct TrPoint *p_pt;
+    s32 cx, cy;
+    int tri, cor;
 
     tri = *r_tri;
     cor = *r_cor;
-
-    if (!tri_is_allocated(tri)) {
-        return -1;
-    }
     p_tri = &triangulation[0].Triangles[tri];
-
     p_pt = &triangulation[0].Points[p_tri->point[cor]];
-    ptAx = (p_pt->x << 8) - pt_x;
-    ptAy = (p_pt->y << 8) - pt_y;
-    p_pt = &triangulation[0].Points[p_tri->point[MOD3[cor+2]]];
-    ptBx = (p_pt->x << 8) - pt_x;
-    ptBy = (p_pt->y << 8) - pt_y;
-    TbBool pt_rel;
-    pt_rel = path_compare_multiplications(ptBy, ptAx, ptBx, ptAy) > 0;
-    TbBool prev_rel;
-    long k;
-    k = 0;
-    while ( 1 )
+    cx = (s32)((u32)p_pt->x << 8);
+    cy = (s32)((u32)p_pt->y << 8);
+    while (1)
     {
-        prev_rel = pt_rel;
+        s32 nx, ny, mx, my;
+        TbBool rel_m, rel_n;
+        int lnk, k;
+
         p_tri = &triangulation[0].Triangles[tri];
         p_pt = &triangulation[0].Points[p_tri->point[MOD3[cor+1]]];
-        ptBy = (p_pt->y << 8) - pt_y;
-        ptBx = (p_pt->x << 8) - pt_x;
-        pt_rel = path_compare_multiplications(ptBy, ptAx, ptBx, ptAy) > 0;
-
-        if ( prev_rel && !pt_rel )
+        nx = (s32)((u32)p_pt->x << 8);
+        ny = (s32)((u32)p_pt->y << 8);
+        p_pt = &triangulation[0].Points[p_tri->point[MOD3[cor+2]]];
+        mx = (s32)((u32)p_pt->x << 8);
+        my = (s32)((u32)p_pt->y << 8);
+        rel_m = path_compare_multiplications(sub32w(mx, cx), sub32w(pt_y, my),
+          sub32w(my, cy), sub32w(pt_x, mx)) > 0;
+        rel_n = path_compare_multiplications(sub32w(nx, cx), sub32w(pt_y, ny),
+          sub32w(ny, cy), sub32w(pt_x, nx)) > 0;
+        if (rel_m && !rel_n)
         {
             *r_tri = tri;
             *r_cor = cor;
             return MOD3[cor+1];
         }
-        TrTriangId lnk_tri;
-        TrTipId lnk_cor;
-        lnk_tri = p_tri->tri[cor];
-        if (lnk_tri < 0) {
-            break;
-        }
-        lnk_cor = link_find(lnk_tri, tri);
-        if (lnk_cor < 0) {
-            LOGERR("no tri link from %d to %d", (int)lnk_tri, (int)tri);
-            break;
-        }
-        cor = MOD3[lnk_cor+1];
-        tri = lnk_tri;
-        k++;
-        if (k >= triangulation[0].max_Triangles) {
-            LOGERR("Infinite loop detected");
-            break;
-        }
+        lnk = p_tri->tri[cor];
+        if (lnk == -1)
+            return -1;
+        p_tri = &triangulation[0].Triangles[lnk];
+        if (p_tri->tri[0] == tri)
+            k = 0;
+        else if (p_tri->tri[1] == tri)
+            k = 1;
+        else if (p_tri->tri[2] == tri)
+            k = 2;
+        else
+            k = -1;
+        cor = MOD3[k+1];
+        tri = lnk;
     }
-    return -1;
-#endif
+}
+
+int pointed_at8(TrFineCoord pt_x, TrFineCoord pt_y, int *r_tri, int *r_cor)
+{
+    int ret;
+
+    FNCHK_RET("pointed_at8", ret, pointed_at8_asm(pt_x, pt_y, r_tri, r_cor),
+      pointed_at8_c(pt_x, pt_y, r_tri, r_cor));
+    return ret;
 }
 
 int triangle_find8(TrFineCoord pt_x, TrFineCoord pt_y)
@@ -312,11 +368,68 @@ int triangle_find8(TrFineCoord pt_x, TrFineCoord pt_y)
 #endif
 }
 
-int triangle_findSE8(int x, int y)
+#ifdef SW_FNCHK
+static int triangle_findSE8_asm(int x, int y)
 {
     int ret;
     asm volatile ("call ASM_triangle_findSE8\n"
-        : "=r" (ret) : "a" (x), "d" (y));
+        : "=r" (ret) : "a" (x), "d" (y) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Triangle containing point (x,y) (coordinates * 256), with points on an
+ * edge or a corner resolved towards the south-east: on a corner the
+ * triangle around it pointed at by (0x10100,0x10100), on an edge the
+ * neighbour across it when (0x10100,0x10100) lies on its side.
+ */
+static int triangle_findSE8_c(int x, int y)
+{
+    struct TrTriangle *p_tri;
+    struct TrPoint *p_pt;
+    int tri, cor;
+
+    tri = triangle_find8(x, y);
+    if (tri < 0)
+        return tri;
+    p_tri = &triangulation[0].Triangles[tri];
+    for (cor = 0; cor < 3; cor++)
+    {
+        p_pt = &triangulation[0].Points[p_tri->point[cor]];
+        if ((s32)((u32)p_pt->x << 8) != x)
+            continue;
+        if ((s32)((u32)p_pt->y << 8) != y)
+            continue;
+        pointed_at8(0x10100, 0x10100, &tri, &cor);
+        return tri;
+    }
+    for (cor = 0; cor < 3; cor++)
+    {
+        s32 px, py, qx, qy;
+
+        p_pt = &triangulation[0].Points[p_tri->point[cor]];
+        px = (s32)((u32)p_pt->x << 8);
+        py = (s32)((u32)p_pt->y << 8);
+        p_pt = &triangulation[0].Points[p_tri->point[MOD3[cor+1]]];
+        qx = (s32)((u32)p_pt->x << 8);
+        qy = (s32)((u32)p_pt->y << 8);
+        if (path_compare_multiplications(sub32w(qx, px), sub32w(y, qy),
+          sub32w(qy, py), sub32w(x, qx)) != 0)
+            continue;
+        if (path_compare_multiplications(sub32w(qx, px), sub32w(0x10100, qy),
+          sub32w(qy, py), sub32w(0x10100, qx)) <= 0)
+            continue;
+        return p_tri->tri[cor];
+    }
+    return tri;
+}
+
+int triangle_findSE8(int x, int y)
+{
+    int ret;
+
+    FNCHK_RET("triangle_findSE8", ret, triangle_findSE8_asm(x, y),
+      triangle_findSE8_c(x, y));
     return ret;
 }
 
@@ -347,7 +460,8 @@ int edge_find(int x1, int y1, int x2, int y2, int *ntri1, int *ncor1)
     return ret;
 }
 
-TbBool two4_line_intersection(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
+#ifdef SW_FNCHK
+static TbBool two4_line_intersection_asm(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
 {
     TbBool ret;
     // Pushed through a register holding them: a "g" operand may be placed
@@ -368,6 +482,83 @@ TbBool two4_line_intersection(int x1, int y1, int x2, int y2, int x3, int y3, in
         : "=r" (ret)
         : "a" (x1), "d" (y1), "b" (x2), "c" (y2), "S" (stkargs)
         : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Product of two 32-bit values, wrapping as the original imul. */
+static inline s32 mul32w(s32 a, s32 b)
+{
+    return (s32)((u32)a * (u32)b);
+}
+
+/** Segment (x1,y1)-(x2,y2) against segment (x3,y3)-(x4,y4): 0 - no
+ * intersection, 1 - the segments are parallel (and their bounding boxes
+ * overlap), 2 - they intersect. The original compares the bounding boxes on
+ * the low 16 bits of the coordinates, products are 32-bit.
+ */
+static TbBool two4_line_intersection_c(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
+{
+    s32 ax, ay, bx, by, cx, cy, d, e, f;
+    short lo, hi;
+
+    ax = (s32)((u32)x2 - (u32)x1);
+    bx = (s32)((u32)x3 - (u32)x4);
+    if (ax < 0) {
+        lo = x2; hi = x1;
+    } else {
+        lo = x1; hi = x2;
+    }
+    if (bx > 0) {
+        if ((hi < (short)x4) || ((short)x3 < lo))
+            return 0;
+    } else {
+        if ((hi < (short)x3) || ((short)x4 < lo))
+            return 0;
+    }
+    ay = (s32)((u32)y2 - (u32)y1);
+    by = (s32)((u32)y3 - (u32)y4);
+    if (ay < 0) {
+        hi = y1; lo = y2;
+    } else {
+        hi = y2; lo = y1;
+    }
+    if (by > 0) {
+        if ((hi < (short)y4) || (lo > (short)y3))
+            return 0;
+    } else {
+        if ((hi < (short)y3) || (lo > (short)y4))
+            return 0;
+    }
+    cx = (s32)((u32)x1 - (u32)x3);
+    cy = (s32)((u32)y1 - (u32)y3);
+    d = (s32)((u32)mul32w(by, cx) - (u32)mul32w(bx, cy));
+    f = (s32)((u32)mul32w(ay, bx) - (u32)mul32w(by, ax));
+    if (f > 0) {
+        if ((d < 0) || (d > f))
+            return 0;
+    } else {
+        if ((d > 0) || (d < f))
+            return 0;
+    }
+    e = (s32)((u32)mul32w(cy, ax) - (u32)mul32w(ay, cx));
+    if (f > 0) {
+        if ((e < 0) || (e > f))
+            return 0;
+    } else {
+        if ((e > 0) || (e < f))
+            return 0;
+    }
+    return (f == 0) ? 1 : 2;
+}
+
+TbBool two4_line_intersection(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
+{
+    TbBool ret;
+
+    FNCHK_PURE("two4_line_intersection", ret,
+      two4_line_intersection_asm(x1, y1, x2, y2, x3, y3, x4, y4),
+      two4_line_intersection_c(x1, y1, x2, y2, x3, y3, x4, y4));
     return ret;
 }
 
@@ -463,10 +654,10 @@ s32 ma_triangle_route_4(int triA, int triB, s32 *p_treert)
     return ret;
 }
 
-s32 route_to_path(int ax8, int ay8, int bx8, int by8, s32 *p_treert,
+#ifdef SW_FNCHK
+static s32 route_to_path_asm(int ax8, int ay8, int bx8, int by8, s32 *p_treert,
   s32 treert_len, struct Path *p_path, int *p_len2)
 {
-#if 1
     // Pushed through a register holding them: a "g" operand may be placed
     // relative to the stack pointer, which each push moves.
     int stkargs[4];
@@ -487,7 +678,626 @@ s32 route_to_path(int ax8, int ay8, int bx8, int by8, s32 *p_treert,
         : "cc", "memory");
 
     return ret;
+}
 #endif
+
+/** Point of a triangle corner, coordinates * 256. */
+static void tri_corner_point8(struct TrTriangle *p_tri, int cor, s32 *p_x, s32 *p_y)
+{
+    struct TrPoint *p_pt;
+
+    p_pt = &triangulation[0].Points[p_tri->point[cor]];
+    *p_x = (s32)((u32)p_pt->x << 8);
+    *p_y = (s32)((u32)p_pt->y << 8);
+}
+
+/** Ends of the edge of triangle `tri` through which the route goes on to
+ * triangle `nxt` (a neighbour, or the jump triangle when the edge allows
+ * entering it): (x1,y1) the end on the left, (x2,y2) on the right.
+ * Returns 0, or -42 when `nxt` is not reachable from `tri`.
+ * Remade from edge_points8.
+ */
+static int edge_points8(int tri, int nxt, s32 *p_x1, s32 *p_y1, s32 *p_x2, s32 *p_y2)
+{
+    struct TrTriangle *p_tri;
+    int cor;
+
+    p_tri = &triangulation[0].Triangles[tri];
+    for (cor = 0; cor < 3; cor++)
+    {
+        if ((p_tri->tri[cor] == nxt) ||
+          ((p_tri->jump == nxt) && ((p_tri->enter & (0x10 << cor)) != 0)))
+        {
+            tri_corner_point8(p_tri, MOD3[cor+1], p_x1, p_y1);
+            tri_corner_point8(p_tri, cor, p_x2, p_y2);
+            return 0;
+        }
+    }
+    return -42;
+}
+
+/** Where point (x,y) lies against the funnel from the current point p[0..1]
+ * through the left p[2..3] and right p[4..5] points: -1 - outside on the
+ * left side, 1 - outside on the right side, 0 - inside.
+ * Remade from fov_region.
+ */
+static int fov_region(s32 x, s32 y, s32 *p)
+{
+    if (path_compare_multiplications(sub32w(p[2], p[0]), sub32w(y, p[3]),
+      sub32w(p[3], p[1]), sub32w(x, p[2])) < 0)
+        return -1;
+    if (path_compare_multiplications(sub32w(p[4], p[0]), sub32w(y, p[5]),
+      sub32w(p[5], p[1]), sub32w(x, p[4])) > 0)
+        return 1;
+    return 0;
+}
+
+/** Distance between two points, as the original: squares summed in 32 bits. */
+static s32 route_dist8(s32 x1, s32 y1, s32 x2, s32 y2)
+{
+    u32 dx, dy;
+
+    dx = (u32)x2 - (u32)x1;
+    dy = (u32)y2 - (u32)y1;
+    return LbSqrL(dy * dy + dx * dx);
+}
+
+/** Turns a route through triangles into a path of way points from A to B:
+ * the funnel along the crossed edges, a corner of it becomes a way point
+ * where the route turns. Returns the number of way points, -1 on error
+ * (an unreachable step, a loop, more than 256 points); *p_len2 gets the
+ * path length.
+ */
+static s32 route_to_path_c(int ax8, int ay8, int bx8, int by8, s32 *p_treert,
+  s32 treert_len, struct Path *p_path, int *p_len2)
+{
+    // current point, left and right funnel points (as fov_region() reads them)
+    s32 fp[6];
+    s32 nlx, nly, nrx, nry;
+    int npts, i, li, ri;
+
+    p_path->ax8 = ax8;
+    p_path->ay8 = ay8;
+    p_path->bx8 = bx8;
+    p_path->by8 = by8;
+    *p_len2 = 0;
+    npts = 0;
+    fp[0] = ax8;
+    fp[1] = ay8;
+    if (treert_len == 0)
+    {
+        *p_len2 += route_dist8(fp[0], fp[1], bx8, by8);
+        p_path->PathLength = 1;
+        p_path->WayPoints[0].x8 = bx8;
+        p_path->WayPoints[0].y8 = by8;
+        return 1;
+    }
+    li = 0;
+    ri = 0;
+    if (edge_points8(p_treert[0], p_treert[1], &fp[2], &fp[3], &fp[4], &fp[5]) == -42)
+        return -1;
+    i = 1;
+    while (1)
+    {
+        int r1, r2;
+
+        if (i < treert_len)
+        {
+            if (edge_points8(p_treert[i], p_treert[i+1], &nlx, &nly, &nrx, &nry) == -42)
+                return -1;
+            r1 = fov_region(nlx, nly, fp);
+            r2 = fov_region(nrx, nry, fp);
+        }
+        else
+        {
+            r1 = fov_region(bx8, by8, fp);
+            r2 = r1;
+            if (r1 == 0)
+            {
+                if (npts == 256)
+                    return -1;
+                *p_len2 += route_dist8(fp[0], fp[1], bx8, by8);
+                p_path->WayPoints[npts].x8 = bx8;
+                p_path->WayPoints[npts].y8 = by8;
+                npts++;
+                p_path->PathLength = npts;
+                return npts;
+            }
+            if ((npts >= 3) &&
+              (p_path->WayPoints[npts-1].x8 == p_path->WayPoints[npts-3].x8) &&
+              (p_path->WayPoints[npts-1].y8 == p_path->WayPoints[npts-3].y8))
+                return -1;
+        }
+        if (r1 == 0) {
+            fp[2] = nlx;
+            fp[3] = nly;
+            li = i;
+        }
+        if (r2 == 0) {
+            fp[4] = nrx;
+            fp[5] = nry;
+            ri = i;
+        }
+        if (r2 == -1)
+        {
+            if (npts == 256)
+                return -1;
+            *p_len2 += route_dist8(fp[0], fp[1], fp[2], fp[3]);
+            p_path->WayPoints[npts].x8 = fp[2];
+            p_path->WayPoints[npts].y8 = fp[3];
+            fp[0] = fp[2];
+            fp[1] = fp[3];
+            i = li;
+            npts++;
+            if (edge_points8(p_treert[i], p_treert[i+1], &fp[2], &fp[3], &fp[4], &fp[5]) == -42)
+                return -1;
+        }
+        else if (r1 == 1)
+        {
+            if (npts == 256)
+                return -1;
+            *p_len2 += route_dist8(fp[0], fp[1], fp[4], fp[5]);
+            p_path->WayPoints[npts].x8 = fp[4];
+            p_path->WayPoints[npts].y8 = fp[5];
+            fp[0] = fp[4];
+            fp[1] = fp[5];
+            i = ri;
+            npts++;
+            if (edge_points8(p_treert[i], p_treert[i+1], &fp[2], &fp[3], &fp[4], &fp[5]) == -42)
+                return -1;
+        }
+        i++;
+    }
+}
+
+s32 route_to_path(int ax8, int ay8, int bx8, int by8, s32 *p_treert,
+  s32 treert_len, struct Path *p_path, int *p_len2)
+{
+    s32 ret;
+
+    FNCHK_RET("route_to_path", ret,
+      route_to_path_asm(ax8, ay8, bx8, by8, p_treert, treert_len, p_path, p_len2),
+      route_to_path_c(ax8, ay8, bx8, by8, p_treert, treert_len, p_path, p_len2));
+    return ret;
+}
+
+/* Route search data, in the asm data: a heap of triangles (index 1 is the
+ * top, 256 the last usable place) and a spare path. */
+extern s32 route_heap[257];
+extern s32 route_heap_end;
+extern struct Path route_fwd_path;
+extern ubyte tag_current;
+
+static inline void route_heap_swap(int a, int b)
+{
+    s32 t;
+
+    t = route_heap[a];
+    route_heap[a] = route_heap[b];
+    route_heap[b] = t;
+}
+
+/** Puts a triangle on the route heap and moves it up, as the original:
+ * at each step the smallest of the place, its sibling and their parent goes
+ * to the parent. With a full heap the last place is overwritten.
+ */
+static void route_heap_push(s32 tri)
+{
+    int i;
+
+    if (route_heap_end < 256)
+        route_heap_end++;
+    i = route_heap_end;
+    route_heap[i] = tri;
+    if (i == 1)
+        return;
+    if ((i & 1) == 0)
+    {
+        int p = i >> 1;
+        if (tree_val[route_heap[i]] > tree_val[route_heap[p]])
+            return;
+        route_heap_swap(i, p);
+        i = p;
+    }
+    while (i != 1)
+    {
+        int p, sb, m;
+        s32 vi;
+
+        p = i >> 1;
+        sb = i ^ 1;
+        vi = tree_val[route_heap[i]];
+        if (vi < tree_val[route_heap[sb]])
+            m = (vi < tree_val[route_heap[p]]) ? i : p;
+        else
+            m = (tree_val[route_heap[sb]] < tree_val[route_heap[p]]) ? sb : p;
+        if (m == p)
+            return;
+        route_heap_swap(p, m);
+        i = p;
+    }
+}
+
+/** Removes the top of the route heap (the caller has read it): the last
+ * place goes to the top and moves down, as the original.
+ */
+static void route_heap_pop(void)
+{
+    int i, end;
+
+    end = route_heap_end;
+    route_heap[1] = route_heap[end];
+    route_heap_end = end - 1;
+    route_heap[end] = -1;
+    if (route_heap_end == 0)
+        return;
+    i = 1;
+    while (1)
+    {
+        int c, sb, m;
+        s32 vi;
+
+        c = 2 * i;
+        sb = c ^ 1;
+        end = route_heap_end;
+        if (sb > end)
+        {
+            if (i == end)
+                return;
+            if (tree_val[route_heap[i]] < tree_val[route_heap[end]])
+                return;
+            route_heap_swap(end, i);
+            return;
+        }
+        vi = tree_val[route_heap[i]];
+        if (vi < tree_val[route_heap[c]])
+            m = (vi >= tree_val[route_heap[sb]]) ? sb : i;
+        else
+            m = (tree_val[route_heap[c]] >= tree_val[route_heap[sb]]) ? sb : c;
+        if (m == i)
+            return;
+        route_heap_swap(m, i);
+        i = m;
+    }
+}
+
+static inline s32 abs32w(s32 a)
+{
+    return (a < 0) ? (s32)(0u - (u32)a) : a;
+}
+
+/** Estimated distance from a triangle to point (tree_Ax8,tree_Ay8):
+ * the smallest of the octile distances from its corners.
+ */
+static s32 route_tri_dist_to_A(int tri)
+{
+    struct TrTriangle *p_tri;
+    s32 ax, ay, best;
+    int cor;
+
+    ax = tree_Ax8 >> 8;
+    ay = tree_Ay8 >> 8;
+    p_tri = &triangulation[0].Triangles[tri];
+    best = 0;
+    for (cor = 0; cor < 3; cor++)
+    {
+        struct TrPoint *p_pt;
+        s32 dx, dy, d;
+
+        p_pt = &triangulation[0].Points[(ushort)p_tri->point[cor]];
+        dx = abs32w(sub32w(ax, p_pt->x));
+        dy = abs32w(sub32w(ay, p_pt->y));
+        if (dx > dy)
+            d = dx + (dy >> 1);
+        else
+            d = dy + (dx >> 1);
+        if ((cor == 0) || (d < best))
+            best = d;
+    }
+    return best;
+}
+
+/** Adds to the search the not yet visited triangles which can be entered
+ * from a triangle (its neighbours and the jump triangle). */
+static void route_expand_tri(s32 tri)
+{
+    struct TrTriangle *p_tri;
+    int k;
+
+    for (k = 0; k < 4; k++)
+    {
+        s32 n;
+
+        p_tri = &triangulation[0].Triangles[tri];
+        if ((p_tri->enter & (1 << k)) == 0)
+            continue;
+        n = (k < 3) ? p_tri->tri[k] : p_tri->jump;
+        if (n == -1)
+            continue;
+        if (routeTags[n] == tag_current)
+            continue;
+        tree_val[n] = route_tri_dist_to_A(n);
+        routeTags[n] = tag_current;
+        tree_dad[n] = tri;
+        route_heap_push(n);
+    }
+}
+
+/** Best-first search of a route through triangles from triB to triA,
+ * guided by the distance to point A. The route is stored from triA back to
+ * triB; returns its length (number of steps) or -1.
+ * Remade from triangle_route_do_unkn5 and triangle_route_do_unkn6 (the same
+ * code twice in the original).
+ */
+static s32 triangle_route_do_unkn5(s32 triA, s32 triB, s32 *p_route)
+{
+    s32 cur, nxt;
+
+    tag_current++;
+    route_heap[1] = -1;
+    route_heap_end = 0;
+    if (tag_current == 0) {
+        memset(routeTags, 0, 8000);
+        tag_current = 1;
+    }
+    tree_val[triB] = 1;
+    tree_dad[triB] = triB;
+    routeTags[triB] = tag_current;
+    route_heap_push(triB);
+
+    while (1)
+    {
+        cur = route_heap[1];
+        if ((cur == triA) || (cur == -1))
+            break;
+        route_heap_pop();
+        // the original takes two triangles from the heap before expanding
+        nxt = route_heap[1];
+        if (nxt != -1)
+        {
+            if (nxt == triA)
+                break;
+            route_heap_pop();
+        }
+        route_expand_tri(cur);
+        if (nxt != -1)
+            route_expand_tri(nxt);
+    }
+
+    if (route_heap[1] == -1)
+        return -1;
+    {
+        s32 n, count;
+
+        n = triA;
+        count = 0;
+        while (1)
+        {
+            p_route[count] = n;
+            if (n == triB)
+                break;
+            count++;
+            n = tree_dad[n];
+        }
+        return count;
+    }
+}
+
+#ifdef SW_FNCHK
+static s32 ma_triangle_route_3_asm(int triA, int triB, s32 *p_route, s32 *p_cost)
+{
+    s32 ret;
+
+    asm volatile ("call ASM_ma_triangle_route_3\n"
+        : "=a" (ret), "+d" (triB), "+b" (p_route), "+c" (p_cost)
+        : "a" (triA)
+        : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Route through triangles between triangles A and B, searched both ways
+ * (from A to B with the points swapped, and from B to A): the one giving
+ * the shorter path is stored. Returns its length (number of steps) or -1.
+ */
+static s32 ma_triangle_route_3_c(int triA, int triB, s32 *p_route, s32 *p_cost)
+{
+    s32 t, len_bak, len_fwd;
+    int cost_bak, cost_fwd;
+
+    t = tree_Ax8; tree_Ax8 = tree_Bx8; tree_Bx8 = t;
+    t = tree_Ay8; tree_Ay8 = tree_By8; tree_By8 = t;
+    len_bak = triangle_route_do_unkn5(triB, triA, route_bak);
+    if (len_bak == -1)
+        return -1;
+    if (route_to_path(tree_Ax8, tree_Ay8, tree_Bx8, tree_By8, route_bak,
+      len_bak, &route_fwd_path, &cost_bak) == -1)
+        return -1;
+    t = tree_Ax8; tree_Ax8 = tree_Bx8; tree_Bx8 = t;
+    t = tree_Ay8; tree_Ay8 = tree_By8; tree_By8 = t;
+    len_fwd = triangle_route_do_unkn5(triA, triB, p_route);
+    if (len_fwd == -1)
+    {
+        cost_fwd = 0x7FFFFFFF;
+    }
+    else
+    {
+        if (route_to_path(tree_Ax8, tree_Ay8, tree_Bx8, tree_By8, p_route,
+          len_fwd, &route_fwd_path, &cost_fwd) == -1)
+            return -1;
+    }
+    if (cost_fwd < cost_bak)
+        return len_fwd;
+    {
+        int k;
+        for (k = len_bak; k >= 0; k--)
+            p_route[len_bak - k] = route_bak[k];
+    }
+    return len_bak;
+}
+
+s32 ma_triangle_route_3(int triA, int triB, s32 *p_route, s32 *p_cost)
+{
+    s32 ret;
+
+    FNCHK_RET("ma_triangle_route_3", ret,
+      ma_triangle_route_3_asm(triA, triB, p_route, p_cost),
+      ma_triangle_route_3_c(triA, triB, p_route, p_cost));
+    return ret;
+}
+
+/** The `solid` byte of a triangle, sign extended, as the original reads it;
+ * the original does this also for triangle -1 (the bytes before the array).
+ */
+static s32 tri_solid_sx(int tri)
+{
+    sbyte *p = (sbyte *)triangulation[0].Triangles + (s32)((u32)tri << 4);
+    return p[offsetof(struct TrTriangle, solid)];
+}
+
+#ifdef SW_FNCHK
+static int path_init8_thing_asm(struct Path *p_path, int ax8, int ay8, int bx8, int by8, int a6)
+{
+    int stkargs[2];
+    int ret;
+
+    stkargs[0] = by8;
+    stkargs[1] = a6;
+    asm volatile (
+      "push 4(%5)\n"
+      "push 0(%5)\n"
+      "call ASM_path_init8_thing\n"
+        : "=a" (ret), "+d" (ax8), "+b" (ay8), "+c" (bx8)
+        : "a" (p_path), "S" (stkargs)
+        : "cc", "memory");
+    return ret;
+}
+
+static int tri_path_init8_asm(int triA, int triB, struct Path *p_path, int ax8,
+  int ay8, int bx8, int by8, int a8)
+{
+    int stkargs[4];
+    int ret;
+
+    stkargs[0] = ay8;
+    stkargs[1] = bx8;
+    stkargs[2] = by8;
+    stkargs[3] = a8;
+    asm volatile (
+      "push 12(%5)\n"
+      "push 8(%5)\n"
+      "push 4(%5)\n"
+      "push 0(%5)\n"
+      "call ASM_tri_path_init8\n"
+        : "=a" (ret), "+d" (triB), "+b" (p_path), "+c" (ax8)
+        : "a" (triA), "S" (stkargs)
+        : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Path from point A to point B (coordinates * 256) for a thing: triangles
+ * of both points, a route between them and its way points.
+ * Returns the number of way points or -1.
+ */
+static int path_init8_thing_c(struct Path *p_path, int ax8, int ay8, int bx8, int by8, int a6)
+{
+    s32 triB;
+    int len2;
+
+    navi_onscreen_debug(0);
+    tree_Ax8 = ax8;
+    tree_Ay8 = ay8;
+    tree_Bx8 = bx8;
+    tree_By8 = by8;
+    p_path->PathLength = 0;
+    p_path->ax8 = ax8;
+    p_path->ay8 = ay8;
+    p_path->bx8 = bx8;
+    p_path->by8 = by8;
+    tree_routelen = -1;
+    tree_triA = triangle_findSE8(ax8, ay8);
+    triB = triangle_findSE8(bx8, by8);
+    if (tree_triA < 0)
+        return -1;
+    tree_altA = tri_solid_sx(tree_triA);
+    tree_altB = tri_solid_sx(triB);
+    tree_triB = triB;
+    if (triB == -1)
+        return -1;
+    tree_routelen = ma_triangle_route_3(tree_triA, triB, tree_route, &tree_routecost);
+    if (tree_routelen == -1)
+        return -1;
+    p_path->PathLength = route_to_path(ax8, ay8, bx8, by8, tree_route,
+      tree_routelen, p_path, &len2);
+    return p_path->PathLength;
+}
+
+/** Path from point A to point B (coordinates * 256) with known triangles of
+ * the points (-1 - not known, found from the point).
+ * Returns the number of way points or -1.
+ */
+static int tri_path_init8_c(int triA, int triB, struct Path *p_path, int ax8,
+  int ay8, int bx8, int by8, int a8)
+{
+    s32 tA, tB;
+    int len2;
+
+    navi_onscreen_debug(0);
+    tree_Ax8 = ax8;
+    tree_Ay8 = ay8;
+    tree_Bx8 = bx8;
+    tree_By8 = by8;
+    p_path->ax8 = ax8;
+    p_path->ay8 = ay8;
+    p_path->bx8 = bx8;
+    p_path->by8 = by8;
+    p_path->PathLength = 0;
+    tree_routelen = -1;
+    tA = (short)triA;
+    if (tA == -1)
+        tA = triangle_findSE8(ax8, ay8);
+    tree_triA = tA;
+    tB = (short)triB;
+    if (tB == -1)
+    {
+        tB = triangle_findSE8(bx8, by8);
+        if (tB == -1)
+            return -1;
+    }
+    tree_altA = tri_solid_sx(tA);
+    tree_altB = tri_solid_sx(tB);
+    tree_triB = tB;
+    // with no triangle of A the original returns what is left in its register
+    if (tA == -1)
+        return tree_altB;
+    tree_routelen = ma_triangle_route_3(tA, tB, tree_route, &tree_routecost);
+    if (tree_routelen == -1)
+        return -1;
+    p_path->PathLength = route_to_path(ax8, ay8, bx8, by8, tree_route,
+      tree_routelen, p_path, &len2);
+    return p_path->PathLength;
+}
+
+int path_init8_thing(struct Path *p_path, int ax8, int ay8, int bx8, int by8, int a6)
+{
+    int ret;
+
+    FNCHK_RET("path_init8_thing", ret,
+      path_init8_thing_asm(p_path, ax8, ay8, bx8, by8, a6),
+      path_init8_thing_c(p_path, ax8, ay8, bx8, by8, a6));
+    return ret;
+}
+
+int tri_path_init8(int triA, int triB, struct Path *p_path, int ax8,
+  int ay8, int bx8, int by8, int a8)
+{
+    int ret;
+
+    FNCHK_RET("tri_path_init8", ret,
+      tri_path_init8_asm(triA, triB, p_path, ax8, ay8, bx8, by8, a8),
+      tri_path_init8_c(triA, triB, p_path, ax8, ay8, bx8, by8, a8));
+    return ret;
 }
 
 void path_init8_unkn3(struct Path *p_path, int ax8, int ay8, int bx8, int by8, int a6)

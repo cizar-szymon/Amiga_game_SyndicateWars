@@ -59,6 +59,7 @@
 #include "scandraw.h"
 #include "sound.h"
 #include "thing.h"
+#include "fncheck.h"
 #include "thing_fire.h"
 #include "thing_onface.h"
 #include "thing_search.h"
@@ -2142,10 +2143,39 @@ short person_shield_glow_brightness(struct Thing *p_thing)
     return br_inc;
 }
 
-void process_stamina(struct Thing *p_person)
+#ifdef SW_FNCHK
+static void process_stamina_asm(struct Thing *p_person)
 {
     asm volatile ("call ASM_process_stamina\n"
-        : : "a" (p_person));
+        : : "a" (p_person) : "cc", "memory");
+}
+#endif
+
+/** The mood of a person is kept within the stamina left (as a part of 88),
+ * stamina regenerates by 2 plus the chest mod level each turn.
+ */
+static void process_stamina_c(struct Thing *p_person)
+{
+    int lim;
+
+    if (p_person->Type != TT_PERSON)
+        return;
+    // no check for MaxStamina 0, as in the original
+    lim = (p_person->U.UPerson.Stamina * 88) / p_person->U.UPerson.MaxStamina;
+    if (p_person->U.UPerson.Mood > lim)
+        p_person->U.UPerson.Mood = lim;
+    else if (p_person->U.UPerson.Mood < -lim)
+        p_person->U.UPerson.Mood = -lim;
+
+    if (p_person->U.UPerson.Stamina < p_person->U.UPerson.MaxStamina)
+        p_person->U.UPerson.Stamina += person_mod_chest_level(p_person) + 2;
+    if (p_person->U.UPerson.Stamina < 0)
+        p_person->U.UPerson.Stamina = 0;
+}
+
+void process_stamina(struct Thing *p_person)
+{
+    FNCHK_VOID("process_stamina", process_stamina_asm(p_person), process_stamina_c(p_person));
 }
 
 void process_shield(struct Thing *p_person)
@@ -6162,10 +6192,96 @@ void process_persuaded(struct Thing *p_person)
         : : "a" (p_person));
 }
 
-void process_danger(struct Thing *p_person)
+#ifdef SW_FNCHK
+static void process_danger_asm(struct Thing *p_person)
 {
     asm volatile ("call ASM_process_danger\n"
-        : : "a" (p_person));
+        : : "a" (p_person) : "cc", "memory");
+}
+#endif
+
+/** A civilian who sees an armed agent of a playing player close by runs away
+ * from the closest one. Returns true if the person was made to flee.
+ * Remade from search_for_danger.
+ */
+static TbBool search_for_danger(struct Thing *p_person)
+{
+    int flee_x, flee_z, best_dist;
+    short plyr, agent;
+
+    flee_x = 0;
+    flee_z = 0;
+    best_dist = 0x7fffffff;
+    if (!in_network_game)
+    {
+        ushort group;
+
+        group = p_person->U.UPerson.EffectiveGroup & 0x1F;
+        if ((war_flags[group].Truce & (1u << (level_def.PlayableGroups[0] & 0x1F))) != 0)
+            return false;
+    }
+    for (plyr = 0; plyr < 8; plyr++)
+    {
+        if ((ingame.InNetGame_UNSURE & (1 << plyr)) == 0)
+            continue;
+        for (agent = 0; agent < playable_agents; agent++)
+        {
+            struct Thing *p_agent;
+            int dx, dz, adx, adz, dist;
+
+            p_agent = players[plyr].MyAgent[agent];
+            if (p_agent == NULL)
+                continue;
+            if ((p_agent->U.UPerson.CurrentWeapon == WEP_NULL) ||
+              (p_agent->U.UPerson.CurrentWeapon == WEP_CLONESHLD))
+                continue;
+            dx = (p_person->X - p_agent->X) >> 8;
+            dz = (p_person->Z - p_agent->Z) >> 8;
+            adx = (dx < 0) ? -dx : dx;
+            adz = (dz < 0) ? -dz : dz;
+            if (adx > adz)
+                dist = adx + (adz >> 1);
+            else
+                dist = adz + (adx >> 1);
+            if ((dist >= best_dist) || (dist >= 0x600))
+                continue;
+            if (!in_network_game && !can_i_see_thing(p_person, p_agent, 0x190000, 1))
+                continue;
+            best_dist = dist;
+            flee_x = dx;
+            flee_z = dz;
+        }
+    }
+    if (best_dist >= 0x500)
+        return false;
+    make_peep_flee(flee_x, flee_z, p_person);
+    return true;
+}
+
+/** Every 4 turns (with an offset per thing) a person without a strong brain
+ * mod looks for danger around.
+ */
+static void process_danger_c(struct Thing *p_person)
+{
+    if ((p_person->Flag & (TngF_Unkn40000000|TngF_WepRecoil|TngF_SelectedAgent|TngF_Destroyed|TngF_Unkn0001)) != 0)
+        return;
+    if ((p_person->Flag2 & TgF2_Unkn00080000) != 0)
+        return;
+    if ((p_person->U.UPerson.AnimMode == ANIM_PERS_Unkn14) ||
+      (p_person->U.UPerson.AnimMode == ANIM_PERS_WEPHEAVY_Unkn15))
+        return;
+    if ((p_person->Flag2 & (TgF2_ExistsOffMap|TgF2_AlteredSubType)) != 0)
+        return;
+    if ((((ushort)p_person->ThingOffset + gameturn) & 3) != 0)
+        return;
+    if (person_mod_brain_level(p_person) >= 3)
+        return;
+    search_for_danger(p_person);
+}
+
+void process_danger(struct Thing *p_person)
+{
+    FNCHK_VOID("process_danger", process_danger_asm(p_person), process_danger_c(p_person));
 }
 
 void peep_return_to_point(struct Thing *p_person)
@@ -6938,12 +7054,47 @@ void set_angle_to_avoid_group(struct Thing *p_person)
 #endif
 }
 
+#ifdef SW_FNCHK
+static ubyte check_person_within_asm(struct Command *p_cmd, int x, int z)
+{
+    ubyte ret;
+    asm volatile ("call ASM_check_person_within\n"
+        : "=a" (ret) : "a" (p_cmd), "d" (x), "b" (z) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Is the point within the area of a command: a rectangle (flag 0x10, from
+ * X,Z to Arg1,Time, borders excluded) or a circle around X,Z of radius Arg1
+ * (in tiles, compared squared and scaled by 4096). Flag 0x08 inverts it.
+ */
+static ubyte check_person_within_c(struct Command *p_cmd, int x, int z)
+{
+    TbBool inside, invert;
+
+    invert = (p_cmd->Flags & 0x08) != 0;
+    if ((p_cmd->Flags & 0x10) != 0)
+    {
+        inside = (x > p_cmd->X) && (x < p_cmd->Arg1) && (z > p_cmd->Z) && (z < p_cmd->Time);
+    }
+    else
+    {
+        u32 dx, dz, r;
+
+        // 32-bit wrapping products, as the original
+        dx = (u32)(x - p_cmd->X);
+        dz = (u32)(z - p_cmd->Z);
+        r = (u32)p_cmd->Arg1;
+        inside = (s32)(dx * dx + dz * dz) <= (s32)((r * r) << 12);
+    }
+    return (inside != invert);
+}
+
 ubyte check_person_within(struct Command *p_cmd, int x, int z)
 {
     ubyte ret;
-    asm volatile (
-      "call ASM_check_person_within\n"
-        : "=r" (ret) : "a" (p_cmd), "d" (x), "b" (z));
+    FNCHK_RET("check_person_within", ret, check_person_within_asm(p_cmd, x, z),
+      check_person_within_c(p_cmd, x, z));
     return ret;
 }
 

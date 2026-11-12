@@ -18,14 +18,52 @@ czyli ok. 85–100 ms na turę: gra w zwolnionym tempie albo z pomijaniem obraz�
 - **Klucz `ext_key_warp.h`** – od autora firmware (użytkownik prosi o niego). Trzymany poza repozytorium,
   nigdy nie commitowany, nie wypisywany, nie kopiowany do projektu; w Makefile tylko ścieżka (`EXT_KEY=`).
   Bez klucza `mkwxt.py` robi kontener niepodpisany, który firmware wydaniowy odrzuca (`EXTERR_SIGNATURE`).
-- **Arm Compiler 6** (armclang/armlink/fromelf, testowany 6.24) – instaluje Claude na Windows
-  (CMSIS SDK); GCC się nie nadaje (format `--bare_metal_pie`).
+- **Arm Compiler 6** – jest (Keil MDK, 6.13.1, sekcja „Kompilator”); GCC się nie nadaje
+  (format `--bare_metal_pie`).
 - Nagłówki są na dysku: `C:\Workprojects\csAmigaWarp\Arm\common\WarpExtEnv.h`,
   `C:\Workprojects\csWarpAmigaSoftware\cswarp_library\sdk_includes` (inline tylko dla vbcc – dla bebbo
   gcc własne wstawki LVO `extLoad` -558, `extXchg` -564, `extFetch` -570, `extFeed` -576, `extStop` -582).
 - Wzorzec projektu: `C:\Workprojects\AmigaSoft\YouTube_viewer\warpVideoPlay-main` (arm/Makefile,
   `ext_libc.c`, `ext_stdio.h`, `mkwxt.py`, `host_main.c` z zastępnikiem strony 68k, `wxt_blob.s`,
   `common/wvp_link.h`, narzędzia `wxrun.py`/`wxsample.py`).
+
+## Wzorzec: WarpQuake2ARM (cała gra na ARM, 68k jako terminal)
+
+`https://github.com/cslab-sc/WarpQuake2ARM` (kopia tylko do odczytu: `C:\Workprojects\ext-ref\WarpQuake2ARM`,
+GPL v2 – przed skopiowaniem plików sprawdzić nagłówki licencyjne; format protokołu można powtórzyć).
+Z opcją `-arm` cały silnik Quake II (klient, serwer, gra, renderer, czyste C) chodzi na ARM, program
+68k tylko otwiera ekran, pokazuje klatki, czyta wejście, odtwarza dźwięk i obsługuje pliki.
+
+- Pliki platformy po stronie silnika kompilowane drugi raz na ARM; system tylko przez wywołania
+  `qa*` (`src/amiga_q2.h`): na ARM rekordy łącza (`arm/ext_q2.c`), na 68k obsługa (`src/amiga_arm.c`).
+- Protokół `src/q2link.h`: `QL_FOPEN/FREAD/FWRITE/FIND`, `QL_SCREEN_OPEN`, `QL_PALETTE`, `QL_FRAME` +
+  `QL_FRAME_DONE` (2 strony w render area, `extFetch` prosto do ekranu, bufor zapasowy), `QL_SOUND`,
+  `QL_KEY/QL_MOUSE`, `QL_NET_*`; obsługa rekordów z `warplink.c` (WarpQuakeARM).
+- Dźwięk miksowany na ARM; od WarpExtEnv v6 prosto do miksera karty (bez AHI, bez łącza) – tak też
+  dla Syndicate Wars.
+- Czas z licznika cykli M7 (64 bity), stos 512 KB, Makefile AC6 `-O3 -ffp-mode=fast -fno-unroll-loops`,
+  kontener w programie 68k (`armclient.s`), `-armclient <plik>` do testów, CRC klatek (`-crc*`, `framecmp.py`).
+
+Wyniki z historii repozytorium (demo1, Warp z ARM 480 MHz; 68060 104 MHz):
+
+| | ms na klatkę | kl./s |
+|---|---:|---:|
+| 68060, 320×240×8 (C + asm 68060) | 84,00 | 11,9 |
+| ARM, 320×240×8, sam C renderera id | 36,07 | 27,7 |
+| ARM, 320×240×8, pętle M7 + pamięć na chipie | 30,74 | 32,5 |
+| ARM, 640×480×8 (bez dźwięku / z dźwiękiem) | 67,1 / 70,3 | ~14,5 |
+| ARM, 640×360×16 | 43,5 | ~23 |
+
+Szczyt sterty przy 640×480 z dźwiękiem: 16,7 MB z 18,4 MB.
+
+## Kompilator (stan 12.11.2026)
+
+Na PC jest **Keil MDK Plus 5.29 z Arm Compiler 6.13.1** (`C:\Keil_v5\ARM\ARMCLANG\bin`, licencja
+działa). Starszy niż testowany 6.24, ale bare-metal PIE działa: test skompilowany, zlinkowany
+(`--bare_metal_pie`, microlib) i zamieniony na kontener przez `mkwxt.py` (relokacje sprawdzone). Różnica:
+linker 6.13 wymaga pustego `void __arm_preinit_(void) { }` obok `__arm_relocate_pie_` i ostrzega
+L6085 (opcja przestarzała – wyłączyć `--diag_suppress=6085`). Nowszy AC6 tylko z kontem Arm – na razie
+nie potrzeba.
 
 ## Pamięć ARM (szacunek z kodu, do zmierzenia)
 

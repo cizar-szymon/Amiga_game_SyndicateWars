@@ -373,11 +373,58 @@ struct TbLoadFiles missionspr_load_files[] =
 
 ubyte reload_menu_flags = 0;
 
-short arctan(int dx, int dz)
+#ifdef SW_FNCHK
+static ushort arctan_asm(int dx, int dz)
 {
     ushort ret;
     asm volatile ("call ASM_arctan\n"
-        : "=r" (ret) : "a" (dx), "d" (dz));
+        : "=a" (ret) : "a" (dx), "d" (dz) : "cc");
+    return ret;
+}
+#endif
+
+extern unsigned short const lbArcTanFactors[];
+
+/** Angle of the vector (dx,dz), 0..0x800 for the full circle; as
+ * LbArcTanAngle(), with the shifts and divisions of the original done on
+ * unsigned 32 bits (its table is the same as lbArcTanFactors[]).
+ */
+static ushort arctan_c(int dx, int dz)
+{
+    s32 a, b;
+
+    a = dx;
+    b = dz;
+    if ((a == 0) && (b == 0))
+        return 0;
+    if (a >= 0)
+    {
+        if (b >= 0) {
+            if (a >= b)
+                return 0x200 + lbArcTanFactors[((u32)b << 8) / (u32)a];
+            return 0x400 - lbArcTanFactors[((u32)a << 8) / (u32)b];
+        }
+        b = (s32)(0u - (u32)b);
+        if (a >= b)
+            return 0x200 - lbArcTanFactors[((u32)b << 8) / (u32)a];
+        return lbArcTanFactors[((u32)a << 8) / (u32)b];
+    }
+    a = (s32)(0u - (u32)a);
+    if (b >= 0) {
+        if (a >= b)
+            return 0x600 - lbArcTanFactors[((u32)b << 8) / (u32)a];
+        return 0x400 + lbArcTanFactors[((u32)a << 8) / (u32)b];
+    }
+    b = (s32)(0u - (u32)b);
+    if (a >= b)
+        return 0x600 + lbArcTanFactors[((u32)b << 8) / (u32)a];
+    return 0x800 - lbArcTanFactors[((u32)a << 8) / (u32)b];
+}
+
+short arctan(int dx, int dz)
+{
+    ushort ret;
+    FNCHK_PURE("arctan", ret, arctan_asm(dx, dz), arctan_c(dx, dz));
     return ret;
 }
 

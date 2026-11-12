@@ -336,11 +336,54 @@ ubyte on_mapwho(struct Thing *p_thing)
     return ret;
 }
 
+#ifdef SW_FNCHK
+static void move_mapwho_asm(struct Thing *p_thing, int x, int y, int z)
+{
+    asm volatile ("call ASM_move_mapwho\n"
+        : : "a" (p_thing), "d" (x), "b" (y), "c" (z) : "cc", "memory");
+}
+#endif
+
+/** Move a thing to new coordinates; if the map tile changes, move it to the
+ * head of the `mapwho` list of the new tile. Coordinates outside the map are
+ * ignored (the thing is not moved at all).
+ */
+static void move_mapwho_c(struct Thing *p_thing, int x, int y, int z)
+{
+    if (((x >> 8) >= 0x8000) || ((z >> 8) >= 0x8000) || (x < 0) || (z < 0))
+        return;
+    // tiles over 127 cannot pass the check above; kept from the original
+    if (((x >> 16) >= MAP_TILE_WIDTH) || ((z >> 16) >= MAP_TILE_HEIGHT)) {
+        x = (x & 0xFFFF) | (((x >> 16) & 0x7F) << 16);
+        z = (z & 0xFFFF) | (((z >> 16) & 0x7F) << 16);
+    }
+    if (((p_thing->Flag2 & TgF2_ExistsOffMap) == 0) &&
+      (((short)(x >> 16) != (short)(p_thing->X >> 16)) ||
+       ((short)(z >> 16) != (short)(p_thing->Z >> 16))))
+    {
+        ushort tile;
+        ThingIdx head;
+
+        // a no-op hook of the original for people (nullsub_3) was called here
+        tile = (ushort)(((z >> 16) << 7) + (x >> 16));
+        delete_node(p_thing);
+        head = game_my_big_map[tile].Child;
+        p_thing->Next = head;
+        if (head > 0)
+            things[head].Parent = p_thing->ThingOffset;
+        else if (head < 0)
+            sthings[head].Parent = p_thing->ThingOffset;
+        p_thing->Parent = 0;
+        game_my_big_map[tile].Child = p_thing->ThingOffset;
+    }
+    p_thing->Y = y;
+    p_thing->X = x;
+    p_thing->Z = z;
+}
+
 void move_mapwho(struct Thing *p_thing, int x, int y, int z)
 {
-    asm volatile (
-      "call ASM_move_mapwho\n"
-        : : "a" (p_thing), "d" (x), "b" (y), "c" (z));
+    FNCHK_VOID("move_mapwho", move_mapwho_asm(p_thing, x, y, z), move_mapwho_c(p_thing, x, y, z));
 }
 
 #ifdef SW_FNCHK

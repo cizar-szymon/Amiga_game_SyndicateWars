@@ -14,7 +14,7 @@ Sposób portowania według `PORTING_PLAN.md`: **D (port ze źródeł)** z etapem
 | A0. Kolejność konwersji | ⏳ do akceptacji użytkownika |
 | A0. Test grywalności wersji referencyjnej (użytkownik) | ✅ 11.11.2026 „działa, gra się dobrze” |
 | A1. Konwersja asm → C: wczytanie i rysowanie misji 1 | ✅ ~35 funkcji, fncheck 0 różnic |
-| A1. Konwersja asm → C: symulacja świata (process_things) | ⏳ ~57 funkcji |
+| A1. Konwersja asm → C: symulacja świata (process_things) | ⏳ 12.11.2026: 9 z 29 (bez dźwięku), fncheck 0 różnic na nagraniu misji 1 |
 | A2. Kolejność bajtów: mapa, poziom, prymitywy, sprite'y, animacje, FLI, WAD | ✅ (misja 1) |
 | B1. Build Amigi (Docker, bebbo gcc), warstwa bflibrary m68k-amigaos | ✅ |
 | B1. Misja 1 na Amidze | ✅ 12.11.2026: Amiga 1 (Warp 1260) ~5 kl./s, obraz zgodny z PC |
@@ -185,3 +185,26 @@ Dalsze możliwości (każda ~0,5–1 ms): podłoga — przyrostowe iloczyny obro
 (dokładne, suma przed przesunięciem rośnie o stałą), wysokość i transformacja w jednej pętli;
 dzielenie perspektywy w FPU równolegle z częścią całkowitą (wynik dokładny: dla dodatnich
 liczb < 2^31 obcięcie ilorazu `double` = iloraz całkowity), z wersją bez FPU.
+
+## 12.11.2026 — symulacja: asm → C (etap 1)
+
+- Nagranie gry w misji 1 (wersja referencyjna PC, `-r`): `qdata/savegame/rc00m001.s01` (5 min,
+  5578 tur, ruch agentów, drzwi, strzały); odtwarzanie `-q -W -m 0,1 -p 1`. Plik leży przy danych gry
+  (nie w gicie).
+- `fncheck` z wyborem wywołań: `SW_FNCHK_ONLY=a,b`, `SW_FNCHK_EVERY=N` (pierwsze 1000 wywołań każdej
+  funkcji, potem co N-te) – funkcje wołane dla każdej postaci w każdej turze (1,7 mln wywołań) bez tego
+  spowalniały przebieg ~20×.
+- Faktyczna lista do zrobienia (wywołania asm z C po preprocesorze, build ARM): 37 funkcji w misji 1,
+  w tym 8 dźwięku (na później). Na Amidze trafiane zaślepki: `RAM:SyndWars-stubs.txt`.
+- Przepisane (0 różnic, całe nagranie): `unkn_update_lights` (+ dwie wewnętrzne; misja 1 nie używa
+  gałęzi typów świateł – do sprawdzenia na innych misjach), `delete_snode`, `remove_sthing`,
+  `process_danger` (+ `search_for_danger`), `process_stamina`, `check_person_within`, `arctan`,
+  `move_mapwho`.
+- **Błąd portu:** `remove_sthing` oryginału czyta `sthings_empty_head` jako górną połowę 32-bitowego
+  odczytu `sthings_used` (0x19EC80/82); deklaracje C były w innej kolejności i asm brał
+  `sthings_used_head`. Kolejność przywrócona.
+- `post_process_blips` (przepisana wcześniej) ma pojedyncze różnice w tablicy grających próbek – stan
+  sterownika dźwięku PC nie jest cofany przez `fncheck`; do sprawdzenia przy etapie dźwięku.
+- Amiga 1 po tej grupie: 68k 71,9 ms/turę (`things` 7,6 ms), ARM 30,2 ms/turę – stabilnie. Zaślepki
+  jeszcze trafiane (bez dźwięku): `calc_lighting`, `mem_group_arrived_square2`, `player_weapon_time`,
+  `process_gate1`, `process_smoke_generator`, `people_intel`, `person_goto_point`, `process_wander`.

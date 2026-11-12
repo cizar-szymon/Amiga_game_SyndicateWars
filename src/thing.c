@@ -180,9 +180,11 @@ ThingIdx things_used_head;
 ThingIdx things_empty_head;
 
 struct SimpleThing *sthings = NULL;
+/* In the order of the original memory layout: remove_sthing() of the original
+ * reads `sthings_empty_head` as the upper half of a 32-bit `sthings_used`. */
 ushort sthings_used;
-ThingIdx sthings_used_head;
 ThingIdx sthings_empty_head;
+ThingIdx sthings_used_head;
 
 ThingIdx same_type_head[256 + PEOPLE_GROUPS_LIMIT + 1] = {0};
 
@@ -1950,11 +1952,39 @@ TbResult delete_node(struct Thing *p_thing)
     return ret;
 }
 
-TbResult delete_snode(struct SimpleThing *p_sthing)
+#ifdef SW_FNCHK
+static TbResult delete_snode_asm(struct SimpleThing *p_sthing)
 {
     TbResult ret;
     asm volatile ("call ASM_delete_snode\n"
-        : "=r" (ret) : "a" (p_sthing));
+        : "=a" (ret) : "a" (p_sthing) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Remove an sthing from its `mapwho` list. Unlike delete_node(), the
+ * original neither checks the coordinates nor clears the links.
+ */
+static TbResult delete_snode_c(struct SimpleThing *p_sthing)
+{
+    if (p_sthing->Parent > 0)
+        things[p_sthing->Parent].Next = p_sthing->Next;
+    else if (p_sthing->Parent < 0)
+        sthings[p_sthing->Parent].Next = p_sthing->Next;
+    else
+        game_my_big_map[((p_sthing->Z >> 16) << 7) + (p_sthing->X >> 16)].Child = p_sthing->Next;
+
+    if (p_sthing->Next > 0)
+        things[p_sthing->Next].Parent = p_sthing->Parent;
+    else if (p_sthing->Next < 0)
+        sthings[p_sthing->Next].Parent = p_sthing->Parent;
+    return 0;
+}
+
+TbResult delete_snode(struct SimpleThing *p_sthing)
+{
+    TbResult ret;
+    FNCHK_RET("delete_snode", ret, delete_snode_asm(p_sthing), delete_snode_c(p_sthing));
     return ret;
 }
 
@@ -2117,10 +2147,45 @@ short get_new_sthing(void)
     return ret;
 }
 
-void remove_sthing(short tngno)
+#ifdef SW_FNCHK
+static void remove_sthing_asm(short tngno)
 {
     asm volatile ("call ASM_remove_sthing\n"
-        : : "a" (tngno));
+        : : "a" (tngno) : "cc", "memory");
+}
+#endif
+
+/** Take an sthing off the used list and put it at the head of the empty list.
+ * The original reads the old empty head as the upper half of a 32-bit read
+ * at `sthings_used` (the next variable in its memory layout).
+ */
+static void remove_sthing_c(short tngno)
+{
+    struct SimpleThing *p_sthing;
+    ThingIdx child, parent, old_empty;
+
+    p_sthing = &sthings[tngno];
+    child = p_sthing->LinkChild;
+    parent = p_sthing->LinkParent;
+    p_sthing->Type = 0;
+    if (child < 0)
+        sthings[child].LinkParent = parent;
+    if (tngno == sthings_used_head)
+        sthings_used_head = child;
+    else
+        sthings[parent].LinkChild = child;
+
+    old_empty = sthings_empty_head;
+    p_sthing->LinkParent = 0;
+    p_sthing->LinkChild = old_empty;
+    sthings_empty_head = tngno;
+    sthings_used--;
+    sthings[old_empty].LinkParent = tngno;
+}
+
+void remove_sthing(short tngno)
+{
+    FNCHK_VOID("remove_sthing", remove_sthing_asm(tngno), remove_sthing_c(tngno));
 }
 
 short add_static(int x, int y, int z, ushort frame, int timer)

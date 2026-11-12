@@ -6168,10 +6168,172 @@ void process_protect_person(struct Thing *p_person)
     }
 }
 
-void process_wander(struct Thing *p_person)
+#ifdef SW_FNCHK
+static void process_wander_asm(struct Thing *p_person)
 {
     asm volatile ("call ASM_process_wander\n"
-        : : "a" (p_person));
+        : : "a" (p_person) : "cc", "memory");
+}
+#endif
+
+extern short word_1AA390;
+short person_move(struct Thing *p_person);
+void process_wander_and_fly(struct Thing *p_person, struct Thing *p_vehicle);
+
+/** First frame of the animation of a person's current anim mode, for the
+ * direction it faces. */
+static ushort wander_anim_frame(struct Thing *p_person)
+{
+    return nstart_ani[people_frames[p_person->SubType][p_person->U.UPerson.AnimMode]
+      + p_person->U.UPerson.Angle];
+}
+
+/** Adds the direction of a map tile with a walking direction (Flags2 0x10,
+ * direction in its top 3 bits) to the choices, once if within 2 eighths of
+ * the person's angle and once more if within 1.
+ */
+static void wander_add_tile_direction(struct Thing *p_person, struct MyMapElement *p_mapel,
+  ubyte *choices, int *p_count)
+{
+    int tdir, diff;
+
+    tdir = p_mapel->Flags2 >> 5;
+    diff = p_person->U.UPerson.Angle - tdir;
+    if (diff > 4)
+        diff -= 8;
+    if (diff < -4)
+        diff += 8;
+    if (diff < 0)
+        diff = -diff;
+    if (diff <= 2)
+        choices[(*p_count)++] = tdir;
+    if (diff <= 1)
+        choices[(*p_count)++] = tdir;
+}
+
+/** A person walking around: straight on, turning on collisions and, every
+ * few turns, choosing a new direction - from the walking directions of the
+ * map tiles around, or slowly turning when there are none.
+ */
+static void process_wander_c(struct Thing *p_person)
+{
+    ubyte choices[20];
+    int count, old_angle;
+    short timer;
+
+    if ((p_person->Flag & TngF_InVehicle) != 0)
+    {
+        struct Thing *p_vehicle;
+
+        p_vehicle = &things[p_person->U.UPerson.Vehicle];
+        if (p_vehicle->SubType == SubTT_VEH_FLYING)
+            process_wander_and_fly(p_person, p_vehicle);
+        if (conditional_command_state_true(p_person->U.UPerson.ComCur, p_person, 0))
+            p_person->State = 0;
+        return;
+    }
+    if ((p_person->Flag2 & TgF2_Unkn00080000) != 0)
+        set_person_animmode_walk(p_person);
+    if ((p_person->U.UPerson.AnimMode == ANIM_PERS_Unkn14) ||
+      (p_person->U.UPerson.AnimMode == ANIM_PERS_WEPHEAVY_Unkn15))
+    {
+        p_person->U.UPerson.AnimMode = gun_out_anim(p_person, 0);
+        p_person->StartFrame = people_frames[p_person->SubType][p_person->U.UPerson.AnimMode] - 1;
+        p_person->Frame = wander_anim_frame(p_person);
+    }
+    if (p_person->U.UPerson.RecoilTimer != 0)
+        return;
+
+    p_person->Flag |= TngF_Unkn0004;
+    p_person->VX = angle_direction[p_person->U.UPerson.Angle].DiX;
+    p_person->VZ = angle_direction[p_person->U.UPerson.Angle].DiY;
+    if (person_move(p_person) != 0)
+    {
+        // a collision with the vector stored by person_move(); with flag
+        // 0x40000000 the person turns only if that object has flag 0x0800
+        if (((p_person->Flag2 & TgF2_Unkn40000000) == 0) ||
+          ((things[game_col_vects_list[word_1AA390].Object].Flag & TngF_TriggerUse) != 0))
+        {
+            p_person->U.UPerson.Angle = (p_person->U.UPerson.Angle + 1) & 7;
+            p_person->Frame = wander_anim_frame(p_person);
+            p_person->U.UPerson.Timer2 = (LbRandomAnyShort() & 3) + 6;
+        }
+        p_person->Flag2 &= ~TgF2_Unkn40000000;
+    }
+    if ((p_person->Flag & TngF_Destroyed) != 0)
+        return;
+    if (conditional_command_state_true(p_person->U.UPerson.ComCur, p_person, 1))
+        p_person->State = 0;
+
+    p_person->Timer1 -= fifties_per_gameturn;
+    if (p_person->Timer1 < 0)
+    {
+        p_person->Timer1 = p_person->StartTimer1;
+        p_person->Frame = frame[p_person->Frame].Next;
+    }
+    timer = p_person->U.UPerson.Timer2;
+    p_person->U.UPerson.Timer2 = timer - 1;
+    if (timer >= 0)
+        return;
+
+    old_angle = p_person->U.UPerson.Angle;
+    p_person->U.UPerson.Timer2 = p_person->U.UPerson.StartTimer2 + (LbRandomAnyShort() & 7);
+    count = 0;
+    {
+        struct MyMapElement *p_mapel;
+
+        p_mapel = &game_my_big_map[((p_person->Z >> 16) << 7) + (p_person->X >> 16)];
+        if ((p_mapel->Flags2 & 0x10) != 0)
+            wander_add_tile_direction(p_person, p_mapel, choices, &count);
+    }
+    if (count == 0)
+    {
+        int dx, dz;
+
+        // the 3x3 tiles around, the person's own again among them
+        for (dx = -1; dx <= 1; dx++)
+        {
+            for (dz = -1; dz <= 1; dz++)
+            {
+                int tx, tz;
+                struct MyMapElement *p_mapel;
+
+                tx = (p_person->X >> 16) + dx;
+                if ((tx < 0) || (tx >= MAP_TILE_WIDTH))
+                    continue;
+                tz = (p_person->Z >> 16) + dz;
+                if ((tz < 0) || (tz >= MAP_TILE_HEIGHT))
+                    continue;
+                p_mapel = &game_my_big_map[tz * MAP_TILE_WIDTH + tx];
+                if ((p_mapel->Flags2 & 0x10) == 0)
+                    continue;
+                wander_add_tile_direction(p_person, p_mapel, choices, &count);
+            }
+        }
+    }
+    if (count == 0)
+    {
+        // no directions around: an occasional turn
+        if ((((ushort)p_person->ThingOffset + gameturn) & 3) == 0)
+        {
+            unsigned int k = (((ulong)gameturn >> 1) + (ushort)p_person->ThingOffset) & 0xF;
+            if (k == 0)
+                p_person->U.UPerson.Angle = (p_person->U.UPerson.Angle + 1) & 7;
+            else if (k == 1)
+                p_person->U.UPerson.Angle = (p_person->U.UPerson.Angle - 1) & 7;
+        }
+    }
+    else
+    {
+        p_person->U.UPerson.Angle = choices[(int)LbRandomAnyShort() % count] & 7;
+    }
+    if (old_angle != p_person->U.UPerson.Angle)
+        p_person->Frame = nstart_ani[(ushort)p_person->StartFrame + p_person->U.UPerson.Angle + 1];
+}
+
+void process_wander(struct Thing *p_person)
+{
+    FNCHK_VOID("process_wander", process_wander_asm(p_person), process_wander_c(p_person));
 }
 
 void person_recoil(struct Thing *p_person)

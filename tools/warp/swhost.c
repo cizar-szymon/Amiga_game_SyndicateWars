@@ -547,6 +547,14 @@ int main(int argc, char **argv)
         t = 252460800UL + ds.ds_Days * 86400UL + ds.ds_Minute * 60UL + ds.ds_Tick / 50;
         sprintf(args, "prof=%c time=%lu |", prof[0], t);
     }
+    /* far civilians option (see far_civilians_level() in src/thing.c):
+     * the ARM core has no ENV:, so it gets the value on its command line */
+    {
+        char civ[4];
+        if ((GetVar((STRPTR)"SyndWarsCivLOD", (STRPTR)civ, sizeof(civ), 0) >= 0)
+          && (civ[0] >= '0') && (civ[0] <= '9'))
+            sprintf(args + strlen(args) - 1, " civlod=%c |", civ[0]);
+    }
     for (i = 1; i < argc; i++) {
         if (strncmp(argv[i], "STAGE=", 6) == 0) {
             sprintf(args + strlen(args) - 1, " stage=%c |", argv[i][6]);

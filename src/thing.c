@@ -1985,7 +1985,8 @@ int amiga_getenv_int(const char *name, int dflt);
  * from the view (mission 1: 285 of 308 people). They walk slower there,
  * which cannot be seen. Not in network games and packet recording or
  * playback, which need the original course of the game.
- * ENV:SyndWarsCivLOD on the Amiga, SW_CIVLOD elsewhere.
+ * ENV:SyndWarsCivLOD on the Amiga and the Warp ARM (default 3 there),
+ * SW_CIVLOD elsewhere (default 0: the PC build stays the reference).
  */
 static int far_civilians_level(void)
 {
@@ -1994,7 +1995,9 @@ static int far_civilians_level(void)
     if (level < 0)
     {
 #if defined(SW_AMIGA)
-        level = amiga_getenv_int("SyndWarsCivLOD", 0);
+        // on by default on the Amiga and the Warp ARM (the user found no
+        // change in the game); SyndWarsCivLOD 0 turns it off
+        level = amiga_getenv_int("SyndWarsCivLOD", 3);
 #else
         const char *s = getenv("SW_CIVLOD");
         level = (s != NULL) ? atoi(s) : 0;

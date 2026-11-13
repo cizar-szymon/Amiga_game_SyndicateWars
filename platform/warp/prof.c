@@ -266,9 +266,13 @@ int amiga_check_enabled(void)
 /* the sampling profiler of the 68k build: not on the ARM */
 void amiga_sampler_start(void) { }
 
-/* no ENV: variables reach the ARM core yet: the defaults */
+/* ENV: variables do not reach the ARM core; swhost passes the ones used
+ * here on the core's command line (wmain.c) */
+extern int w_civlod;
+
 int amiga_getenv_int(const char *name, int dflt)
 {
-    (void)name;
+    if ((strcmp(name, "SyndWarsCivLOD") == 0) && (w_civlod >= 0))
+        return w_civlod;
     return dflt;
 }

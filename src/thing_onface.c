@@ -20,6 +20,7 @@
 #include "thing_onface.h"
 
 #include <assert.h>
+#include <stdlib.h>
 #include "bfendian.h"
 #include "bfscreen.h"
 #include "poly.h"
@@ -34,6 +35,7 @@
 #include "player.h"
 #include "swlog.h"
 #include "thing.h"
+#include "lvwalk.h"
 #include "fncheck.h"
 /******************************************************************************/
 
@@ -112,15 +114,6 @@ ubyte check_big_point_triangle(int x, int y, int ux, int uy, int vx, int vy, int
     FNCHK_PURE("check_big_point_triangle", ret,
       check_big_point_triangle_asm(x, y, ux, uy, vx, vy, wx, wy),
       check_big_point_triangle_c(x, y, ux, uy, vx, vy, wx, wy));
-    return ret;
-}
-
-ushort set_thing_height_on_face_tri(struct Thing *p_thing, int x, int z, short face)
-{
-    ushort ret;
-    asm volatile (
-      "call ASM_set_thing_height_on_face_tri\n"
-        : "=r" (ret) : "a" (p_thing), "d" (x), "b" (z), "c" (face));
     return ret;
 }
 
@@ -261,6 +254,124 @@ ushort set_thing_height_on_face_quad(struct Thing *p_thing, int x, int z, short 
     return ret;
 }
 
+/** Is the map point (in 1/256 of map coordinates) inside the triangle
+ * face, seen from above?  Remade from inside_the_triangle.
+ */
+static int inside_the_triangle(struct SingleObjectFace3 *p_face3, int x, int z)
+{
+    struct SingleObject *p_obj;
+    struct SinglePoint *p_pt;
+    int x0, z0, x1, z1, x2, z2;
+    int px, pz;
+
+    p_obj = &game_objects[p_face3->Object];
+    p_pt = &game_object_points[(ushort)p_face3->PointNo[0]];
+    x0 = p_obj->MapX + p_pt->X; z0 = p_obj->MapZ + p_pt->Z;
+    p_pt = &game_object_points[(ushort)p_face3->PointNo[1]];
+    x1 = p_obj->MapX + p_pt->X; z1 = p_obj->MapZ + p_pt->Z;
+    p_pt = &game_object_points[(ushort)p_face3->PointNo[2]];
+    x2 = p_obj->MapX + p_pt->X; z2 = p_obj->MapZ + p_pt->Z;
+    px = x >> 8;
+    pz = z >> 8;
+
+    if (sign_cross64(x1 - x0, pz - z1, z1 - z0, px - x1) < 0)
+        return 0;
+    if (sign_cross64(x2 - x1, pz - z2, z2 - z1, px - x2) < 0)
+        return 0;
+    if (sign_cross64(x0 - x2, pz - z0, z0 - z2, px - x0) < 0)
+        return 0;
+    return 1;
+}
+
+/** Sets the height of the thing standing at (x,z) on the plane of the
+ * triangle face.  Returns 0 outside (or more than 0xA00 from point 0),
+ * else 1.  Remade from set_thing_height_on_face_tri64.
+ */
+static ushort set_thing_height_on_face_tri64(struct Thing *p_thing, int x, int z, ushort face)
+{
+    struct SingleObjectFace3 *p_face3;
+    struct SingleObject *p_obj;
+    struct SinglePoint *p_pt;
+    int x0, y0, z0, x1, y1, z1, x2, y2, z2;
+    s32 dx1, dy1, dz1, dx2, dy2, dz2, px, pz;
+    s32 den, u, v, y;
+    int adx, adz, dist;
+
+    if (face > next_object_face3)
+        return 0;
+    p_face3 = &game_object_faces3[face];
+    p_obj = &game_objects[p_face3->Object];
+    p_pt = &game_object_points[(ushort)p_face3->PointNo[0]];
+    x0 = p_obj->MapX + p_pt->X; y0 = p_obj->OffsetY + p_pt->Y; z0 = p_obj->MapZ + p_pt->Z;
+    p_pt = &game_object_points[(ushort)p_face3->PointNo[1]];
+    x1 = p_obj->MapX + p_pt->X; y1 = p_obj->OffsetY + p_pt->Y; z1 = p_obj->MapZ + p_pt->Z;
+    p_pt = &game_object_points[(ushort)p_face3->PointNo[2]];
+    x2 = p_obj->MapX + p_pt->X; y2 = p_obj->OffsetY + p_pt->Y; z2 = p_obj->MapZ + p_pt->Z;
+
+    dx1 = (x1 - x0) << 8;
+    dy1 = (y1 - y0) << 8;
+    dz1 = (z1 - z0) << 8;
+    dx2 = (x2 - x0) << 8;
+    dy2 = (y2 - y0) << 8;
+    dz2 = (z2 - z0) << 8;
+    px = x - (x0 << 8);
+    pz = z - (z0 << 8);
+
+    adx = abs(px >> 8);
+    adz = abs(pz >> 8);
+    if (adz >= adx)
+        dist = adz + (adx >> 1);
+    else
+        dist = adx + (adz >> 1);
+    if (dist > 0xA00)
+        return 0;
+
+    den = fix_mul16(dz2, dx1) - fix_mul16(dx2, dz1);
+    if (den == 0)
+        den = 1;
+    u = fix_div16(fix_mul16(px, dz2) - fix_mul16(pz, dx2), den);
+    v = fix_div16(fix_mul16(pz, dx1) - fix_mul16(px, dz1), den);
+    if ((u < 0) || (u > 0x10000) || (v < 0) || (v > 0x10000))
+        return 0;
+    if (u + v > 0x10000)
+        return 0;
+    y = (y0 << 8) + fix_mul16(u, dy1) + fix_mul16(v, dy2);
+    p_thing->Y = y >> 3;
+    return 1;
+}
+
+#ifdef SW_FNCHK
+static ushort set_thing_height_on_face_tri_asm(struct Thing *p_thing, int x, int z, short face)
+{
+    ushort ret;
+    asm volatile (
+      "call ASM_set_thing_height_on_face_tri\n"
+        : "=a" (ret) : "a" (p_thing), "d" (x), "b" (z), "c" (face) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Remade from set_thing_height_on_face_tri. */
+static ushort set_thing_height_on_face_tri_c(struct Thing *p_thing, int x, int z, short face)
+{
+    int inside;
+
+    inside = inside_the_triangle(&game_object_faces3[(ushort)face], x, z);
+    if (inside == 0)
+        return 0;
+    set_thing_height_on_face_tri64(p_thing, x, z, (ushort)face);
+    return inside;
+}
+
+ushort set_thing_height_on_face_tri(struct Thing *p_thing, int x, int z, short face)
+{
+    ushort ret;
+    FNCHK_RET("set_thing_height_on_face_tri", ret,
+      set_thing_height_on_face_tri_asm(p_thing, x, z, face),
+      set_thing_height_on_face_tri_c(p_thing, x, z, face));
+    return ret;
+}
+
 ushort set_thing_height_on_face(struct Thing *p_thing, int x, int z, short face)
 {
     if (face > 0) {
@@ -271,12 +382,108 @@ ushort set_thing_height_on_face(struct Thing *p_thing, int x, int z, short face)
     return 0;
 }
 
-short find_and_set_connected_face(struct Thing *p_thing, int x, int z, short face)
+#ifdef SW_FNCHK
+static short find_and_set_connected_face_asm(struct Thing *p_thing, int x, int z, short face)
 {
     short ret;
     asm volatile (
       "call ASM_find_and_set_connected_face\n"
-        : "=r" (ret) : "a" (p_thing), "d" (x), "b" (z), "c" (face));
+        : "=a" (ret) : "a" (p_thing), "d" (x), "b" (z), "c" (face) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Height of a thing moving from its face (OnFace) onto one of the faces
+ * connected to it.  Moves of more than 4000 in height are refused.
+ * Returns the new face, or 0.  Remade from find_and_set_connected_face;
+ * the face argument is not used.
+ */
+static short find_and_set_connected_face_c(struct Thing *p_thing, int x, int z, short face)
+{
+    struct WalkHeader *p_walk_head;
+    ushort item;
+    short wface;
+    s32 old_y;
+
+    if (p_thing->U.UPerson.OnFace > 0)
+        p_walk_head = &game_walk_headers[(short)game_object_faces3[p_thing->U.UPerson.OnFace].WalkHeader];
+    else
+        p_walk_head = &game_walk_headers[(short)game_object_faces4[-p_thing->U.UPerson.OnFace].WalkHeader];
+
+    for (item = p_walk_head->StartItem; ; item++)
+    {
+        if (item >= p_walk_head->Count + p_walk_head->StartItem)
+            return 0;
+        wface = game_walk_items[item];
+        if (wface >= 0)
+        {
+            struct SingleObjectFace3 *p_face3;
+
+            p_face3 = &game_object_faces3[wface];
+            if (((p_face3->GFlags & 0x04) != 0) && (inside_the_triangle(p_face3, x, z) != 0))
+                break;
+        }
+        else
+        {
+            struct SingleObjectFace4 *p_face4;
+            int inside;
+
+            p_face4 = &game_object_faces4[(ushort)-wface];
+            if ((p_face4->GFlags & 0x04) == 0)
+                continue;
+            inside = inside_the_quad(p_face4, x, z);
+            if (inside == 0)
+                continue;
+            if (inside == 2)
+                p_thing->Flag |= 0x20;
+            else
+                p_thing->Flag &= ~0x20;
+            break;
+        }
+    }
+
+    old_y = p_thing->Y;
+    wface = game_walk_items[item];
+    if (wface > 0)
+    {
+        if (inside_the_triangle(&game_object_faces3[(ushort)wface], x, z) != 0)
+            set_thing_height_on_face_tri64(p_thing, x, z, (ushort)wface);
+    }
+    else if (wface == 0)
+    {
+        return wface;
+    }
+    else
+    {
+        struct SingleObjectFace4 *p_face4;
+        struct SingleObject *p_obj;
+        ushort face4;
+        int n;
+
+        face4 = (ushort)-wface;
+        p_face4 = &game_object_faces4[face4];
+        p_obj = &game_objects[p_face4->Object];
+        n = face4 - p_obj->StartFace4;
+        if (((n == 0x3E) || (n == 9) || (n == 0x3F)) && (p_obj->NumbFaces == 0x15) &&
+          (p_obj->NumbFaces4 == 0x40) && (p_obj->EndPoint - p_obj->StartPoint == 0x53))
+            p_thing->Flag2 &= ~0x20000000;
+        if (inside_the_quad(p_face4, x, z) != 0)
+            set_thing_height_on_face_quad64(p_thing, x, z, face4);
+    }
+    if (abs((int)(old_y - p_thing->Y)) > 4000) {
+        p_thing->Y = old_y;
+        return 0;
+    }
+    p_thing->U.UPerson.OnFace = wface;
+    return wface;
+}
+
+short find_and_set_connected_face(struct Thing *p_thing, int x, int z, short face)
+{
+    short ret;
+    FNCHK_RET("find_and_set_connected_face", ret,
+      find_and_set_connected_face_asm(p_thing, x, z, face),
+      find_and_set_connected_face_c(p_thing, x, z, face));
     return ret;
 }
 

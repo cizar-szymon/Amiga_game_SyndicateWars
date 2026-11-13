@@ -1373,11 +1373,99 @@ void process_spark(struct SimpleThing *p_sthing)
     FNCHK_VOID("process_spark", process_spark_asm(p_sthing), process_spark_c(p_sthing));
 }
 
-void process_intelligent_door(struct SimpleThing *p_sthing)
+#ifdef SW_FNCHK
+static void process_intelligent_door_asm(struct SimpleThing *p_sthing)
 {
     asm volatile (
       "call ASM_process_intelligent_door\n"
-        : : "a" (p_sthing));
+        : : "a" (p_sthing) : "cc", "memory");
+}
+#endif
+
+/** Sets the texture of a door face to the given frame of an animation
+ * page (frames side by side).  Remade from apply_texture_to_face.
+ */
+static void apply_texture_to_face(ushort frame, ushort page, ushort face)
+{
+    struct SingleFloorTexture *p_tex;
+    struct AnimPage *p_anpg;
+    ubyte u, v, w, h;
+
+    p_tex = &game_textures[game_object_faces4[face].Texture];
+    p_anpg = &door_anim_page[page];
+    w = p_anpg->Width;
+    h = p_anpg->Height;
+    u = (ubyte)(p_anpg->X + frame * w);
+    v = p_anpg->Y;
+    p_tex->Page = p_anpg->PageNo;
+    p_tex->TMapX1 = u;
+    p_tex->TMapY1 = v + h;
+    p_tex->TMapX2 = u;
+    p_tex->TMapY2 = v;
+    p_tex->TMapX3 = u + w;
+    p_tex->TMapY3 = v + h;
+    p_tex->TMapX4 = u + w;
+    p_tex->TMapY4 = v;
+}
+
+/** A door opening (state 1), open and waiting (3), closing (2).
+ * Remade from process_intelligent_door.
+ */
+static void process_intelligent_door_c(struct SimpleThing *p_sthing)
+{
+    ushort frame;
+
+    if (((p_sthing->Flag & TngF_Unkn0001) != 0) &&
+      (p_sthing->State != 1) && (p_sthing->State != 3))
+    {
+        p_sthing->State = 1;
+        p_sthing->Flag &= ~TngF_Unkn0001;
+    }
+    switch ((ushort)p_sthing->State)
+    {
+    case 1:
+        p_sthing->Flag &= ~TngF_Unkn0001;
+        frame = p_sthing->Frame + 1;
+        p_sthing->Frame = frame;
+        if (frame < door_anim_page[(ushort)p_sthing->StartFrame].No) {
+            apply_texture_to_face(frame, p_sthing->StartFrame, p_sthing->Parent);
+        } else {
+            p_sthing->State = 3;
+            p_sthing->Timer1 = 7;
+            p_sthing->Frame = frame - 1;
+            p_sthing->Flag |= TngF_Destroyed;
+        }
+        break;
+    case 2:
+        frame = p_sthing->Frame - 1;
+        p_sthing->Frame = frame;
+        if (frame <= door_anim_page[(ushort)p_sthing->StartFrame].No) {
+            apply_texture_to_face(frame, p_sthing->StartFrame, p_sthing->Parent);
+        } else {
+            game_object_faces4[p_sthing->Parent].WalkHeader = 0;
+            remove_sthing(p_sthing->ThingOffset);
+        }
+        break;
+    case 3:
+        p_sthing->Flag &= ~TngF_Unkn0001;
+        if (p_sthing->Timer1 != 0) {
+            p_sthing->Timer1--;
+            break;
+        }
+        if (check_for_people(p_sthing->X, p_sthing->Y, p_sthing->Z, 100) != NULL)
+            break;
+        p_sthing->State = 2;
+        play_dist_ssample(p_sthing, 0x35, 0x7F, 0x40, 100, 0, 1);
+        break;
+    default:
+        break;
+    }
+}
+
+void process_intelligent_door(struct SimpleThing *p_sthing)
+{
+    FNCHK_VOID("process_intelligent_door", process_intelligent_door_asm(p_sthing),
+      process_intelligent_door_c(p_sthing));
 }
 
 void process_unkn58(struct SimpleThing *p_sthing)
@@ -1417,11 +1505,64 @@ void process_mushroom(struct SimpleThing *p_sthing, ThingIdx thing_item)
         : : "a" (p_sthing), "d" (thing_item));
 }
 
-void process_special_drift_smoke(struct SimpleThing *p_sthing, ThingIdx thing_item)
+#ifdef SW_FNCHK
+static void process_special_drift_smoke_asm(struct SimpleThing *p_sthing, ThingIdx thing_item)
 {
     asm volatile (
       "call ASM_process_special_drift_smoke\n"
-        : : "a" (p_sthing), "d" (thing_item));
+        : : "a" (p_sthing), "d" (thing_item) : "cc", "memory");
+}
+#endif
+
+/** Smoke drifting on a spiral (State counts the turns), slowing down
+ * and rising, until its timer ends.  Remade from process_special_drift_smoke.
+ */
+static void process_special_drift_smoke_c(struct SimpleThing *p_sthing, ThingIdx thing_item)
+{
+    struct STngUEffect *p_eff;
+    int x, y, z;
+    ushort turn, angle;
+    s32 cs, sn;
+
+    p_eff = &p_sthing->U.UEffect;
+    p_sthing->State++;
+    p_sthing->Frame = frame[(ushort)p_sthing->Frame].Next;
+    x = p_sthing->X + (p_eff->VX << 2);
+    y = p_sthing->Y + (p_eff->VY << 2);
+    z = p_sthing->Z + (p_eff->VZ << 2);
+    turn = p_sthing->State;
+    angle = (turn << 5) & 0x7FF;
+    cs = (lbSinTable[angle + 512] * turn) >> 11;
+    sn = (lbSinTable[angle] * turn) >> 11;
+    x += (short)cs;
+    z += (short)sn;
+    move_smapwho_c(p_sthing, &x, y, &z);
+    p_sthing->Object += p_sthing->StartFrame;
+    if (p_sthing->StartTimer1 > 0)
+    {
+        short slow;
+
+        p_sthing->StartTimer1--;
+        slow = p_eff->OX;
+        p_eff->VX = (p_eff->VX * slow) >> 8;
+        p_eff->VY = (p_eff->VY * slow) >> 8;
+        p_eff->VZ = (p_eff->VZ * slow) >> 8;
+    }
+    p_eff->VY += p_eff->OY;
+    if (p_sthing->Timer1 > 0)
+    {
+        p_sthing->Timer1--;
+        if (p_sthing->Timer1 == 0) {
+            remove_sthing(thing_item);
+            delete_snode(p_sthing);
+        }
+    }
+}
+
+void process_special_drift_smoke(struct SimpleThing *p_sthing, ThingIdx thing_item)
+{
+    FNCHK_VOID("process_special_drift_smoke", process_special_drift_smoke_asm(p_sthing, thing_item),
+      process_special_drift_smoke_c(p_sthing, thing_item));
 }
 
 void process_napalm_flame(struct SimpleThing *p_sthing, ThingIdx thing_item)
@@ -2916,23 +3057,134 @@ void refresh_old_thing_format(struct Thing *p_thing, struct ThingOldV9 *p_oldthi
     }
 }
 
-struct SimpleThing *create_item(int x, int y, int z, ushort frame, ubyte subtype)
+#ifdef SW_FNCHK
+static struct SimpleThing *create_item_asm(int x, int y, int z, ushort frame, ubyte subtype)
 {
     struct SimpleThing *ret;
     asm volatile (
       "push %5\n"
       "call ASM_create_item\n"
-        : "=r" (ret) : "a" (x), "d" (y), "b" (z), "c" (frame), "g" ((u32)subtype));
+        : "=a" (ret) : "a" (x), "d" (y), "b" (z), "c" (frame), "g" ((u32)subtype)
+        : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Creates an item lying on the ground (a dropped weapon of type subtype).
+ * The sprite comes from the item type; frame only sets the start frame
+ * first.  Remade from create_item.
+ */
+static struct SimpleThing *create_item_c(int x, int y, int z, ushort frame, ubyte subtype)
+{
+    struct SimpleThing *p_sthing;
+    short thing;
+    ushort anim;
+
+    if (((u32)x >= 0x8000) || ((u32)z >= 0x8000))
+        return NULL;
+    thing = get_new_sthing();
+    if ((thing > -1) || (thing < -1500))
+        return NULL;
+    p_sthing = &sthings[thing];
+    p_sthing->StartTimer1 = 5;
+    p_sthing->Timer1 = 5;
+    p_sthing->X = x << 8;
+    p_sthing->Z = z << 8;
+    p_sthing->Y = y << 8;
+    p_sthing->Type = SmTT_DROPPED_ITEM;
+    p_sthing->U.UWeapon.OnFace = 0;
+    p_sthing->U.UWeapon.Ammo = 0;
+    p_sthing->Radius = 30;
+    p_sthing->Frame = nstart_ani[frame];
+    p_sthing->StartFrame = frame - 1;
+    p_sthing->U.UWeapon.WeaponType = subtype;
+    switch (subtype)
+    {
+    case 0:
+        anim = 0x423;
+        break;
+    case 2: case 3: case 4: case 8: case 15: case 17: case 20:
+        anim = 0x420;
+        break;
+    case 6: case 11: case 13:
+        anim = 0x440;
+        break;
+    case 10: case 12:
+        anim = 0x441;
+        break;
+    default:
+        anim = 0x3EC;
+        break;
+    }
+    p_sthing->Frame = nstart_ani[anim];
+    p_sthing->StartFrame = anim - 1;
+    ingame.fld_unkCB7++;
+    add_node_sthing(thing);
+    p_sthing->Flag = TngF_Unkn0004;
+    p_sthing->SubType = subtype;
+    return p_sthing;
+}
+
+struct SimpleThing *create_item(int x, int y, int z, ushort frame, ubyte subtype)
+{
+    struct SimpleThing *ret;
+    FNCHK_RET("create_item", ret, create_item_asm(x, y, z, frame, subtype),
+      create_item_c(x, y, z, frame, subtype));
     return ret;
 }
 
-struct SimpleThing *create_scale_effect(int x, int y, int z, ushort frame, short timer)
+#ifdef SW_FNCHK
+static struct SimpleThing *create_scale_effect_asm(int x, int y, int z, ushort frame, short timer)
 {
     struct SimpleThing *ret;
     asm volatile (
       "push %5\n"
       "call ASM_create_scale_effect\n"
-        : "=r" (ret) : "a" (x), "d" (y), "b" (z), "c" (frame), "g" ((s32)timer));
+        : "=a" (ret) : "a" (x), "d" (y), "b" (z), "c" (frame), "g" ((s32)timer)
+        : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Creates a growing sprite effect (smoke, flash) at map coordinates.
+ * Remade from create_scale_effect.
+ */
+static struct SimpleThing *create_scale_effect_c(int x, int y, int z, ushort frame, short timer)
+{
+    struct SimpleThing *p_sthing;
+    short thing;
+
+    if ((x < 0) || (x >= 0x8000))
+        return NULL;
+    if ((z < 0) || (z >= 0x8000))
+        return NULL;
+    if (sthings_used > 0x5D7)
+        return NULL;
+    thing = get_new_sthing();
+    if (thing == 0)
+        return NULL;
+    if ((thing > -1) || (thing < -1500))
+        return NULL;
+    p_sthing = &sthings[thing];
+    p_sthing->Z = z << 8;
+    p_sthing->X = x << 8;
+    p_sthing->Y = y << 8;
+    p_sthing->Frame = nstart_ani[frame];
+    p_sthing->StartFrame = frame - 1;
+    add_node_sthing(thing);
+    p_sthing->Type = SmTT_SCALE_EFFECT;
+    p_sthing->SubType = 0;
+    p_sthing->Radius = 64;
+    p_sthing->Flag = TngF_Unkn0004;
+    p_sthing->Timer1 = timer;
+    return p_sthing;
+}
+
+struct SimpleThing *create_scale_effect(int x, int y, int z, ushort frame, short timer)
+{
+    struct SimpleThing *ret;
+    FNCHK_RET("create_scale_effect", ret, create_scale_effect_asm(x, y, z, frame, timer),
+      create_scale_effect_c(x, y, z, frame, timer));
     return ret;
 }
 

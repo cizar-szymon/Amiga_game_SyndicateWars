@@ -1195,12 +1195,81 @@ short find_nearest_person_min(int x, int y, int z,
     return ret;
 }
 
-struct Thing *check_for_people(int x, int y, int z, ushort radius)
+#ifdef SW_FNCHK
+static struct Thing *check_for_people_asm(int x, int y, int z, ushort radius)
 {
     struct Thing *ret;
     asm volatile (
       "call ASM_check_for_people\n"
-        : "=r" (ret) : "a" (x), "d" (y), "b" (z), "c" (radius));
+        : "=a" (ret) : "a" (x), "d" (y), "b" (z), "c" (radius) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** First living person within radius (plus its own) of the point and
+ * within 25 in height, on the 3x3 tiles around it.
+ * Remade from check_for_people.
+ */
+static struct Thing *check_for_people_c(int x, int y, int z, ushort radius)
+{
+    short dtx, dtz;
+    int tile_x, tile_z;
+
+    for (dtx = -1; dtx < 2; dtx++)
+    {
+        for (dtz = -1; dtz < 2; dtz++)
+        {
+            ThingIdx thing;
+            ushort n;
+
+            tile_x = (short)(x >> 16) + dtx;
+            tile_z = (short)(z >> 16) + dtz;
+            if ((tile_x < 0) || (tile_x >= MAP_TILE_WIDTH))
+                continue;
+            if ((tile_z < 0) || (tile_z >= MAP_TILE_HEIGHT))
+                continue;
+            thing = game_my_big_map[(tile_z << 7) + tile_x].Child;
+            for (n = 0; (thing != 0) && (n < 400); n++)
+            {
+                if (thing > 0)
+                {
+                    struct Thing *p_thing;
+
+                    p_thing = &things[thing];
+                    if ((p_thing->Type == TT_PERSON) && ((ushort)p_thing->State != PerSt_DEAD))
+                    {
+                        int dy, adx, adz, dist;
+
+                        dy = (p_thing->Y - y) >> 8;
+                        if ((dy < 25) && (dy > -25))
+                        {
+                            adx = abs((p_thing->X - x) >> 8);
+                            adz = abs((p_thing->Z - z) >> 8);
+                            if (adx <= adz)
+                                dist = adz + (adx >> 1);
+                            else
+                                dist = adx + (adz >> 1);
+                            if (dist < (ushort)p_thing->Radius + radius)
+                                return p_thing;
+                        }
+                    }
+                    thing = p_thing->Next;
+                }
+                else
+                {
+                    thing = sthings[thing].Next;
+                }
+            }
+        }
+    }
+    return NULL;
+}
+
+struct Thing *check_for_people(int x, int y, int z, ushort radius)
+{
+    struct Thing *ret;
+    FNCHK_RET("check_for_people", ret, check_for_people_asm(x, y, z, radius),
+      check_for_people_c(x, y, z, radius));
     return ret;
 }
 

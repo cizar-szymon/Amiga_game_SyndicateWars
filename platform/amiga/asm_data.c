@@ -50,6 +50,7 @@ s32 SCANNER_unknarr_1DBB6C[512]; /* src\scandraw.c, 4 bytes */
 s32 * SCANNER_width; /* src\scanner.h, 4 bytes */
 short VNAV_nearnodes[5]; /* src\vehicle.c, 6 bytes */
 s32 VNAV_nodedists[5]; /* src\vehicle.c, 20 bytes */
+short VNAV_route[128]; /* src\vehicle.c, 2 bytes */
 s32 bangdetail[21]; /* src\game.c, 84 bytes */
 int bat_unknvalA_max; /* src\bat.c, 4 bytes */
 int bat_unknvalA_min; /* src\bat.c, 4 bytes */
@@ -120,6 +121,7 @@ ulong turn_last = 999;
 long unkn01_downcount; /* src\game.h, 4 bytes */
 long unkn01_pos_x; /* src\game.h, 4 bytes */
 long unkn01_pos_y; /* src\game.h, 4 bytes */
+s32 veh_ma_heap[258]; /* src\vehicle.c, 4 bytes */
 short word_1552F8 = 1;
 short word_1AA38E; /* src\people.c, 2 bytes */
 short word_1AA390; /* src\people.c, 2 bytes */

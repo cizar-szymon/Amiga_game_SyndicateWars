@@ -58064,7 +58064,7 @@ continue_flying_wander:	/* 0x078280 */
 		shl    $0x10,%ebp
 		shl    $0x8,%ebx
 		mov    %ebp,0x20(%esi)
-		call   ariadne_initialise_route
+		call   ASM_ariadne_initialise_route
 		test   %eax,%eax
 		jle    jump_782be
 		mov    $0x1,%edx
@@ -58197,7 +58197,7 @@ GLOBAL_FUNC(ASM_start_goto_vehicle)	/* 0x07841C */
 		mov    %esi,%ebx
 		mov    %edi,%edx
 		mov    %ecx,%eax
-		call   ariadne_initialise_route
+		call   ASM_ariadne_initialise_route
 		test   %eax,%eax
 		jle    jump_78725
 		mov    $0x1,%edx
@@ -99191,7 +99191,7 @@ GLOBAL_FUNC(ASM_build_navigate_path)	/* 0x0C06D0 */
 
 
 /*----------------------------------------------------------------*/
-ariadne_initialise_route:
+GLOBAL_FUNC(ASM_ariadne_initialise_route)
 /*----------------------------------------------------------------*/
 		push   %ecx
 		push   %esi
@@ -114231,7 +114231,7 @@ data_1c8540:
 		.long	0x0
 GLOBAL (VNAV_nodedists)	/* 0x1C8544 */
 		.fill   0x14
-VNAV_route:	/* 0x1C8558 */
+GLOBAL (VNAV_route)	/* 0x1C8558 */
 		.short  0x0
 data_1c855a:
 		.long	0x0
@@ -114239,7 +114239,7 @@ VNAV_route__route:	/* 0x1C855E */
 		.short  0x0
 data_1c8560:
 		.fill   0xf8
-veh_ma_heap:	/* 0x1C8658 */
+GLOBAL (veh_ma_heap)	/* 0x1C8658 */
 		.long	0x0
 data_1c865c:
 		.fill   0x400

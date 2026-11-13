@@ -39,6 +39,7 @@
 #include "game_speed.h"
 #include "matrix.h"
 #include "pathtrig.h"
+#include "people.h"
 #include "sound.h"
 #include "thing.h"
 #include "swlog.h"
@@ -887,6 +888,807 @@ static void VNAV_unkn_func_207_c(struct Thing *p_vehicle)
 void VNAV_unkn_func_207(struct Thing *p_thing)
 {
     FNCHK_VOID("VNAV_unkn_func_207", VNAV_unkn_func_207_asm(p_thing), VNAV_unkn_func_207_c(p_thing));
+}
+
+/* Road route search state, in the asm data: VNAV_route[2] is the number of
+ * nodes, the route itself (destination first) from VNAV_route[4];
+ * veh_ma_heap[1..256] is the search heap, veh_ma_heap[257] its size. */
+extern short VNAV_route[128];
+extern s32 veh_ma_heap[258];
+#define VEH_HEAP_COUNT veh_ma_heap[257]
+#define VEH_HEAP_EMPTY 0xABCD
+#define VNAV_ROUTE_FAIL 42
+
+/* Search fields of a traffic node, kept in its unnamed bytes 0x16..0x19 */
+#define TN_PARENT(p_tn) (*(short *)&(p_tn)->field_16[0])
+#define TN_COST(p_tn) (*(short *)&(p_tn)->field_16[2])
+
+int build_tank_path(struct Thing *p_thing, int x, int z);
+
+static int ariadne_initialise_route_asm(struct Thing *p_thing, int x, int z)
+{
+    int ret;
+    asm volatile ("call ASM_ariadne_initialise_route\n"
+        : "=a" (ret), "+d" (x), "+b" (z) : "0" (p_thing) : "cc", "memory");
+    return ret;
+}
+
+/* The asm keeps two shorts of a vehicle as one 32-bit value in places;
+ * these give them in that (little endian) order. */
+static ulong veh_get_d88(struct TngUVehicle *p_veh)
+{
+    return (ushort)p_veh->Dummy4a | ((ulong)(ushort)p_veh->Dummy4b << 16);
+}
+
+static void veh_set_d88(struct TngUVehicle *p_veh, ulong val)
+{
+    p_veh->Dummy4a = (short)(val & 0xFFFF);
+    p_veh->Dummy4b = (short)(val >> 16);
+}
+
+static ulong veh_get_d8c(struct TngUVehicle *p_veh)
+{
+    return (ushort)p_veh->Dummy5a | ((ulong)(ushort)p_veh->Dummy5b << 16);
+}
+
+static void veh_set_d8c(struct TngUVehicle *p_veh, ulong val)
+{
+    p_veh->Dummy5a = (short)(val & 0xFFFF);
+    p_veh->Dummy5b = (short)(val >> 16);
+}
+
+static ulong veh_get_d90(struct TngUVehicle *p_veh)
+{
+    return (ushort)p_veh->AccelZ | ((ulong)(ushort)p_veh->AccelX << 16);
+}
+
+static void veh_set_d90(struct TngUVehicle *p_veh, ulong val)
+{
+    p_veh->AccelZ = (short)(val & 0xFFFF);
+    p_veh->AccelX = (short)(val >> 16);
+}
+
+static void veh_set_d88_low(struct TngUVehicle *p_veh, ubyte val)
+{
+    p_veh->Dummy4a = (short)(((ushort)p_veh->Dummy4a & 0xFF00) | val);
+}
+
+static short veh_heap_cost(int i)
+{
+    return TN_COST(&game_traffic_nodes[-veh_ma_heap[i]]);
+}
+
+static void veh_heap_swap(int i, int k)
+{
+    s32 tmp;
+
+    tmp = veh_ma_heap[i];
+    veh_ma_heap[i] = veh_ma_heap[k];
+    veh_ma_heap[k] = tmp;
+}
+
+/** Adds a traffic node to the route search heap.  Remade from veh_heap_add. */
+static void veh_heap_add(s32 node)
+{
+    int i, p, sib, tgt;
+
+    if (VEH_HEAP_COUNT < 0x100)
+        VEH_HEAP_COUNT++;
+    i = VEH_HEAP_COUNT;
+    veh_ma_heap[i] = node;
+    if (i == 1)
+        return;
+    if ((i & 1) == 0)
+    {
+        p = i >> 1;
+        if (veh_heap_cost(p) < veh_heap_cost(i))
+            return;
+        veh_heap_swap(i, p);
+        i = p;
+    }
+    while (i != 1)
+    {
+        short ci, cs, cp;
+
+        sib = i ^ 1;
+        p = i >> 1;
+        ci = veh_heap_cost(i);
+        cs = veh_heap_cost(sib);
+        cp = veh_heap_cost(p);
+        if (ci < cs) {
+            if (cs < cp)
+                tgt = i;
+            else if (ci < cp)
+                tgt = i;
+            else
+                tgt = p;
+        } else {
+            if (ci < cp)
+                tgt = sib;
+            else if (cp > cs)
+                tgt = sib;
+            else
+                tgt = p;
+        }
+        if (tgt == p)
+            return;
+        veh_heap_swap(p, tgt);
+        i = p;
+    }
+}
+
+/** Takes the cheapest node from the route search heap. */
+static s32 veh_heap_pop(void)
+{
+    s32 cur;
+    int n, b;
+
+    n = VEH_HEAP_COUNT;
+    cur = veh_ma_heap[1];
+    veh_ma_heap[1] = veh_ma_heap[n];
+    veh_ma_heap[n] = VEH_HEAP_EMPTY;
+    n--;
+    VEH_HEAP_COUNT = n;
+    if (n == 0)
+        return cur;
+    b = 1;
+    for (;;)
+    {
+        int l, r, t;
+        short cb, cl, cr;
+
+        l = 2 * b;
+        r = l ^ 1;
+        if (r > n)
+        {
+            if ((b != n) && !(veh_heap_cost(b) < veh_heap_cost(n)))
+                veh_heap_swap(b, n);
+            break;
+        }
+        cb = veh_heap_cost(b);
+        cl = veh_heap_cost(l);
+        cr = veh_heap_cost(r);
+        if (cb < cl) {
+            if (cl < cr)
+                t = b;
+            else if (cr <= cb)
+                t = r;
+            else
+                t = b;
+        } else {
+            if (cb < cr)
+                t = l;
+            else if (cl < cr)
+                t = l;
+            else
+                t = r;
+        }
+        if (t == b)
+            break;
+        veh_heap_swap(t, b);
+        b = t;
+    }
+    return cur;
+}
+
+static void vnav_build_route(short *p_route, short start, short dest)
+{
+    short node;
+    int i;
+
+    i = 0;
+    node = dest;
+    do {
+        p_route[4 + i] = node;
+        node = TN_PARENT(&game_traffic_nodes[-node]);
+        i++;
+    } while (node != start);
+    p_route[4 + i] = start;
+    p_route[2] = i + 1;
+}
+
+/** Cheapest route along roads between two traffic nodes (negative
+ * indices), through stations too; written to p_route, destination first.
+ * Remade from VNAV_do.
+ */
+static void VNAV_do(short start, short dest, short *p_route)
+{
+    TbBool retry;
+
+    if ((start >= 0) || (dest >= 0)) {
+        p_route[4] = VNAV_ROUTE_FAIL;
+        return;
+    }
+    // the original searches once more when nothing is found
+    retry = true;
+    for (;;)
+    {
+        ushort n;
+
+        if (start == dest) {
+            p_route[4] = VNAV_ROUTE_FAIL;
+            return;
+        }
+        for (n = 1; n < next_traffic_node; n++)
+            TN_PARENT(&game_traffic_nodes[n]) = 0;
+        TN_COST(&game_traffic_nodes[0]) = 0;
+        veh_ma_heap[1] = VEH_HEAP_EMPTY;
+        VEH_HEAP_COUNT = 0;
+        TN_COST(&game_traffic_nodes[-start]) = 0;
+        veh_heap_add(start);
+
+        while (veh_ma_heap[1] != VEH_HEAP_EMPTY)
+        {
+            struct TrafficNode *p_cur;
+            s32 cur;
+            int k;
+
+            cur = veh_heap_pop();
+            if (cur >= 0)
+                continue;
+            p_cur = &game_traffic_nodes[-cur];
+            for (k = 0; k < 4; k++)
+            {
+                s32 link;
+
+                link = p_cur->UTraffic.Link[k];
+                if (link == dest) {
+                    TN_PARENT(&game_traffic_nodes[-dest]) = cur;
+                    vnav_build_route(p_route, start, dest);
+                    return;
+                }
+                if (link < 0)
+                {
+                    struct TrafficNode *p_tn2;
+
+                    p_tn2 = &game_traffic_nodes[-link];
+                    if ((TN_PARENT(p_tn2) == 0) && ((p_tn2->Flags & 0x2000) == 0))
+                    {
+                        s32 dx, dz, cost;
+
+                        dx = abs(p_tn2->X - p_cur->X);
+                        dz = abs(p_tn2->Z - p_cur->Z);
+                        if (dx <= dz)
+                            dx >>= 1;
+                        else
+                            dz >>= 1;
+                        cost = dx + dz + TN_COST(p_cur);
+                        if ((p_cur->UTraffic.Flags[k] & 0x40) != 0)
+                            cost += 500;
+                        TN_COST(p_tn2) = cost;
+                        TN_PARENT(p_tn2) = cur;
+                        veh_heap_add(link);
+                    }
+                }
+                if (link > 0)
+                {
+                    struct Thing *p_station;
+                    struct TrafficNode *p_tn3;
+                    s32 snode;
+
+                    p_station = &things[link];
+                    snode = p_station->U.UObject.TNode;
+                    if (snode == dest) {
+                        TN_PARENT(&game_traffic_nodes[-dest]) = cur;
+                        vnav_build_route(p_route, start, dest);
+                        return;
+                    }
+                    p_tn3 = &game_traffic_nodes[-snode];
+                    if (TN_PARENT(p_tn3) == 0)
+                    {
+                        TN_COST(p_tn3) = p_station->U.UObject.Cost + TN_COST(p_cur);
+                        TN_PARENT(p_tn3) = cur;
+                        veh_heap_add(snode);
+                    }
+                }
+            }
+        }
+        if (!retry) {
+            p_route[4] = VNAV_ROUTE_FAIL;
+            return;
+        }
+        retry = false;
+    }
+}
+
+/** Is there a vehicle on the map tile. */
+static TbBool vnav_vehicle_on_tile(int tile_x, int tile_z)
+{
+    ThingIdx thing;
+
+    thing = game_my_big_map[(tile_z << 7) + tile_x].Child;
+    while (thing != 0)
+    {
+        if (thing > 0) {
+            if (things[thing].Type == TT_VEHICLE)
+                return true;
+            thing = things[thing].Next;
+        } else {
+            thing = sthings[thing].Next;
+        }
+    }
+    return false;
+}
+
+/** Can a car stop on the road segment into the node at (x,z): no vehicle
+ * around the node or on the first half of the segment from it. */
+static TbBool vnav_parking_free(s32 nx, s32 nz, s32 bx, s32 bz)
+{
+    s32 sx, sz, px, pz;
+    int tx, tz, dx, dz, j;
+
+    tx = bx >> 8;
+    tz = bz >> 8;
+    for (dz = -1; dz <= 1; dz++)
+        for (dx = -1; dx <= 1; dx++)
+            if (vnav_vehicle_on_tile(tx + dx, tz + dz))
+                return false;
+    sx = (nx - bx) >> 3;
+    sz = (nz - bz) >> 3;
+    px = bx;
+    pz = bz;
+    for (j = 0; j < 4; j++)
+    {
+        px += sx;
+        pz += sz;
+        if (vnav_vehicle_on_tile(px >> 8, pz >> 8))
+            return false;
+    }
+    return true;
+}
+
+/** The road segment nearest to the map point where a car can leave its
+ * passengers.  Remade from VNAV_find_dropoff_point.
+ */
+static void VNAV_find_dropoff_point(short *p_node, ubyte *p_link, s32 *p_frac,
+  short x, short z)
+{
+    s32 best;
+    int i, k;
+
+    if (VNAV_nearnodes[0] == 0)
+        return;
+    best = 0xFFFFFFF;
+    *p_node = 9999;
+    for (i = 0; i < 5; i++)
+    {
+        struct TrafficNode *p_tnode;
+        s32 nx, nz;
+
+        p_tnode = &game_traffic_nodes[VNAV_nearnodes[i]];
+        nx = p_tnode->X;
+        nz = p_tnode->Z;
+        for (k = 0; k < 4; k++)
+        {
+            struct TrafficNode *p_tnode2;
+            short link;
+            s32 bx, bz, dist, frac;
+
+            link = p_tnode->UTraffic.Link[k];
+            if (link >= 0)
+                continue;
+            if ((p_tnode->UTraffic.Flags[k] & 0x40) != 0)
+                continue;
+            p_tnode2 = &game_traffic_nodes[-link];
+            bx = p_tnode2->X;
+            bz = p_tnode2->Z;
+            if (((p_tnode2->Flags & 0x0800) != 0) && !vnav_parking_free(nx, nz, bx, bz))
+                continue;
+            VNAV_qwertyuiop(&dist, &frac, nx, nz, bx, bz, x, z);
+            if (dist >= best)
+                continue;
+            *p_node = VNAV_nearnodes[i];
+            *p_link = k;
+            *p_frac = frac;
+            best = dist;
+        }
+    }
+}
+
+/** Can a car reach the road near the map point.
+ * Remade from VNAV_can_i_get_there.
+ */
+static TbBool VNAV_can_i_get_there(struct Thing *p_vehicle, short x, short z)
+{
+    short node;
+    ubyte link;
+    s32 frac;
+
+    VNAV_find_nearnodes(x, z);
+    node = 9999;
+    link = 0;
+    frac = 0;
+    VNAV_find_dropoff_point(&node, &link, &frac, x, z);
+    if (node == 9999)
+        return false;
+    if (p_vehicle->U.UVehicle.TNode == -node)
+        return true;
+    VNAV_do(p_vehicle->U.UVehicle.TNode, -node, VNAV_route);
+    if (VNAV_route[4] == VNAV_ROUTE_FAIL)
+        return false;
+    return true;
+}
+
+/** Approximate length of a vector from its absolute coordinates. */
+static s32 vnav_dist_approx(s32 adx, s32 adz)
+{
+    s32 hi, lo;
+
+    if (adx < adz) {
+        hi = adz;
+        lo = adx;
+    } else {
+        hi = adx;
+        lo = adz;
+    }
+    return hi - (hi >> 5) - (hi >> 7) + (lo >> 2) + (lo >> 3) + (lo >> 6) + (lo >> 7);
+}
+
+/** Sends a car along the roads to the drop-off point nearest to the map
+ * point: 2 when it is already on that segment before the point, 1 with a
+ * route, 0 when there is none.  Remade from VNAV_goto.
+ */
+static int VNAV_goto(struct Thing *p_vehicle, short x, short z)
+{
+    struct TngUVehicle *p_veh;
+    short node;
+    ubyte link;
+    s32 frac;
+    short tlink;
+    ulong d;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    p_veh->destx = x;
+    p_veh->destz = z;
+    VNAV_find_nearnodes(x, z);
+    node = 9999;
+    link = 0;
+    frac = 0;
+    VNAV_find_dropoff_point(&node, &link, &frac, x, z);
+    if (node == 9999)
+        return 0;
+    if (frac < 0x23)
+        frac = 0x23;
+    if (frac > 0xDC)
+        frac = 0xDC;
+    tlink = game_traffic_nodes[node].UTraffic.Link[link];
+    if ((tlink < 0) && ((game_traffic_nodes[-tlink].Flags & 0x0800) != 0))
+        frac = 200;
+
+    if ((p_veh->Dummy4b == -node) && (((veh_get_d88(p_veh) & 0xC0) >> 6) == link) &&
+      (p_veh->TNode < 0))
+    {
+        struct TrafficNode *p_tn1, *p_tn2;
+        s32 seglen, dist;
+
+        p_tn1 = &game_traffic_nodes[node];
+        p_tn2 = &game_traffic_nodes[-p_veh->TNode];
+        seglen = vnav_dist_approx(abs(p_tn2->X - p_tn1->X), abs(p_tn2->Z - p_tn1->Z));
+        dist = vnav_dist_approx(abs((p_vehicle->X >> 8) - p_tn1->X),
+          abs((p_vehicle->Z >> 8) - p_tn1->Z));
+        if (((dist << 8) / seglen) < frac)
+        {
+            s32 nx, nz;
+
+            p_vehicle->State = 0x33;
+            nx = (((p_tn2->X - p_tn1->X) * frac) >> 8) + p_tn1->X;
+            nz = (((p_tn2->Z - p_tn1->Z) * frac) >> 8) + p_tn1->Z;
+            veh_set_d8c(p_veh, ((ulong)nx << 16) | (ulong)nz);
+            return 2;
+        }
+    }
+
+    if (p_veh->TNode == -node)
+    {
+        veh_set_d8c(p_veh, link);
+        d = veh_get_d88(p_veh) & ~0xFF00UL;
+        d |= (ulong)frac << 8;
+        d &= ~0x3FUL;
+        veh_set_d88(p_veh, d);
+    }
+    else
+    {
+        int m, n, s;
+
+        VNAV_do(p_veh->TNode, -node, VNAV_route);
+        if (VNAV_route[4] == VNAV_ROUTE_FAIL)
+            return 0;
+        // links to take at the next nodes, 2 bits each, up to 16
+        m = VNAV_route[2] - 2;
+        n = 0;
+        while (m >= 0)
+        {
+            struct TrafficNode *p_tn;
+            short want;
+            int k;
+
+            p_tn = &game_traffic_nodes[-VNAV_route[4 + m + 1]];
+            want = VNAV_route[4 + m];
+            for (k = 0; ; k++)
+            {
+                short l;
+
+                // not limited to 4 links, as in the original
+                l = ((short *)&p_tn->UTraffic)[k];
+                if (l < 0) {
+                    if (l == want)
+                        break;
+                } else if (l > 0) {
+                    if (things[l].U.UObject.TNode == want)
+                        break;
+                }
+            }
+            d = veh_get_d8c(p_veh);
+            d = (d & ~3UL) | (ulong)k;
+            d = (d >> 2) | (d << 30);
+            veh_set_d8c(p_veh, d);
+            n++;
+            m--;
+            if (n >= 16)
+                break;
+        }
+        d = veh_get_d8c(p_veh);
+        s = (2 * n) & 31;
+        if (s != 0)
+            d = (d << s) | (d >> (32 - s));
+        veh_set_d8c(p_veh, d);
+        d = veh_get_d88(p_veh) & ~0xFF00UL;
+        d |= (ulong)frac << 8;
+        d &= ~0x3FUL;
+        d |= (ulong)n;
+        veh_set_d88(p_veh, d);
+    }
+    veh_set_d90(p_veh, ((ulong)(ushort)(-node) << 16) | link);
+    return 1;
+}
+
+static ulong vnav_dest_d8c(short x, short z)
+{
+    return ((ulong)(s32)x << 16) | (ulong)(s32)z;
+}
+
+/** A car stopping (state 0x36) drives on to new map point.
+ * Remade from VNAV_goto_and_unstop. */
+static int VNAV_goto_and_unstop(struct Thing *p_vehicle, short x, short z)
+{
+    struct TngUVehicle *p_veh;
+    s32 v;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    v = (ushort)p_veh->Dummy5a;
+    v = 10 - (v * 10) / 17;
+    veh_set_d8c(p_veh, vnav_dest_d8c(x, z));
+    p_vehicle->State = 0x38;
+    veh_set_d88_low(p_veh, (ubyte)(p_veh->Dummy4a & 0xC0));
+    veh_set_d88(p_veh, veh_get_d88(p_veh) | (ulong)v);
+    return 1;
+}
+
+/** A parked car (state 0x21) drives to new map point.
+ * Remade from VNAV_goto_and_unpark. */
+static int VNAV_goto_and_unpark(struct Thing *p_vehicle, short x, short z)
+{
+    struct TngUVehicle *p_veh;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    p_vehicle->State = 0x38;
+    veh_set_d8c(p_veh, vnav_dest_d8c(x, z));
+    veh_set_d90(p_veh, veh_get_d90(p_veh) << 1);
+    veh_set_d88_low(p_veh, (ubyte)((p_veh->Dummy4a & 0xC0) | 0x0A));
+    return 1;
+}
+
+/** A car placed by the road (state 0x3D) drives to new map point.
+ * Remade from VNAV_goto_and_unplace. */
+static int VNAV_goto_and_unplace(struct Thing *p_vehicle, short x, short z)
+{
+    struct TngUVehicle *p_veh;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    veh_set_d8c(p_veh, vnav_dest_d8c(x, z));
+    p_vehicle->State = 0x3E;
+    veh_set_d88_low(p_veh, (ubyte)((p_veh->Dummy4a & 0xC0) | 0x14));
+    return 1;
+}
+
+/** Ship route: breadth-first search over the sea nodes (flag 0x0200) to
+ * the one nearest to the map point; the route is left in the GateLink
+ * fields, from the ship's node on.  Remade from send_ship_to.
+ */
+static void send_ship_to(struct Thing *p_vehicle, short x, short z)
+{
+    short queue[32];
+    int head, tail;
+    s32 best;
+    short best_node, start, cur;
+    ushort n;
+
+    for (n = 1; n < next_traffic_node; n++) {
+        if ((game_traffic_nodes[n].Flags & 0x0200) != 0)
+            game_traffic_nodes[n].GateLink = -1;
+    }
+    start = p_vehicle->U.UVehicle.TNode;
+    game_traffic_nodes[start].GateLink = 0;
+    head = 0;
+    tail = 0;
+    best = 0xFFFFFFF;
+    best_node = 0;
+    cur = start;
+    for (;;)
+    {
+        struct TrafficNode *p_tn;
+        int k;
+
+        p_tn = &game_traffic_nodes[cur];
+        for (k = 0; k < 4; k++)
+        {
+            short link;
+
+            link = p_tn->UTraffic.Link[k];
+            if (link == 0)
+                continue;
+            if ((p_tn->UTraffic.Flags[k] & 0xC0) != 0)
+                continue;
+            if (game_traffic_nodes[-link].GateLink != -1)
+                continue;
+            queue[tail] = -link;
+            tail = (tail + 1) & 0x1F;
+            game_traffic_nodes[-link].GateLink = cur;
+        }
+        if (head == tail)
+            break;
+        {
+            s32 dx, dz, dist;
+
+            cur = queue[head];
+            p_tn = &game_traffic_nodes[cur];
+            dx = x - p_tn->X;
+            dz = z - p_tn->Z;
+            dist = dx * dx + dz * dz;
+            head = (head + 1) & 0x1F;
+            if (dist < best) {
+                best = dist;
+                best_node = cur;
+            }
+        }
+    }
+    if (best < 0x200000)
+    {
+        short node, prev, next;
+
+        node = best_node;
+        prev = 0;
+        do {
+            next = game_traffic_nodes[node].GateLink;
+            game_traffic_nodes[node].GateLink = prev;
+            prev = node;
+            node = next;
+        } while (next != 0);
+    }
+}
+
+#ifdef SW_FNCHK
+static int start_goto_vehicle_asm(struct Thing *p_vehicle, int x, int z)
+{
+    int ret;
+    asm volatile (
+      "call ASM_start_goto_vehicle\n"
+        : "=a" (ret), "+d" (x), "+b" (z) : "0" (p_vehicle) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Sends a vehicle to the map point: a car along the roads, flying
+ * vehicles and tanks along a path, a ship over the sea nodes.
+ * Remade from start_goto_vehicle.
+ */
+static int start_goto_vehicle_c(struct Thing *p_vehicle, int x, int z)
+{
+    struct TngUVehicle *p_veh;
+    struct MyPath *p_path;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    if ((ushort)p_vehicle->State == 0x45)
+        return 0;
+    if (x < 0)
+        x = 0x80;
+    else if (x >= 0x8000)
+        x = 0x7F80;
+    if (z < 0)
+        z = 0x80;
+    else if (z >= 0x8000)
+        z = 0x7F80;
+
+    switch (p_vehicle->SubType)
+    {
+    case 0x28:
+        break;
+    case SubTT_VEH_FLYING:
+        remove_path(p_vehicle);
+        if (ariadne_initialise_route_asm(p_vehicle, x, z) <= 0)
+            return 0;
+        unkn_path_func_001(p_vehicle, 1);
+        p_path = &my_paths[p_veh->PathIndex];
+        p_veh->GotoX = p_path->X[p_vehicle->PathOffset & 3];
+        p_veh->GotoZ = p_path->Z[p_vehicle->PathOffset & 3];
+        p_vehicle->State = 0x39;
+        p_veh->TNode = 0;
+        return 1;
+    case 0x33:
+    case 0x3B:
+        remove_path(p_vehicle);
+        if (build_tank_path(p_vehicle, x, z) == 0)
+            return 0;
+        p_path = &my_paths[p_veh->PathIndex];
+        p_veh->GotoX = p_path->X[p_vehicle->PathOffset & 3];
+        p_veh->GotoZ = p_path->Z[p_vehicle->PathOffset & 3];
+        p_vehicle->State = 0x32;
+        return 1;
+    case 0x36:
+        send_ship_to(p_vehicle, x, z);
+        return 0;
+    default:
+        return 0;
+    }
+
+    if (x < 0x200)
+        x = 0x200;
+    if (z < 0x200)
+        z = 0x200;
+    if (x > 0x7E00)
+        x = 0x7E00;
+    if (z > 0x7E00)
+        z = 0x7E00;
+    if (p_veh->TNode >= 0)
+        return 0;
+    switch ((ushort)p_vehicle->State)
+    {
+    case 0x36:
+        if (!VNAV_can_i_get_there(p_vehicle, x, z))
+            return 0;
+        VNAV_goto_and_unstop(p_vehicle, x, z);
+        p_vehicle->Flag &= ~0x0004;
+        return 0;
+    case 0x21:
+        if (!VNAV_can_i_get_there(p_vehicle, x, z))
+            return 0;
+        VNAV_goto_and_unpark(p_vehicle, x, z);
+        p_vehicle->Flag &= ~0x0004;
+        return 0;
+    case 0x3D:
+        if (!VNAV_can_i_get_there(p_vehicle, x, z))
+            return 0;
+        VNAV_goto_and_unplace(p_vehicle, x, z);
+        p_vehicle->Flag &= ~0x0004;
+        return 0;
+    default:
+        break;
+    }
+    switch (VNAV_goto(p_vehicle, x, z))
+    {
+    case 1:
+        p_vehicle->State = 0x32;
+        p_veh->GotoY = 0;
+        p_veh->GotoX = x;
+        p_veh->GotoZ = z;
+        p_vehicle->Flag &= ~0x0004;
+        return 1;
+    case 2:
+        return 1;
+    default:
+        if ((ushort)p_vehicle->State == 0x36)
+            return 0;
+        p_vehicle->State = 0x3C;
+        return 0;
+    }
+}
+
+int start_goto_vehicle(struct Thing *p_vehicle, int x, int z)
+{
+    int ret;
+    FNCHK_RET("start_goto_vehicle", ret, start_goto_vehicle_asm(p_vehicle, x, z),
+      start_goto_vehicle_c(p_vehicle, x, z));
+    return ret;
 }
 
 int check_for_a_vehicle_here(int x, int z, struct Thing *p_vehicle)

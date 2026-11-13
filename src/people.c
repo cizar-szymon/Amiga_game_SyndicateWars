@@ -2645,15 +2645,6 @@ int build_tank_path(struct Thing *p_thing, int x, int z)
     return ret;
 }
 
-int start_goto_vehicle(struct Thing *p_vehicle, int x, int z)
-{
-    int ret;
-    asm volatile (
-      "call ASM_start_goto_vehicle\n"
-        : "=r" (ret) : "a" (p_vehicle), "d" (x), "b" (z));
-    return ret;
-}
-
 short find_peep_in_area(struct Thing *p_me, struct Command *p_cmd)
 {
     short ret;

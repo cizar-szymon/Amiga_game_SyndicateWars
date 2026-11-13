@@ -185,3 +185,26 @@ Do zmierzenia: szczyt przy wczytywaniu mapy (`.mad` do 1,87 MB, `lvfiles.c:1754`
 
 - CRC każdej klatki: host = build referencyjny (deterministyczne wejście, `time(0)`/`clock()`), ARM = host.
 - Pomiary tylko na prawdziwej Amidze; build x86 nie może się zepsuć.
+
+### Optymalizacja, noc 12/13.11.2026 (Amiga 1)
+
+Scena pomiarowa: `tools/warp/bench.sh` – nagranie misji 1 (`-p 1`, agenci chodzą i strzelają),
+640×480, średnia `busy per turn` od 30 s. Symulacja jest już w większości w C, więc liczy naprawdę
+(`things` 3 → 11–13 ms). W misjach 3–10 nie ma więcej postaci, a pojazdy nie pracują (`process_vehicle`
+i dalej to jeszcze zaśleplony asm) – nagranie misji 1 jest najcięższą sceną.
+
+| zmiana | 640×480 (bench, bez slotów) |
+|---|---:|
+| start (po przepisaniu nawigacji) | ~61 ms (pomiar ze slotami) |
+| pętla pikseli bez ponownego wczytywania tablic, osobna funkcja na ARM (`cec20d06`) | **55,4 ms** (54,4–56,5) |
+| `-funroll-loops` | 56,9 – gorzej, odrzucone |
+| tablica cieni i najczęstsza strona tekstury w SRAM na chipie, zapis 4 pikseli słowem | bez zmian – odrzucone (łatka w `experiments/`) |
+
+Podział (PROF=2, 62 ms ze slotami): trójkąty 25 ms (piksele 14,4 ms: 353 tys. pikseli, 13 tys.
+odcinków, 425 trójkątów na klatkę – ok. 16 cykli na piksel, pętla nie czeka na pamięć), obiekty 7,9,
+HUD 7,4 (skaner 4,8), podłoga 3,4, czyszczenie ekranu 1,8; symulacja 12,9 (postacie 10,2: spacer
+cywili 5,3, w tym `check_for_other_people` 2,6 – przechodzenie list obiektów na 9 kaflach).
+Na ARM dostępna pamięć na chipie: ITCM 32 KB (kod), SRAM 64 KB + 16 KB (`env->fastMem`).
+
+Dalej: pętla pikseli ręcznie w asm ARM z przeplotem dwóch pikseli (z trybem porównania z C), koszty
+na odcinek (13 tys.), skaner, obiekty; w symulacji `check_for_other_people`.

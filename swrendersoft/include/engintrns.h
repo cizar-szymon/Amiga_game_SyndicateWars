@@ -103,6 +103,14 @@ void transform_shpoint_fpv(struct ShEnginePoint *p_sp, int dxc, int dyc, int dzc
  */
 int transform_shpoint_y(int dxc, int dyc, int dzc);
 
+/** Is the box (ranges of coordinates as given to transform_shpoint()) surely
+ * beyond one edge of the screen: would every point inside it get the same
+ * out-of-screen flag (0x01, 0x02, 0x04 or 0x08) from transform_shpoint()?
+ * False when not sure.
+ */
+TbBool transform_shbox_outside(int dx_lo, int dx_hi, int dy_lo, int dy_hi,
+  int dz_lo, int dz_hi);
+
 void transform_screen_to_map_isometric(int *dxc, int *dzc, int scr_x, int scr_y);
 
 /** Reinit part of transform functionality setup based on vecs vars.

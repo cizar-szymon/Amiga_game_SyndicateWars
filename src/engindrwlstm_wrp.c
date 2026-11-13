@@ -26,6 +26,7 @@
 #include "bfutility.h"
 #include <assert.h>
 #include <limits.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "enginbckt.h"
@@ -941,6 +942,55 @@ enum DrawObjectFacesFlags {
     DrwObjF_StartBelowWindow = 0x0200,
 };
 
+#if defined(SW_AMIGA) || defined(SW_WARP)
+int amiga_check_enabled(void);
+#endif
+
+/** Check mode of the off-screen object skip in draw_object_faces():
+ * ENV:SyndWarsCheck on the Amiga, SW_DRAWCHECK environment variable elsewhere.
+ */
+static TbBool offscreen_skip_check_on(void)
+{
+    static int check_mode = -1;
+
+    if (check_mode < 0) {
+#if defined(SW_AMIGA) || defined(SW_WARP)
+        check_mode = amiga_check_enabled();
+#else
+        check_mode = (getenv("SW_DRAWCHECK") != NULL);
+#endif
+    }
+    return check_mode;
+}
+
+/** Is the box of the object's points, moved by the given shifts, surely
+ * beyond one edge of the screen. */
+static TbBool object_box_outside(struct SingleObject *point_object,
+  int cor_dx, int cor_dy, int cor_dz)
+{
+    struct SinglePoint *p_snpoint, *p_end;
+    int x_lo, x_hi, y_lo, y_hi, z_lo, z_hi;
+
+    if (point_object->EndPoint < point_object->StartPoint)
+        return false;
+    p_snpoint = &game_object_points[point_object->StartPoint];
+    p_end = &game_object_points[point_object->EndPoint];
+    x_lo = x_hi = p_snpoint->X;
+    y_lo = y_hi = p_snpoint->Y;
+    z_lo = z_hi = p_snpoint->Z;
+    for (p_snpoint++; p_snpoint <= p_end; p_snpoint++)
+    {
+        if (p_snpoint->X < x_lo) x_lo = p_snpoint->X;
+        if (p_snpoint->X > x_hi) x_hi = p_snpoint->X;
+        if (p_snpoint->Y < y_lo) y_lo = p_snpoint->Y;
+        if (p_snpoint->Y > y_hi) y_hi = p_snpoint->Y;
+        if (p_snpoint->Z < z_lo) z_lo = p_snpoint->Z;
+        if (p_snpoint->Z > z_hi) z_hi = p_snpoint->Z;
+    }
+    return transform_shbox_outside(x_lo + cor_dx, x_hi + cor_dx,
+      y_lo + cor_dy, y_hi + cor_dy, z_lo + cor_dz, z_hi + cor_dz);
+}
+
 short draw_object_faces(int cor_dx, int cor_dy, int cor_dz,
   struct SingleObject *point_object, ushort doflags)
 {
@@ -951,6 +1001,9 @@ short draw_object_faces(int cor_dx, int cor_dy, int cor_dz,
     int points_num;
     short depth_shift;
     short faces_num;
+    ubyte flags_all;
+    TbBool offscreen, check, box_outside;
+    u32 faces_before;
 
     depth_shift = point_object->field_1E;
 
@@ -965,6 +1018,25 @@ short draw_object_faces(int cor_dx, int cor_dy, int cor_dz,
     if (next_screen_point + 1 * points_num > screen_points_limit)
         return 0;
 
+    // An object surely beyond one edge of the screen, from the box of its
+    // points: no point needs transforming and no face testing (see below);
+    // poles transform their own points.
+    box_outside = object_box_outside(point_object, cor_dx, cor_dy - 8 * engn_yc, cor_dz);
+    if (box_outside && !offscreen_skip_check_on())
+    {
+        faces_num = point_object->NumbFaces4;
+        face = point_object->StartFace4;
+        for (i = 0; i < faces_num; i++, face++)
+        {
+            if ((game_object_faces4[face].GFlags & FGFlg_Unkn08) == 0)
+                continue;
+            if (!enlist_draw_face4_pole(cor_dx, cor_dy, cor_dz, face, 0, &bckt_max))
+                break;
+        }
+        return bckt_max;
+    }
+
+    flags_all = 0xFF;
     for (snpoint = point_object->StartPoint; snpoint <= point_object->EndPoint; snpoint++)
     {
         struct SinglePoint *p_snpoint;
@@ -989,8 +1061,18 @@ short draw_object_faces(int cor_dx, int cor_dy, int cor_dz,
 
             p_snpoint->PointOffset = specpt + 0;
             p_snpoint->Flags = sp1.Flags;
+            flags_all &= sp1.Flags;
         }
     }
+
+    // All points beyond one edge of the screen: every face of the object is
+    // rejected by object_face_get_visible_max_depth() (all its points share
+    // that bit), so the faces need no testing - except poles, which are
+    // placed by their own rules. Most of the objects in the drawn area are
+    // like that (mission 1: 112 of 117).
+    offscreen = ((flags_all & 0x0F) != 0);
+    check = offscreen && offscreen_skip_check_on();
+    faces_before = stat_drawlist_faces;
 
     faces_num = point_object->NumbFaces4;
     face_beg = point_object->StartFace4;
@@ -1004,9 +1086,17 @@ short draw_object_faces(int cor_dx, int cor_dy, int cor_dz,
         p_face4 = &game_object_faces4[face];
         if ((p_face4->GFlags & FGFlg_Unkn08) != 0)
         {
+            u32 before;
+
             // TODO why depth_shift is zero? deliberate or a mistake?
+            before = stat_drawlist_faces;
             enlisted = enlist_draw_face4_pole(cor_dx, cor_dy, cor_dz,
               face, 0, &bckt_max);
+            faces_before += stat_drawlist_faces - before;
+        }
+        else if (offscreen && !check)
+        {
+            enlisted = true;
         }
         else
         {
@@ -1023,26 +1113,62 @@ short draw_object_faces(int cor_dx, int cor_dy, int cor_dz,
             break;
     }
 
-    faces_num = point_object->NumbFaces;
-    face_beg = point_object->StartFace;
-
-    face = face_beg;
-    for (i = 0; i < faces_num; i++, face++)
+    if (!offscreen || check)
     {
-        TbBool enlisted;
+        faces_num = point_object->NumbFaces;
+        face_beg = point_object->StartFace;
 
+        face = face_beg;
+        for (i = 0; i < faces_num; i++, face++)
         {
-            ushort edflags;
+            TbBool enlisted;
 
-            edflags = 0;
-            if ((doflags & DrwObjF_StartBelowWindow) != 0)
-                edflags |= EnFaceF_SemiTranspr;
+            {
+                ushort edflags;
 
-            enlisted = enlist_draw_face3_prealloc(face, depth_shift,
-              edflags, &bckt_max);
+                edflags = 0;
+                if ((doflags & DrwObjF_StartBelowWindow) != 0)
+                    edflags |= EnFaceF_SemiTranspr;
+
+                enlisted = enlist_draw_face3_prealloc(face, depth_shift,
+                  edflags, &bckt_max);
+            }
+            if (!enlisted)
+                break;
         }
-        if (!enlisted)
-            break;
+    }
+
+    if (box_outside && offscreen_skip_check_on())
+    {
+        static ulong box_checked, box_failed, box_points;
+
+        box_checked++;
+        box_points += points_num + 1;
+        if (!offscreen) {
+            box_failed++;
+            if (box_failed <= 10)
+                LOGERR("object %d taken as off-screen from its box, but its points have flags 0x%02x",
+                  (int)(point_object - game_objects), (int)flags_all);
+        }
+        if ((box_checked % 20000) == 0)
+            LOGWARN("off-screen box check: %lu objects (%lu points), %lu failed",
+              box_checked, box_points, box_failed);
+    }
+
+    if (check)
+    {
+        static ulong checked, failed;
+
+        checked++;
+        if (stat_drawlist_faces != faces_before) {
+            failed++;
+            if (failed <= 10)
+                LOGERR("off-screen object %d (flags 0x%02x) has %lu faces enlisted",
+                  (int)(point_object - game_objects), (int)flags_all,
+                  (ulong)(stat_drawlist_faces - faces_before));
+        }
+        if ((checked % 20000) == 0)
+            LOGWARN("off-screen object skip check: %lu objects, %lu failed", checked, failed);
     }
 
     return bckt_max;

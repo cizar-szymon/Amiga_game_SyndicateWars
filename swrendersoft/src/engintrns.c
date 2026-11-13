@@ -280,6 +280,111 @@ void transform_shpoint_fpv(struct ShEnginePoint *p_sp, int dxc, int dyc, int dzc
     p_sp->Depth = scr_d;
 }
 
+/* Interval helpers for transform_shbox_outside(): [lo,hi] ranges. */
+static void ival_mul_k(int *p_lo, int *p_hi, int lo, int hi, int k)
+{
+    int a, b;
+
+    a = lo * k;
+    b = hi * k;
+    *p_lo = (a < b) ? a : b;
+    *p_hi = (a < b) ? b : a;
+}
+
+static void ival_mul(int *p_lo, int *p_hi, int alo, int ahi, int blo, int bhi)
+{
+    int p[4], i;
+
+    p[0] = alo * blo;
+    p[1] = alo * bhi;
+    p[2] = ahi * blo;
+    p[3] = ahi * bhi;
+    *p_lo = *p_hi = p[0];
+    for (i = 1; i < 4; i++) {
+        if (p[i] < *p_lo)
+            *p_lo = p[i];
+        if (p[i] > *p_hi)
+            *p_hi = p[i];
+    }
+}
+
+static int shpoint_depth_compress(int d)
+{
+    if ((game_perspective == ProjM_Perspective) && (d > 0x4000 / 16))
+        d = 0x4000 * d / (d + 0x4000);
+    return d;
+}
+
+TbBool transform_shbox_outside(int dx_lo, int dx_hi, int dy_lo, int dy_hi,
+  int dz_lo, int dz_hi)
+{
+    int a_lo, a_hi, b_lo, b_hi, t_lo, t_hi;
+    int fa_lo, fa_hi, fb_lo, fb_hi, fc_lo, fc_hi, d_lo, d_hi;
+    int sh_lo, sh_hi, s_lo, s_hi;
+
+    // The same steps as transform_shpoint(), on ranges: each result range
+    // holds the value of that step for any point of the box. Arithmetic
+    // shifts and the depth compression keep the order of values, so their
+    // ranges come from the range ends (the compression drops at 0x400).
+    ival_mul_k(&a_lo, &a_hi, dx_lo, dx_hi, transf_vec_yaw_z);
+    ival_mul_k(&b_lo, &b_hi, dz_lo, dz_hi, -transf_vec_yaw_x);
+    fa_lo = (a_lo + b_lo) >> 16;
+    fa_hi = (a_hi + b_hi) >> 16;
+    ival_mul_k(&a_lo, &a_hi, dx_lo, dx_hi, transf_vec_yaw_x);
+    ival_mul_k(&b_lo, &b_hi, dz_lo, dz_hi, transf_vec_yaw_z);
+    fb_lo = (a_lo + b_lo) >> 16;
+    fb_hi = (a_hi + b_hi) >> 16;
+    ival_mul_k(&a_lo, &a_hi, dy_lo, dy_hi, transf_vec_tlt_xz);
+    ival_mul_k(&b_lo, &b_hi, fb_lo, fb_hi, -transf_vec_tlt_y);
+    fc_lo = (a_lo + b_lo) >> 16;
+    fc_hi = (a_hi + b_hi) >> 16;
+    ival_mul_k(&a_lo, &a_hi, dy_lo, dy_hi, transf_vec_tlt_y);
+    ival_mul_k(&b_lo, &b_hi, fb_lo, fb_hi, transf_vec_tlt_xz);
+    d_lo = (a_lo + b_lo) >> 16;
+    d_hi = (a_hi + b_hi) >> 16;
+    if ((game_perspective == ProjM_Perspective) && (d_hi > 0x4000 / 16))
+    {
+        if (d_lo > 0x4000 / 16) {
+            d_lo = shpoint_depth_compress(d_lo);
+        } else {
+            t_lo = shpoint_depth_compress(0x4000 / 16 + 1);
+            if (t_lo < d_lo)
+                d_lo = t_lo;
+        }
+        t_hi = shpoint_depth_compress(d_hi);
+        d_hi = (t_hi > 0x4000 / 16) ? t_hi : 0x4000 / 16;
+    }
+
+    // screen X
+    ival_mul_k(&s_lo, &s_hi, fa_lo, fa_hi, overall_scale);
+    sh_lo = s_lo >> 11;
+    sh_hi = s_hi >> 11;
+    if (game_perspective == ProjM_Perspective) {
+        ival_mul(&s_lo, &s_hi, sh_lo, sh_hi, 0x4000 - d_hi, 0x4000 - d_lo);
+        sh_lo = s_lo >> 14;
+        sh_hi = s_hi >> 14;
+    }
+    if (transf_scr_center_x + sh_hi < 0)
+        return true;
+    if (transf_scr_center_x + sh_lo >= vec_window_width)
+        return true;
+
+    // screen Y, which goes the other way
+    ival_mul_k(&s_lo, &s_hi, fc_lo, fc_hi, overall_scale);
+    sh_lo = s_lo >> 11;
+    sh_hi = s_hi >> 11;
+    if (game_perspective == ProjM_Perspective) {
+        ival_mul(&s_lo, &s_hi, sh_lo, sh_hi, 0x4000 - d_hi, 0x4000 - d_lo);
+        sh_lo = s_lo >> 14;
+        sh_hi = s_hi >> 14;
+    }
+    if (transf_scr_center_y - sh_lo < 0)
+        return true;
+    if (transf_scr_center_y - sh_hi >= vec_window_height)
+        return true;
+    return false;
+}
+
 int transform_shpoint_y(int dxc, int dyc, int dzc)
 {
     int fctr_b, fctr_c, scr_d;

@@ -33,6 +33,12 @@
 #include "game_speed.h"
 #include "guitext.h"
 #include "swlog.h"
+#include "bftext.h"
+#include "bfsprite.h"
+#include <string.h>
+#include "femain.h"
+#include "sound.h"
+#include "fncheck.h"
 
 /******************************************************************************/
 
@@ -427,12 +433,89 @@ void init_buffered_keys(void)
     LbKeyboardCustomHandler(KEventBufferedKeysUpdate);
 }
 
+#ifdef SW_FNCHK
+static TbBool user_read_value_asm(char *buf, ubyte len, ubyte type)
+{
+    int ret;
+    uint32_t d = len, b = type;
+    asm volatile ("call ASM_user_read_value\n"
+        : "=a" (ret), "+d" (d), "+b" (b) : "0" (buf) : "cc", "memory");
+    return (ubyte)ret;
+}
+#endif
+
+/** Text entry: takes one buffered key into the buffer (up to len chars).
+ * type: 0 any text, 1 letters upper case, 2 digits, 3 hex digits.
+ * Returns true on Enter.  Remade from user_read_value.
+ */
+static TbBool user_read_value_c(char *buf, ubyte len, ubyte type)
+{
+    ulong key;
+    ubyte cur_len, ch, c;
+
+    cur_len = (ubyte)strlen(buf);
+    if (show_alert)
+        return false;
+    key = next_buffered_key();
+    if ((key == 0) || (key >= 0x80))
+        return (key == KC_RETURN);
+    if (lbKeyOn[KC_BACK] && (cur_len > 0))
+    {
+        lbKeyOn[KC_BACK] = 0;
+        buf[cur_len - 1] = '\0';
+        play_sample_using_heap(0, 0x75, 0x7F, 0x40, 100, 0, 1);
+    }
+    ch = (ubyte)lbInkeyToAscii[key];
+    if ((ch < 0x20) || (ch > 0x7E))
+        return (key == KC_RETURN);
+    if (cur_len >= len)
+        return (key == KC_RETURN);
+    switch (type)
+    {
+    case 3:
+        if (((ch >= '0') && (ch <= '9')) || ((ch >= 'a') && (ch <= 'f')))
+            c = ch;
+        else
+            c = 0;
+        break;
+    case 2:
+        if ((ch >= '0') && (ch <= '9'))
+            c = ch;
+        else
+            c = 0;
+        break;
+    case 1:
+        if (((ch >= 'a') && (ch <= 'z')) || ((lbShift & KMod_SHIFT) != 0))
+            c = (ubyte)lbInkeyToAsciiShift[key];
+        else
+            c = ch;
+        break;
+    case 0:
+        if ((lbShift & KMod_SHIFT) != 0)
+            c = (ubyte)lbInkeyToAsciiShift[key];
+        else
+            c = ch;
+        break;
+    default:
+        // the original uses an unset value here
+        c = 0;
+        break;
+    }
+    // a rejected char (0) would read before the font - the original does
+    if ((c >= 0x20) && (lbFontPtr[c - 0x1F].SWidth > 1) && ((cur_len != 0) || (c != ' ')))
+    {
+        buf[cur_len] = c;
+        buf[cur_len + 1] = '\0';
+        play_sample_using_heap(0, 0x74, 0x7F, 0x40, 100, 0, 1);
+    }
+    return false;
+}
+
 TbBool user_read_value(char *buf, ubyte len, ubyte type)
 {
     TbBool ret;
-    asm volatile (
-      "call ASM_user_read_value\n"
-        : "=r" (ret) : "a" (buf), "d" (len), "b" (type));
+    FNCHK_RET("user_read_value", ret, user_read_value_asm(buf, len, type),
+      user_read_value_c(buf, len, type));
     return ret;
 }
 

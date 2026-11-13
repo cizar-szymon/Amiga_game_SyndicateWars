@@ -28,6 +28,7 @@
 #include <stdlib.h>
 
 #include "bigmap.h"
+#include "engincam.h"
 #include "building.h"
 #include "bmbang.h"
 #include "command.h"
@@ -1971,6 +1972,82 @@ void process_sthing(struct SimpleThing *p_sthing, ThingIdx thing)
     }
 }
 
+#if defined(SW_AMIGA)
+int amiga_getenv_int(const char *name, int dflt);
+#endif
+
+/** Far civilians option: 0 off (as the original), 1 or 2 - a wandering
+ * civilian far from the camera and from all the local player's agents is
+ * processed every 2nd or 4th turn. On a 68060 the simulation of the whole
+ * city's crowd is a large part of a turn, while nearly all of it is far
+ * from the view (mission 1: 285 of 308 people). They walk slower there,
+ * which cannot be seen. Not in network games and packet recording or
+ * playback, which need the original course of the game.
+ * ENV:SyndWarsCivLOD on the Amiga, SW_CIVLOD elsewhere.
+ */
+static int far_civilians_level(void)
+{
+    static int level = -1;
+
+    if (level < 0)
+    {
+#if defined(SW_AMIGA)
+        level = amiga_getenv_int("SyndWarsCivLOD", 0);
+#else
+        const char *s = getenv("SW_CIVLOD");
+        level = (s != NULL) ? atoi(s) : 0;
+#endif
+        if ((level < 0) || (level > 2))
+            level = 0;
+        if (level > 0)
+            LOGWARN("far civilians processed every %d turns", 1 << level);
+    }
+    return level;
+}
+
+#define FAR_CIVILIAN_DIST TILE_TO_MAPCOORD(16, 0)
+
+static TbBool map_coords_within(MapCoord x1, MapCoord z1, MapCoord x2, MapCoord z2, MapCoord dist)
+{
+    return (abs(x1 - x2) < dist) && (abs(z1 - z2) < dist);
+}
+
+/** Is this the turn to skip the person, under the far civilians option. */
+static TbBool far_civilian_skip_turn(struct Thing *p_person, ThingIdx thing)
+{
+    int level;
+    MapCoord cor_x, cor_z;
+    ushort i;
+
+    level = far_civilians_level();
+    if (level == 0)
+        return false;
+    if (((gameturn + thing) & ((1 << level) - 1)) == 0)
+        return false;
+    if (in_network_game || (pktrec_mode != PktR_NONE))
+        return false;
+    if (p_person->State != PerSt_WANDER)
+        return false;
+    if ((p_person->Flag & (TngF_PlayerAgent | TngF_Persuaded | TngF_InVehicle | TngF_Destroyed)) != 0)
+        return false;
+    cor_x = PRCCOORD_TO_MAPCOORD(p_person->X);
+    cor_z = PRCCOORD_TO_MAPCOORD(p_person->Z);
+    if (map_coords_within(cor_x, cor_z, engn_xc, engn_zc, FAR_CIVILIAN_DIST))
+        return false;
+    for (i = 0; i < playable_agents; i++)
+    {
+        struct Thing *p_agent;
+
+        p_agent = players[local_player_no].MyAgent[i];
+        if (p_agent == NULL)
+            continue;
+        if (map_coords_within(cor_x, cor_z, PRCCOORD_TO_MAPCOORD(p_agent->X),
+          PRCCOORD_TO_MAPCOORD(p_agent->Z), FAR_CIVILIAN_DIST))
+            return false;
+    }
+    return true;
+}
+
 void process_things(void)
 {
     int i;
@@ -2061,6 +2138,9 @@ void process_things(void)
                 continue;
 
             if (process_thing_unkflag0002(p_thing))
+                continue;
+
+            if ((p_thing->Type == TT_PERSON) && far_civilian_skip_turn(p_thing, thing))
                 continue;
 
             process_thing(p_thing, thing);

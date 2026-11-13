@@ -265,3 +265,10 @@ int amiga_check_enabled(void)
 
 /* the sampling profiler of the 68k build: not on the ARM */
 void amiga_sampler_start(void) { }
+
+/* no ENV: variables reach the ARM core yet: the defaults */
+int amiga_getenv_int(const char *name, int dflt)
+{
+    (void)name;
+    return dflt;
+}

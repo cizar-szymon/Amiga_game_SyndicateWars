@@ -368,3 +368,18 @@ int amiga_check_enabled(void)
     LbWarnLog("render check mode %s\n", on ? "ON" : "off");
     return on;
 }
+
+/** Integer value of an ENV: variable (first characters as a decimal number),
+ * dflt when it is not set. */
+int amiga_getenv_int(const char *name, int dflt)
+{
+    char buf[12];
+    int v, i;
+
+    if (GetVar((STRPTR)name, (STRPTR)buf, sizeof(buf), 0) < 0)
+        return dflt;
+    v = 0;
+    for (i = 0; (buf[i] >= '0') && (buf[i] <= '9'); i++)
+        v = v * 10 + (buf[i] - '0');
+    return (i > 0) ? v : dflt;
+}

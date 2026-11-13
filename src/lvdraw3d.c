@@ -21,6 +21,7 @@
 
 #include <assert.h>
 #include <limits.h>
+#include <stdlib.h>
 #include "bfendian.h"
 #include "bfmath.h"
 #include "bfmemut.h"
@@ -634,6 +635,171 @@ struct MyMapElement *map_element_for_clipped_cords(int map_x, int map_z)
     return &game_my_big_map[MAP_TILE_WIDTH * MAPCOORD_TO_TILE(map_z) + MAPCOORD_TO_TILE(map_x)];
 }
 
+/* Off-screen floor skip for lvdraw_do_floor(). The floor area is a square of
+ * tiles round the camera, much larger than the view: on a 320x200 screen in
+ * mission 1, 94% of its tiles have all four corners beyond one screen edge,
+ * and each such tile is rejected only after its corner points were given a
+ * height, transformed and shaded. A part of a row of tiles (FLOOR_CHUNK
+ * tiles) is tested at once by the box of its corner points (heights from
+ * their map elements, with a margin for the waving of the surface) - if the
+ * box is surely beyond one edge (transform_shbox_outside()), these tiles
+ * would be rejected anyway, and their points need not be computed. */
+#define FLOOR_CHUNK 8
+/* the waving and wobbling surface moves the height by at most 44 */
+#define FLOOR_Y_MARGIN 64
+
+#if defined(SW_AMIGA) || defined(SW_WARP)
+int amiga_check_enabled(void);
+#endif
+
+/** Check mode of the off-screen floor skip: everything computed as before,
+ * and each skipped tile checked to be one the original rejects.
+ * ENV:SyndWarsCheck on the Amiga, SW_DRAWCHECK environment variable elsewhere. */
+static TbBool floor_skip_check_on(void)
+{
+    static int check_mode = -1;
+
+    if (check_mode < 0) {
+#if defined(SW_AMIGA) || defined(SW_WARP)
+        check_mode = amiga_check_enabled();
+#else
+        check_mode = (getenv("SW_DRAWCHECK") != NULL);
+#endif
+    }
+    return check_mode;
+}
+
+/* Ranges of map heights (Alt) in cells of 8x8 tiles, for the height range
+ * of a part of the floor without reading its map elements (cache misses,
+ * which cost as much as the points saved). Built for each map, on a new
+ * game turn count (a mission started or loaded) and every 256 turns;
+ * a crater lowers its cell at once (floor_alt_grid_lower()). Heights only
+ * change at map loading and by craters. */
+#define FLOOR_ALT_CELL_SH 3
+#define FLOOR_ALT_CELLS_X (MAP_TILE_WIDTH >> FLOOR_ALT_CELL_SH)
+#define FLOOR_ALT_CELLS_Z (MAP_TILE_HEIGHT >> FLOOR_ALT_CELL_SH)
+static short floor_alt_cell_min[FLOOR_ALT_CELLS_Z][FLOOR_ALT_CELLS_X];
+static short floor_alt_cell_max[FLOOR_ALT_CELLS_Z][FLOOR_ALT_CELLS_X];
+static int floor_alt_grid_map = -1;
+static ulong floor_alt_grid_turn;
+
+static void floor_alt_grid_refresh(void)
+{
+    int tile_x, tile_z;
+
+    if ((floor_alt_grid_map == current_map) && (gameturn >= floor_alt_grid_turn)
+      && (gameturn - floor_alt_grid_turn < 256))
+        return;
+    for (tile_z = 0; tile_z < FLOOR_ALT_CELLS_Z; tile_z++)
+        for (tile_x = 0; tile_x < FLOOR_ALT_CELLS_X; tile_x++) {
+            floor_alt_cell_min[tile_z][tile_x] = SHRT_MAX;
+            floor_alt_cell_max[tile_z][tile_x] = SHRT_MIN;
+        }
+    for (tile_z = 0; tile_z < MAP_TILE_HEIGHT; tile_z++)
+    {
+        struct MyMapElement *p_mapel;
+        short *p_min, *p_max;
+
+        p_mapel = &game_my_big_map[MAP_TILE_WIDTH * tile_z];
+        p_min = floor_alt_cell_min[tile_z >> FLOOR_ALT_CELL_SH];
+        p_max = floor_alt_cell_max[tile_z >> FLOOR_ALT_CELL_SH];
+        for (tile_x = 0; tile_x < MAP_TILE_WIDTH; tile_x++, p_mapel++)
+        {
+            int c = tile_x >> FLOOR_ALT_CELL_SH;
+            if (p_mapel->Alt < p_min[c])
+                p_min[c] = p_mapel->Alt;
+            if (p_mapel->Alt > p_max[c])
+                p_max[c] = p_mapel->Alt;
+        }
+    }
+    floor_alt_grid_map = current_map;
+    floor_alt_grid_turn = gameturn;
+}
+
+void floor_alt_grid_lower(int tile_x, int tile_z, short alt)
+{
+    short *p_min;
+
+    if ((tile_x < 0) || (tile_x >= MAP_TILE_WIDTH) || (tile_z < 0) || (tile_z >= MAP_TILE_HEIGHT))
+        return;
+    p_min = &floor_alt_cell_min[tile_z >> FLOOR_ALT_CELL_SH][tile_x >> FLOOR_ALT_CELL_SH];
+    if (alt < *p_min)
+        *p_min = alt;
+}
+
+static int floor_cell_of_cor(int cor, int tiles)
+{
+    int tile;
+
+    tile = cor >> 8;
+    if (tile < 0)
+        tile = 0;
+    else if (tile >= tiles)
+        tile = tiles - 1;
+    return tile >> FLOOR_ALT_CELL_SH;
+}
+
+/** Marks the tiles between the rows of points at z0 and z1 (tile k between
+ * points k and k+1, ntiles tiles) which may be on screen. */
+static void floor_band_maybe_visible(ubyte *p_vis, int cor_x0, int z0, int z1, int ntiles)
+{
+    int k0;
+
+    for (k0 = 0; k0 < ntiles; k0 += FLOOR_CHUNK)
+    {
+        int k, k1, y_lo, y_hi, z_lo, z_hi;
+        TbBool outside;
+
+        k1 = k0 + FLOOR_CHUNK;
+        if (k1 > ntiles)
+            k1 = ntiles;
+        z_lo = (z0 < z1) ? z0 : z1;
+        z_hi = (z0 < z1) ? z1 : z0;
+        if (game_perspective == ProjM_IsomFloorFlat)
+        {
+            y_lo = 0;
+            y_hi = 0;
+        }
+        else
+        {
+            int cx, cz, cx0, cx1, cz0, cz1;
+
+            cx0 = floor_cell_of_cor(cor_x0 + TILE_TO_MAPCOORD(k0, 0), MAP_TILE_WIDTH);
+            cx1 = floor_cell_of_cor(cor_x0 + TILE_TO_MAPCOORD(k1, 0), MAP_TILE_WIDTH);
+            cz0 = floor_cell_of_cor(z_lo, MAP_TILE_HEIGHT);
+            cz1 = floor_cell_of_cor(z_hi, MAP_TILE_HEIGHT);
+            y_lo = SHRT_MAX;
+            y_hi = SHRT_MIN;
+            for (cz = cz0; cz <= cz1; cz++)
+                for (cx = cx0; cx <= cx1; cx++) {
+                    if (floor_alt_cell_min[cz][cx] < y_lo)
+                        y_lo = floor_alt_cell_min[cz][cx];
+                    if (floor_alt_cell_max[cz][cx] > y_hi)
+                        y_hi = floor_alt_cell_max[cz][cx];
+                }
+            y_lo *= 8;
+            y_hi *= 8;
+        }
+        outside = transform_shbox_outside(
+          cor_x0 + TILE_TO_MAPCOORD(k0, 0) - engn_xc, cor_x0 + TILE_TO_MAPCOORD(k1, 0) - engn_xc,
+          y_lo - FLOOR_Y_MARGIN - 8 * engn_yc, y_hi + FLOOR_Y_MARGIN - 8 * engn_yc,
+          z_lo - engn_zc, z_hi - engn_zc);
+        for (k = k0; k < k1; k++)
+            p_vis[k] = !outside;
+    }
+}
+
+/** Is the point k of a row used by a tile which may be on screen, in the
+ * bands on either side of the row. */
+static inline TbBool floor_point_needed(const ubyte *p_vis_a, const ubyte *p_vis_b, int k, int ntiles)
+{
+    if (k > 0 && (p_vis_a[k - 1] || p_vis_b[k - 1]))
+        return true;
+    if (k < ntiles && (p_vis_a[k] || p_vis_b[k]))
+        return true;
+    return false;
+}
+
 void lvdraw_do_floor(void)
 {
 #if 0
@@ -646,6 +812,9 @@ void lvdraw_do_floor(void)
     int shift_a, shift_b;
     int elcr_z, elpv_z; // Coord Z for current and previous map element
     short *p_sqlight;
+    ubyte floor_vis[2][RENDER_AREA_MAX + 1];
+    ubyte *p_vis_cur, *p_vis_next;
+    TbBool fcheck;
 
     drwfloor_start_cor_x = (engn_xc & 0xFF00) - (render_area_a << 7);
     drwfloor_start_cor_z = (engn_zc & 0xFF00) - (render_area_b << 7);
@@ -653,6 +822,12 @@ void lvdraw_do_floor(void)
         drwfloor_start_cor_z = 0;
 
     LbMemorySet(&loc_mapel, '\0', sizeof(loc_mapel));
+
+    fcheck = floor_skip_check_on();
+    floor_alt_grid_refresh();
+    p_vis_cur = floor_vis[0];
+    p_vis_next = floor_vis[1];
+    LbMemorySet(floor_vis, 0, sizeof(floor_vis));
 
     elcr_z = drwfloor_start_cor_z;
     shift_b = 0;
@@ -664,6 +839,16 @@ void lvdraw_do_floor(void)
         if (elcr_z >= MAP_COORD_HEIGHT)
             elcr_z = MAP_COORD_HEIGHT - 1;
 
+        // tiles below this row which may be on screen
+        if ((shift_b + 1 < render_area_b) && (elcr_z + TILE_TO_MAPCOORD(1, 0) <= MAP_COORD_HEIGHT))
+        {
+            int elnx_z;
+            elnx_z = elcr_z + TILE_TO_MAPCOORD(1, 0);
+            if (elnx_z >= MAP_COORD_HEIGHT)
+                elnx_z = MAP_COORD_HEIGHT - 1;
+            floor_band_maybe_visible(p_vis_next, drwfloor_start_cor_x, elcr_z, elnx_z, render_area_a);
+        }
+
         p_sqlight = &super_quick_light[shift_b * render_area_a];
         p_spcr = &loc_unknarrD[(shift_b) & 1];
         shift_a = 0;
@@ -673,12 +858,15 @@ void lvdraw_do_floor(void)
             int elcr_y;
             short ambient;
 
-            p_mapel = map_element_for_clipped_cords(elcr_x, elcr_z);
-            elcr_y = shpoint_compute_coord_y(p_spcr, p_mapel, elcr_x, elcr_z, 4);
-            transform_shpoint(p_spcr, elcr_x - engn_xc, elcr_y - 8 * engn_yc, elcr_z - engn_zc);
+            if (fcheck || floor_point_needed(p_vis_cur, p_vis_next, shift_a, render_area_a))
+            {
+                p_mapel = map_element_for_clipped_cords(elcr_x, elcr_z);
+                elcr_y = shpoint_compute_coord_y(p_spcr, p_mapel, elcr_x, elcr_z, 4);
+                transform_shpoint(p_spcr, elcr_x - engn_xc, elcr_y - 8 * engn_yc, elcr_z - engn_zc);
 
-            ambient = p_mapel->Ambient + p_spcr->ReflShade + 2;
-            p_spcr->Shade = calculate_shpoint_shade(ambient, p_mapel->Shade, p_sqlight);
+                ambient = p_mapel->Ambient + p_spcr->ReflShade + 2;
+                p_spcr->Shade = calculate_shpoint_shade(ambient, p_mapel->Shade, p_sqlight);
+            }
 
             p_sqlight++;
             p_spcr += 2;
@@ -700,6 +888,26 @@ void lvdraw_do_floor(void)
         if (elcr_z >= MAP_COORD_HEIGHT)
             elcr_z = MAP_COORD_HEIGHT - 1;
 
+        // tiles above this row (from the previous one) and below it
+        {
+            ubyte *p_vis_tmp;
+            p_vis_tmp = p_vis_cur;
+            p_vis_cur = p_vis_next;
+            p_vis_next = p_vis_tmp;
+        }
+        if ((shift_b + 1 < render_area_b) && (elcr_z + TILE_TO_MAPCOORD(1, 0) <= MAP_COORD_HEIGHT))
+        {
+            int elnx_z;
+            elnx_z = elcr_z + TILE_TO_MAPCOORD(1, 0);
+            if (elnx_z >= MAP_COORD_HEIGHT)
+                elnx_z = MAP_COORD_HEIGHT - 1;
+            floor_band_maybe_visible(p_vis_next, drwfloor_start_cor_x, elcr_z, elnx_z, render_area_a);
+        }
+        else
+        {
+            LbMemorySet(p_vis_next, 0, sizeof(floor_vis[0]));
+        }
+
         p_spcr = &loc_unknarrD[(shift_b) & 1];
         shift_a = 0;
         elcr_x = drwfloor_start_cor_x;
@@ -707,10 +915,13 @@ void lvdraw_do_floor(void)
         {
             int elcr_y;
 
-            p_mapel = map_element_for_clipped_cords(elcr_x, elcr_z);
-            elcr_y = shpoint_compute_coord_y(p_spcr, p_mapel, elcr_x, elcr_z, 4);
-            transform_shpoint(p_spcr, elcr_x - engn_xc, elcr_y - 8 * engn_yc, elcr_z - engn_zc);
-            p_spcr->Shade = -1;
+            if (fcheck || floor_point_needed(p_vis_cur, p_vis_next, shift_a, render_area_a))
+            {
+                p_mapel = map_element_for_clipped_cords(elcr_x, elcr_z);
+                elcr_y = shpoint_compute_coord_y(p_spcr, p_mapel, elcr_x, elcr_z, 4);
+                transform_shpoint(p_spcr, elcr_x - engn_xc, elcr_y - 8 * engn_yc, elcr_z - engn_zc);
+                p_spcr->Shade = -1;
+            }
 
             p_spcr += 2;
             shift_a++;
@@ -740,7 +951,39 @@ void lvdraw_do_floor(void)
                 if (elcr_x == elpv_x) // Do not continue rendering last row to end of screen
                     break;
             }
+            // surely beyond the screen: rejected below anyway, its points
+            // were not computed
+            if (!p_vis_cur[shift_a] && !fcheck)
+            {
+                p_sqlight++;
+                p_spcr += 2;
+                p_spnx += 2;
+                shift_a++;
+                elpv_x = elcr_x;
+                elcr_x += TILE_TO_MAPCOORD(1, 0);
+                continue;
+            }
             p_mapel = &game_my_big_map[MAP_TILE_WIDTH * (elpv_z >> 8) + (elcr_x >> 8)];
+
+            if (!p_vis_cur[shift_a])
+            {
+                static ulong fl_checked, fl_failed;
+
+                fl_checked++;
+                if ((((p_spnx[2].Flags & p_spcr[0].Flags & p_spnx[0].Flags & p_spcr[2].Flags) & 0x0F) == 0)
+                  && (((p_spcr[2].Flags | p_spnx[2].Flags | p_spcr[0].Flags | p_spnx[0].Flags) & 0x20) == 0)
+                  && (elcr_x >= 0) && (elcr_z >= 0)
+                  && !((game_perspective != ProjM_IsomNoBuildng) && ((p_mapel->Flags & 0x80) != 0)))
+                {
+                    fl_failed++;
+                    if (fl_failed <= 10)
+                        LOGERR("floor tile (%d,%d) taken as off-screen is drawn, flags %02x %02x %02x %02x",
+                          elcr_x >> 8, elpv_z >> 8, (int)p_spcr[0].Flags, (int)p_spcr[2].Flags,
+                          (int)p_spnx[0].Flags, (int)p_spnx[2].Flags);
+                }
+                if ((fl_checked % 200000) == 0)
+                    LOGWARN("off-screen floor skip check: %lu tiles, %lu failed", fl_checked, fl_failed);
+            }
 
             if ( (((p_spcr[2].Flags | p_spnx[2].Flags | p_spcr[0].Flags | p_spnx[0].Flags) & 0x20) != 0)
               || (((p_spnx[2].Flags & p_spcr[0].Flags & p_spnx[0].Flags & p_spcr[2].Flags) & 0x0F) != 0)

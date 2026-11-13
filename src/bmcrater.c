@@ -17,6 +17,7 @@
  */
 /******************************************************************************/
 #include "bmcrater.h"
+#include "lvdraw3d.h"
 
 #include "bfutility.h"
 
@@ -145,6 +146,7 @@ static void quick_crater_stamp_tile(int x, int z, int depth, TbBool gated,
     p_mapel->Texture = (p_mapel->Texture & 0xC000) | crater_unkn_texture_flags;
     p_mapel->ColumnHead &= COL_COLUMN_MASK; // clear TearAround, shared zip-pass will fill it in
     p_mapel->Alt -= (short)(2 * depth + (LbRandomAnyShort() & 3));
+    floor_alt_grid_lower(x, z, p_mapel->Alt);
 
     if (x < *min_x) *min_x = x;
     if (x > *max_x) *max_x = x;

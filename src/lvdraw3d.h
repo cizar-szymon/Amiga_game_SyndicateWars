@@ -36,6 +36,8 @@ void clear_super_quick_lights(void);
 void apply_super_quick_light(short lx, short lz, ushort b);
 
 void lvdraw_do_floor(void);
+/** A map height got lower (a crater): keeps the floor height ranges right. */
+void floor_alt_grid_lower(int tile_x, int tile_z, short alt);
 void engine_draw_whole_screen_flyby(void);
 
 void engine_draw_whole_screen_top_down(void);

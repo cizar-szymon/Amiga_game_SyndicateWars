@@ -1978,7 +1978,9 @@ int amiga_getenv_int(const char *name, int dflt);
 
 /** Far civilians option: 0 off (as the original), 1 or 2 - a wandering
  * civilian far from the camera and from all the local player's agents is
- * processed every 2nd or 4th turn. On a 68060 the simulation of the whole
+ * processed every 2nd or 4th turn; 3 - such a civilian is not processed at
+ * all while it is also off the scanner (it stands still until the view or
+ * the scanner reaches it). On a 68060 the simulation of the whole
  * city's crowd is a large part of a turn, while nearly all of it is far
  * from the view (mission 1: 285 of 308 people). They walk slower there,
  * which cannot be seen. Not in network games and packet recording or
@@ -1997,9 +1999,11 @@ static int far_civilians_level(void)
         const char *s = getenv("SW_CIVLOD");
         level = (s != NULL) ? atoi(s) : 0;
 #endif
-        if ((level < 0) || (level > 2))
+        if ((level < 0) || (level > 3))
             level = 0;
-        if (level > 0)
+        if (level == 3)
+            LOGWARN("far civilians off the scanner not processed");
+        else if (level > 0)
             LOGWARN("far civilians processed every %d turns", 1 << level);
     }
     return level;
@@ -2012,6 +2016,23 @@ static TbBool map_coords_within(MapCoord x1, MapCoord z1, MapCoord x2, MapCoord 
     return (abs(x1 - x2) < dist) && (abs(z1 - z2) < dist);
 }
 
+/** Is the map point surely off the scanner. The scanner shows a square
+ * around (MX, MZ) (in map coords >> 7), Zoom/2 map coords per pixel, turned
+ * by its angle: the test takes the square round that turned one, plus 2
+ * tiles. */
+static TbBool map_coords_off_scanner(MapCoord cor_x, MapCoord cor_z)
+{
+    int range, half;
+
+    range = ingame.Scanner.X2 - ingame.Scanner.X1;
+    if (ingame.Scanner.Y2 - ingame.Scanner.Y1 < range)
+        range = ingame.Scanner.Y2 - ingame.Scanner.Y1;
+    range >>= 1;
+    half = (range * ingame.Scanner.Zoom / 2) * 3 / 2 + TILE_TO_MAPCOORD(2, 0);
+    return !map_coords_within(cor_x, cor_z, ingame.Scanner.MX << 7,
+      ingame.Scanner.MZ << 7, half);
+}
+
 /** Is this the turn to skip the person, under the far civilians option. */
 static TbBool far_civilian_skip_turn(struct Thing *p_person, ThingIdx thing)
 {
@@ -2022,7 +2043,7 @@ static TbBool far_civilian_skip_turn(struct Thing *p_person, ThingIdx thing)
     level = far_civilians_level();
     if (level == 0)
         return false;
-    if (((gameturn + thing) & ((1 << level) - 1)) == 0)
+    if ((level < 3) && (((gameturn + thing) & ((1 << level) - 1)) == 0))
         return false;
     if (in_network_game || (pktrec_mode != PktR_NONE))
         return false;
@@ -2045,6 +2066,8 @@ static TbBool far_civilian_skip_turn(struct Thing *p_person, ThingIdx thing)
           PRCCOORD_TO_MAPCOORD(p_agent->Z), FAR_CIVILIAN_DIST))
             return false;
     }
+    if ((level == 3) && !map_coords_off_scanner(cor_x, cor_z))
+        return false;
     return true;
 }
 

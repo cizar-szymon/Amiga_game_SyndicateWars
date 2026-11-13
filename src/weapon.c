@@ -35,6 +35,7 @@
 #include "enginsngtxtr.h"
 #include "engintrns.h"
 #include "enginzoom.h"
+#include "enginsngobjs.h"
 
 #include "bigmap.h"
 #include "bmbang.h"
@@ -51,6 +52,8 @@
 #include "thing.h"
 #include "pepgroup.h"
 #include "player.h"
+#include "pathtrig.h"
+#include "people.h"
 #include "plyr_net.h"
 #include "research.h"
 #include "thing_search.h"
@@ -1560,7 +1563,8 @@ ThingIdx thing_fire_shot_finish_position_toward_target(struct M31 *prc_fin_pt,
     return 0;
 }
 
-int bul_path_end(int x1, int y1, int z1, int *x2, int *y2, int *z2,
+#ifdef SW_FNCHK
+static int bul_path_end_asm(int x1, int y1, int z1, int *x2, int *y2, int *z2,
   int radius, struct Thing *p_owner, ubyte *status)
 {
     int ret;
@@ -1587,6 +1591,184 @@ int bul_path_end(int x1, int y1, int z1, int *x2, int *y2, int *z2,
         : "=a" (ret)
         : "0" (x1), "d" (y1), "b" (z1), "c" (x2), "S" (stkargs)
         : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Finds a collision vector of the map tile crossed by the line
+ * (x1,z1)-(x2,z2).  Returns its ColVectList index, negated if the face is
+ * see-through (or an open door), or 0.  Remade from do_fvect_colide.
+ */
+static int do_fvect_colide(int x1, int z1, int x2, int z2, struct MyMapElement *p_mapel)
+{
+    ushort cvl;
+    int res;
+
+    res = 0;
+    for (cvl = p_mapel->ColHead; (cvl != 0) && (res == 0);
+      cvl = game_col_vects_list[cvl].NextColList & 0x7FFF)
+    {
+        struct ColVectList *p_cvlist;
+        struct ColVect *p_cvect;
+        TbBool pass;
+
+        p_cvlist = &game_col_vects_list[cvl];
+        if ((p_cvlist->NextColList & 0x8000) != 0)
+            continue;
+        if (p_cvlist->Object < 0)
+            continue;
+        p_cvect = &game_col_vects[p_cvlist->Vect];
+        pass = false;
+        if (p_cvect->Face < 0)
+        {
+            struct SingleObjectFace4 *p_face4;
+
+            p_face4 = &game_object_faces4[-p_cvect->Face];
+            if (((p_face4->GFlags & 0x10) != 0) && (p_face4->WalkHeader != 0))
+                pass = ((sthings[(short)p_face4->WalkHeader].Flag & 0x02) != 0);
+            else
+                pass = ((p_face4->GFlags & 0x04) != 0);
+        }
+        if (!two4_line_intersection(p_cvect->X1, p_cvect->Z1, p_cvect->X2, p_cvect->Z2,
+          x1, z1, x2, z2))
+            continue;
+        res = pass ? -(int)cvl : (int)cvl;
+    }
+    return res;
+}
+
+/** Follows a bullet from (x1,y1,z1) towards (x2,y2,z2) in steps of about
+ * 128 units; on return (x2,y2,z2) is where it stopped.  Returns the index
+ * of a person hit (a static simple thing: negated, | 0x40000000), a
+ * negated collision vector, -1 for a hit on a column/wall, or 0.
+ * status: 3 thing hit, 1 vector hit, 2 column hit.
+ * Remade from bul_path_end.
+ */
+static int bul_path_end_c(int x1, int y1, int z1, int *x2, int *y2, int *z2,
+  int radius, struct Thing *p_owner, ubyte *status)
+{
+    int orig_x, orig_y, orig_z;
+    short dx, dy, dz;
+    int steps, cnt;
+    int colided;
+    u32 colided_cnt;
+    u32 dist2;
+
+    colided = 0;
+    colided_cnt = 0;
+    dx = (short)(*x2 - x1);
+    dy = (short)(*y2 - y1);
+    dz = (short)(*z2 - z1);
+    orig_x = *x2;
+    orig_y = *y2;
+    orig_z = *z2;
+    dist2 = (u32)((int)dx * dx) + (u32)((int)dz * dz) + ((u32)((int)dy * dy) << 7);
+    steps = LbSqrL(dist2);
+    steps = steps / 128;
+    if (steps == 0)
+        steps = 1;
+    dx = (short)(dx / steps);
+    dy = (short)(dy / steps);
+    dz = (short)(dz / steps);
+    *x2 = x1;
+    *y2 = y1;
+    *z2 = z1;
+
+    for (cnt = steps + 1; cnt > 0; cnt--)
+    {
+        struct Thing *p_hit;
+        struct MyMapElement *p_mapel;
+        int alt;
+
+        if (colided != 0)
+        {
+            colided_cnt--;
+            if (colided_cnt == 0)
+                return -1;
+        }
+        // the original tests x twice and not the upper limit of z
+        if ((*x2 < 0) || (*x2 > 0x8000) || (*z2 < 0) || (*x2 > 0x8000))
+        {
+            *x2 -= dx;
+            *y2 -= dy;
+            *z2 -= dz;
+            return 0;
+        }
+        p_hit = check_for_radius_hit_person(*x2 << 8, *y2 << 8, *z2 << 8,
+          (ushort)radius, p_owner, 1, 0);
+        if (p_hit != NULL)
+        {
+            *status = 3;
+            if (p_hit->Type == SmTT_STATIC)
+                return (-(int)p_hit->ThingOffset) | 0x40000000;
+            return (ushort)p_hit->ThingOffset;
+        }
+        p_mapel = &game_my_big_map[(*z2 >> 8) * MAP_TILE_WIDTH + (*x2 >> 8)];
+        alt = p_mapel->Alt;
+        if ((alt < *y2) && (alt + 32 > *y2))
+        {
+            if (p_mapel->ColHead != 0)
+            {
+                colided = do_fvect_colide(x1, z1, orig_x, orig_z, p_mapel);
+                if (colided > 0)
+                {
+                    *status = 1;
+                    return -colided;
+                }
+            }
+        }
+        else if (colided == 0)
+        {
+            colided = check_col_collision(*x2, *y2, *z2);
+            if (colided != 0)
+            {
+                *status = 2;
+                return -1;
+            }
+        }
+        *x2 += dx;
+        *y2 += dy;
+        *z2 += dz;
+        if (((*x2 >> 8) < 0) || ((*x2 >> 8) >= MAP_TILE_WIDTH))
+            return 0;
+        if (((*z2 >> 8) < 0) || ((*z2 >> 8) >= MAP_TILE_HEIGHT))
+            return 0;
+    }
+    *x2 = orig_x;
+    *y2 = orig_y;
+    *z2 = orig_z;
+    return 0;
+}
+
+int bul_path_end(int x1, int y1, int z1, int *x2, int *y2, int *z2,
+  int radius, struct Thing *p_owner, ubyte *status)
+{
+    int ret;
+#ifdef SW_FNCHK
+    // the end point and status are usually the caller's locals on the stack,
+    // which the check does not restore: the asm version works on copies, and
+    // a difference in them shows as a difference of the results
+    if (fnchk_begin("bul_path_end"))
+    {
+        int ax, ay, az;
+        ubyte ast;
+        long ra;
+
+        ax = *x2; ay = *y2; az = *z2; ast = *status;
+        ra = bul_path_end_asm(x1, y1, z1, &ax, &ay, &az, radius, p_owner, &ast);
+        fnchk_mid();
+        ret = bul_path_end_c(x1, y1, z1, x2, y2, z2, radius, p_owner, status);
+        if ((ax != *x2) || (ay != *y2) || (az != *z2) || (ast != *status)) {
+            LOGERR("bul_path_end: end asm %d,%d,%d st %d, c %d,%d,%d st %d",
+              ax, ay, az, (int)ast, *x2, *y2, *z2, (int)*status);
+            fnchk_end("bul_path_end", ra, ra ^ 0x10000000);
+        } else {
+            fnchk_end("bul_path_end", ra, ret);
+        }
+        return ret;
+    }
+#endif
+    ret = bul_path_end_c(x1, y1, z1, x2, y2, z2, radius, p_owner, status);
     return ret;
 }
 

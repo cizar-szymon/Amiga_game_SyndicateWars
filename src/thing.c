@@ -1298,11 +1298,79 @@ void FIRE_finish_flame(struct SimpleThing *p_sthing, ThingIdx thing)
     delete_snode(p_sthing);
 }
 
-void process_spark(struct SimpleThing *p_sthing)
+#ifdef SW_FNCHK
+static void process_spark_asm(struct SimpleThing *p_sthing)
 {
     asm volatile (
       "call ASM_process_spark\n"
-        : : "a" (p_sthing));
+        : : "a" (p_sthing) : "cc", "memory");
+}
+#endif
+
+/** Move a simple thing to new coordinates; if the map tile changes, move
+ * it to the head of the `mapwho` list of the new tile.  Tiles outside the
+ * map are wrapped to 0..127.  Remade from move_smapwho.
+ */
+static void move_smapwho_c(struct SimpleThing *p_sthing, int *x, int y, int *z)
+{
+    if (((*x >> 16) >= MAP_TILE_WIDTH) || ((*z >> 16) >= MAP_TILE_HEIGHT) ||
+      ((*x >> 16) < 0) || ((*z >> 16) < 0))
+    {
+        *x = (*x & 0xFFFF) | (((*x >> 16) & 0x7F) << 16);
+        *z = (*z & 0xFFFF) | (((*z >> 16) & 0x7F) << 16);
+    }
+    if (((short)(*x >> 16) != (short)(p_sthing->X >> 16)) ||
+      ((short)(*z >> 16) != (short)(p_sthing->Z >> 16)))
+    {
+        ushort tile;
+        ThingIdx head;
+
+        delete_snode(p_sthing);
+        tile = (ushort)(((*z >> 16) << 7) + (*x >> 16));
+        head = game_my_big_map[tile].Child;
+        p_sthing->Next = head;
+        if (head > 0)
+            things[head].Parent = p_sthing->ThingOffset;
+        else if (head < 0)
+            sthings[head].Parent = p_sthing->ThingOffset;
+        p_sthing->Parent = 0;
+        game_my_big_map[tile].Child = p_sthing->ThingOffset;
+    }
+    p_sthing->X = *x;
+    p_sthing->Z = *z;
+    p_sthing->Y = y;
+}
+
+/** A spark flies on, falling, until its timer ends or it goes into the
+ * ground.  Remade from process_spark.
+ */
+static void process_spark_c(struct SimpleThing *p_sthing)
+{
+    short timer;
+    int x, y, z;
+
+    timer = p_sthing->Timer1;
+    p_sthing->Timer1 = timer - 1;
+    if ((timer == 0) ||
+      (alt_at_point((short)(p_sthing->X >> 8), (short)(p_sthing->Z >> 8)) > p_sthing->Y))
+    {
+        remove_sthing((short)(p_sthing - sthings));
+        delete_snode(p_sthing);
+        return;
+    }
+    x = p_sthing->X + p_sthing->U.UEffect.VX;
+    z = p_sthing->Z + p_sthing->U.UEffect.VZ;
+    y = p_sthing->Y + p_sthing->U.UEffect.VY;
+    p_sthing->U.UEffect.OX = (short)(p_sthing->X >> 8);
+    p_sthing->U.UEffect.OY = (short)(p_sthing->Y >> 8);
+    p_sthing->U.UEffect.VY -= 32;
+    p_sthing->U.UEffect.OZ = (short)(p_sthing->Z >> 8);
+    move_smapwho_c(p_sthing, &x, y, &z);
+}
+
+void process_spark(struct SimpleThing *p_sthing)
+{
+    FNCHK_VOID("process_spark", process_spark_asm(p_sthing), process_spark_c(p_sthing));
 }
 
 void process_intelligent_door(struct SimpleThing *p_sthing)

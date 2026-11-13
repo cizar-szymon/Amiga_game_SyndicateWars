@@ -1371,15 +1371,66 @@ void set_person_animmode_walk(struct Thing *p_person)
     p_person->Speed = calc_person_speed(p_person);
 }
 
-int check_col_collision_floor(int cor_x, int cor_y, int cor_z)
+#ifdef SW_FNCHK
+static int check_col_collision_floor_asm(int cor_x, int cor_y, int cor_z)
 {
     int ret;
     asm volatile ("call ASM_check_col_collision_floor\n"
-        : "=r" (ret) : "a" (cor_x), "d" (cor_y), "b" (cor_z));
+        : "=a" (ret) : "a" (cor_x), "d" (cor_y), "b" (cor_z) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Is the point below the ground (interpolated on the tile's two
+ * triangles)?  Returns -1 if so, else 0; 0 outside the map.
+ * Remade from check_col_collision_floor.
+ */
+static int check_col_collision_floor_c(int cor_x, int cor_y, int cor_z)
+{
+    struct MyMapElement *p_mapel;
+    int tile_x, tile_z;
+    int alt00, alt10, alt01, alt11, alt;
+    int fx, fz;
+
+    tile_x = cor_x >> 8;
+    tile_z = cor_z >> 8;
+    if ((tile_x < 0) || (tile_x >= MAP_TILE_WIDTH))
+        return 0;
+    if ((tile_z < 0) || (tile_z >= MAP_TILE_HEIGHT))
+        return 0;
+    p_mapel = &game_my_big_map[tile_z * MAP_TILE_WIDTH + tile_x];
+    alt00 = p_mapel[0].Alt;
+    alt10 = p_mapel[1].Alt;
+    alt01 = p_mapel[MAP_TILE_WIDTH].Alt;
+    alt11 = p_mapel[MAP_TILE_WIDTH + 1].Alt;
+    if ((alt00 == alt10) && (alt00 == alt01) && (alt01 == alt11))
+    {
+        alt = alt10;
+    }
+    else
+    {
+        fx = cor_x & 0xFF;
+        fz = cor_z & 0xFF;
+        if (fx + fz < 256)
+            alt = alt00 + (((alt10 - alt00) * fx) >> 8) + (((alt01 - alt00) * fz) >> 8);
+        else
+            alt = alt11 + (((256 - fx) * (alt01 - alt11)) >> 8) + (((256 - fz) * (alt10 - alt11)) >> 8);
+    }
+    if (alt > cor_y)
+        return -1;
+    return 0;
+}
+
+int check_col_collision_floor(int cor_x, int cor_y, int cor_z)
+{
+    int ret;
+    FNCHK_RET("check_col_collision_floor", ret, check_col_collision_floor_asm(cor_x, cor_y, cor_z),
+      check_col_collision_floor_c(cor_x, cor_y, cor_z));
     return ret;
 }
 
-short do_vect_colide(struct MyMapElement *p_me, int x1, int y1, int z1, int x2, int y2, int z2)
+#ifdef SW_FNCHK
+static short do_vect_colide_asm(struct MyMapElement *p_me, int x1, int y1, int z1, int x2, int y2, int z2)
 {
     short ret;
     // Pushed through a register holding them: a "g" operand may be placed
@@ -1395,9 +1446,67 @@ short do_vect_colide(struct MyMapElement *p_me, int x1, int y1, int z1, int x2, 
       "push 4(%5)\n"
       "push 0(%5)\n"
       "call ASM_do_vect_colide\n"
-        : "=r" (ret)
+        : "=a" (ret)
         : "a" (p_me), "d" (x1), "b" (y1), "c" (z1), "S" (stkargs)
         : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Finds a collision vector of the map tile crossed by the line
+ * (x1,z1)-(x2,z2) at height y1 (within 160 of the vector's height).
+ * Returns the ColVectList index, or 0.  Remade from do_vect_colide;
+ * y2 and z2's height are not used.
+ */
+static short do_vect_colide_c(struct MyMapElement *p_me, int x1, int y1, int z1, int x2, int y2, int z2)
+{
+    ushort cvl;
+    ushort n;
+    short y8;
+
+    cvl = p_me->ColHead;
+    if (cvl == 0)
+        return 0;
+    y8 = (short)(y1 << 3);
+    for (n = 0; n < 30; )
+    {
+        struct ColVectList *p_cvlist;
+        struct ColVect *p_cvect;
+
+        p_cvlist = &game_col_vects_list[cvl];
+        n++;
+        if (p_cvlist->Object >= 0)
+        {
+            short face, dy;
+
+            p_cvect = &game_col_vects[p_cvlist->Vect];
+            face = p_cvect->Face;
+            if ((face < 0) && ((game_object_faces4[-face].GFlags & 0x04) != 0))
+                goto next;
+            // the original indexes the triangles with the negated index
+            // here too, before the start of the array
+            if ((face > 0) && ((game_object_faces3[-(int)face].GFlags & 0x04) != 0))
+                goto next;
+            dy = (short)(y8 - p_cvect->Y1);
+            if ((dy < 0 ? -dy : dy) >= 160)
+                goto next;
+            if (two4_line_intersection(p_cvect->X1, p_cvect->Z1, p_cvect->X2, p_cvect->Z2,
+              x1, z1, x2, z2))
+                return (short)cvl;
+        }
+    next:
+        cvl = game_col_vects_list[cvl].NextColList & 0x7FFF;
+        if (cvl == 0)
+            break;
+    }
+    return 0;
+}
+
+short do_vect_colide(struct MyMapElement *p_me, int x1, int y1, int z1, int x2, int y2, int z2)
+{
+    short ret;
+    FNCHK_RET("do_vect_colide", ret, do_vect_colide_asm(p_me, x1, y1, z1, x2, y2, z2),
+      do_vect_colide_c(p_me, x1, y1, z1, x2, y2, z2));
     return ret;
 }
 
@@ -4213,12 +4322,86 @@ uint find_and_alert_guardian(struct Thing *p_person, struct Thing *p_attacker)
     return ret;
 }
 
-void init_recoil(struct Thing *p_person, short vx, short vy, short vz, ushort type)
+#ifdef SW_FNCHK
+static void init_recoil_asm(struct Thing *p_person, short vx, short vy, short vz, ushort type)
 {
     asm volatile (
       "push %4\n"
       "call ASM_init_recoil\n"
-        :  : "a" (p_person), "d" (vx), "b" (vy), "c" (vz), "g" ((u32)type));
+        :  : "a" (p_person), "d" (vx), "b" (vy), "c" (vz), "g" ((u32)type) : "cc", "memory");
+}
+#endif
+
+/** Animation frames of a person for its current AnimMode and Angle. */
+static void person_set_anim_frames(struct Thing *p_person)
+{
+    ushort base;
+
+    base = people_frames[p_person->SubType][p_person->U.UPerson.AnimMode];
+    p_person->Frame = nstart_ani[base + p_person->U.UPerson.Angle];
+    p_person->StartFrame = base - 1;
+}
+
+/** A person hit by a shot from direction (vx, vz) staggers back, unless
+ * its shield takes it.  Remade from init_recoil; vy is not used.
+ */
+static void init_recoil_c(struct Thing *p_person, short vx, short vy, short vz, ushort type)
+{
+    ushort ang;
+    ubyte angle8;
+
+    if ((ushort)p_person->State == PerSt_PERSON_BURNING)
+        return;
+    if (p_person->SubType == SubTT_PERS_MECH_SPIDER)
+        return;
+    if (p_person->U.UPerson.RecoilTimer != 0)
+        return;
+    if ((p_person->Flag & TngF_Unkn0001) != 0)
+    {
+        p_person->Flag &= ~TngF_Unkn0001;
+        p_person->U.UPerson.AnimMode = p_person->U.UPerson.OldAnimMode;
+        p_person->State = PerSt_NONE;
+        person_set_anim_frames(p_person);
+    }
+    ang = (ushort)arctan(vx, -vz);
+    angle8 = ((ang + 0x400) & 0x7FF) >> 8;
+    if (((p_person->U.UPerson.WeaponsCarried & 0x400000) != 0) &&
+      (p_person->U.UPerson.ShieldEnergy > 0))
+    {
+        p_person->Flag |= TngF_Unkn00200000;
+        play_dist_sample(p_person, 0x1E, 0x7F, 0x40, 100, 0, 3);
+        return;
+    }
+    if ((p_person->Flag & TngF_WepRecoil) != 0)
+        return;
+    p_person->U.UPerson.RecoilDir = (ubyte)(ang >> 3);
+    switch (type)
+    {
+    case 1:
+        p_person->U.UPerson.RecoilTimer = 3;
+        break;
+    case 7:
+        p_person->U.UPerson.RecoilTimer = 4;
+        break;
+    case 8:
+        p_person->U.UPerson.RecoilTimer = 7;
+        break;
+    default:
+        p_person->U.UPerson.RecoilTimer = 5;
+        break;
+    }
+    p_person->U.UPerson.Angle = angle8;
+    if (p_person->U.UPerson.AnimMode != ANIM_PERS_PUSH_BACK)
+        p_person->U.UPerson.OldAnimMode = p_person->U.UPerson.AnimMode;
+    p_person->U.UPerson.AnimMode = ANIM_PERS_PUSH_BACK;
+    p_person->Flag |= TngF_WepRecoil;
+    person_set_anim_frames(p_person);
+}
+
+void init_recoil(struct Thing *p_person, short vx, short vy, short vz, ushort type)
+{
+    FNCHK_VOID("init_recoil", init_recoil_asm(p_person, vx, vy, vz, type),
+      init_recoil_c(p_person, vx, vy, vz, type));
 }
 
 void person_update_kill_stats(struct Thing *p_attacker, struct Thing *p_victim)
@@ -6327,10 +6510,39 @@ void person_intel(struct Thing *p_person)
         : : "a" (p_person));
 }
 
-void process_im_shoved(struct Thing *p_person)
+#ifdef SW_FNCHK
+static void process_im_shoved_asm(struct Thing *p_person)
 {
     asm volatile ("call ASM_process_im_shoved\n"
-        : : "a" (p_person));
+        : : "a" (p_person) : "cc", "memory");
+}
+#endif
+
+/** A shoved person slides in the direction of BumpMode (counted down to
+ * 0, or 0 at once when it hits something).  The own velocity is kept,
+ * only its low 16 bits (as the original).  Remade from process_im_shoved.
+ */
+static void process_im_shoved_c(struct Thing *p_person)
+{
+    short old_vx, old_vz;
+    ushort dir;
+
+    old_vx = (short)p_person->VX;
+    old_vz = (short)p_person->VZ;
+    dir = (p_person->U.UPerson.BumpMode + 7) & 7;
+    p_person->VX = angle_direction[dir].DiX >> 4;
+    p_person->VZ = angle_direction[dir].DiY >> 4;
+    if (person_move(p_person) != 0)
+        p_person->U.UPerson.BumpMode--;
+    else
+        p_person->U.UPerson.BumpMode = 0;
+    p_person->VX = old_vx;
+    p_person->VZ = old_vz;
+}
+
+void process_im_shoved(struct Thing *p_person)
+{
+    FNCHK_VOID("process_im_shoved", process_im_shoved_asm(p_person), process_im_shoved_c(p_person));
 }
 
 void try_and_kill_target(struct Thing *p_person)

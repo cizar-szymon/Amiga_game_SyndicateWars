@@ -114225,11 +114225,11 @@ data_1c84f8:
 		.fill   0x40
 data_1c8538:
 		.short  0x0
-VNAV_nearnodes:	/* 0x1C853A */
+GLOBAL (VNAV_nearnodes)	/* 0x1C853A */
 		.fill   0x6
 data_1c8540:
 		.long	0x0
-VNAV_nodedists:	/* 0x1C8544 */
+GLOBAL (VNAV_nodedists)	/* 0x1C8544 */
 		.fill   0x14
 VNAV_route:	/* 0x1C8558 */
 		.short  0x0

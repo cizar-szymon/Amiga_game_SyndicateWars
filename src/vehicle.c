@@ -584,10 +584,309 @@ ushort veh_passenger_count(struct Thing *p_veh)
     return c;
 }
 
-void VNAV_unkn_func_207(struct Thing *p_thing)
+static void rotate_obj(short angle_a, short angle_b, short angle_c, struct M33 *p_mat);
+
+#ifdef SW_FNCHK
+static void VNAV_unkn_func_207_asm(struct Thing *p_thing)
 {
     asm volatile ("call ASM_VNAV_unkn_func_207\n"
-        : : "a" (p_thing));
+        : : "a" (p_thing) : "cc", "memory");
+}
+#endif
+
+/* scratch of the road navigation, in the asm data */
+extern short VNAV_nearnodes[5];
+extern s32 VNAV_nodedists[5];
+
+/** Size of a vehicle model: 170/256 of the largest |X| or |Z| of its
+ * points.  Remade from func_4225c.
+ */
+static int vehicle_object_radius(ushort object)
+{
+    struct SingleObject *p_obj;
+    ushort pt;
+    int m;
+
+    p_obj = &game_objects[object];
+    m = 0;
+    for (pt = p_obj->StartPoint; pt <= p_obj->EndPoint; pt++)
+    {
+        int v;
+
+        v = abs(game_object_points[pt].Z);
+        if (v > m)
+            m = v;
+        v = abs(game_object_points[pt].X);
+        if (v > m)
+            m = v;
+        if (pt == 0xFFFF)
+            break;
+    }
+    return (m * 170) >> 8;
+}
+
+/** The 5 traffic nodes nearest to the map point (not unused or flagged
+ * 0x0A00).  Remade from VNAV_find_nearnodes.
+ */
+static void VNAV_find_nearnodes(short x, short z)
+{
+    s32 worst;
+    int worst_i, i;
+    ushort node;
+
+    for (i = 0; i < 5; i++) {
+        VNAV_nearnodes[i] = 0;
+        VNAV_nodedists[i] = 0xFFFFFFF;
+    }
+    worst = 0xFFFFFFF;
+    worst_i = 0;
+    for (node = 1; node < next_traffic_node; node++)
+    {
+        struct TrafficNode *p_tnode;
+        s32 dx, dz, dist;
+
+        p_tnode = &game_traffic_nodes[node];
+        if (p_tnode->Flags == 0xFF)
+            continue;
+        if ((p_tnode->Flags & 0x0A00) != 0)
+            continue;
+        dx = x - p_tnode->X;
+        dz = z - p_tnode->Z;
+        dist = dx * dx + dz * dz;
+        if (dist >= worst)
+            continue;
+        VNAV_nearnodes[worst_i] = node;
+        VNAV_nodedists[worst_i] = dist;
+        worst = VNAV_nodedists[0];
+        worst_i = 0;
+        for (i = 1; i < 5; i++) {
+            if (VNAV_nodedists[i] > worst) {
+                worst = VNAV_nodedists[i];
+                worst_i = i;
+            }
+        }
+    }
+}
+
+/** Octagonal distance: the longer coordinate plus half the shorter one. */
+static s32 vnav_oct_dist(s32 dx, s32 dz)
+{
+    s32 ax, az;
+
+    ax = abs(dx);
+    az = abs(dz);
+    if (ax > az)
+        return ax + (az >> 1);
+    return az + (ax >> 1);
+}
+
+/** Distance of the point P from the road segment A-B, and where along it
+ * (0..0xFF, in 1/256).  Remade from VNAV_qwertyuiop.
+ */
+static void VNAV_qwertyuiop(s32 *p_dist, s32 *p_frac, s32 ax, s32 az, s32 bx, s32 bz,
+  s32 px, s32 pz)
+{
+    s32 abx, abz, apx, apz, dot1;
+    s32 bax, baz, bpx, bpz, dot2;
+    s32 cross, sa, ss, seglen;
+
+    abx = bx - ax;
+    abz = bz - az;
+    apx = px - ax;
+    apz = pz - az;
+    dot1 = apx * abx + apz * abz;
+    if (dot1 <= 0)
+    {
+        *p_frac = 0;
+        *p_dist = vnav_oct_dist(apx, apz);
+        return;
+    }
+    bax = ax - bx;
+    baz = az - bz;
+    bpx = px - bx;
+    bpz = pz - bz;
+    dot2 = bpx * bax + baz * bpz;
+    if (dot2 <= 0)
+    {
+        *p_frac = 0xFF;
+        *p_dist = vnav_oct_dist(bpx, bpz);
+        return;
+    }
+    cross = apx * abz - apz * abx;
+    sa = abs(abx);
+    ss = abs(abz);
+    if (sa > ss)
+        seglen = sa + (ss >> 1);
+    else
+        seglen = ss + (sa >> 1);
+    *p_dist = abs(cross) / seglen;
+    *p_frac = abs(dot1) / ((sa * sa + ss * ss) >> 8);
+}
+
+/** The road segment (from one of the 5 nearest nodes along one of its
+ * links into a traffic node) nearest to the map point.
+ * Remade from VNAV_find_start_dropoff_point.
+ */
+static void VNAV_find_start_dropoff_point(short *p_node, ubyte *p_link, s32 *p_frac,
+  short x, short z)
+{
+    s32 best;
+    int i, k;
+
+    if (VNAV_nearnodes[0] == 0)
+        return;
+    best = 0xFFFFFFF;
+    *p_node = 9999;
+    for (i = 0; i < 5; i++)
+    {
+        struct TrafficNode *p_tnode;
+        s32 nx, nz;
+
+        p_tnode = &game_traffic_nodes[VNAV_nearnodes[i]];
+        nx = p_tnode->X;
+        nz = p_tnode->Z;
+        for (k = 0; k < 4; k++)
+        {
+            struct TrafficNode *p_tnode2;
+            short link;
+            s32 dist, frac;
+
+            link = p_tnode->UTraffic.Link[k];
+            if (link >= 0)
+                continue;
+            if ((p_tnode->UTraffic.Flags[k] & 0x40) != 0)
+                continue;
+            p_tnode2 = &game_traffic_nodes[-link];
+            VNAV_qwertyuiop(&dist, &frac, nx, nz, p_tnode2->X, p_tnode2->Z, x, z);
+            if (dist >= best)
+                continue;
+            *p_node = VNAV_nearnodes[i];
+            *p_link = k;
+            *p_frac = frac;
+            best = dist;
+        }
+    }
+}
+
+/** Health of a vehicle from its size and armour. */
+static void vehicle_init_size_health(struct Thing *p_vehicle)
+{
+    int health;
+
+    p_vehicle->Radius = vehicle_object_radius(p_vehicle->U.UVehicle.Object);
+    health = p_vehicle->Radius * 5 * p_vehicle->U.UVehicle.Armour;
+    if (health > 32000)
+        p_vehicle->Health = 32000;
+    else
+        p_vehicle->Health = (short)((short)(p_vehicle->Radius * 5) * p_vehicle->U.UVehicle.Armour);
+}
+
+/** Vehicle state on level load: size, health, and a ground vehicle is put
+ * on the nearest road segment.  Remade from VNAV_unkn_func_207.
+ */
+static void VNAV_unkn_func_207_c(struct Thing *p_vehicle)
+{
+    struct TngUVehicle *p_veh;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    switch (p_vehicle->SubType)
+    {
+    case 0x33:
+    case 0x36:
+    case SubTT_VEH_FLYING:
+        p_vehicle->Speed = 0;
+        if (p_vehicle->SubType == 0x33)
+            p_vehicle->State = 0x21;
+        if (p_vehicle->SubType == 0x36)
+            p_veh->LeisurePlace = 0;
+        vehicle_init_size_health(p_vehicle);
+        p_vehicle->Speed = 0;
+        p_veh->PathIndex = 0;
+        p_vehicle->PathOffset = 0;
+        p_veh->WorkPlace = 0;
+        p_veh->AngleDY = 0;
+        p_veh->MaxSpeed = 0;
+        p_veh->MaxHealth = p_vehicle->Health;
+        p_veh->ZebraOldHealth = p_vehicle->Health;
+        return;
+    case 0x3B:
+        p_vehicle->Radius = 300;
+        p_vehicle->Health = 25000;
+        p_vehicle->Speed = 0;
+        p_veh->PathIndex = 0;
+        p_vehicle->PathOffset = 0;
+        p_veh->WorkPlace = 0;
+        p_veh->AngleDY = 0;
+        p_veh->MaxSpeed = 0;
+        p_veh->MaxHealth = p_vehicle->Health;
+        p_veh->ZebraOldHealth = p_vehicle->Health;
+        return;
+    default:
+        break;
+    }
+
+    {
+        short node;
+        ubyte link;
+        s32 frac;
+        short x, z;
+        short tnode;
+
+        p_veh->MaxSpeed = 0;
+        p_veh->PathIndex = 0;
+        p_vehicle->PathOffset = 0;
+        p_vehicle->Speed = 0;
+        p_veh->WorkPlace = 0;
+        p_veh->AngleDY = 0;
+        p_veh->AccelZ = 0;
+        p_veh->AccelX = 0;
+        p_veh->ZebraOldHealth = p_vehicle->Health;
+        x = (short)(p_vehicle->X >> 8);
+        z = (short)(p_vehicle->Z >> 8);
+        VNAV_find_nearnodes(x, z);
+        // left as they were when no node is found, as in the original
+        node = 0;
+        link = 0;
+        frac = 0;
+        VNAV_find_start_dropoff_point(&node, &link, &frac, x, z);
+        p_veh->Dummy4b = -node;
+        p_veh->Dummy4a = (p_veh->Dummy4a & ~0xFF) | ((p_veh->Dummy4a & 0x3F) | (link << 6));
+        tnode = game_traffic_nodes[node].UTraffic.Link[link];
+        p_veh->TNode = tnode;
+        if ((tnode < 0) && ((game_traffic_nodes[-tnode].Flags & 0x0800) != 0))
+        {
+            struct TrafficNode *p_tn1, *p_tn2;
+            s32 nx, nz;
+            ThingIdx old_offs;
+
+            p_veh->Dummy4a = (p_veh->Dummy4a & ~0xFF) | ((p_veh->Dummy4a & 0xC0) | 0x13);
+            p_vehicle->State = 0x3D;
+            p_tn1 = &game_traffic_nodes[node];
+            p_tn2 = &game_traffic_nodes[-tnode];
+            nx = (((p_tn2->X - p_tn1->X) * frac) >> 8) + p_tn1->X;
+            nz = (((p_tn2->Z - p_tn1->Z) * frac) >> 8) + p_tn1->Z;
+            old_offs = p_vehicle->ThingOffset;
+            p_vehicle->ThingOffset = (short)(p_vehicle - things);
+            move_mapwho(p_vehicle, nx << 8, p_vehicle->Y, nz << 8);
+            p_vehicle->ThingOffset = old_offs;
+            p_veh->AngleY = (ushort)arctan(p_tn2->X - (p_vehicle->X >> 8),
+              p_tn2->Z - (p_vehicle->Z >> 8));
+            rotate_obj(0, -p_veh->AngleY, 0, &local_mats[p_veh->MatrixIndex]);
+        }
+        else
+        {
+            p_vehicle->State = 0x21;
+            p_veh->Dummy4a &= ~0x3F;
+        }
+        vehicle_init_size_health(p_vehicle);
+        p_veh->EffectiveGroup = 99;
+        p_veh->MaxHealth = p_vehicle->Health;
+    }
+}
+
+void VNAV_unkn_func_207(struct Thing *p_thing)
+{
+    FNCHK_VOID("VNAV_unkn_func_207", VNAV_unkn_func_207_asm(p_thing), VNAV_unkn_func_207_c(p_thing));
 }
 
 int check_for_a_vehicle_here(int x, int z, struct Thing *p_vehicle)

@@ -48,6 +48,8 @@ s32 SCANNER_scr_y; /* src\scandraw.c, 4 bytes */
 TbPixel * SCANNER_screenptr; /* src\scandraw.c, 4 bytes */
 s32 SCANNER_unknarr_1DBB6C[512]; /* src\scandraw.c, 4 bytes */
 s32 * SCANNER_width; /* src\scanner.h, 4 bytes */
+short VNAV_nearnodes[5]; /* src\vehicle.c, 6 bytes */
+s32 VNAV_nodedists[5]; /* src\vehicle.c, 20 bytes */
 s32 bangdetail[21]; /* src\game.c, 84 bytes */
 int bat_unknvalA_max; /* src\bat.c, 4 bytes */
 int bat_unknvalA_min; /* src\bat.c, 4 bytes */

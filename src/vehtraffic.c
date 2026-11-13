@@ -68,12 +68,182 @@ void tnode_all_unlink_thing(ThingIdx thing)
     }
 }
 
+#ifdef SW_FNCHK
+static short get_next_tnode_asm(struct Thing *p_vehicle, struct TrafficNode *p_tnode)
+{
+    int ret;
+    asm volatile (
+      "call ASM_get_next_tnode\n"
+        : "=a" (ret) : "a" (p_vehicle), "d" (p_tnode) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Does a link lead somewhere a vehicle can go on: to a station, or to a
+ * traffic node with a link not marked 0x80 - itself or, if all are marked,
+ * via its last link.  Remade from good_node.
+ */
+static TbBool good_node(short link)
+{
+    struct TrafficNode *p_tnode;
+    int k, last;
+    short link2;
+
+    if (link > 0)
+        return true;
+    p_tnode = &game_traffic_nodes[-link];
+    last = -1;
+    for (k = 0; k < 4; k++)
+    {
+        if (p_tnode->UTraffic.Link[k] == 0)
+            continue;
+        if ((p_tnode->UTraffic.Flags[k] & 0x80) == 0)
+            return true;
+        last = k;
+    }
+    if (last < 0)
+        return false;
+    link2 = p_tnode->UTraffic.Link[last];
+    if (link2 > 0)
+        return true;
+    p_tnode = &game_traffic_nodes[-link2];
+    for (k = 0; k < 4; k++)
+    {
+        if ((p_tnode->UTraffic.Link[k] != 0) && ((p_tnode->UTraffic.Flags[k] & 0x80) == 0))
+            return true;
+    }
+    return false;
+}
+
+/** The vehicle's turn history (LeisurePlace): shifted on each node, bit 1
+ * set for a turn into a marked link. */
+static void tnode_history_shift(struct Thing *p_vehicle, TbBool marked)
+{
+    p_vehicle->U.UVehicle.LeisurePlace = (ushort)((short)p_vehicle->U.UVehicle.LeisurePlace >> 1);
+    if (marked)
+        p_vehicle->U.UVehicle.LeisurePlace |= 0x02;
+}
+
+/** Is the link usable: not to a traffic node with flags 0x1800. */
+static TbBool tnode_link_open(short link)
+{
+    if (link >= 0)
+        return true;
+    return ((game_traffic_nodes[-link].Flags & 0x1800) == 0);
+}
+
+/** Chooses the link a vehicle on a traffic node leaves by: the only one,
+ * else a random one fitting the turn rules (up to 8 tries), else the first
+ * open one.  Remade from get_next_tnode.
+ */
+static short get_next_tnode_c(struct Thing *p_vehicle, struct TrafficNode *p_tnode)
+{
+    int k, n, last, tries;
+
+    n = 0;
+    last = 0;
+    for (k = 0; k < 4; k++)
+    {
+        if (p_tnode->UTraffic.Link[k] != 0) {
+            last = k;
+            n++;
+        }
+    }
+    if (n == 0)
+        return 0;
+    if (n == 1)
+    {
+        p_vehicle->U.UVehicle.WorkPlace |= 0x0004;
+        tnode_history_shift(p_vehicle, (p_tnode->UTraffic.Flags[last] & 0x80) != 0);
+        return last;
+    }
+    for (tries = 0; tries < 8; tries++)
+    {
+        short link;
+
+        k = LbRandomAnyShort() & 3;
+        link = p_tnode->UTraffic.Link[k];
+        if (link == 0)
+            continue;
+        if (!tnode_link_open(link))
+            continue;
+        if ((p_tnode->UTraffic.Flags[k] & 0x80) == 0)
+        {
+            tnode_history_shift(p_vehicle, false);
+            return k;
+        }
+        {
+            struct TrafficNode *p_tnode2;
+            short history;
+
+            // also when the link leads to a station - as the original
+            p_tnode2 = &game_traffic_nodes[-link];
+            if ((p_tnode2->Flags & 0x40) != 0)
+                continue;
+            history = (short)p_vehicle->U.UVehicle.LeisurePlace;
+            if (history == 2)
+            {
+                TbBool ok;
+
+                ok = false;
+                if (link > 0) {
+                    ok = true;
+                } else {
+                    int j;
+                    for (j = 0; j < 4; j++) {
+                        if ((p_tnode2->UTraffic.Link[j] != 0) &&
+                          ((p_tnode2->UTraffic.Flags[j] & 0x80) == 0)) {
+                            ok = true;
+                            break;
+                        }
+                    }
+                }
+                if (!ok)
+                    continue;
+            }
+            else if (history == 3)
+            {
+                continue;
+            }
+            else if (!good_node(link))
+            {
+                continue;
+            }
+            tnode_history_shift(p_vehicle, true);
+            return k;
+        }
+    }
+    for (k = 0; k < 4; k++)
+    {
+        short link = p_tnode->UTraffic.Link[k];
+        if ((link != 0) && ((p_tnode->UTraffic.Flags[k] & 0x80) == 0) && tnode_link_open(link)) {
+            tnode_history_shift(p_vehicle, false);
+            return k;
+        }
+    }
+    for (k = 0; k < 4; k++)
+    {
+        short link = p_tnode->UTraffic.Link[k];
+        if ((link != 0) && tnode_link_open(link)) {
+            tnode_history_shift(p_vehicle, true);
+            return k;
+        }
+    }
+    for (k = 0; k < 4; k++)
+    {
+        if (p_tnode->UTraffic.Link[k] != 0) {
+            tnode_history_shift(p_vehicle, (p_tnode->UTraffic.Flags[k] & 0x80) != 0);
+            return k;
+        }
+    }
+    return 0;
+}
+
 short get_next_tnode(struct Thing *p_vehicle, struct TrafficNode *p_tnode)
 {
     short ret;
-    asm volatile (
-      "call ASM_get_next_tnode\n"
-        : "=r" (ret) : "a" (p_vehicle), "d" (p_tnode));
+    FNCHK_RET("get_next_tnode", ret, get_next_tnode_asm(p_vehicle, p_tnode),
+      get_next_tnode_c(p_vehicle, p_tnode));
     return ret;
 }
 

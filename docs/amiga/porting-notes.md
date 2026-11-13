@@ -239,3 +239,25 @@ liczb < 2^31 obcięcie ilorazu `double` = iloraz całkowity), z wersją bez FPU.
   globalnego (`6ba54116`).
 - `tools/amiga/offsets.sh -size` nie działa (opcja tylko w opisie).
 - Amiga 1 po tych zmianach: 78,9 ms/turę (sloty), `things` 14,9 ms; zrzut poprawny.
+
+## 13.11.2026 — optymalizacja 68060 (Amiga 2) i zasada dla ARM
+
+**Zasada (decyzja użytkownika 13.11.2026): każde przyspieszenie robione dla 68060 ma też trafić do
+wersji ARM (Warp).** Zmiany we wspólnym kodzie C (renderer, symulacja) przechodzą do ARM same; to,
+co zależy od platformy (zmienne `ENV:`, asm 68k, profiler), trzeba dla ARM zrobić osobno.
+
+Pomiary: profiler próbkujący (`ENV:SyndWarsProf=3`, timer CIA-B) i próbnik adresów
+(`ENV:SyndWarsSample`, `tools/amiga/samples.py` z `func=NAZWA`). Misja 1, 320×200, 68060:
+
+| Zmiana | commit | 68060 | ARM |
+|---|---|---|---|
+| pomijanie obiektów w całości poza ekranem (`draw_object_faces`, `transform_shbox_outside`) | `3004417e` | `draw_things` 12,8 → 6,8 ms | wspólny C – jest; niezmierzone |
+| omijanie ludzi: puste kafelki bez wywołania (`check_for_other_people`) | `d94eb5a7` | symulacja −1,0 ms (misja 21 −1,7) | wspólny C – jest; niezmierzone |
+| bez cyklicznych wpisów do `error.log` w zwykłej grze | `98987063` | drobne szarpnięcia co 5 s | ARM pisze log osobno – do sprawdzenia |
+| opcja dalekich przechodniów (`SyndWarsCivLOD` 1/2) | `e80c891a` | symulacja 18,8 → 12,5 / 8,8 ms, 13,4 → 15,4 tury/s | **do zrobienia:** rdzeń ARM nie widzi `ENV:` (`amiga_getenv_int` to zaślepka) – przekazać wartość przez `swhost` |
+
+Sprawdzone, bez zysku (wycofane): przestawienie pętli pikseli `gpoly_lines_shaded_68k` pod 68060 –
+pętla jest ograniczona łańcuchem dodawań z przeniesieniem, nie pamięcią (odczyt tekstury −0,7 ms,
+zapis −1,2 ms, wszystkie piksele 8,4 ms przy 59 tys. pikseli na klatkę).
+
+Do zrobienia: radar co 2. klatkę (opcja), wszystkie opcje szybkości w menu gry, opcje dla ARM.

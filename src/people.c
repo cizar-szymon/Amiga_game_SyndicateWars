@@ -2706,16 +2706,51 @@ void set_xz_for_tri(struct SingleObjectFace3 *p_face, int *x, int *z)
 extern struct Path g_nav_data;
 extern struct Path g_fat_data;
 
-void set_xz_for_quad210(struct SingleObjectFace4 *p_face, int *x, int *z)
+/** A point inside the quad face near its corner `base`: the corner plus a
+ * quarter of the way to each of the corners `pa` and `pb`.  The original
+ * also computes a side test, which is not used. */
+static void set_xz_for_quad_corner(struct SingleObjectFace4 *p_face, int base, int pa, int pb,
+  int *x, int *z)
 {
-    asm volatile ("call ASM_set_xz_for_quad210\n"
-        : "+a" (p_face), "+d" (x), "+b" (z) : : "cc", "memory");
+    struct SingleObject *p_obj;
+    struct SinglePoint *p_ptb, *p_pta, *p_ptc;
+
+    p_obj = &game_objects[p_face->Object];
+    p_pta = &game_object_points[(ushort)p_face->PointNo[pa]];
+    p_ptb = &game_object_points[(ushort)p_face->PointNo[base]];
+    p_ptc = &game_object_points[(ushort)p_face->PointNo[pb]];
+    *x = p_obj->MapX + p_ptb->X + ((p_pta->X - p_ptb->X) >> 2) + ((p_ptc->X - p_ptb->X) >> 2);
+    *z = p_obj->MapZ + p_ptb->Z + ((p_pta->Z - p_ptb->Z) >> 2) + ((p_ptc->Z - p_ptb->Z) >> 2);
 }
 
+/** Remade from set_xz_for_quad210. */
+void set_xz_for_quad210(struct SingleObjectFace4 *p_face, int *x, int *z)
+{
+    set_xz_for_quad_corner(p_face, 3, 1, 2, x, z);
+}
+
+/** Remade from set_xz_for_quad_unkn03. */
 void set_xz_for_quad_unkn03(struct SingleObjectFace4 *p_face, int *x, int *z)
 {
-    asm volatile ("call ASM_set_xz_for_quad_unkn03\n"
-        : "+a" (p_face), "+d" (x), "+b" (z) : : "cc", "memory");
+    set_xz_for_quad_corner(p_face, 0, 1, 2, x, z);
+}
+
+/** Which half triangle of the quad face is the point (x,z) in.
+ * Remade from set_xz_for_quad123. */
+static short set_xz_for_quad123(struct SingleObjectFace4 *p_face, int x, int z)
+{
+    struct SingleObject *p_obj;
+    struct SinglePoint *p_pt1, *p_pt2;
+    s64 v;
+
+    p_obj = &game_objects[p_face->Object];
+    p_pt2 = &game_object_points[(ushort)p_face->PointNo[2]];
+    p_pt1 = &game_object_points[(ushort)p_face->PointNo[1]];
+    v = (s64)(p_pt2->X - p_pt1->X) * (z - (p_obj->MapZ + p_pt2->Z)) -
+      (s64)(p_pt2->Z - p_pt1->Z) * (x - (p_obj->MapX + p_pt2->X));
+    if (v > 0)
+        return p_face->UnknTringl1;
+    return p_face->UnknTringl2;
 }
 
 #ifdef SW_FNCHK
@@ -3071,10 +3106,68 @@ void build_navigate_path_to_face(struct Thing *p_thing, short face)
         : : "a" (p_thing), "d" (face));
 }
 
-void build_navigate_path_to_face_xz(struct Thing *p_thing, short face, int x, int z)
+#ifdef SW_FNCHK
+static void build_navigate_path_to_face_xz_asm(struct Thing *p_thing, short face, int x, int z)
 {
     asm volatile ("call ASM_build_navigate_path_to_face_xz\n"
-        : : "a" (p_thing), "d" (face), "b" (x), "c" (z));
+        : "+d" (face), "+b" (x), "+c" (z) : "a" (p_thing) : "cc", "memory");
+}
+#endif
+
+/** Finds a path for a thing to point (x,z) on an object face (a quad if
+ * face >= 0, a triangle -face otherwise) and gives it to the thing.
+ * Remade from build_navigate_path_to_face_xz.
+ */
+static void build_navigate_path_to_face_xz_c(struct Thing *p_thing, short face, int x, int z)
+{
+    s32 x8, z8;
+    short tri_beg, tri_end;
+
+    if ((p_thing->Flag & TngF_InVehicle) != 0)
+        return;
+    if (((p_thing->Flag & TngF_PlayerAgent) == 0) &&
+      ((p_thing->Flag2 & TgF2_Unkn00020000) != 0)) {
+        p_thing->Flag2 |= (TgF2_Unkn00020000 | TgF2_Unkn0040);
+        return;
+    }
+    p_thing->U.UPerson.LastDist = 32000;
+    if ((p_thing->Flag2 & TgF2_Unkn0008) == 0)
+        p_thing->U.UPerson.BumpCount = 0;
+    if (((p_thing->X >> 8) < 0) || ((p_thing->X >> 8) >= 0x8000) ||
+      ((p_thing->Z >> 8) < 0) || ((p_thing->Z >> 8) >= 0x8000)) {
+        p_thing->Flag2 |= (TgF2_Unkn00020000 | TgF2_Unkn0040);
+        return;
+    }
+    tri_beg = navigate_face_start(p_thing, &x8, &z8);
+    if (face < 0)
+        tri_end = game_object_faces3[-face].UnknTringl;
+    else
+        tri_end = set_xz_for_quad123(&game_object_faces4[face], x, z);
+    nav_stats__ThisTurn++;
+    tri_path_init8(tri_beg, tri_end, &g_nav_data, x8, z8, x << 8, z << 8, -2);
+    if (g_nav_data.PathLength == 0)
+    {
+        g_fat_data.ax8 = x8;
+        g_fat_data.ay8 = z8;
+        g_fat_data.bx8 = x << 8;
+        g_fat_data.by8 = z << 8;
+        g_fat_data.WayPoints[0].x8 = x << 8;
+        g_fat_data.WayPoints[0].y8 = z << 8;
+        g_fat_data.PathLength = 1;
+        use_nav_data(p_thing);
+        count_fnavs(0);
+        p_thing->Flag2 |= (TgF2_Unkn00020000 | TgF2_Unkn0040);
+        return;
+    }
+    fatter_than_nothing(&g_nav_data, &g_fat_data, 0x80);
+    use_nav_data(p_thing);
+    unkn_path_func_001(p_thing, 1);
+}
+
+void build_navigate_path_to_face_xz(struct Thing *p_thing, short face, int x, int z)
+{
+    FNCHK_VOID("build_navigate_path_to_face_xz", build_navigate_path_to_face_xz_asm(p_thing, face, x, z),
+      build_navigate_path_to_face_xz_c(p_thing, face, x, z));
 }
 
 /** Initialize drop item state.
@@ -3139,10 +3232,37 @@ void check_weapon(struct Thing *p_person, int range)
     FNCHK_VOID("check_weapon", check_weapon_asm(p_person, range), check_weapon_c(p_person, range));
 }
 
-void get_weapon_out(struct Thing *p_person)
+#ifdef SW_FNCHK
+static void get_weapon_out_asm(struct Thing *p_person)
 {
     asm volatile ("call ASM_get_weapon_out\n"
-        : : "a" (p_person));
+        : : "a" (p_person) : "cc", "memory");
+}
+#endif
+
+/** A person without a weapon in hand takes out the best one it has; the
+ * animation frame keeps its phase.  Remade from get_weapon_out.
+ */
+static void get_weapon_out_c(struct Thing *p_person)
+{
+    ushort base;
+
+    if (p_person->U.UPerson.CurrentWeapon != 0)
+        return;
+    choose_best_weapon_for_range(p_person, 0x500);
+    if (p_person->U.UPerson.CurrentWeapon == 0)
+        return;
+    base = people_frames[p_person->SubType][p_person->U.UPerson.AnimMode];
+    p_person->Frame -= nstart_ani[base + p_person->U.UPerson.Angle];
+    p_person->U.UPerson.AnimMode = gun_out_anim(p_person, 0);
+    base = people_frames[p_person->SubType][p_person->U.UPerson.AnimMode];
+    p_person->Frame += nstart_ani[base + p_person->U.UPerson.Angle];
+    p_person->StartFrame = base - 1;
+}
+
+void get_weapon_out(struct Thing *p_person)
+{
+    FNCHK_VOID("get_weapon_out", get_weapon_out_asm(p_person), get_weapon_out_c(p_person));
 }
 
 #define CMD_CONDITION_CONTINUE 0xFFFF
@@ -3553,10 +3673,215 @@ StateChRes person_init_protect_person(struct Thing *p_person, short targetng, Tb
     return StCh_ACCEPTED;
 }
 
-void person_init_get_item(struct Thing *p_person, short item, ushort plyr)
+/** Number of weapon types carried (the shield bit 0x400000 not counted). */
+static ushort person_weapons_count(struct Thing *p_person)
+{
+    u32 weapons;
+    ushort n;
+    int i;
+
+    n = 0;
+    weapons = p_person->U.UPerson.WeaponsCarried & ~0x400000;
+    for (i = 0; (weapons != 0) && (i < 32); i++, weapons >>= 1)
+    {
+        if ((weapons & 1) != 0)
+            n++;
+    }
+    return n;
+}
+
+/** Index of the FourPacks row of a consumable weapon type, or -1. */
+static int weapon_fourpack_row(ushort wtype)
+{
+    switch (wtype)
+    {
+    case 12: return 0;
+    case 13: return 1;
+    case 6:  return 2;
+    case 10: return 3;
+    case 11: return 4;
+    default: return -1;
+    }
+}
+
+/** Can the person not take a weapon of this type?  Nonzero when it has it
+ * already (or a full four-pack of it), or a player agent carries 6 types.
+ * Type 0x1F: nonzero if it has the brain mods.  Remade from do_i_have_weapon.
+ */
+static u32 do_i_have_weapon(struct Thing *p_person, ushort wtype)
+{
+    u32 bit;
+    ushort count, plagent, plyr;
+    int row;
+
+    if (wtype == 0)
+        return 0;
+    if (wtype == 0x1F)
+        return ((p_person->U.UPerson.UMod.Mods & 0xF000) != 0);
+    bit = 1u << ((wtype - 1) & 31);
+    if ((p_person->Flag & TngF_PlayerAgent) == 0)
+        return bit & p_person->U.UPerson.WeaponsCarried;
+    count = person_weapons_count(p_person);
+    plagent = p_person->U.UPerson.ComCur & 3;
+    plyr = (p_person->U.UPerson.ComCur & 0x1C) >> 2;
+    row = weapon_fourpack_row(wtype);
+    if (row >= 0)
+    {
+        if (players[plyr].FourPacks[row][plagent] == 4)
+            return 1;
+        if (((p_person->U.UPerson.WeaponsCarried & bit) == 0) && (count == 6))
+            return 1;
+        return 0;
+    }
+    if (count >= 6)
+        return 1;
+    return bit & p_person->U.UPerson.WeaponsCarried;
+}
+
+/** Sends a person to pick up the item (a simple thing).
+ * Remade from set_get_item.
+ */
+static void set_get_item(struct Thing *p_person, short item)
+{
+    struct SimpleThing *p_item;
+
+    p_person->State = PerSt_GET_ITEM;
+    p_item = &sthings[item];
+    p_person->U.UPerson.GotoX = p_item->X >> 8;
+    p_person->U.UPerson.ComTimer = -1;
+    p_person->SubState = 0;
+    p_person->U.UPerson.ComRange = 0;
+    p_person->GotoThingIndex = item;
+    p_person->U.UPerson.GotoZ = p_item->Z >> 8;
+    if (p_person->U.UPerson.PathIndex != 0)
+        remove_path(p_person);
+    p_person->U.UPerson.PathIndex = 0;
+    p_person->Flag2 &= ~(TgF2_Unkn00020000 | TgF2_Unkn0040);
+    if (p_item->U.UWeapon.OnFace == 0)
+        build_navigate_path(p_person, p_person->U.UPerson.GotoX, p_person->U.UPerson.GotoZ, 0);
+    else
+        build_navigate_path_to_face_xz(p_person, -p_item->U.UWeapon.OnFace,
+          p_person->U.UPerson.GotoX, p_person->U.UPerson.GotoZ);
+}
+
+/** A player agent which cannot take the item sends the nearest other
+ * protecting agent of the player who can.  Returns 1 if one was sent,
+ * 0 if the agent can take it itself (or another one goes there already),
+ * 0xFFFF if nobody can.  Remade from send_another_player_peep.
+ */
+static ushort send_another_player_peep(struct Thing *p_person, short item, ushort plyr)
+{
+    struct SimpleThing *p_item;
+    s32 best_dist;
+    ThingIdx best;
+    ushort wtype;
+    ushort plagent;
+
+    best_dist = 0x7FFFFFFF;
+    best = 0;
+    p_item = &sthings[item];
+    wtype = p_item->U.UWeapon.WeaponType;
+    if (wtype == 0)
+        return 0;
+    if (do_i_have_weapon(p_person, wtype) == 0)
+        return 0;
+    for (plagent = 0; plagent < playable_agents; plagent++)
+    {
+        struct Thing *p_agent;
+        s32 dx, dy, dz, dist;
+
+        p_agent = players[plyr].MyAgent[plagent];
+        if (p_agent == p_person)
+            continue;
+        if ((p_agent->GotoThingIndex == item) && ((ushort)p_agent->State == PerSt_GET_ITEM))
+            return 0;
+        if ((p_agent->U.UPerson.Vehicle == item) && ((ushort)p_agent->State == 7))
+            return 0;
+        if ((p_agent->Flag & TngF_Destroyed) != 0)
+            continue;
+        if ((ushort)p_agent->State != PerSt_PROTECT_PERSON)
+            continue;
+        if (person_weapons_count(p_agent) >= 6)
+            continue;
+        if (do_i_have_weapon(p_agent, wtype) != 0)
+            continue;
+        dx = (p_agent->X - p_item->X) >> 8;
+        dy = (p_agent->Y - p_item->Y) >> 8;
+        dz = (p_agent->Z - p_item->Z) >> 8;
+        dist = dx * dx + dy * dy + dz * dz;
+        if (dist < best_dist) {
+            best_dist = dist;
+            best = p_agent->ThingOffset;
+        }
+    }
+    if (best != 0)
+    {
+        struct Thing *p_agent;
+
+        p_agent = &things[best];
+        set_person_animmode_run(p_agent);
+        set_get_item(p_agent, item);
+        p_agent->Flag2 |= 0x10000000;
+        return 1;
+    }
+    return 0xFFFF;
+}
+
+#ifdef SW_FNCHK
+static void person_init_get_item_asm(struct Thing *p_person, short item, ushort plyr)
 {
     asm volatile ("call ASM_person_init_get_item\n"
-        : : "a" (p_person), "d" (item), "b" (plyr));
+        : : "a" (p_person), "d" (item), "b" (plyr) : "cc", "memory");
+}
+#endif
+
+/** A person (player agent) is told to pick up an item.
+ * Remade from person_init_get_item.
+ */
+static void person_init_get_item_c(struct Thing *p_person, short item, ushort plyr)
+{
+    struct SimpleThing *p_item;
+    ushort wtype;
+
+    p_item = &sthings[item];
+    if (send_another_player_peep(p_person, item, plyr) != 0)
+        return;
+    if ((p_person->Flag & (TngF_StationrSht | TngF_Destroyed)) != 0)
+        return;
+    wtype = p_item->U.UWeapon.WeaponType;
+    if (wtype != 0)
+    {
+        TbBool can_take;
+
+        can_take = (do_i_have_weapon(p_person, wtype) == 0);
+        if ((p_person->Flag & TngF_PlayerAgent) != 0)
+        {
+            int row;
+
+            row = weapon_fourpack_row(wtype);
+            // a four-pack weapon already carried can be taken while the
+            // pack is not full
+            if ((row >= 0) && !can_take)
+            {
+                ushort plagent;
+
+                plagent = p_person->U.UPerson.ComCur & 3;
+                if (((p_person->U.UPerson.WeaponsCarried & (1u << (wtype - 1))) != 0) &&
+                  (players[plyr].FourPacks[row][plagent] != 4))
+                    can_take = true;
+            }
+        }
+        if (!can_take)
+            return;
+    }
+    if (sthings[item].Type == SmTT_DROPPED_ITEM)
+        set_get_item(p_person, item);
+}
+
+void person_init_get_item(struct Thing *p_person, short item, ushort plyr)
+{
+    FNCHK_VOID("person_init_get_item", person_init_get_item_asm(p_person, item, plyr),
+      person_init_get_item_c(p_person, item, plyr));
 }
 
 void person_init_get_item_fast(struct Thing *p_person, short item, ushort plyr)
@@ -6187,15 +6512,75 @@ ubyte vector_in_way(struct Thing *p_thing, int dx, int dz)
     return ret;
 }
 
-ushort check_col_collision(int x, int y, int z)
+#ifdef SW_FNCHK
+static ushort check_col_collision_asm(int x, int y, int z)
 {
-#if 1
     ushort ret;
     asm volatile (
       "call ASM_check_col_collision\n"
-        : "=r" (ret) : "a" (x), "d" (y), "b" (z));
+        : "=a" (ret) : "a" (x), "d" (y), "b" (z) : "cc", "memory");
     return ret;
+}
 #endif
+
+/** Collision of a point with the ground or a building column of the tile
+ * (2 bits per height level in each quarter of the tile).  Returns 0xFFFF
+ * under the ground, else the column bits found (the low 16 bits only, as
+ * the original).  Remade from check_col_collision.
+ */
+static ushort check_col_collision_c(int x, int y, int z)
+{
+    struct MyMapElement *p_mapel;
+    int tile_x, tile_z;
+    int alt00, alt10, alt01, alt11, alt;
+    int fx, fz;
+    ushort col;
+    int quarter;
+    short level;
+
+    tile_x = x >> 8;
+    tile_z = z >> 8;
+    if ((tile_x < 0) || (tile_x >= MAP_TILE_WIDTH) || (tile_z < 0) || (tile_z >= MAP_TILE_HEIGHT))
+        return 0;
+    p_mapel = &game_my_big_map[(tile_z << 7) + tile_x];
+    alt00 = p_mapel[0].Alt;
+    alt10 = p_mapel[1].Alt;
+    alt01 = p_mapel[MAP_TILE_WIDTH].Alt;
+    alt11 = p_mapel[MAP_TILE_WIDTH + 1].Alt;
+    if ((alt00 == alt10) && (alt00 == alt01) && (alt01 == alt11))
+    {
+        alt = alt10;
+    }
+    else
+    {
+        fx = x & 0xFF;
+        fz = z & 0xFF;
+        if (fx + fz < 256)
+            alt = alt00 + (((alt10 - alt00) * fx) >> 8) + (((alt01 - alt00) * fz) >> 8);
+        else
+            alt = alt11 + (((256 - fx) * (alt01 - alt11)) >> 8) + (((256 - fz) * (alt10 - alt11)) >> 8);
+    }
+    if (alt > y)
+        return 0xFFFF;
+    col = p_mapel->ColumnHead & 0x0FFF;
+    if (col == 0)
+        return 0;
+    if ((x & 0xFF) > 0x7F)
+        quarter = ((z & 0xFF) > 0x7F) ? 2 : 1;
+    else
+        quarter = ((z & 0xFF) > 0x7F) ? 3 : 0;
+    level = (short)(((y << 3) - (p_mapel->Alt << 3)) >> 7);
+    if (level > 31)
+        return 0;
+    return (ushort)(game_col_columns[col].QBits[quarter] & (3u << (level & 31)));
+}
+
+ushort check_col_collision(int x, int y, int z)
+{
+    ushort ret;
+    FNCHK_RET("check_col_collision", ret, check_col_collision_asm(x, y, z),
+      check_col_collision_c(x, y, z));
+    return ret;
 }
 
 ThingIdx thing_collide_with_thing_when_moved_by(struct Thing *p_person, short sh_x, short sh_z)
@@ -8175,10 +8560,39 @@ void process_danger(struct Thing *p_person)
     FNCHK_VOID("process_danger", process_danger_asm(p_person), process_danger_c(p_person));
 }
 
-void peep_return_to_point(struct Thing *p_person)
+#ifdef SW_FNCHK
+static void peep_return_to_point_asm(struct Thing *p_person)
 {
     asm volatile ("call ASM_peep_return_to_point\n"
-        : : "a" (p_person));
+        : : "a" (p_person) : "cc", "memory");
+}
+#endif
+
+/** A person (not a player agent) goes back to its post, remembered in VY.
+ * Remade from peep_return_to_point.
+ */
+static void peep_return_to_point_c(struct Thing *p_person)
+{
+    p_person->Flag &= ~TngF_PersKeepPost;
+    if (p_person->U.UPerson.PathIndex != 0)
+        remove_path(p_person);
+    if ((p_person->Flag & TngF_PlayerAgent) != 0)
+        return;
+    p_person->State = PerSt_GOTO_POINT;
+    p_person->U.UPerson.ComTimer = -1;
+    p_person->SubState = 0;
+    p_person->U.UPerson.ComRange = 1;
+    p_person->Timer1 = 48;
+    p_person->StartTimer1 = 48;
+    p_person->Flag |= TngF_Unkn0040;
+    p_person->U.UPerson.GotoX = (ushort)(p_person->VY >> 16);
+    p_person->U.UPerson.GotoZ = (short)p_person->VY;
+}
+
+void peep_return_to_point(struct Thing *p_person)
+{
+    FNCHK_VOID("peep_return_to_point", peep_return_to_point_asm(p_person),
+      peep_return_to_point_c(p_person));
 }
 
 void person_kill_target2(struct Thing *p_person)
@@ -8599,10 +9013,52 @@ void person_drop_item(struct Thing *p_person)
         : : "a" (p_person));
 }
 
-void person_dieing(struct Thing *p_person)
+#ifdef SW_FNCHK
+static void person_dieing_asm(struct Thing *p_person)
 {
     asm volatile ("call ASM_person_dieing\n"
-        : : "a" (p_person));
+        : : "a" (p_person) : "cc", "memory");
+}
+#endif
+
+/** A dying person plays its death animation; at its last frame it is
+ * dead (and lies as a body).  Remade from person_dieing.
+ */
+static void person_dieing_c(struct Thing *p_person)
+{
+    ushort nxframe;
+
+    p_person->Radius = 40;
+    p_person->Timer1 -= fifties_per_gameturn;
+    if (p_person->Timer1 >= 0)
+        return;
+    p_person->Timer1 = p_person->StartTimer1;
+    nxframe = frame[(ushort)p_person->Frame].Next;
+    if ((frame[nxframe].Flags & 0x01) == 0) {
+        p_person->Frame = nxframe;
+        return;
+    }
+    p_person->State = PerSt_DEAD;
+    group_actions[p_person->U.UPerson.Group].Alive--;
+    group_actions[p_person->U.UPerson.Group].Dead++;
+    if ((p_person->Flag & TngF_Persuaded) != 0)
+        stop_being_persuaded(p_person);
+    p_person->U.UPerson.Timer2 = 50;
+    p_person->Flag &= ~TngF_Persuaded;
+    if (p_person->U.UPerson.AnimMode == ANIM_PERS_Unkn12)
+        p_person->Flag |= 0x02000000;
+    if (p_person->U.UPerson.AnimMode == ANIM_PERS_LAY_DOWN)
+    {
+        p_person->U.UPerson.AnimMode = ANIM_PERS_DEAD_BODY;
+        person_set_anim_frames(p_person);
+        p_person->U.UPerson.FrameId.Version[3] = 1;
+        p_person->U.UPerson.FrameId.Version[4] = 0;
+    }
+}
+
+void person_dieing(struct Thing *p_person)
+{
+    FNCHK_VOID("person_dieing", person_dieing_asm(p_person), person_dieing_c(p_person));
 }
 
 void person_dead(struct Thing *p_person)

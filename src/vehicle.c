@@ -1616,6 +1616,280 @@ void process_next_vnav_turn(struct Thing *p_vehicle)
       process_next_vnav_turn_c(p_vehicle));
 }
 
+void remove_locks(struct Thing *p_vehicle);
+
+/** Steps of a car leaving the roadside, from the last: AngleDY / 8,
+ * AngleX added, ReqdSpeed. The asm data table `unplace`, as constants (the
+ * Amiga build has the asm data as zeroed storage). */
+static const short vehicle_unplace_steps[19][3] = {
+    {  -5, 0,  200}, { -10, 0,  150}, { -20, 0,  100}, { -30, 0,   50},
+    { -40, 0,    0}, { -50, 0,    0}, { -60, 0,    0}, { -70, 0,  -50},
+    { -60, 0, -100}, { -50, 0, -150}, { -40, 0, -250}, { -30, 0, -300},
+    { -20, 0, -350}, { -10, 0, -400}, { -10, 0, -450}, {  -5, 0, -450},
+    {   0, 0, -500}, {   0, 0, -500}, {   0, 0, -500},
+};
+
+/** Octagonal distance of two points in map coords. */
+static s32 vnav_oct_dist_pts(s32 x1, s32 z1, s32 x2, s32 z2)
+{
+    s32 adx, adz;
+
+    adx = abs(x1 - x2);
+    adz = abs(z1 - z2);
+    if (adx > adz)
+        adz >>= 1;
+    else
+        adx >>= 1;
+    return adx + adz;
+}
+
+/** Is another car's front or back (its position moved along its heading
+ * by its size) close to the map point, on the 5x5 tiles round it.
+ * Remade from check_for_a_moving_vehicle_here. */
+static TbBool check_for_a_moving_vehicle_here(s32 cor_x, s32 cor_z, struct Thing *p_self)
+{
+    int tile_x, tile_z, tx, tz;
+
+    tile_x = cor_x >> 8;
+    tile_z = cor_z >> 8;
+    for (tx = tile_x - 2; tx <= tile_x + 2; tx++)
+    {
+        for (tz = tile_z - 2; tz <= tile_z + 2; tz++)
+        {
+            ThingIdx thing;
+
+            if ((tx < 0) || (tx > MAP_TILE_WIDTH - 1) || (tz < 0) || (tz > MAP_TILE_HEIGHT - 1))
+                continue;
+            thing = game_my_big_map[(tz << 7) + tx].Child;
+            while (thing != 0)
+            {
+                struct Thing *p_thing;
+                struct M33 *p_mat;
+                s32 rad, dfx, dfz, fx, fz, bx, bz;
+
+                if (thing < 0) {
+                    thing = sthings[thing].Next;
+                    continue;
+                }
+                p_thing = &things[thing];
+                thing = p_thing->Next;
+                if ((p_thing->Type != TT_VEHICLE) || (p_thing == p_self) || (p_thing->SubType != 0x28))
+                    continue;
+                rad = ((ushort)p_thing->Radius * 400) >> 9;
+                p_mat = &local_mats[p_thing->U.UVehicle.MatrixIndex];
+                dfx = (-p_mat->R[0][2] * 4 * rad) >> 8;
+                dfz = (-p_mat->R[2][2] * 4 * rad) >> 8;
+                fx = (p_thing->X + dfx) >> 8;
+                fz = (p_thing->Z + dfz) >> 8;
+                bx = (p_thing->X - dfx) >> 8;
+                bz = (p_thing->Z - dfz) >> 8;
+                if (vnav_oct_dist_pts(cor_x, cor_z, fx, fz) < rad)
+                    return true;
+                if (vnav_oct_dist_pts(cor_x, cor_z, bx, bz) < rad)
+                    return true;
+            }
+        }
+    }
+    return false;
+}
+
+#ifdef SW_FNCHK
+static void process_stopping_asm(struct Thing *p_vehicle)
+{
+    asm volatile ("call ASM_process_stopping\n"
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+
+static void process_unstopping_asm(struct Thing *p_vehicle)
+{
+    asm volatile ("call ASM_process_unstopping\n"
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+
+static void process_unplacing_asm(struct Thing *p_vehicle)
+{
+    asm volatile ("call ASM_process_unplacing\n"
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+#endif
+
+/** A car stopping at its drop-off point: steering to the kept angle, the
+ * tilt and sideways slide fading, then parked (state 0x21, or 0x3D at a
+ * roadside node).  Remade from process_stopping. */
+static void process_stopping_c(struct Thing *p_vehicle)
+{
+    struct TngUVehicle *p_veh;
+    s32 cnt, angle, ax, az, d;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    cnt = (ushort)p_veh->Dummy5a;
+    angle = p_veh->Dummy5b;
+    ax = p_veh->AccelX;
+    az = p_veh->AccelZ;
+    if (cnt > 10) {
+        p_veh->AngleZ = (0x11 - cnt) * 0x50;
+        ax += ax >> 1;
+        az += az >> 1;
+    } else {
+        p_veh->AngleZ = cnt * 0x28;
+        ax -= ax >> 2;
+        az -= az >> 2;
+    }
+    veh_set_d90(p_veh, ((ulong)ax << 16) | (ulong)(az & 0xFFFF));
+    d = p_veh->AngleY - angle;
+    if (d < -0x400)
+        d += 0x800;
+    else if (d > 0x400)
+        d -= 0x800;
+    if (d < 0) {
+        if (d > -50)
+            p_veh->AngleDY = -d * 2;
+        else
+            p_veh->AngleDY = (0x800 - (p_vehicle->Speed >> 3)) >> 2;
+    } else if (d > 0) {
+        if (d < 50)
+            p_veh->AngleDY = -(d * 2);
+        else
+            p_veh->AngleDY = -((0x800 - (p_vehicle->Speed >> 3)) >> 2);
+    }
+    p_veh->ReqdSpeed = 0;
+    if (cnt > 0)
+        cnt--;
+    p_veh->Dummy5a = cnt;
+    if ((p_vehicle->Speed == 0) && (cnt == 0) && (abs(p_veh->AngleDY) < 20))
+    {
+        if ((p_veh->TNode < 0) && ((game_traffic_nodes[-p_veh->TNode].Flags & 0x0800) != 0))
+            p_vehicle->State = 0x3D;
+        else
+            p_vehicle->State = 0x21;
+        p_vehicle->Flag |= 0x0004;
+        p_veh->WorkPlace &= ~0x0100;
+        remove_locks(p_vehicle);
+    }
+}
+
+/** A stopped car starting off again: waiting while another car is in front
+ * or behind, then the tilt and slide fading and speed growing; at the end
+ * it goes on to the kept map point.  Remade from process_unstopping. */
+static void process_unstopping_c(struct Thing *p_vehicle)
+{
+    struct TngUVehicle *p_veh;
+    s32 ax, az, step;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    ax = p_veh->AccelX;
+    az = p_veh->AccelZ;
+    step = p_veh->Dummy4a & 0x3F;
+    if (step == 10)
+    {
+        s32 cx, cz;
+
+        cx = (p_vehicle->X >> 8) - 8 * ax;
+        cz = (p_vehicle->Z >> 8) - 8 * az;
+        if (check_for_a_moving_vehicle_here(cx + 2 * az, cz - 2 * ax, p_vehicle)
+          || check_for_a_moving_vehicle_here(cx - 2 * az, cz + 2 * ax, p_vehicle))
+        {
+            p_veh->ReqdSpeed = 0;
+            p_veh->WorkPlace |= 0x0200;
+            return;
+        }
+    }
+    p_veh->WorkPlace &= ~0x0200;
+    if (step > 5) {
+        p_veh->AngleZ = (0xB - step) * -100;
+        ax += ax >> 1;
+        az += az >> 1;
+    } else {
+        p_veh->AngleZ = step * -100;
+        ax -= ax >> 2;
+        az -= az >> 2;
+    }
+    veh_set_d90(p_veh, ((ulong)ax << 16) | (ulong)(az & 0xFFFF));
+    p_veh->ReqdSpeed += 100;
+    if (step > 0)
+        step--;
+    veh_set_d88_low(p_veh, (ubyte)(p_veh->Dummy4a & 0xC0));
+    veh_set_d88(p_veh, veh_get_d88(p_veh) | (ulong)step);
+    if (step == 0)
+    {
+        p_vehicle->State = 0x32;
+        start_goto_vehicle(p_vehicle, p_veh->Dummy5b, p_veh->Dummy5a);
+    }
+}
+
+/** A car leaving its roadside place: first onto the road (its node's first
+ * link), then backing and turning by the steps of vehicle_unplace_steps;
+ * at the end it goes on to the kept map point.
+ * Remade from process_unplacing. */
+static void process_unplacing_c(struct Thing *p_vehicle)
+{
+    struct TngUVehicle *p_veh;
+    s32 step;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    step = p_veh->Dummy4a & 0x3F;
+    if (step == 0x14)
+    {
+        struct TrafficNode *p_tnode;
+        int k;
+
+        p_veh->Dummy4b = p_veh->TNode;
+        p_tnode = &game_traffic_nodes[-p_veh->TNode];
+        for (k = 0; k < 4; k++) {
+            if (p_tnode->UTraffic.Link[k] != 0) {
+                p_veh->TNode = p_tnode->UTraffic.Link[k];
+                break;
+            }
+        }
+        step = 0x13;
+    }
+    if (step <= 0x12)
+    {
+        const short *p_step;
+
+        p_step = vehicle_unplace_steps[step];
+        p_veh->ReqdSpeed = p_step[2];
+        p_veh->AngleDY = p_step[0] << 3;
+        p_veh->AngleX += p_step[1];
+        if (step > 0)
+            step--;
+        if (step == 0)
+        {
+            p_vehicle->State = 0x32;
+            start_goto_vehicle(p_vehicle, p_veh->Dummy5b, p_veh->Dummy5a);
+        }
+    }
+    else
+    {
+        struct TrafficNode *p_tnode;
+        s32 dx, dz;
+
+        p_veh->ReqdSpeed = -600;
+        p_tnode = &game_traffic_nodes[-p_veh->TNode];
+        dx = (p_vehicle->X >> 8) - p_tnode->X;
+        dz = (p_vehicle->Z >> 8) - p_tnode->Z;
+        if (dx * dx + dz * dz < 0x10000)
+            step = 0x12;
+    }
+    veh_set_d88_low(p_veh, (ubyte)(p_veh->Dummy4a & 0xC0));
+    veh_set_d88(p_veh, veh_get_d88(p_veh) | (ulong)step);
+}
+
+void process_stopping(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("process_stopping", process_stopping_asm(p_vehicle), process_stopping_c(p_vehicle));
+}
+
+void process_unstopping(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("process_unstopping", process_unstopping_asm(p_vehicle), process_unstopping_c(p_vehicle));
+}
+
+void process_unplacing(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("process_unplacing", process_unplacing_asm(p_vehicle), process_unplacing_c(p_vehicle));
+}
+
 /** Ship route: breadth-first search over the sea nodes (flag 0x0200) to
  * the one nearest to the map point; the route is left in the GateLink
  * fields, from the ship's node on.  Remade from send_ship_to.
@@ -2609,12 +2883,6 @@ void process_my_flying_vehicle(struct Thing *p_vehicle)
         : : "a" (p_vehicle));
 }
 
-void process_unplacing(struct Thing *p_vehicle)
-{
-    asm volatile ("call ASM_process_unplacing\n"
-        : : "a" (p_vehicle));
-}
-
 void process_stop_as_soon_as_you_can(struct Thing *p_vehicle)
 {
     asm volatile ("call ASM_process_stop_as_soon_as_you_can\n"
@@ -2671,18 +2939,6 @@ static void set_vehicle_alt_c(struct Thing *p_vehicle)
 void set_vehicle_alt(struct Thing *p_vehicle)
 {
     FNCHK_VOID("set_vehicle_alt", set_vehicle_alt_asm(p_vehicle), set_vehicle_alt_c(p_vehicle));
-}
-
-void process_unstopping(struct Thing *p_vehicle)
-{
-    asm volatile ("call ASM_process_unstopping\n"
-        : : "a" (p_vehicle));
-}
-
-void process_stopping(struct Thing *p_vehicle)
-{
-    asm volatile ("call ASM_process_stopping\n"
-        : : "a" (p_vehicle));
 }
 
 void process_vehicle_goto_point_land(struct Thing *p_vehicle)

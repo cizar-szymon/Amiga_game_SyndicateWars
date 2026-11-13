@@ -32,6 +32,7 @@ static const char *const prof_names[PROF_SLOTS] = {
     [42] = "p_danger", [43] = "p_weapon", [44] = "p_wander", [45] = "p_state",
     [46] = "person_move", [47] = "p_goto_point",
     [48] = "pm_other_people", [49] = "pm_colide_tile",
+    [50] = "dt_building_vis", [51] = "dt_thing", [52] = "dt_sthing",
 };
 
 static ULONG prof_start[PROF_SLOTS];

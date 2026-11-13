@@ -484,7 +484,9 @@ void engine_draw_things(int pos_beg_x, int pos_beg_z, int rend_beg_x, int rend_b
                         p_thing = &things[thing];
                         if ((p_thing->Type == TT_BUILDING)
                          && (p_thing->U.UObject.DrawTurn != drawturn)) {
+                            AMIGA_PROF_BEGIN(50);
                             draw_thing_object(p_thing);
+                            AMIGA_PROF_END(50);
                         }
                     }
                 }
@@ -524,14 +526,18 @@ void engine_draw_things(int pos_beg_x, int pos_beg_z, int rend_beg_x, int rend_b
                     {
                         struct Thing *p_thing;
                         p_thing = &things[thing];
+                        AMIGA_PROF_BEGIN(51);
                         thing = draw_thing_object(p_thing);
+                        AMIGA_PROF_END(51);
                         continue;
                     }
                     else
                     {
                         struct SimpleThing *p_sthing;
                         p_sthing = &sthings[thing];
+                        AMIGA_PROF_BEGIN(52);
                         thing = draw_sthing_object(p_sthing);
+                        AMIGA_PROF_END(52);
                         continue;
                     }
                 }

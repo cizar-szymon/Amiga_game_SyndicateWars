@@ -223,3 +223,8 @@ pamięci, ani od miejsca kodu – ogranicza ją szeregowy łańcuch przeniesień
 piksel) i zależne odczyty. Dalszy zysk tylko z mniejszej liczby pikseli (353 tys. na 307 tys. pikseli
 ekranu – ~15% nadrysowania) albo innego algorytmu. Do sprawdzenia: `draw_screen` poza pikselami
 (~10,7 ms: przekształcenia, sortowanie, obsługa 425 trójkątów), symulacja, skaner.
+
+`draw_things` (8,7 ms ze slotami, PROF=2): ściany budynków 3,9 ms (`draw_thing_object` budynków →
+`object_face_get_visible_max_depth`, przejścia ściana → punkt → punkt ekranu), obiekty 0,6, obiekty
+proste 0,8, samo przechodzenie kafli i list `mapwho` ~3,4 ms. Koszt to głównie odczyty rozrzucone po
+dużych tablicach – bez zmiany układu danych silnika nie widać szybkiego zysku.

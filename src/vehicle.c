@@ -1644,9 +1644,12 @@ static s32 vnav_oct_dist_pts(s32 x1, s32 z1, s32 x2, s32 z2)
 }
 
 /** Is another car's front or back (its position moved along its heading
- * by its size) close to the map point, on the 5x5 tiles round it.
- * Remade from check_for_a_moving_vehicle_here. */
-static TbBool check_for_a_moving_vehicle_here(s32 cor_x, s32 cor_z, struct Thing *p_self)
+ * by its size) close to the map point, on the 5x5 tiles round it; with
+ * `parked_only` only parked cars (state 0x21) count.
+ * Remade from check_for_a_moving_vehicle_here (any car) and
+ * check_for_a_vehicle_here (parked cars). */
+static TbBool check_for_vehicle_near(s32 cor_x, s32 cor_z, struct Thing *p_self,
+  TbBool parked_only)
 {
     int tile_x, tile_z, tx, tz;
 
@@ -1674,6 +1677,8 @@ static TbBool check_for_a_moving_vehicle_here(s32 cor_x, s32 cor_z, struct Thing
                 p_thing = &things[thing];
                 thing = p_thing->Next;
                 if ((p_thing->Type != TT_VEHICLE) || (p_thing == p_self) || (p_thing->SubType != 0x28))
+                    continue;
+                if (parked_only && ((ushort)p_thing->State != 0x21))
                     continue;
                 rad = ((ushort)p_thing->Radius * 400) >> 9;
                 p_mat = &local_mats[p_thing->U.UVehicle.MatrixIndex];
@@ -1786,8 +1791,8 @@ static void process_unstopping_c(struct Thing *p_vehicle)
 
         cx = (p_vehicle->X >> 8) - 8 * ax;
         cz = (p_vehicle->Z >> 8) - 8 * az;
-        if (check_for_a_moving_vehicle_here(cx + 2 * az, cz - 2 * ax, p_vehicle)
-          || check_for_a_moving_vehicle_here(cx - 2 * az, cz + 2 * ax, p_vehicle))
+        if (check_for_vehicle_near(cx + 2 * az, cz - 2 * ax, p_vehicle, false)
+          || check_for_vehicle_near(cx - 2 * az, cz + 2 * ax, p_vehicle, false))
         {
             p_veh->ReqdSpeed = 0;
             p_veh->WorkPlace |= 0x0200;
@@ -2090,12 +2095,27 @@ int start_goto_vehicle(struct Thing *p_vehicle, int x, int z)
     return ret;
 }
 
-int check_for_a_vehicle_here(int x, int z, struct Thing *p_vehicle)
+static TbBool check_for_vehicle_near(s32 cor_x, s32 cor_z, struct Thing *p_self,
+  TbBool parked_only);
+
+#ifdef SW_FNCHK
+static int check_for_a_vehicle_here_asm(int x, int z, struct Thing *p_vehicle)
 {
     int ret;
     asm volatile (
       "call ASM_check_for_a_vehicle_here\n"
-        : "=r" (ret) : "a" (x), "d" (z), "b" (p_vehicle));
+        : "=a" (ret), "+d" (z) : "0" (x), "b" (p_vehicle) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Is a parked car's front or back close to the map point.
+ * Remade from check_for_a_vehicle_here. */
+int check_for_a_vehicle_here(int x, int z, struct Thing *p_vehicle)
+{
+    int ret;
+    FNCHK_RET("check_for_a_vehicle_here", ret, check_for_a_vehicle_here_asm(x, z, p_vehicle),
+      check_for_vehicle_near(x, z, p_vehicle, true));
     return ret;
 }
 

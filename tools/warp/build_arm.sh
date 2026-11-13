@@ -17,7 +17,7 @@ OBJ=$OUT/obj
 mkdir -p "$PP" "$OBJ"
 
 COMMON="--target=arm-arm-none-eabi -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb
-  -fbare-metal-pie -ffunction-sections -fdata-sections ${OPT:--O3} -fno-unroll-loops
+  -fbare-metal-pie -ffunction-sections -fdata-sections ${OPT:--O3} ${UNROLL:--fno-unroll-loops}
   -fno-short-enums -fsigned-char
   -DHAVE_CONFIG_H -DSW_AMIGA -DSW_WARP -include platform/warp/config.h
   -Iplatform/warp -Iplatform/warp/include -Iplatform/amiga -I$FW_COMMON

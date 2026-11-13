@@ -741,6 +741,10 @@ static inline void gpoly_span_shaded(ubyte *o, int n, const struct gpoly_blends 
         gpoly_span_check(o, n, p_bld, p_inc, 1);
 #endif
 #else
+#if defined(SW_WARP)
+    amiga_prof_pixels += n;
+    amiga_prof_spans++;
+#endif
     gpoly_span_shaded_c(o, n, p_bld, p_inc);
 #endif
 }
@@ -761,6 +765,10 @@ static inline void gpoly_span_noshade(ubyte *o, int n, const struct gpoly_blends
         gpoly_span_check(o, n, p_bld, p_inc, 0);
 #endif
 #else
+#if defined(SW_WARP)
+    amiga_prof_pixels += n;
+    amiga_prof_spans++;
+#endif
     gpoly_span_noshade_c(o, n, p_bld, p_inc);
 #endif
 }

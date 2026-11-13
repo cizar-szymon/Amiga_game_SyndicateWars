@@ -1,0 +1,383 @@
+diff --git a/bflibrary/include/bfgentab.h b/bflibrary/include/bfgentab.h
+index 87a26763..ec78022d 100644
+--- a/bflibrary/include/bfgentab.h
++++ b/bflibrary/include/bfgentab.h
+@@ -53,6 +53,17 @@ struct TbColorTables {
+ 
+ extern struct TbColorTables pixmap;
+ 
++#if defined(SW_WARP)
++/** Warp ARM: copy of pixmap.fade_table in the on-chip RAM, read by the
++ * textured span loops (NULL - none, they read pixmap.fade_table). */
++extern const TbPixel *pixmap_fade_fast;
++/** Called after the colour tables are loaded or generated. */
++void warp_colour_tables_changed(void);
++#define LB_COLOUR_TABLES_CHANGED() warp_colour_tables_changed()
++#else
++#define LB_COLOUR_TABLES_CHANGED() ((void)0)
++#endif
++
+ /** Generate colour transistion tables and save to file.
+  *
+  * Generates tables for fading colours and merging colours.
+diff --git a/bflibrary/src/arm-warp/sscreen.c b/bflibrary/src/arm-warp/sscreen.c
+index 70360001..cf3bcebd 100644
+--- a/bflibrary/src/arm-warp/sscreen.c
++++ b/bflibrary/src/arm-warp/sscreen.c
+@@ -408,10 +408,13 @@ static TbBool warp_early_finish(void)
+     return true;
+ }
+ 
++void warp_tmap_frame_end(void);
++
+ TbResult LbScreenSwap(void)
+ {
+     TbResult ret;
+ 
++    warp_tmap_frame_end();
+     warp_early_finish();
+     LbMouseOnBeginSwap();
+     ret = warp_present(1);
+@@ -423,9 +426,10 @@ TbResult LbScreenSwapClear(TbPixel colour)
+ {
+     TbResult ret;
+ 
+-    if (warp_early_finish())
++    if (warp_early_finish()) {
++        warp_tmap_frame_end();
+         ret = Lb_SUCCESS;       /* this frame is on the screen already */
+-    else
++    } else
+         ret = LbScreenSwap();
+     amiga_prof_begin(31);
+     LbScreenClear(colour);
+diff --git a/bflibrary/src/general/ggenf.c b/bflibrary/src/general/ggenf.c
+index 40c16255..f8216e99 100644
+--- a/bflibrary/src/general/ggenf.c
++++ b/bflibrary/src/general/ggenf.c
+@@ -116,6 +116,7 @@ TbResult LbFadeTableGenerate(const ubyte *palette, const TbPixel *unaffected,
+         }
+     }
+     lbDisplay.FadeTable = pixmap.fade_table;
++    LB_COLOUR_TABLES_CHANGED();
+     return Lb_SUCCESS;
+ }
+ 
+@@ -125,6 +126,7 @@ TbResult LbFadeTableLoad(const ubyte *palette, const char *fname)
+ 
+     len = LbFileLoadAt(fname, pixmap.fade_table);
+     lbDisplay.FadeTable = pixmap.fade_table;
++    LB_COLOUR_TABLES_CHANGED();
+ 
+     if (len != PALETTE_FADE_LEVELS * PALETTE_8b_COLORS) {
+         if (len == Lb_FAIL) {
+@@ -161,6 +163,7 @@ TbResult LbColourTablesLoad(const ubyte *palette, const char *fname)
+     len = LbFileLoadAt(fname, &pixmap);
+     lbDisplay.FadeTable = pixmap.fade_table;
+     lbDisplay.GlassMap = pixmap.ghost_table;
++    LB_COLOUR_TABLES_CHANGED();
+ 
+     if (len != sizeof(pixmap)) {
+         if (len == Lb_FAIL) {
+diff --git a/bflibrary/src/general/poly_gp.c b/bflibrary/src/general/poly_gp.c
+index 61f3ae85..436ec17e 100644
+--- a/bflibrary/src/general/poly_gp.c
++++ b/bflibrary/src/general/poly_gp.c
+@@ -490,7 +490,11 @@ GP_SPAN_FN static void gpoly_span_shaded_c(ubyte *o, int n, const struct gpoly_b
+     // the tables in locals: a byte store through o could alias the global
+     // pointers, so the compiler would load them again for every pixel
+     const ubyte *map = vec_map;
++#if defined(SW_WARP)
++    const ubyte *fade = (pixmap_fade_fast != NULL) ? pixmap_fade_fast : pixmap.fade_table;
++#else
+     const ubyte *fade = pixmap.fade_table;
++#endif
+     u32 b0, b2, s1, s2;
+     ubyte v, s3;
+ 
+@@ -500,24 +504,47 @@ GP_SPAN_FN static void gpoly_span_shaded_c(ubyte *o, int n, const struct gpoly_b
+     s1 = p_inc->S[1];
+     s2 = p_inc->S[2];
+     s3 = (ubyte)p_inc->S[3];
++#define GP_SHADED_PIXEL(px) do { \
++        ubyte shade, texel; \
++        u32 nb, t; \
++        ubyte c; \
++        shade = (ubyte)(b2 >> 8); \
++        texel = map[(v << PITCH_SH) | (ubyte)b0]; \
++        nb = b2 + s1; \
++        c = (nb < b2); \
++        b2 = nb; \
++        t = b0 + c; \
++        nb = t + s2; \
++        c = (nb < t); \
++        b0 = nb; \
++        v = (ubyte)(v + c + s3); \
++        px = fade[(shade << 8) | texel]; \
++    } while (0)
++#if defined(SW_WARP)
++    // the screen is in memory without write-allocate: one word store
++    // instead of four byte stores (little endian: first pixel lowest)
++    for (; (n > 0) && (((uintptr_t)o & 3) != 0); n--) {
++        ubyte px;
++        GP_SHADED_PIXEL(px);
++        *o++ = px;
++    }
++    for (; n >= 4; n -= 4) {
++        ubyte p0, p1, p2, p3;
++        GP_SHADED_PIXEL(p0);
++        GP_SHADED_PIXEL(p1);
++        GP_SHADED_PIXEL(p2);
++        GP_SHADED_PIXEL(p3);
++        *(u32 *)o = (u32)p0 | ((u32)p1 << 8) | ((u32)p2 << 16) | ((u32)p3 << 24);
++        o += 4;
++    }
++#endif
+     for (; n > 0; n--)
+     {
+-        ubyte shade, texel;
+-        u32 nb, t;
+-        ubyte c;
+-
+-        shade = (ubyte)(b2 >> 8);
+-        texel = map[(v << PITCH_SH) | (ubyte)b0];
+-        nb = b2 + s1;
+-        c = (nb < b2);
+-        b2 = nb;
+-        t = b0 + c;
+-        nb = t + s2;
+-        c = (nb < t);
+-        b0 = nb;
+-        v = (ubyte)(v + c + s3);
+-        *o++ = fade[(shade << 8) | texel];
++        ubyte px;
++        GP_SHADED_PIXEL(px);
++        *o++ = px;
+     }
++#undef GP_SHADED_PIXEL
+ }
+ 
+ GP_SPAN_FN static void gpoly_span_noshade_c(ubyte *o, int n, const struct gpoly_blends *p_bld,
+diff --git a/platform/warp/wlibc.h b/platform/warp/wlibc.h
+index 9bb1abac..ab1624c4 100644
+--- a/platform/warp/wlibc.h
++++ b/platform/warp/wlibc.h
+@@ -185,6 +185,9 @@ uint32_t w_millis(void);
+ uint32_t w_cycles(void);
+ void w_log(const char *text);
+ 
++/* on-chip data memory of the board (wmain.c), NULL when none is left */
++void *w_fastmem_alloc(uint32_t size);
++
+ #ifdef __cplusplus
+ }
+ #endif
+diff --git a/platform/warp/wmain.c b/platform/warp/wmain.c
+index 84e949e2..71b002fc 100644
+--- a/platform/warp/wmain.c
++++ b/platform/warp/wmain.c
+@@ -28,6 +28,32 @@ int w_prof_level;
+ static int w_stage = 99;  /* diagnostics: "stage=N" returns after step N */
+ uint32_t w_cpu_hz;
+ 
++/* On-chip RAM lent by the firmware (env->fastMem): a miss in the SDRAM costs
++ * ~146 cycles, here a few. Bump allocation, nothing is freed. */
++static WarpExtMem w_fast[WEXT_FASTMEM_MAX];
++static uint32_t w_fast_used[WEXT_FASTMEM_MAX];
++static uint32_t w_fast_count;
++
++/* Data memory (not TCM): the smallest block the size fits in. */
++void *w_fastmem_alloc(uint32_t size)
++{
++    uint32_t i, best = WEXT_FASTMEM_MAX;
++
++    size = (size + 31u) & ~31u;
++    for (i = 0; i < w_fast_count; i++) {
++        if ((w_fast[i].flags & WEXT_MEM_TCM) != 0)
++            continue;
++        if (w_fast[i].size - w_fast_used[i] < size)
++            continue;
++        if ((best == WEXT_FASTMEM_MAX) || (w_fast[i].size < w_fast[best].size))
++            best = i;
++    }
++    if (best == WEXT_FASTMEM_MAX)
++        return NULL;
++    w_fast_used[best] += size;
++    return (uint8_t *)w_fast[best].base + w_fast_used[best] - size;
++}
++
+ int main(int argc, char **argv);
+ 
+ /* C++ constructors (bflibrary mouse handler and the like).  armlink writes
+@@ -68,6 +94,18 @@ int ext_main(const WarpExtEnv *env)
+         return 100;
+     wl_init(env);
+     w_cpu_hz = env->cpuHz;
++    w_fast_count = env->fastMemCount;
++    if (w_fast_count > WEXT_FASTMEM_MAX)
++        w_fast_count = WEXT_FASTMEM_MAX;
++    memcpy(w_fast, env->fastMem, w_fast_count * sizeof(WarpExtMem));
++    {
++        uint32_t i;
++        for (i = 0; i < w_fast_count; i++) {
++            snprintf(msg, sizeof(msg), "swcore: fast memory %lu KB, flags %lu\n",
++              (unsigned long)(w_fast[i].size / 1024u), (unsigned long)w_fast[i].flags);
++            wl_log(msg);
++        }
++    }
+     w_time_init();
+ 
+     /* render area: the file transfer buffer at its start */
+diff --git a/src/game.c b/src/game.c
+index 4aac66d7..9e883d24 100644
+--- a/src/game.c
++++ b/src/game.c
+@@ -491,6 +491,9 @@ int reload_texturemaps(void)
+         sprintf(locstr, "data/tex%02d.dat", i);
+         LbFileLoadAt(locstr, vec_tmap[i]);
+     }
++#if defined(SW_WARP)
++    warp_tmap_reloaded();
++#endif
+     return i;
+ }
+ 
+diff --git a/swrendersoft/include/engintxtrmap.h b/swrendersoft/include/engintxtrmap.h
+index f0c5c753..5bfe9313 100644
+--- a/swrendersoft/include/engintxtrmap.h
++++ b/swrendersoft/include/engintxtrmap.h
+@@ -38,6 +38,17 @@ extern "C" {
+  */
+ extern ubyte *vec_tmap[VEC_TMAP_LIMIT];
+ 
++#if defined(SW_WARP)
++/** Warp ARM: a texture page for a face, the copy in the on-chip RAM when
++ * there is one (platform/warp/wfast.c). */
++ubyte *warp_tmap_page(int page);
++void warp_tmap_reloaded(void);
++void warp_tmap_frame_end(void);
++#define VEC_TMAP_PAGE(page) warp_tmap_page(page)
++#else
++#define VEC_TMAP_PAGE(page) vec_tmap[page]
++#endif
++
+ /** Reference to the start of tmaps allocation.
+  */
+ extern ubyte *tmaps_alloc_start;
+diff --git a/swrendersoft/src/engindrwlstx_fac.c b/swrendersoft/src/engindrwlstx_fac.c
+index 6b7d4ca9..3c87b50c 100644
+--- a/swrendersoft/src/engindrwlstx_fac.c
++++ b/swrendersoft/src/engindrwlstx_fac.c
+@@ -128,7 +128,7 @@ void set_floor_texture_uv(ushort sftex, struct PolyPoint *p_pt1, struct PolyPoin
+     p_sftex = &game_textures[sftex];
+ 
+     assert(vec_tmap[p_sftex->Page] != NULL);
+-    vec_map = vec_tmap[p_sftex->Page];
++    vec_map = VEC_TMAP_PAGE(p_sftex->Page);
+     if ((gflags & FGFlg_Unkn02) != 0) {
+         assert(scratch_buf1 != NULL);
+         vec_map = scratch_buf1;
+@@ -159,7 +159,7 @@ void set_face_texture_uv(ushort stex, struct PolyPoint *p_pt1,
+     p_stex = &game_face_textures[stex];
+ 
+     assert(vec_tmap[p_stex->Page] != NULL);
+-    vec_map = vec_tmap[p_stex->Page];
++    vec_map = VEC_TMAP_PAGE(p_stex->Page);
+     if ((gflags & FGFlg_Unkn02) != 0) {
+         assert(scratch_buf1 != NULL);
+         vec_map = scratch_buf1;
+diff --git a/platform/warp/wfast.c b/platform/warp/wfast.c
+new file mode 100644
+index 00000000..9afb8976
+--- /dev/null
++++ b/platform/warp/wfast.c
+@@ -0,0 +1,89 @@
++/* Warp ARM build: game tables copied to the on-chip RAM of the board.
++ * A miss in the SDRAM costs ~146 cycles, in the on-chip RAM a few.
++ *
++ * - the fade table: refreshed whenever the game loads or generates it
++ *   (LB_COLOUR_TABLES_CHANGED in ggenf.c);
++ * - the texture page most used by the faces of the last frame: the faces
++ *   take their page through warp_tmap_page(); at the end of each frame the
++ *   page with most faces is copied (only when it changes). Pages the game
++ *   writes during play (animated textures 4 and 5, the shadow page) are
++ *   never copied; reloading the pages drops the copy. */
++#include <string.h>
++#include "bftypes.h"
++#include "bfgentab.h"
++#include "bflog.h"
++#include "engintxtrmap.h"
++#include "wlibc.h"
++
++extern ushort shadow_tmap_page;
++
++const TbPixel *pixmap_fade_fast;
++static TbPixel *fade_copy;
++static TbBool fade_tried;
++
++void warp_colour_tables_changed(void)
++{
++    if (!fade_tried) {
++        fade_tried = true;
++        fade_copy = (TbPixel *)w_fastmem_alloc(sizeof(pixmap.fade_table));
++        LbWarnLog("fast memory: fade table %u bytes at %p\n",
++          (unsigned)sizeof(pixmap.fade_table), (void *)fade_copy);
++    }
++    if (fade_copy == NULL)
++        return;
++    memcpy(fade_copy, pixmap.fade_table, sizeof(pixmap.fade_table));
++    pixmap_fade_fast = fade_copy;
++}
++
++#define TPAGE_SIZE (VEC_TMAP_WIDTH * VEC_TMAP_HEIGHT)
++
++static ubyte *tpage_copy;
++static TbBool tpage_tried;
++static int tpage_cur = -1;
++static ulong tpage_uses[VEC_TMAP_LIMIT];
++static ulong tpage_changes;
++
++ubyte *warp_tmap_page(int page)
++{
++    tpage_uses[page]++;
++    if (page == tpage_cur)
++        return tpage_copy;
++    return vec_tmap[page];
++}
++
++void warp_tmap_reloaded(void)
++{
++    tpage_cur = -1;
++}
++
++void warp_tmap_frame_end(void)
++{
++    int page, best;
++    ulong best_uses;
++
++    if (!tpage_tried) {
++        tpage_tried = true;
++        tpage_copy = (ubyte *)w_fastmem_alloc(TPAGE_SIZE);
++        LbWarnLog("fast memory: texture page %u bytes at %p\n",
++          (unsigned)TPAGE_SIZE, (void *)tpage_copy);
++    }
++    best = -1;
++    best_uses = 0;
++    for (page = 0; page < VEC_TMAP_LIMIT; page++)
++    {
++        if ((page != 4) && (page != 5) && (page != shadow_tmap_page)
++          && (vec_tmap[page] != NULL) && (tpage_uses[page] > best_uses)) {
++            best = page;
++            best_uses = tpage_uses[page];
++        }
++        tpage_uses[page] = 0;
++    }
++    if ((tpage_copy == NULL) || (best < 0) || (best == tpage_cur))
++        return;
++    memcpy(tpage_copy, vec_tmap[best], TPAGE_SIZE);
++    tpage_cur = best;
++    tpage_changes++;
++    if ((tpage_changes & (tpage_changes - 1)) == 0)
++        LbWarnLog("fast memory: texture page %d copied (%lu changes)\n",
++          best, tpage_changes);
++}

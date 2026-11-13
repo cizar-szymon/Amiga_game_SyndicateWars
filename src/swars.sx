@@ -43790,7 +43790,7 @@ GLOBAL_FUNC(ASM_create_scale_effect)	/* 0x06338C */
 
 
 /*----------------------------------------------------------------*/
-explode_thing_object:	/* 0x063484 */
+GLOBAL_FUNC(ASM_explode_thing_object)	/* 0x063484 */
 /*----------------------------------------------------------------*/
 		push   %esi
 		push   %edi
@@ -46278,7 +46278,7 @@ do_explode:	/* 0x0652A8 */
 		sar    $0x10,%ecx
 		sar    $0x10,%ebx
 		sar    $0x10,%edx
-		call   explode_thing_object
+		call   ASM_explode_thing_object
 	jump_65371:
 		mov    0x2(%esi),%si
 	jump_65375:
@@ -64606,7 +64606,7 @@ GLOBAL_FUNC(ASM_init_vehicle_explode)	/* 0x07CDE4 */
 		xor    %ebx,%ebx
 		xor    %edx,%edx
 		sar    $0x10,%eax
-		call   explode_thing_object
+		call   ASM_explode_thing_object
 		xor    %eax,%eax
 		mov    0x8(%esi),%al
 		cmp    $0x32,%eax

@@ -34,6 +34,10 @@
 #include "scanner.h"
 #include "sound.h"
 #include "swlog.h"
+#include "fncheck.h"
+#include "poly.h"
+#include "matrix.h"
+#include "engincolour.h"
 #include "thing.h"
 #include "thing_fire.h"
 
@@ -55,6 +59,150 @@ u32 minimum_explode_and;
 s32 minimum_explode_depth;
 
 /******************************************************************************/
+
+#ifdef SW_FNCHK
+static ushort explode_thing_object_asm(ThingIdx thing)
+{
+    int ret;
+    asm volatile ("call ASM_explode_thing_object\n"
+        : "=a" (ret) : "0" ((int)thing) : "ebx", "ecx", "edx", "cc", "memory");
+    return (ushort)ret;
+}
+#endif
+
+/** A point of an object, turned by its matrix and moved to its place. */
+static void explode_object_point(s32 *p_x, s32 *p_y, s32 *p_z, const struct M33 *p_mat,
+  ushort pt, s32 base_x, s32 base_y, s32 base_z)
+{
+    struct SinglePoint *p_snpoint;
+    s32 x2, y2, z2;
+
+    p_snpoint = &game_object_points[pt];
+    x2 = 2 * p_snpoint->X;
+    y2 = 2 * p_snpoint->Y;
+    z2 = 2 * p_snpoint->Z;
+    *p_x = base_x + ((p_mat->R[0][0] * x2 + p_mat->R[0][1] * y2 + p_mat->R[0][2] * z2) >> 15);
+    *p_y = base_y + ((p_mat->R[1][0] * x2 + p_mat->R[1][1] * y2 + p_mat->R[1][2] * z2) >> 15);
+    *p_z = base_z + ((p_mat->R[2][0] * x2 + p_mat->R[2][1] * y2 + p_mat->R[2][2] * z2) >> 15);
+}
+
+/** Fills an explode face from the points of a face (3 or 4) round their
+ * centre, flying out from the object's base. */
+static void explode_face_fill(ushort eface, ubyte type, ushort texture, ubyte flags, ubyte col,
+  const s32 *px, const s32 *py, const s32 *pz, int npoints, s32 cx, s32 cy, s32 cz,
+  s32 base_x, s32 base_y, s32 base_z)
+{
+    struct ExplodeFace *p_exface;
+    short *p_rel;
+    int i;
+
+    p_exface = &ex_faces[eface];
+    p_exface->Type = type;
+    p_exface->Texture = texture;
+    p_exface->Flags = flags;
+    p_exface->Col = col;
+    p_exface->X = cx;
+    p_exface->Z = cz;
+    p_rel = &p_exface->X0;
+    for (i = 0; i < npoints; i++) {
+        p_rel[3 * i + 0] = px[i] - cx;
+        p_rel[3 * i + 1] = py[i] - cy;
+        p_rel[3 * i + 2] = pz[i] - cz;
+    }
+    p_exface->Y = cy;
+    p_exface->DX = (sbyte)((cx - base_x) >> 3);
+    p_exface->DY = (sbyte)((cy - base_y) >> 3);
+    p_exface->DZ = (sbyte)((cz - base_z) >> 3);
+    p_exface->DY += 50;
+    p_exface->Timer = 50 - (eface & 0x1F);
+}
+
+/** Breaks the faces of an object (a vehicle's model, or a building's) into
+ * flying explode faces. Returns the next object of the model.
+ * Remade from explode_thing_object. */
+static ushort explode_thing_object_c(ThingIdx thing)
+{
+    struct Thing *p_thing;
+    struct SingleObject *p_sobj;
+    struct M33 *p_mat;
+    s32 base_x, base_y, base_z;
+    ushort i, n;
+
+    dont_bother_with_explode_faces = 0;
+    p_thing = &things[thing];
+    if (p_thing->Type == TT_VEHICLE)
+    {
+        p_sobj = &game_objects[(ushort)p_thing->U.UVehicle.Object];
+        base_x = (short)(p_thing->X >> 8);
+        base_y = (short)(p_thing->Y >> 5);
+        base_z = (short)(p_thing->Z >> 8);
+    }
+    else
+    {
+        p_sobj = &game_objects[(ushort)p_thing->U.UObject.Object];
+        base_x = p_sobj->MapX;
+        base_y = p_sobj->OffsetY;
+        base_z = p_sobj->MapZ;
+    }
+    p_mat = &local_mats[p_thing->U.UObject.MatrixIndex];
+
+    n = p_sobj->NumbFaces;
+    for (i = 0; i < n; i++)
+    {
+        struct SingleObjectFace3 *p_face;
+        s32 px[3], py[3], pz[3], cx, cy, cz;
+        ushort eface;
+        int k;
+
+        p_face = &game_object_faces3[(uint)p_sobj->StartFace + i];
+        vec_colour = colour_grey1;
+        vec_mode = 0;
+        for (k = 0; k < 3; k++)
+            explode_object_point(&px[k], &py[k], &pz[k], p_mat, p_face->PointNo[k],
+              base_x, base_y, base_z);
+        cy = ((py[0] + py[1] + py[2]) * 0x55) >> 8;
+        cx = ((px[0] + px[1] + px[2]) * 0x55) >> 8;
+        cz = ((pz[0] + pz[1] + pz[2]) * 0x55) >> 8;
+        eface = explode_face_alloc();
+        if (eface == 0)
+            continue;
+        explode_face_fill(eface, 1, p_face->Texture, p_face->Flags, (ubyte)p_face->ExCol,
+          px, py, pz, 3, cx, cy, cz, base_x, base_y, base_z);
+    }
+
+    n = p_sobj->NumbFaces4;
+    for (i = 0; i < n; i++)
+    {
+        struct SingleObjectFace4 *p_face4;
+        s32 px[4], py[4], pz[4], cx, cy, cz;
+        ushort eface;
+        int k;
+
+        p_face4 = &game_object_faces4[(uint)p_sobj->StartFace4 + i];
+        vec_mode = 0;
+        vec_colour = colour_grey1;
+        for (k = 0; k < 4; k++)
+            explode_object_point(&px[k], &py[k], &pz[k], p_mat, p_face4->PointNo[k],
+              base_x, base_y, base_z);
+        cx = (px[0] + px[1] + px[2] + px[3]) >> 2;
+        cy = (py[0] + py[1] + py[2] + py[3]) >> 2;
+        cz = (pz[0] + pz[1] + pz[2] + pz[3]) >> 2;
+        eface = explode_face_alloc();
+        if (eface == 0)
+            continue;
+        explode_face_fill(eface, 2, p_face4->Texture, p_face4->Flags, (ubyte)p_face4->ExCol,
+          px, py, pz, 4, cx, cy, cz, base_x, base_y, base_z);
+    }
+    return p_sobj->NextObject;
+}
+
+ushort explode_thing_object(ThingIdx thing)
+{
+    ushort ret;
+    FNCHK_RET("explode_thing_object", ret, explode_thing_object_asm(thing),
+      explode_thing_object_c(thing));
+    return ret;
+}
 
 void init_object_explode_faces(void)
 {

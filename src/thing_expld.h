@@ -42,6 +42,9 @@ void process_explode(void);
 void draw_explode(void);
 
 void thing_explode_faces(struct Thing *p_thing);
+/** Breaks the faces of the thing's 3D object into flying explode faces;
+ * returns the next object of the model. */
+ushort explode_thing_object(ThingIdx thing);
 void floor_explode_faces(short tile_x, short tile_z);
 
 /******************************************************************************/

@@ -36,6 +36,8 @@
 #include "enginsngtxtr.h"
 #include "engintrns.h"
 #include "game.h"
+#include "bmcrater.h"
+#include "thing_expld.h"
 #include "febrief.h"
 #include "misstat.h"
 #include "frame_sprani.h"
@@ -2741,10 +2743,71 @@ void process_shuttle_pod(struct Thing *p_vehicle)
         : : "a" (p_vehicle));
 }
 
-void init_vehicle_explode(struct Thing *p_vehicle)
+#ifdef SW_FNCHK
+static void init_vehicle_explode_asm(struct Thing *p_vehicle)
 {
     asm volatile ("call ASM_init_vehicle_explode\n"
-        : : "a" (p_vehicle));
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+#endif
+
+ubyte person_leave_vehicle(struct Thing *p_person, struct Thing *p_vehicle);
+
+/** A vehicle blows up: passengers thrown out, its model broken into
+ * flying faces, a crater (a flyer only near the ground), a bang and a
+ * shockwave; the vehicle becomes a thing of type 1.
+ * Remade from init_vehicle_explode. */
+static void init_vehicle_explode_c(struct Thing *p_vehicle)
+{
+    struct Thing *p_owner;
+    TbBool crater;
+    ushort i;
+
+    if (p_vehicle->SubType == 0x33)
+        stop_sample_using_heap((ushort)p_vehicle->ThingOffset, 0x31);
+    remove_locks(p_vehicle);
+    p_vehicle->Flag |= 0x0002;
+    play_dist_sample(p_vehicle, 0x25, 0x7F, 0x40, 100, 0, 3);
+    p_vehicle->State = 0x0D;
+    for (i = 0; (p_vehicle->U.UVehicle.PassengerHead != 0) && (i < 100); i++)
+    {
+        short passenger;
+
+        passenger = p_vehicle->U.UVehicle.PassengerHead;
+        person_leave_vehicle(&things[(ushort)passenger], p_vehicle);
+        // stop when the passenger did not leave
+        if ((s32)(ushort)p_vehicle->U.UVehicle.PassengerHead == (s32)passenger)
+            break;
+    }
+    explode_thing_object(p_vehicle->ThingOffset);
+    if (p_vehicle->SubType == SubTT_VEH_FLYING)
+    {
+        s32 alt;
+
+        alt = alt_at_point((short)(p_vehicle->X >> 8), (short)(p_vehicle->Z >> 8));
+        alt += (((ushort)p_vehicle->Radius * 193) * 2) >> 5;
+        crater = (alt + 250 > p_vehicle->Y);
+    }
+    else
+    {
+        crater = true;
+    }
+    if (crater)
+        quick_crater(p_vehicle->X >> 16, p_vehicle->Z >> 16, 2);
+    bang_new4(p_vehicle->X, p_vehicle->Y, p_vehicle->Z, 0x0F);
+    delete_node(p_vehicle);
+    p_vehicle->Type = 1;
+    p_owner = NULL;
+    if (p_vehicle->OldTarget != 0)
+        p_owner = &things[p_vehicle->OldTarget];
+    do_shockwave(p_vehicle->X >> 8, p_vehicle->Y >> 8, p_vehicle->Z >> 8,
+      (ushort)p_vehicle->Radius << 2, 5000, p_owner);
+}
+
+void init_vehicle_explode(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("init_vehicle_explode", init_vehicle_explode_asm(p_vehicle),
+      init_vehicle_explode_c(p_vehicle));
 }
 
 void process_tank_stationary(struct Thing *p_vehicle)

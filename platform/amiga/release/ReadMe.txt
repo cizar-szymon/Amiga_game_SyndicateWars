@@ -17,6 +17,13 @@ Start: ikona SyndWars albo w Shellu:
   CD Work:Games/SyndWars
   SyndWars
 
+Opcje szybkosci (SYSTEM -> VISUAL DEPTH)
+----------------------------------------
+  FAR PEDESTRIANS  ON: przechodnie poza ekranem i radarem stoja (szybciej,
+                   bez zmian w rozgrywce); domyslnie ON
+  RADAR HALF RATE  ON: radar rysowany co 2. klatke; domyslnie OFF
+Zapis ustawien: SYSTEM -> INTERFACE -> SAVE.
+
 Klawisze
 --------
   F8      przelaczenie rozdzielczosci w misji: 320x200 (szybciej) / 640x480

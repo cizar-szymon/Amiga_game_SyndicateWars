@@ -3,7 +3,8 @@
 (transfer through AmiAgent, then `UnZip` on the Amiga).
 
 Leaves out what the Amiga build does not use yet: sound, music, intro and
-Smacker/FLI videos, other languages.
+Smacker videos, other languages. FLI animations and .raw pictures (menu
+backgrounds, equipment screens) are included.
 
 Usage: python tools/amiga/pack_data.py GAMEDIR OUTDIR [--max-mb 12]
 Writes OUTDIR/swdata-NN.zip; paths inside are relative to the game dir.
@@ -12,7 +13,7 @@ import argparse
 import os
 import zipfile
 
-SKIP_EXT = (".smk", ".fli", ".raw", ".ogg", ".exe", ".dll", ".log", ".txt")
+SKIP_EXT = (".smk", ".ogg", ".exe", ".dll", ".log", ".txt")
 DIRS = ["conf", "data", "qdata", "levels", "maps", "language/eng"]
 
 

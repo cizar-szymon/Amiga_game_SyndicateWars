@@ -8,7 +8,7 @@ Wymagania
 ---------
 - Amiga z procesorem 68060 (testowano: A4000 + Warp 7060), Fast RAM 64 MB+
 - AmigaOS 3.2, Picasso96 (RTG), ekran 8-bitowy 320x200 i 640x480
-- ok. 80 MB miejsca na dysku (paczka ZIP 23 MB)
+- ok. 120 MB miejsca na dysku (paczka ZIP ok. 40 MB)
 
 Instalacja i uruchomienie
 -------------------------
@@ -25,7 +25,7 @@ Klawisze
 Stan tej wersji
 ---------------
 - Brak dzwieku i muzyki.
-- Brak filmow (czolowka, filmy w menu) - sa pomijane.
+- Brak filmow Smacker (czolowka, filmy w menu) - sa pomijane.
 - Menu, logowanie i pierwsza misja dzialaja; dalsze misje moga sie
   zawiesic albo zachowywac inaczej niz na PC (czesc procedur gry nie jest
   jeszcze przeniesiona z asemblera x86).

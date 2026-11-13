@@ -638,10 +638,49 @@ short create_a_pod(struct Thing *p_thing, struct Thing *p_loader, ushort pod_id)
     return ret;
 }
 
-void process_shuttle_loader(struct Thing *p_building)
+#ifdef SW_FNCHK
+static void process_shuttle_loader_asm(struct Thing *p_building)
 {
     asm volatile ("call ASM_process_shuttle_loader\n"
-        : : "a" (p_building));
+        : : "a" (p_building) : "cc", "memory");
+}
+#endif
+
+/** A shuttle loader puts each person on its tile (VX, VZ) into a pod.
+ * Remade from process_shuttle_loader. */
+static void process_shuttle_loader_c(struct Thing *p_building)
+{
+    ThingIdx thing;
+    s32 tile_x, tile_z;
+
+    tile_x = p_building->VX;
+    tile_z = p_building->VZ;
+    if ((tile_x < 0) || (tile_x >= 0x80) || (tile_z < 0) || (tile_z >= 0x80))
+        return;
+    thing = game_my_big_map[(tile_z << 7) + tile_x].Child;
+    while (thing != 0)
+    {
+        if (thing > 0)
+        {
+            struct Thing *p_thing;
+
+            p_thing = &things[thing];
+            if ((p_thing->Type == TT_PERSON) && ((p_thing->Flag & 0x4000) == 0))
+                thing = create_a_pod(p_thing, p_building, 0);
+            else
+                thing = p_thing->Next;
+        }
+        else
+        {
+            thing = sthings[thing].Next;
+        }
+    }
+}
+
+void process_shuttle_loader(struct Thing *p_building)
+{
+    FNCHK_VOID("process_shuttle_loader", process_shuttle_loader_asm(p_building),
+      process_shuttle_loader_c(p_building));
 }
 
 #ifdef SW_FNCHK

@@ -2525,10 +2525,45 @@ TbBool check_vehicle_col(struct Thing *p_vehicle)
     return false;
 }
 
-void start_crashing(struct Thing *p_vehicle)
+#ifdef SW_FNCHK
+static void start_crashing_asm(struct Thing *p_vehicle)
 {
     asm volatile ("call ASM_start_crashing\n"
-        : : "a" (p_vehicle));
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+#endif
+
+/** A vehicle hit hard starts crashing: a bang, its speed kept as wanted
+ * speed halved; a mech explodes instead.  Remade from start_crashing. */
+static void start_crashing_c(struct Thing *p_vehicle)
+{
+    if (p_vehicle->SubType == 0x3B)
+    {
+        p_vehicle->State = 0x0D;
+        p_vehicle->Flag |= 0x0002;
+        init_mech_explode(p_vehicle);
+        return;
+    }
+    if ((ushort)p_vehicle->State == 0x45)
+        return;
+    p_vehicle->Flag |= 0x0002;
+    p_vehicle->State = 0x45;
+    if (p_vehicle->SubType == 0x1D)
+    {
+        struct Thing *p_station;
+
+        p_station = &things[p_vehicle->U.UVehicle.TNode];
+        if ((p_station->Flag & 0x0002) == 0)
+            p_station->Flag |= 0x00040000;
+    }
+    p_vehicle->VY = 0;
+    p_vehicle->U.UVehicle.ReqdSpeed = p_vehicle->Speed >> 1;
+    bang_new4(p_vehicle->X, p_vehicle->Y, p_vehicle->Z, 0x5F);
+}
+
+void start_crashing(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("start_crashing", start_crashing_asm(p_vehicle), start_crashing_c(p_vehicle));
 }
 
 void start_landing(struct Thing *p_vehicle)
@@ -2883,10 +2918,63 @@ void process_my_flying_vehicle(struct Thing *p_vehicle)
         : : "a" (p_vehicle));
 }
 
-void process_stop_as_soon_as_you_can(struct Thing *p_vehicle)
+#ifdef SW_FNCHK
+static void process_stop_as_soon_as_you_can_asm(struct Thing *p_vehicle)
 {
     asm volatile ("call ASM_process_stop_as_soon_as_you_can\n"
-        : : "a" (p_vehicle));
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+#endif
+
+/** A car told to stop: if it may stop on the segment it is on, it starts
+ * stopping (state 0x36) facing along the segment, with a sideways slide
+ * towards it.  Remade from process_stop_as_soon_as_you_can. */
+static void process_stop_as_soon_as_you_can_c(struct Thing *p_vehicle)
+{
+    struct TngUVehicle *p_veh;
+    struct TrafficNode *p_tnode, *p_tn2;
+    s32 dx, dz, adx, adz, dist, ax, az;
+    int link;
+    ushort angle;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    link = (veh_get_d88(p_veh) >> 6) & 3;
+    if (p_veh->AngleDY >= 20)
+        return;
+    if (p_veh->TNode >= 0)
+        return;
+    if (p_veh->Dummy4b >= 0)
+        return;
+    p_tnode = &game_traffic_nodes[-p_veh->Dummy4b];
+    if ((p_tnode->Flags & 0x8000) != 0)
+        return;
+    if ((p_tnode->UTraffic.Flags[link] & 0x40) != 0)
+        return;
+    p_tn2 = &game_traffic_nodes[-p_veh->TNode];
+    dx = p_tn2->X - (p_vehicle->X >> 8);
+    dz = p_tn2->Z - (p_vehicle->Z >> 8);
+    angle = (ushort)arctan(dx, dz);
+    veh_set_d8c(p_veh, ((ulong)angle << 16) | 0x11);
+    adx = abs(dx);
+    adz = abs(dz);
+    if (adz > adx)
+        dist = (adx >> 1) + adz;
+    else
+        dist = adx + (adz >> 1);
+    az = (-dz) << 5;
+    ax = dx << 5;
+    if (dist != 0) {
+        az /= dist;
+        ax /= dist;
+    }
+    veh_set_d90(p_veh, ((ulong)az << 16) | (ulong)(ax & 0xFFFF));
+    p_vehicle->State = 0x36;
+}
+
+void process_stop_as_soon_as_you_can(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("process_stop_as_soon_as_you_can", process_stop_as_soon_as_you_can_asm(p_vehicle),
+      process_stop_as_soon_as_you_can_c(p_vehicle));
 }
 
 void process_hovering_vehicle(struct Thing *p_vehicle)
@@ -2953,10 +3041,52 @@ void process_vehicle_goto_point_fly(struct Thing *p_vehicle)
         : : "a" (p_vehicle));
 }
 
-void process_parked_flyer(struct Thing *p_vehicle)
+#ifdef SW_FNCHK
+static void process_parked_flyer_asm(struct Thing *p_vehicle)
 {
     asm volatile ("call ASM_process_parked_flyer\n"
-        : : "a" (p_vehicle));
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+#endif
+
+/** Height steps of a parked flyer hovering, *16; 99 ends the loop, which
+ * goes back 26 steps. The asm data table `quiver`, as constants. */
+static const sbyte parked_flyer_quiver[] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    -1, 0, 1, 0, -1, -3, -1, 0,
+    1, 3, 4, 3, 1, 0, -2, -5,
+    -7, -8, -7, -5, -2, 0, 2, 5,
+    8, 10, 12, 13, 13, 13, 12, 10,
+    8, 5, 2, -2, -5, -8, -10, -12,
+    -13, -13, -13, -12, -10, -8, -5, -2,
+    99,
+};
+
+/** A parked flyer hovers 3000 above the ground, bobbing.
+ * Remade from process_parked_flyer. */
+static void process_parked_flyer_c(struct Thing *p_vehicle)
+{
+    struct TngUVehicle *p_veh;
+    ushort step;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    step = p_veh->MaxSpeed;
+    if (step == 0)
+    {
+        p_vehicle->Y = alt_at_point((short)(p_vehicle->X >> 8), (short)(p_vehicle->Z >> 8)) + 3000;
+        p_veh->MaxSpeed = 1;
+        return;
+    }
+    p_veh->MaxSpeed = step + 1;
+    p_vehicle->Y += parked_flyer_quiver[step] << 4;
+    if (parked_flyer_quiver[p_veh->MaxSpeed] == 99)
+        p_veh->MaxSpeed -= 26;
+}
+
+void process_parked_flyer(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("process_parked_flyer", process_parked_flyer_asm(p_vehicle),
+      process_parked_flyer_c(p_vehicle));
 }
 
 void init_mech_explode(struct Thing *p_vehicle)

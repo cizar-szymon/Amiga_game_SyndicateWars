@@ -89,7 +89,12 @@ void asm_cov_phase(int phase)
     cov_collect(cov_cur_phase);
     cov_cur_phase = phase;
     if (phase == ACP_INPUT)
+    {
         cov_frames++;
+        // also written every 500 frames: a run stopped by a timeout leaves it too
+        if ((cov_frames % 500) == 0)
+            cov_dump();
+    }
 }
 
 #endif

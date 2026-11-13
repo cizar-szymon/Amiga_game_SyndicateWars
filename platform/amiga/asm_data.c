@@ -66,6 +66,7 @@ s32 data_1c84f4[17]; /* src\vehtraffic.c, 4 bytes */
 s32 data_1dd91c; /* src\vehtraffic.h, 4 bytes */
 short datagram_backup[2200]; /* struct IPXDatagramBackup datagram_backup[8], src\network.c */
 s32 dword_152E38[5] = {-1, -1, -1, -1, -1};
+s32 dword_1AA67C; /* src\people.c, 4 bytes */
 ubyte * dword_1C6DE4; /* src\game_sprts.h, 4 bytes */
 ubyte * dword_1C6DE8; /* src\game_sprts.h, 4 bytes */
 uint dword_1C8470; /* src\vehtraffic.c, 4 bytes */

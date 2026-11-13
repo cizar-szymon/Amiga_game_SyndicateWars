@@ -238,6 +238,7 @@ extern short word_1AA38E;
 extern short word_1AA390;
 extern short word_1AA392;
 short person_move(struct Thing *p_person);
+static void person_set_anim_frames(struct Thing *p_person);
 extern u32 nav_stats__ThisTurn;
 extern s32 gamep_unknval_14;
 void count_fnavs(TbBool now_draw);
@@ -2877,10 +2878,33 @@ void person_init_pickup(struct Thing *p_person, ThingIdx item)
         : : "a" (p_person), "d" (item));
 }
 
-void check_weapon(struct Thing *p_person, int range)
+#ifdef SW_FNCHK
+static void check_weapon_asm(struct Thing *p_person, int range)
 {
     asm volatile ("call ASM_check_weapon\n"
-        : : "a" (p_person), "d" (range));
+        : : "a" (p_person), "d" (range) : "cc", "memory");
+}
+#endif
+
+/** A person without a weapon in hand takes out the best one it has (for
+ * range 0x500; the range argument is not used).  Remade from check_weapon.
+ */
+static void check_weapon_c(struct Thing *p_person, int range)
+{
+    if ((ushort)p_person->State == PerSt_PERSON_BURNING)
+        return;
+    if (p_person->U.UPerson.CurrentWeapon != 0)
+        return;
+    choose_best_weapon_for_range(p_person, 0x500);
+    if (p_person->U.UPerson.CurrentWeapon == 0)
+        return;
+    p_person->U.UPerson.AnimMode = gun_out_anim(p_person, 0);
+    person_set_anim_frames(p_person);
+}
+
+void check_weapon(struct Thing *p_person, int range)
+{
+    FNCHK_VOID("check_weapon", check_weapon_asm(p_person, range), check_weapon_c(p_person, range));
 }
 
 void get_weapon_out(struct Thing *p_person)
@@ -4297,11 +4321,71 @@ void process_random_speech(struct Thing *p_person, ubyte a2)
     }
 }
 
-void set_interrupt_target(struct Thing *p_person, struct Thing *p_target)
+#ifdef SW_FNCHK
+static void set_interrupt_target_asm(struct Thing *p_person, struct Thing *p_target)
 {
     asm volatile ("call ASM_set_interrupt_target\n"
-        : : "a" (p_person), "d" (p_target));
-    return;
+        : : "a" (p_person), "d" (p_target) : "cc", "memory");
+}
+#endif
+
+/** A person (not a selected player agent) turns to attack the target;
+ * a person not yet fighting first remembers its post.
+ * Remade from set_interrupt_target.
+ */
+static void set_interrupt_target_c(struct Thing *p_person, struct Thing *p_target)
+{
+    if ((p_target < &things[0]) || (p_target > &things[THINGS_LIMIT]))
+        return;
+    if (((p_person->Flag & TngF_SelectedAgent) != 0) && ((p_person->Flag2 & TgF2_Unkn0008) == 0))
+        return;
+    if (((p_person->Flag & TngF_PlayerAgent) != 0) &&
+      (p_person->U.UPerson.Mood >= -10) && (p_person->U.UPerson.Mood <= 20) &&
+      ((ushort)p_person->State == PerSt_PROTECT_PERSON) &&
+      ((things[(ushort)p_person->Owner].Flag & TngF_SelectedAgent) != 0))
+        return;
+    if ((p_person->Flag2 & 0x80000000) != 0)
+        return;
+    if ((p_person->U.UPerson.WeaponsCarried & 0x283CEFF) == 0)
+        return;
+    if (((ushort)p_person->State == PerSt_PROTECT_PERSON) && (p_person->U.UPerson.WeaponTurn != 0))
+        return;
+    if (((p_person->U.UPerson.Target2 == 0) || (p_person->PTarget == NULL)) &&
+      ((p_person->Flag & (TngF_InVehicle | TngF_PlayerAgent)) == 0) &&
+      ((p_person->Flag2 & TgF2_Unkn0008) == 0))
+    {
+        // the post: X tile and fraction in the high half, Z in the low one
+        p_person->VY = (s32)(((u32)p_person->X << 8) & 0xFFFF0000) |
+          (((u32)p_person->Z >> 8) & 0xFFFF);
+        p_person->Flag |= TngF_PersKeepPost;
+    }
+    if (p_person->U.UPerson.Target2 == (ushort)p_target->ThingOffset)
+        return;
+    check_weapon(p_person, 0x500);
+    if (p_person->U.UPerson.Target2 == 0)
+    {
+        if (p_person->PTarget != NULL)
+            p_person->OldTarget = p_person->PTarget->ThingOffset;
+        else
+            p_person->OldTarget = 0;
+    }
+    p_person->PTarget = p_target;
+    p_person->U.UPerson.Target2 = p_target->ThingOffset;
+    if (((p_person->Flag & TngF_PlayerAgent) == 0) && (p_person->U.UPerson.PathIndex != 0))
+        remove_path(p_person);
+    p_person->U.UPerson.ComTimer = -1;
+    if ((p_person->Flag & TngF_PlayerAgent) == 0)
+    {
+        p_person->U.UPerson.ComRange = (ubyte)((get_weapon_range(p_person) >> 6) - 1);
+        if (p_person->U.UPerson.ComRange > 100)
+            p_person->U.UPerson.ComRange = 2;
+    }
+}
+
+void set_interrupt_target(struct Thing *p_person, struct Thing *p_target)
+{
+    FNCHK_VOID("set_interrupt_target", set_interrupt_target_asm(p_person, p_target),
+      set_interrupt_target_c(p_person, p_target));
 }
 
 void set_person_dead(struct Thing *p_person, ushort anim_mode)
@@ -8792,19 +8876,489 @@ void person_find_next_state(struct Thing *p_person)
 }
 
 extern ushort word_1AA678;
+extern s32 dword_1AA67C;
 
-/** Targeting decisions of people, spread over game turns.
- * flag 1 (level start) only resets the progress counter; this part is C,
- * the per-turn part is still asm (world simulation stage).
- */
-void people_intel(ubyte flag)
+/** Can the person be chosen as a target at all (alive, not burning, not
+ * in some special states). */
+static TbBool person_targetable_by_intel(struct Thing *p_him)
 {
+    if ((p_him->Flag2 & 0x00400000) != 0)
+        return false;
+    if ((ushort)p_him->State == PerSt_PERSON_BURNING)
+        return false;
+    if ((ushort)p_him->State == 0x0C)
+        return false;
+    if ((p_him->Flag & TngF_Destroyed) != 0)
+        return false;
+    return true;
+}
+
+/** Turn the persons agent away from a target out of sight, range or
+ * destroyed.  Remade from check_unlock_target.
+ */
+static void check_unlock_target(struct Thing *p_person)
+{
+    struct Thing *p_target;
+    int dx, dz, range;
+    short diff;
+
+    p_target = p_person->PTarget;
+    if (p_target == NULL)
+        return;
+    if ((p_target->Flag & TngF_Destroyed) != 0) {
+        p_person->Flag2 &= ~TgF2_Unkn00200000;
+        return;
+    }
+    dx = (p_person->X - p_target->X) >> 8;
+    dz = (p_person->Z - p_target->Z) >> 8;
+    diff = (short)((((ushort)p_person->U.UPerson.Angle << 8) - arctan(dx, -dz) + 0x800) & 0x7FF);
+    if ((diff > 0x737) || (diff < 0xC8))
+    {
+        p_person->PTarget = NULL;
+        p_person->Flag2 &= ~TgF2_Unkn00200000;
+        return;
+    }
+    range = get_weapon_range(p_person);
+    if (dx * dx + dz * dz > range * range)
+    {
+        p_person->PTarget = NULL;
+        p_person->Flag2 &= ~TgF2_Unkn00200000;
+        return;
+    }
+    if ((p_person->PTarget->Flag2 & TgF2_Unkn0002) != 0)
+    {
+        p_person->PTarget = NULL;
+        p_person->Flag2 &= ~TgF2_Unkn00200000;
+    }
+}
+
+/** How much does p_me want to shoot p_him: 0 not at all, 5 when p_him
+ * targets p_me.  Remade from get_target_priority.
+ */
+static short get_target_priority(struct Thing *p_me, struct Thing *p_him)
+{
+    ubyte my_grp, his_grp;
+    u32 his_bit;
+
+    my_grp = p_me->U.UPerson.EffectiveGroup & 0x1F;
+    his_grp = p_him->U.UPerson.EffectiveGroup & 0x1F;
+    if (my_grp == his_grp)
+        return 0;
+    his_bit = 1u << his_grp;
+    if ((war_flags[my_grp].Truce & his_bit) != 0)
+        return 0;
+    if (p_him->PTarget == p_me)
+        return 5;
+    if (((p_me->Flag & TngF_PlayerAgent) != 0) && (p_me->U.UPerson.Mood < -50))
+        return 4;
+    if ((war_flags[my_grp].KillOnSight & his_bit) != 0)
+        return 4;
+    if (((war_flags[my_grp].KillIfArmed & his_bit) != 0) &&
+      ((p_him->U.UPerson.WeaponsCarried & 0x1FBFFFFF) != 0))
+        return 3;
+    if (((war_flags[my_grp].KillIfWeaponOut & his_bit) != 0) &&
+      (p_him->U.UPerson.CurrentWeapon != 0))
+        return 2;
+    if ((p_me->Flag & TngF_PlayerAgent) != 0)
+        return 1;
+    return 0;
+}
+
+/** Looks through one `same_type_head` list for the nearest visible thing
+ * the person would shoot; one which targets the person wins over others.
+ */
+static void find_a_target_in_list(struct Thing *p_me, ThingIdx head, TbBool skip_me,
+  s32 range2, s32 *p_best, ushort *p_found, TbBool *p_targets_me)
+{
+    ushort thing;
+
+    for (thing = head; thing != 0; thing = things[thing].LinkSame)
+    {
+        struct Thing *p_him;
+        s32 dist;
+
+        p_him = &things[thing];
+        if (skip_me && (p_him == p_me))
+            continue;
+        if ((p_him->Flag & TngF_Destroyed) != 0)
+            continue;
+        if (get_target_priority(p_me, p_him) == 0)
+            continue;
+        dist = can_i_see_thing(p_me, p_him, range2, 0);
+        if (dist == 0)
+            continue;
+        if (dist >= *p_best)
+            continue;
+        if (*p_targets_me)
+        {
+            if (p_him->PTarget != p_me)
+                continue;
+            *p_best = dist;
+            *p_found = thing;
+        }
+        else
+        {
+            *p_best = dist;
+            *p_found = thing;
+            if (p_him->PTarget == p_me)
+                *p_targets_me = true;
+        }
+    }
+}
+
+/** Nearest visible enemy of a player agent in direct control (persons,
+ * then same_type lists 6 and 7).  Remade from find_a_target.
+ */
+static ushort find_a_target(struct Thing *p_me)
+{
+    s32 range, range2, best;
+    ushort found;
+    TbBool targets_me;
+
+    targets_me = false;
+    best = 0x7FFFFFFF;
+    found = 0;
+    range = (weapon_defs[p_me->U.UPerson.CurrentWeapon].RangeBlocks << 8) + 0x100;
+    range2 = range * range;
+    find_a_target_in_list(p_me, same_type_head[1], true, range2, &best, &found, &targets_me);
+    find_a_target_in_list(p_me, same_type_head[6], false, range2, &best, &found, &targets_me);
+    find_a_target_in_list(p_me, same_type_head[7], false, range2, &best, &found, &targets_me);
+    dword_1AA67C = best;
+    return found;
+}
+
+/** Picks one of the visible agents of player 0, by game turn, and sets it
+ * as the target.  Remade from find_target_from_players.
+ */
+static TbBool find_target_from_players(struct Thing *p_me, int max_dist, ubyte flags)
+{
+    s32 seen[AGENTS_SQUAD_MAX_COUNT];
+    struct Thing *p_agent;
+    u32 count, pick;
+    ubyte plagent;
+
+    count = 0;
+    p_agent = NULL;
+    p_me->PTarget = NULL;
+    for (plagent = 0; plagent < playable_agents; plagent++)
+    {
+        p_agent = players[0].MyAgent[plagent];
+        seen[plagent] = 0;
+        if (!person_targetable_by_intel(p_agent))
+            continue;
+        if (can_i_see_thing(p_me, p_agent, max_dist * max_dist, flags) != 0)
+            seen[plagent] = ++count;
+    }
+    if (count == 0)
+        return false;
+    pick = ((gameturn + (ushort)p_me->ThingOffset) % count + 1) & 0xFF;
+    for (plagent = 0; plagent < playable_agents; plagent++)
+    {
+        if ((u32)seen[plagent] == pick) {
+            p_agent = players[0].MyAgent[plagent];
+            break;
+        }
+    }
+    set_interrupt_target(p_me, p_agent);
+    ingame.fld_unkC8B = 1;
+    return true;
+}
+
+/** Does the group war state make p_him a target of a person of `grp`? */
+static TbBool war_flags_make_target(u32 kill_sight, u32 kill_wpout, u32 kill_armed,
+  struct Thing *p_him)
+{
+    u32 his_bit;
+
+    his_bit = 1u << (p_him->U.UPerson.EffectiveGroup & 0x1F);
+    if ((kill_sight & his_bit) != 0)
+        return true;
+    if ((p_him->U.UPerson.CurrentWeapon != 0) && ((kill_wpout & his_bit) != 0))
+        return true;
+    if (((p_him->U.UPerson.WeaponsCarried & 0x283CEFF) != 0) && ((kill_armed & his_bit) != 0))
+        return true;
+    return false;
+}
+
+/** Targets the first visible persuaded person which the person's group
+ * is at war with.  Remade from find_target_from_persuaded_peeps.
+ */
+static TbBool find_target_from_persuaded_peeps(struct Thing *p_me, int max_dist, ubyte flags)
+{
+    struct WarFlag *p_wflags;
+    ushort i;
+
+    // the original does not mask the group here
+    p_wflags = &war_flags[p_me->U.UPerson.EffectiveGroup];
+    for (i = 1; i < word_1531DA; i++)
+    {
+        struct Thing *p_him;
+
+        p_him = &things[word_17FA58[i]];
+        if ((p_him->Flag & TngF_Destroyed) != 0)
+            continue;
+        if (!war_flags_make_target(p_wflags->KillOnSight, p_wflags->KillIfWeaponOut,
+          p_wflags->KillIfArmed, p_him))
+            continue;
+        if (!person_targetable_by_intel(p_him))
+            continue;
+        if (can_i_see_thing(p_me, p_him, max_dist * max_dist, flags) == 0)
+            continue;
+        set_interrupt_target(p_me, p_him);
+        return true;
+    }
+    return false;
+}
+
+/** A person looks for someone of a group it is at war with, and attacks
+ * the first visible one.  Remade from find_target_from_group.
+ */
+static TbBool find_target_from_group(struct Thing *p_me)
+{
+    struct WarFlag *p_wflags;
+    u32 not_truce, kill_sight, kill_wpout, kill_armed;
+    u32 range;
+    ushort mod_lv;
+    ubyte flags;
+    TbBool same_group;
+    ushort thing;
+
+    same_group = false;
+    flags = 1;
+    p_wflags = &war_flags[p_me->U.UPerson.EffectiveGroup & 0x1F];
+    not_truce = ~p_wflags->Truce;
+    p_wflags->KillOnSight &= not_truce;
+    p_wflags->KillIfWeaponOut &= not_truce;
+    p_wflags->KillIfArmed &= not_truce;
+    kill_sight = p_wflags->KillOnSight;
+    kill_wpout = p_wflags->KillIfWeaponOut;
+    kill_armed = p_wflags->KillIfArmed;
+    if ((p_me->U.UPerson.EffectiveGroup & 0x80) != 0)
+        kill_sight = 0xFFFFFFFF;
+    else if (p_me->PTarget != NULL)
+        flags = 0;
+
+    if (p_me->U.UPerson.CurrentWeapon == 0)
+    {
+        choose_best_weapon_for_range(p_me, 0x500);
+        range = weapon_defs[p_me->U.UPerson.CurrentWeapon].RangeBlocks;
+        p_me->U.UPerson.CurrentWeapon = 0;
+    }
+    else
+    {
+        range = weapon_defs[p_me->U.UPerson.CurrentWeapon].RangeBlocks;
+    }
+    range <<= 8;
+    if (range == 0)
+        return false;
+
+    mod_lv = (p_me->U.UPerson.UMod.Mods >> 9) & 7;
+    if ((p_me->Flag & TngF_PlayerAgent) != 0) {
+        mod_lv = 0;
+    } else if ((kill_sight | kill_wpout | kill_armed) == 0) {
+        return false;
+    }
+    if (p_me->U.UPerson.Target2 == 0)
+        p_me->PTarget = NULL;
+    if (mod_lv >= 4)
+        mod_lv = 1;
+    range += mod_lv << 8;
+
+    if (!in_network_game && ((p_me->Flag2 & TgF2_Unkn0008) == 0) &&
+      ((kill_sight & (1u << (level_def.PlayableGroups[0] & 0x1F))) != 0))
+    {
+        if (find_target_from_players(p_me, range, flags))
+            return true;
+        if (find_target_from_persuaded_peeps(p_me, range, flags))
+            return true;
+        if (((~(1u << (level_def.PlayableGroups[0] & 0x1F)) & kill_sight) | kill_wpout | kill_armed) == 0)
+            return false;
+    }
+
+    if ((((p_me->Flag & TngF_PlayerAgent) != 0) && (p_me->U.UPerson.Mood < -50)) ||
+      ((p_me->Flag2 & TgF2_Unkn0008) != 0))
+    {
+        same_group = true;
+        flags = 1;
+    }
+    for (thing = same_type_head[1]; thing != 0; thing = things[thing].LinkSame)
+    {
+        struct Thing *p_him;
+
+        p_him = &things[thing];
+        if (!same_group || (p_him->U.UPerson.EffectiveGroup == p_me->U.UPerson.EffectiveGroup))
+        {
+            if (!war_flags_make_target(kill_sight, kill_wpout, kill_armed, p_him))
+                continue;
+        }
+        if (!person_targetable_by_intel(p_him))
+            continue;
+        if (can_i_see_thing(p_me, p_him, range * range, flags) == 0)
+            continue;
+        set_interrupt_target(p_me, p_him);
+        return true;
+    }
+    return false;
+}
+
+#ifdef SW_FNCHK
+static void people_intel_asm(ubyte flag)
+{
+    asm volatile ("call ASM_people_intel\n"
+        : : "a" (flag) : "cc", "memory");
+}
+#endif
+
+/** A person which is not busy otherwise looks for a target. */
+static void people_intel_person(struct Thing *p_person)
+{
+    if (p_person->U.UPerson.Target2 != 0)
+        return;
+    if ((p_person->Flag & (TngF_ShootAtPos | TngF_PlayerAgent)) != (TngF_ShootAtPos | TngF_PlayerAgent))
+        p_person->Flag &= ~TngF_TriggerUse;
+    if (p_person->U.UPerson.WeaponTurn == 0)
+        find_target_from_group(p_person);
+}
+
+/** Targeting decisions of people: agents protecting others in network
+ * games, player agents in direct control, and 15 persons per game turn
+ * (a different part of the list each turn).  Remade from people_intel.
+ */
+static void people_intel_c(ubyte flag)
+{
+    ushort plyr, plagent, i;
+    ushort thing;
+    short cnt;
+    struct Thing *p_person;
+
     if (flag == 1) {
         word_1AA678 = 0;
         return;
     }
-    asm volatile ("call ASM_people_intel\n"
-        : : "a" (flag) : "cc", "memory");
+
+    for (plyr = 0; plyr < 8; plyr++)
+    {
+        if ((ingame.InNetGame_UNSURE & (1 << plyr)) == 0)
+            continue;
+        for (plagent = 0; plagent < playable_agents; plagent++)
+        {
+            short mood, period;
+
+            p_person = players[plyr].MyAgent[plagent];
+            if (p_person == NULL)
+                continue;
+            if ((p_person->Flag & (TngF_SelectedAgent | TngF_Destroyed)) != 0)
+                continue;
+            mood = p_person->U.UPerson.Mood;
+            if (((ushort)p_person->State == PerSt_PROTECT_PERSON) && (mood > -10) && (mood < 20))
+                continue;
+            period = (short)((102 - abs(mood)) >> 2);
+            if (period <= 0)
+                continue;
+            if (gameturn % (u32)(s32)period != 0)
+                continue;
+            find_target_from_group(p_person);
+        }
+    }
+
+    for (plyr = 0; plyr < 8; plyr++)
+    {
+        if ((ingame.InNetGame_UNSURE & (1 << plyr)) == 0)
+            continue;
+        for (i = 0; i < players[plyr].DoubleMode + 1; i++)
+        {
+            ushort target;
+
+            if ((players[plyr].UserInput[i].ControlMode & 0x1FFF) == 1)
+                continue;
+            p_person = &things[players[plyr].DirectControl[i]];
+            if ((p_person->Flag & TngF_SelectedAgent) == 0)
+                continue;
+            if ((p_person->Flag2 & 0x80080000) != 0) {
+                check_unlock_target(p_person);
+                continue;
+            }
+            if (p_person->PTarget == NULL)
+                p_person->Flag2 &= ~TgF2_Unkn00200000;
+            if ((p_person->Flag2 & TgF2_Unkn00200000) != 0) {
+                check_unlock_target(p_person);
+                continue;
+            }
+            target = find_a_target(p_person);
+            if (target == 0)
+                p_person->PTarget = NULL;
+            else
+                p_person->PTarget = &things[target];
+        }
+    }
+
+    thing = same_type_head[1];
+    if (thing == 0)
+        return;
+    // skip the persons done in previous turns
+    p_person = NULL;
+    for (i = 0; (i < word_1AA678) && (thing != 0); i++)
+    {
+        p_person = &things[thing];
+        thing = p_person->LinkSame;
+    }
+    if (thing == 0) {
+        word_1AA678 = 0;
+        thing = same_type_head[1];
+    }
+    for (cnt = 15; cnt != 0; )
+    {
+        if (thing == 0)
+        {
+            // end of the list: the original keeps counting (and ends with
+            // the counter at 1) using the last person's link
+            word_1AA678 = 0;
+        }
+        else
+        {
+            struct Thing *p_old_target;
+
+            p_person = &things[thing];
+            if (p_person->U.UPerson.CurrentWeapon == 0x1E)
+                goto next;
+            if ((p_person->Flag2 & 0x81080010) != 0)
+                goto next;
+            if ((p_person->Flag & (TngF_Unkn4000 | TngF_PlayerAgent | TngF_Destroyed)) != 0)
+                goto next;
+            switch ((ushort)p_person->State & 0x7FFF)
+            {
+            case 7: case 8: case 9: case 10: case 12: case 13: case 14:
+            case 0x1C: case 0x1D: case PerSt_PERSON_BURNING: case 0x33:
+                break;
+            case 0x1B:
+                p_old_target = p_person->PTarget;
+                people_intel_person(p_person);
+                if (p_person->PTarget == NULL)
+                    p_person->PTarget = p_old_target;
+                break;
+            case PerSt_PROTECT_PERSON:
+                if ((p_person->Flag & TngF_PlayerAgent) != 0)
+                    break;
+                people_intel_person(p_person);
+                break;
+            default:
+                people_intel_person(p_person);
+                break;
+            }
+        }
+    next:
+        cnt--;
+        word_1AA678++;
+        thing = p_person->LinkSame;
+    }
+}
+
+/** Targeting decisions of people, spread over game turns.
+ * flag 1 (level start) only resets the progress counter.
+ */
+void people_intel(ubyte flag)
+{
+    FNCHK_VOID("people_intel", people_intel_asm(flag), people_intel_c(flag));
 }
 
 void process_person(struct Thing *p_person)

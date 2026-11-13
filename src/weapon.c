@@ -18,6 +18,7 @@
 /******************************************************************************/
 #include "weapon.h"
 #include "fncheck.h"
+#include "asm_coverage.h"
 
 #include "bfmath.h"
 #include "bfmemory.h"
@@ -5548,6 +5549,7 @@ void process_wielded_weapon(struct Thing *p_person)
 
 void process_weapon(struct Thing *p_person)
 {
+    AMIGA_SIM_CNT(6);
 #if 0
     asm volatile ("call ASM_process_weapon\n"
         : : "a" (p_person));

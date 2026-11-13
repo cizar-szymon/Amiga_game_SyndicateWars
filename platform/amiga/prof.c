@@ -32,7 +32,7 @@ static const char *const prof_names[PROF_SLOTS] = {
     [42] = "p_danger", [43] = "p_weapon", [44] = "p_wander", [45] = "p_state",
     [46] = "person_move", [47] = "p_goto_point",
     [48] = "pm_other_people", [49] = "pm_colide_tile",
-    [50] = "dt_building_vis", [51] = "dt_thing", [52] = "dt_sthing",
+    [50] = "dt_building_vis", [51] = "dt_thing", [52] = "dt_sthing", [53] = "w_cond_cmd", [54] = "pm_ground_h", [55] = "p_lighting", [56] = "pm_top",
 };
 
 static ULONG prof_start[PROF_SLOTS];
@@ -42,6 +42,7 @@ static TbClockMSec prof_report;
 static ULONG prof_freq;
 unsigned long amiga_prof_pixels, amiga_prof_spans, amiga_prof_gpoly_tris;
 unsigned long amiga_prof_cnt[8];
+unsigned long amiga_sim_cnt[8];
 
 static ULONG prof_now(void)
 {
@@ -137,6 +138,12 @@ void amiga_prof_frame(void)
       amiga_prof_cnt[4] / prof_frames, amiga_prof_cnt[5] / prof_frames,
       amiga_prof_cnt[6] / prof_frames, amiga_prof_cnt[7] / prof_frames);
     for (i = 0; i < 8; i++) amiga_prof_cnt[i] = 0;
+    LbWarnLog("prof:   sim person %lu move %lu other %lu nodes %lu wander %lu cond %lu weapon %lu %lu\n",
+      amiga_sim_cnt[0] / prof_frames, amiga_sim_cnt[1] / prof_frames,
+      amiga_sim_cnt[2] / prof_frames, amiga_sim_cnt[3] / prof_frames,
+      amiga_sim_cnt[4] / prof_frames, amiga_sim_cnt[5] / prof_frames,
+      amiga_sim_cnt[6] / prof_frames, amiga_sim_cnt[7] / prof_frames);
+    for (i = 0; i < 8; i++) amiga_sim_cnt[i] = 0;
     amiga_prof_pixels = 0;
     amiga_prof_spans = 0;
     for (i = 0; i < PROF_SLOTS; i++)

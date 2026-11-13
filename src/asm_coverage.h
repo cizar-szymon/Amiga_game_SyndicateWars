@@ -31,6 +31,9 @@ void amiga_prof_end(int slot);
 extern int amiga_prof_level; /* platform/amiga/prof.c */
 #define AMIGA_PROF_BEGIN(n) do { if (amiga_prof_level) amiga_prof_begin(n); } while (0)
 #define AMIGA_PROF_END(n) do { if (amiga_prof_level) amiga_prof_end(n); } while (0)
+/* simulation call counters, per frame in the profile report */
+extern unsigned long amiga_sim_cnt[8];
+#define AMIGA_SIM_CNT(i) (amiga_sim_cnt[i]++)
 #elif defined(SW_PCPROF)
 /* PC build "prof" (build_x86.sh prof): the same slots, measured with the
  * performance counter, average per turn to error.log every 5 s */
@@ -42,6 +45,9 @@ void pc_prof_end(int slot);
 #define AMIGA_PROF_END(n) pc_prof_end(n)
 #else
 #define asm_cov_phase(phase) ((void)0)
+#endif
+#ifndef AMIGA_SIM_CNT
+#define AMIGA_SIM_CNT(i) ((void)0)
 #endif
 #ifndef AMIGA_STEP
 #define AMIGA_STEP(n) ((void)0)

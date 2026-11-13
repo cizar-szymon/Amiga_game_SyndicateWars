@@ -2149,6 +2149,7 @@ ThingIdx check_for_other_people_on_tile(int x, int y, int z,
             }
             thing = p_thing->Next;
         }
+        AMIGA_SIM_CNT(3);
         k++;
         if (k >= MAX_THINGS_ON_TILE) {
             bad_mapwho_tl_x = tile_x;
@@ -2166,6 +2167,7 @@ short check_for_other_people(int x, int y, int z, struct Thing *p_person)
 {
     short ret;
 
+    AMIGA_SIM_CNT(2);
     AMIGA_PROF_BEGIN(48);
     ret = check_for_other_people_body(x, y, z, p_person);
     AMIGA_PROF_END(48);
@@ -8252,6 +8254,8 @@ static void process_wander_c(struct Thing *p_person)
     int count, old_angle;
     short timer;
 
+    AMIGA_SIM_CNT(4);
+
     if ((p_person->Flag & TngF_InVehicle) != 0)
     {
         struct Thing *p_vehicle;
@@ -8293,8 +8297,11 @@ static void process_wander_c(struct Thing *p_person)
     }
     if ((p_person->Flag & TngF_Destroyed) != 0)
         return;
+    AMIGA_SIM_CNT(5);
+    AMIGA_PROF_BEGIN(53);
     if (conditional_command_state_true(p_person->U.UPerson.ComCur, p_person, 1))
         p_person->State = 0;
+    AMIGA_PROF_END(53);
 
     p_person->Timer1 -= fifties_per_gameturn;
     if (p_person->Timer1 < 0)
@@ -9839,6 +9846,7 @@ short person_move(struct Thing *p_person)
 {
     short ret;
 
+    AMIGA_SIM_CNT(1);
     AMIGA_PROF_BEGIN(46);
     ret = person_move_body(p_person);
     AMIGA_PROF_END(46);
@@ -9852,6 +9860,7 @@ static short person_move_body(struct Thing *p_person)
     short colvect;
     short retry;
 
+    AMIGA_PROF_BEGIN(56);
     word_1AA390 = 0;
     if (((gameturn + 32 * p_person->ThingOffset) & 0x7F) == 0) {
         process_random_speech(p_person, 0);
@@ -9887,6 +9896,7 @@ static short person_move_body(struct Thing *p_person)
             p_person->Speed = calc_person_speed(p_person);
         }
     }
+    AMIGA_PROF_END(56);
     speed_x = (p_person->Speed * p_person->VX) >> 4;
     speed_z = (p_person->Speed * p_person->VZ) >> 4;
     p_person->Flag2 &= ~TgF2_Unkn0100;
@@ -10110,7 +10120,9 @@ static short person_move_body(struct Thing *p_person)
 
     if ((colvect == 0) && (p_person->U.UPerson.OnFace == 0))
     {
+        AMIGA_PROF_BEGIN(54);
         set_thing_height_on_ground_mesh(p_person, x, z);
+        AMIGA_PROF_END(54);
     }
     if (colvect != 0)
         return 1;
@@ -10902,6 +10914,8 @@ void process_person(struct Thing *p_person)
     short state;
     ushort ccol;
 
+    AMIGA_SIM_CNT(0);
+
     if ( (p_person->Flag & TngF_PlayerAgent) != 0 && (p_person->Flag2 & TgF2_Unkn10000000) != 0 )
     {
         state = p_person->State;
@@ -11248,8 +11262,10 @@ void process_person(struct Thing *p_person)
               break;
         }
         AMIGA_PROF_END(45);
+        AMIGA_PROF_BEGIN(55);
         calc_lighting(p_person);
         process_lighting_unkn1(p_person);
+        AMIGA_PROF_END(55);
     }
 }
 

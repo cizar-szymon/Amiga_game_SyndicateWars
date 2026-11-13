@@ -254,7 +254,7 @@ Pomiary: profiler próbkujący (`ENV:SyndWarsProf=3`, timer CIA-B) i próbnik ad
 | pomijanie obiektów w całości poza ekranem (`draw_object_faces`, `transform_shbox_outside`) | `3004417e` | `draw_things` 12,8 → 6,8 ms | wspólny C – jest; niezmierzone |
 | omijanie ludzi: puste kafelki bez wywołania (`check_for_other_people`) | `d94eb5a7` | symulacja −1,0 ms (misja 21 −1,7) | wspólny C – jest; niezmierzone |
 | bez cyklicznych wpisów do `error.log` w zwykłej grze | `98987063` | drobne szarpnięcia co 5 s | ARM pisze log osobno – do sprawdzenia |
-| opcja dalekich przechodniów (`SyndWarsCivLOD` 1/2) | `e80c891a` | symulacja 18,8 → 12,5 / 8,8 ms, 13,4 → 15,4 tury/s | **do zrobienia:** rdzeń ARM nie widzi `ENV:` (`amiga_getenv_int` to zaślepka) – przekazać wartość przez `swhost` |
+| opcja dalekich przechodniów (`SyndWarsCivLOD` 1/2) | `e80c891a` | symulacja 18,8 → 12,5 / 8,8 ms, 13,4 → 15,4 tury/s | `7088a07c`: `swhost` przekazuje `civlod=N`; domyślnie poziom 3 (Amiga i ARM), ARM 40,2 → 30,8 ms na turę |
 
 Sprawdzone, bez zysku (wycofane): przestawienie pętli pikseli `gpoly_lines_shaded_68k` pod 68060 –
 pętla jest ograniczona łańcuchem dodawań z przeniesieniem, nie pamięcią (odczyt tekstury −0,7 ms,

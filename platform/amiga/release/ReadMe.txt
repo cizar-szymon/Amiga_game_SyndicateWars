@@ -29,7 +29,7 @@ Stan tej wersji
 - Menu, logowanie i pierwsza misja dzialaja; dalsze misje moga sie
   zawiesic albo zachowywac inaczej niz na PC (czesc procedur gry nie jest
   jeszcze przeniesiona z asemblera x86).
-- Predkosc na 68060: ok. 13 tur gry/s w 320x200 na poczatku misji 1,
+- Predkosc na 68060: ok. 15-16 tur gry/s w 320x200 w misji 1,
   mniej w ciezszych scenach i w 640x480 (pelne tempo gry to 16 tur/s).
 - Log gry: error.log w katalogu gry.
 

@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Function profile from RAM:SyndWars-samples.bin (platform/amiga/sampler.c).
 
-usage: python tools/amiga/samples.py SAMPLES.bin NM.txt [top]
+usage: python tools/amiga/samples.py SAMPLES.bin NM.txt [top | func=NAME]
   NM.txt = output of `m68k-amigaos-nm -n build/amiga/SyndWars`
+  func=NAME: samples per instruction address inside the function NAME
+  (addresses as in the binary, to match `m68k-amigaos-objdump -d`)
 
 Each sample holds the first N longwords of the saved context of the game task.
 The slot that holds the interrupted PC is the one whose values almost always
@@ -28,7 +30,13 @@ def load_nm(path):
 def main():
     data = open(sys.argv[1], "rb").read()
     syms = load_nm(sys.argv[2])
-    top = int(sys.argv[3]) if len(sys.argv) > 3 else 40
+    func = None
+    top = 40
+    if len(sys.argv) > 3:
+        if sys.argv[3].startswith("func="):
+            func = sys.argv[3][5:]
+        else:
+            top = int(sys.argv[3])
     magic, n, words, a_main, a_frame, a_sampler, total, _ = struct.unpack(">8I", data[:32])
     assert magic == 0x53574D50, "bad file"
     by_name = {name: addr for addr, name in syms}
@@ -57,6 +65,17 @@ def main():
     print(f"PC slot {best} (word offset), {best_frac * 100:.1f}% of PCs in program code")
 
     addrs = [a for a, _ in syms]
+    if func is not None:
+        k = [i for i, (_, nm) in enumerate(syms) if nm == func]
+        assert k, "no such function: " + func
+        f_lo = syms[k[0]][0]
+        f_hi = syms[k[0] + 1][0] if k[0] + 1 < len(syms) else f_lo + 0x10000
+        pcs = Counter(smp[best] - delta for smp in samples if f_lo <= smp[best] - delta < f_hi)
+        tot = sum(pcs.values())
+        print(f"{func}: {tot} samples ({tot * 100.0 / n:.2f}%), 0x{f_lo:x}-0x{f_hi:x}")
+        for a in sorted(pcs):
+            print(f"  0x{a:06x} +{a - f_lo:4d} {pcs[a]:6d} {pcs[a] * 100.0 / tot:6.2f}%")
+        return
     funcs = Counter()
     for smp in samples:
         v = smp[best]

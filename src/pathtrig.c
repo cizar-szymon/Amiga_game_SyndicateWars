@@ -646,13 +646,6 @@ void thin_wall(int x1, int y1, int x2, int y2, ubyte en1, ubyte en2)
 #endif
 }
 
-s32 ma_triangle_route_4(int triA, int triB, s32 *p_treert)
-{
-    s32 ret;
-    asm volatile ("call ASM_ma_triangle_route_4\n"
-        : "=r" (ret) : "a" (triA), "d" (triB), "b" (p_treert));
-    return ret;
-}
 
 #ifdef SW_FNCHK
 static s32 route_to_path_asm(int ax8, int ay8, int bx8, int by8, s32 *p_treert,
@@ -1143,6 +1136,121 @@ s32 ma_triangle_route_3(int triA, int triB, s32 *p_route, s32 *p_cost)
     FNCHK_RET("ma_triangle_route_3", ret,
       ma_triangle_route_3_asm(triA, triB, p_route, p_cost),
       ma_triangle_route_3_c(triA, triB, p_route, p_cost));
+    return ret;
+}
+
+/** Like triangle_route_do_unkn5, but one triangle at a time, and the search
+ * goes on for up to 29 more triangles after reaching triA, which may then
+ * get a better way in (else its first one is restored).
+ * Remade from triangle_route_do_unkn7.
+ */
+static s32 triangle_route_do_unkn7(s32 triA, s32 triB, s32 *p_route)
+{
+    s32 cur, saved_dad;
+    int counter;
+
+    saved_dad = 0;
+    counter = 0;
+    tag_current++;
+    route_heap[1] = -1;
+    route_heap_end = 0;
+    if (tag_current == 0) {
+        memset(routeTags, 0, 8000);
+        tag_current = 1;
+    }
+    tree_val[triB] = 1;
+    tree_dad[triB] = triB;
+    routeTags[triB] = tag_current;
+    route_heap_push(triB);
+
+    while (1)
+    {
+        cur = route_heap[1];
+        if (cur == -1)
+            break;
+        if (cur == triA)
+        {
+            if (counter != 0)
+                break;
+            saved_dad = tree_dad[triA];
+            routeTags[triA] = (ubyte)(tag_current + 1);
+            counter = 30;
+            route_heap_pop();
+            continue;
+        }
+        if (counter > 1)
+        {
+            counter--;
+            if (counter == 1) {
+                tree_dad[triA] = saved_dad;
+                break;
+            }
+        }
+        route_heap_pop();
+        route_expand_tri(cur);
+    }
+
+    if (route_heap[1] == -1)
+        return -1;
+    {
+        s32 n, count;
+
+        n = triA;
+        count = 0;
+        while (1)
+        {
+            p_route[count] = n;
+            if (n == triB)
+                break;
+            count++;
+            n = tree_dad[n];
+        }
+        return count;
+    }
+}
+
+#ifdef SW_FNCHK
+static s32 ma_triangle_route_4_asm(int triA, int triB, s32 *p_treert)
+{
+    s32 ret;
+    asm volatile ("call ASM_ma_triangle_route_4\n"
+        : "=a" (ret), "+d" (triB), "+b" (p_treert) : "a" (triA) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Route through triangles from triangle A to B, searched backwards from B
+ * with the points swapped.  Returns its length (number of steps) or -1.
+ * Remade from ma_triangle_route_4.
+ */
+static s32 ma_triangle_route_4_c(int triA, int triB, s32 *p_treert)
+{
+    s32 t, len;
+    int cost;
+
+    t = tree_Ax8; tree_Ax8 = tree_Bx8; tree_Bx8 = t;
+    t = tree_Ay8; tree_Ay8 = tree_By8; tree_By8 = t;
+    len = triangle_route_do_unkn7(triB, triA, route_bak);
+    if (len == -1)
+        return -1;
+    if (route_to_path(tree_Ax8, tree_Ay8, tree_Bx8, tree_By8, route_bak,
+      len, &route_fwd_path, &cost) == -1)
+        return -1;
+    t = tree_Ax8; tree_Ax8 = tree_Bx8; tree_Bx8 = t;
+    t = tree_Ay8; tree_Ay8 = tree_By8; tree_By8 = t;
+    {
+        int k;
+        for (k = len; k >= 0; k--)
+            p_treert[len - k] = route_bak[k];
+    }
+    return len;
+}
+
+s32 ma_triangle_route_4(int triA, int triB, s32 *p_treert)
+{
+    s32 ret;
+    FNCHK_RET("ma_triangle_route_4", ret, ma_triangle_route_4_asm(triA, triB, p_treert),
+      ma_triangle_route_4_c(triA, triB, p_treert));
     return ret;
 }
 

@@ -25,6 +25,29 @@
 #include "bigmap.h"
 #include "thing.h"
 #include "swlog.h"
+#include <stdlib.h>
+#include "building.h"
+#include "febrief.h"
+#include "fncheck.h"
+#include "frame_sprani.h"
+#include "game.h"
+#include "game_options.h"
+#include "misstat.h"
+#include "people.h"
+#include "sound.h"
+#include "tngcolisn.h"
+#include "vehicle.h"
+
+extern short link__MapColListEmptyHead;
+
+void do_shockwave_building(int dist, int intensity, struct Thing *p_thing, struct Thing *p_owner);
+void do_shockwave_vehicle(int dx, int dz, int dist, int intensity,
+  struct Thing *p_vehicle, struct Thing *p_owner);
+void do_shockwave_person(int dx, int dz, int dist, int intensity,
+  struct Thing *p_person, struct Thing *p_owner);
+void do_shockwave_scale_effect(int dx, int dz, int dist, int intensity,
+  struct SimpleThing *p_sthing, struct Thing *p_owner);
+void init_recoil(struct Thing *p_person, short vx, short vy, short vz, ushort type);
 /******************************************************************************/
 
 #pragma pack(1)
@@ -391,7 +414,8 @@ void unused_func_025(short a1, short a2, short a3)
         : : "a" (a1), "d" (a2), "b" (a3));
 }
 
-void do_shockwave(int x, int y, int z, int radius, int intensity, struct Thing *p_owner)
+#ifdef SW_FNCHK
+static void do_shockwave_asm(int x, int y, int z, int radius, int intensity, struct Thing *p_owner)
 {
     // Pushed through a register holding them: a "g" operand may be placed
     // relative to the stack pointer, which each push moves.
@@ -407,66 +431,319 @@ void do_shockwave(int x, int y, int z, int radius, int intensity, struct Thing *
         : : "a" (x), "d" (y), "b" (z), "c" (radius), "S" (stkargs)
         : "cc", "memory");
 }
+#endif
 
+/** Removes the first collision vector of the tile belonging to the thing.
+ * Remade from del_thing_vectors_from_mapwho.
+ */
+static TbBool del_thing_vectors_from_mapwho(struct MyMapElement *p_mapel, short thing)
+{
+    ushort cvl, prev, next;
 
+    prev = 0;
+    for (cvl = p_mapel->ColHead; cvl != 0; cvl = next & 0x7FFF)
+    {
+        next = game_col_vects_list[cvl].NextColList;
+        if (game_col_vects_list[cvl].Object == thing)
+        {
+            if (prev != 0)
+                game_col_vects_list[prev].NextColList = next;
+            else
+                p_mapel->ColHead = next & 0x7FFF;
+            game_col_vects_list[cvl].NextColList = link__MapColListEmptyHead;
+            link__MapColListEmptyHead = cvl;
+            return true;
+        }
+        prev = cvl;
+    }
+    return false;
+}
+
+/** Distance approximation used by the shockwave: longer + shorter / 2. */
+static int shockwave_dist(int dx, int dz)
+{
+    int adx, adz;
+
+    adx = abs(dx);
+    adz = abs(dz);
+    if (adx > adz)
+        return adx + (adz >> 1);
+    return adz + (adx >> 1);
+}
+
+/** Damages the things around (x,y,z) (map coordinates): persons, vehicles,
+ * buildings, mines, scale effects and dropped items.  A negative radius
+ * only affects dropped items.  Remade from do_shockwave.
+ */
+static void do_shockwave_c(int x, int y, int z, int radius, int intensity, struct Thing *p_owner)
+{
+    TbBool items_only;
+    int r, tile_x, tile_z;
+    int tile_x_beg, tile_z_beg;
+
+    items_only = false;
+    if (radius < 0) {
+        items_only = true;
+        radius = -radius;
+    }
+    r = radius >> 8;
+    if (r < 1)
+        r = 1;
+    tile_x_beg = (x >> 8) - r;
+    tile_z_beg = (z >> 8) - r;
+
+    for (tile_x = tile_x_beg; tile_x <= tile_x_beg + 2 * r; tile_x++)
+    {
+        for (tile_z = tile_z_beg; tile_z <= tile_z_beg + 2 * r; tile_z++)
+        {
+            struct MyMapElement *p_mapel;
+            short thing;
+
+            if ((tile_x <= 0) || (tile_x >= MAP_TILE_WIDTH))
+                continue;
+            if ((tile_z <= 0) || (tile_z >= MAP_TILE_HEIGHT))
+                continue;
+            p_mapel = &game_my_big_map[tile_z * MAP_TILE_WIDTH + tile_x];
+            if (!items_only)
+            {
+                short obj;
+
+                obj = game_col_vects_list[p_mapel->ColHead].Object;
+                if (obj > 0)
+                {
+                    if (things[obj].Type == TT_BUILDING)
+                        do_shockwave_building(0x200, intensity, &things[obj], p_owner);
+                    else if (obj < 1000)
+                        del_thing_vectors_from_mapwho(p_mapel, obj);
+                    // else the original only formats a "strange thing" message
+                }
+            }
+            for (thing = p_mapel->Child; thing != 0; )
+            {
+                int dx, dy, dz, dist;
+
+                if (thing > 0)
+                {
+                    struct Thing *p_thing;
+
+                    p_thing = &things[thing];
+                    if (!items_only)
+                    {
+                        if ((p_thing->Type == TT_PERSON) &&
+                          ((ushort)p_thing->State != PerSt_PERSON_BURNING) &&
+                          ((p_thing->Flag & TngF_Destroyed) == 0))
+                        {
+                            dy = (p_thing->Y >> 8) - y;
+                            if ((dy < 0x55) && (dy > -0x55))
+                            {
+                                dx = (p_thing->X >> 8) - x;
+                                dz = (p_thing->Z >> 8) - z;
+                                dist = shockwave_dist(dx, dz);
+                                if (dist < (ushort)p_thing->Radius + radius)
+                                    do_shockwave_person(dx, dz, dist, intensity, p_thing, p_owner);
+                            }
+                        }
+                        if ((p_thing->Type == TT_VEHICLE) ||
+                          ((p_thing->Type == TT_BUILDING) && (p_thing->SubType == 0x20)))
+                        {
+                            dy = (p_thing->Y >> 8) - y;
+                            if (((ushort)p_thing->State != 0x0D) && (dy < 0xB9) && (dy > -0xCD))
+                            {
+                                dx = (p_thing->X >> 8) - x;
+                                dz = (p_thing->Z >> 8) - z;
+                                dist = shockwave_dist(dx, dz);
+                                if (dist < (ushort)p_thing->Radius + radius)
+                                    do_shockwave_vehicle(dx, dz, dist, intensity, p_thing, p_owner);
+                            }
+                        }
+                        if ((p_thing->Type == TT_MINE) && (p_thing->SubType == 0x30) &&
+                          ((p_thing->Flag & TngF_Destroyed) == 0) &&
+                          ((ushort)p_thing->State != 0x0D))
+                        {
+                            dist = shockwave_dist((p_thing->X >> 8) - x, (p_thing->Z >> 8) - z);
+                            if ((radius - dist) * intensity / radius > 0)
+                            {
+                                p_thing->Health -= (short)intensity;
+                                if (p_thing->Health <= 0)
+                                {
+                                    play_dist_sample(p_thing, 0x25, 0x7F, 0x40, 100, 0, 3);
+                                    bang_new4(p_thing->X, p_thing->Y, p_thing->Z, 0x14);
+                                    p_thing->State = 0x0D;
+                                    p_thing->Flag |= TngF_Destroyed;
+                                    p_thing->StartFrame = 0x42D;
+                                    p_thing->Frame = nstart_ani[0x42D];
+                                }
+                            }
+                        }
+                    }
+                    thing = p_thing->Next;
+                }
+                else
+                {
+                    struct SimpleThing *p_sthing;
+
+                    p_sthing = &sthings[thing];
+                    if ((p_sthing->Type == SmTT_SCALE_EFFECT) && !items_only)
+                    {
+                        dy = (p_sthing->Y >> 8) - y;
+                        if ((dy < 0xB9) && (dy > -0xCD))
+                        {
+                            dx = (p_sthing->X >> 8) - x;
+                            dz = (p_sthing->Z >> 8) - z;
+                            dist = shockwave_dist(dx, dz);
+                            if (dist < (ushort)p_sthing->Radius + radius)
+                                do_shockwave_scale_effect(dx, dz, dist, intensity, p_sthing, NULL);
+                        }
+                    }
+                    if (((p_sthing->Type == SmTT_DROPPED_ITEM) && (p_sthing->SubType == 0x0D)) ||
+                      (p_sthing->SubType == 0x0C))
+                    {
+                        dy = (p_sthing->Y >> 8) - y;
+                        if ((dy < 0xB9) && (dy > -0xCD))
+                        {
+                            dist = shockwave_dist((p_sthing->X >> 8) - x, (p_sthing->Z >> 8) - z);
+                            if (dist < (ushort)p_sthing->Radius + radius)
+                            {
+                                p_sthing->Flag |= TngF_Unkn00040000;
+                                if (p_sthing->Timer1 == 999)
+                                    p_sthing->Timer1 = 140;
+                            }
+                        }
+                    }
+                    thing = sthings[thing].Next;
+                }
+            }
+        }
+    }
+}
+
+void do_shockwave(int x, int y, int z, int radius, int intensity, struct Thing *p_owner)
+{
+    FNCHK_VOID("do_shockwave", do_shockwave_asm(x, y, z, radius, intensity, p_owner),
+      do_shockwave_c(x, y, z, radius, intensity, p_owner));
+}
+
+/** Remade from do_shockwave_building. */
 void do_shockwave_building(int dist, int intensity, struct Thing *p_thing, struct Thing *p_owner)
 {
-    asm volatile (
-      "call ASM_do_shockwave_building\n"
-        : : "a" (dist), "d" (intensity), "b" (p_thing), "c" (p_owner));
+    if ((p_thing->Flag & TngF_Destroyed) != 0)
+        return;
+    p_thing->Health = (short)(p_thing->Health - (intensity >> 4));
+    if (p_thing->Health < 0)
+        collapse_building(p_thing->X >> 8, p_thing->Y >> 8, p_thing->Z >> 8, p_thing);
 }
 
+/** Remade from do_shockwave_vehicle. */
 void do_shockwave_vehicle(int dx, int dz, int dist, int intensity,
-  struct Thing *p_vevicle, struct Thing *p_owner)
+  struct Thing *p_vehicle, struct Thing *p_owner)
 {
-    // Pushed through a register holding them: a "g" operand may be placed
-    // relative to the stack pointer, which each push moves.
-    int stkargs[2];
+    int div;
 
-    stkargs[0] = (int)(intptr_t)p_vevicle;
-    stkargs[1] = (int)(intptr_t)p_owner;
-
-    asm volatile (
-      "push 4(%4)\n"
-      "push 0(%4)\n"
-      "call ASM_do_shockwave_vehicle\n"
-        : : "a" (dx), "d" (dz), "b" (dist), "c" (intensity), "S" (stkargs)
-        : "cc", "memory");
+    if ((p_vehicle->Flag & TngF_Destroyed) != 0)
+        return;
+    div = (dist >> 7) * (dist >> 7);
+    if (div > 0)
+        intensity /= div;
+    if (p_vehicle->SubType == 0x33)
+        intensity >>= 1;
+    p_vehicle->Health = (short)(p_vehicle->Health - intensity);
+    p_vehicle->U.UVehicle.RecoilTimer = 10;
+    if (p_vehicle->Health > 0)
+        return;
+    if (p_vehicle->Type == TT_VEHICLE)
+        start_crashing(p_vehicle);
+    else
+        init_mgun_explode(p_vehicle);
 }
 
+/** Remade from do_shockwave_person. */
 void do_shockwave_person(int dx, int dz, int dist, int intensity,
   struct Thing *p_person, struct Thing *p_owner)
 {
-    // Pushed through a register holding them: a "g" operand may be placed
-    // relative to the stack pointer, which each push moves.
-    int stkargs[2];
+    int div;
 
-    stkargs[0] = (int)(intptr_t)p_person;
-    stkargs[1] = (int)(intptr_t)p_owner;
+    if ((p_person->Flag & TngF_Destroyed) != 0)
+        return;
+    div = (dist >> 7) * (dist >> 7);
+    if (div > 0)
+        intensity /= div;
+    if (((p_person->U.UPerson.UMod.Mods >> 6) & 7) < 4)
+        p_person->Health -= (short)intensity;
+    if ((p_person->Type == TT_MINE) && (p_person->Health <= 0))
+    {
+        play_dist_ssample((struct SimpleThing *)p_person, 0x25, 0x7F, 0x40, 100, 0, 3);
+        // the original shifts only y here
+        bang_new4(p_person->X, p_person->Y >> 8, p_person->Z, 0x14);
+        remove_thing(p_person->ThingOffset);
+        delete_node(p_person);
+        return;
+    }
+    p_person->U.UPerson.ShieldEnergy = 0;
+    if (p_person->Health < 0)
+    {
+        if (p_owner != NULL)
+        {
+            if (!in_network_game)
+            {
+                if (p_owner->U.UPerson.EffectiveGroup == ingame.MyGroup)
+                {
+                    switch (p_person->SubType)
+                    {
+                    case 1: case 2: case 3: case 9: case 12:
+                        mission_status[open_brief].SP.EnemiesKilled++;
+                        break;
+                    case 4: case 5: case 10: case 11: case 13: case 14:
+                        mission_status[open_brief].SP.CivsKilled++;
+                        break;
+                    case 6: case 7: case 8:
+                        mission_status[open_brief].SP.SecurityKilled++;
+                        break;
+                    default:
+                        break;
+                    }
+                }
+            }
+            else if ((p_person->Flag & TngF_PlayerAgent) != 0)
+            {
+                struct Thing *p_killer;
 
-    asm volatile (
-      "push 4(%4)\n"
-      "push 0(%4)\n"
-      "call ASM_do_shockwave_person\n"
-        : : "a" (dx), "d" (dz), "b" (dist), "c" (intensity), "S" (stkargs)
-        : "cc", "memory");
+                p_killer = NULL;
+                if ((p_owner->Flag & TngF_PlayerAgent) != 0) {
+                    p_killer = p_owner;
+                } else if ((p_owner->Flag & TngF_Persuaded) != 0) {
+                    if ((things[(ushort)p_owner->Owner].Flag & TngF_PlayerAgent) != 0)
+                        p_killer = &things[(ushort)p_owner->Owner];
+                }
+                if ((p_killer != NULL) && ((p_killer->Flag & TngF_PlayerAgent) != 0))
+                    mission_status[p_killer->U.UPerson.ComCur >> 2].MP.AgentsKilled[p_person->U.UPerson.ComCur >> 2]++;
+            }
+        }
+        set_person_dead(p_person, 0x0B);
+        return;
+    }
+    if ((p_person->Flag2 & TgF2_KnockedOut) != 0)
+        return;
+    if ((dx == 0) && (dz == 0))
+    {
+        dx = (LbRandomAnyShort() & 0x1FF) - 0x100;
+        dz = (LbRandomAnyShort() & 0x1FF) - 0x100;
+    }
+    init_recoil(p_person, (short)dx, 0, (short)dz, 0);
+    p_person->U.UPerson.RecoilTimer = 10;
 }
 
+/** Remade from do_shockwave_scale_effect. */
 void do_shockwave_scale_effect(int dx, int dz, int dist, int intensity,
   struct SimpleThing *p_sthing, struct Thing *p_owner)
 {
-    // Pushed through a register holding them: a "g" operand may be placed
-    // relative to the stack pointer, which each push moves.
-    int stkargs[2];
+    int div;
 
-    stkargs[0] = (int)(intptr_t)p_sthing;
-    stkargs[1] = (int)(intptr_t)p_owner;
-
-    asm volatile (
-      "push 4(%4)\n"
-      "push 0(%4)\n"
-      "call ASM_do_shockwave_scale_effect\n"
-        : : "a" (dx), "d" (dz), "b" (dist), "c" (intensity), "S" (stkargs)
-        : "cc", "memory");
+    if (intensity > 2000)
+        intensity = 2000;
+    div = (dist >> 5) * (dist >> 5);
+    if (div > 0)
+        intensity /= div;
+    p_sthing->U.UEffect.VX += (dx * intensity) >> 3;
+    p_sthing->U.UEffect.VZ += (dz * intensity) >> 3;
 }
 /******************************************************************************/

@@ -6,6 +6,8 @@
 #include "bigmap.h"
 #include "thing.h"
 
+extern int amiga_prof_level;
+
 static int count_bad_mapwho(int *first)
 {
     int i, bad;
@@ -34,7 +36,8 @@ void amiga_phase_trace(int phase)
     if (n <= 60) {
         bad = count_bad_mapwho(&first);
         LbWarnLog("phase %d (call %lu), bad mapwho %d first %d\n", phase, n, bad, first);
-    } else if ((n % 500) == 0) {
+    } else if (((n % 500) == 0) && amiga_prof_level) {
+        // each log line opens and closes error.log - not during normal play
         LbWarnLog("phase %d (call %lu)\n", phase, n);
     }
 }

@@ -427,6 +427,7 @@ static void fps_draw(UBYTE *base, ULONG bpr, unsigned long value)
 void amiga_prof_begin(int slot);
 void amiga_prof_end(int slot);
 void amiga_prof_frame(void);
+extern int amiga_prof_level;
 
 static void fps_count(void)
 {
@@ -438,7 +439,9 @@ static void fps_count(void)
     now = LbTimerClock();
     fps_frames++;
     total_frames++;
-    if ((now - diag_last >= 5000) || (total_frames <= 3)) {
+    // error.log is opened and closed for each line: every 5 s only when
+    // profiling (ENV:SyndWarsProf), not during normal play
+    if (((now - diag_last >= 5000) && amiga_prof_level) || (total_frames <= 3)) {
         LOGWARN("present %lu, clock %lu ms, fps %lu", total_frames,
           (unsigned long)now, amiga_fps_last);
         diag_last = now;

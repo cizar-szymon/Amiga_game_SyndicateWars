@@ -208,6 +208,8 @@ void amiga_prof_frame(void)
     TbClockMSec now;
     int i;
 
+    if (amiga_prof_level == 0)
+        return; // no clock read, no log lines during normal play
     prof_frames++;
     now = LbTimerClock();
     if (prof_report == 0)

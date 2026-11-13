@@ -644,7 +644,8 @@ void process_shuttle_loader(struct Thing *p_building)
         : : "a" (p_building));
 }
 
-void bul_hit_vector(int x, int y, int z, short col, int hp, int type)
+#ifdef SW_FNCHK
+static void bul_hit_vector_asm(int x, int y, int z, short col, int hp, int type)
 {
     // Pushed through a register holding them: a "g" operand may be placed
     // relative to the stack pointer, which each push moves.
@@ -659,6 +660,36 @@ void bul_hit_vector(int x, int y, int z, short col, int hp, int type)
       "call ASM_bul_hit_vector\n"
         : : "a" (x), "d" (y), "b" (z), "c" (col), "S" (stkargs)
         : "cc", "memory");
+}
+#endif
+
+/** A shot hit the wall of an object (col is a ColVectList index): a
+ * building loses health hp/2 and collapses below zero.
+ * Remade from bul_hit_vector; x, y, z and type are not used.
+ */
+static void bul_hit_vector_c(int x, int y, int z, short col, int hp, int type)
+{
+    struct ColVectList *p_cvlist;
+    struct Thing *p_building;
+    int health;
+
+    p_cvlist = &game_col_vects_list[col];
+    if (game_col_vects[p_cvlist->Vect].Face == 0)
+        return;
+    p_building = &things[p_cvlist->Object];
+    if ((p_building->Flag & TngF_Destroyed) != 0)
+        return;
+    play_dist_sample(p_building, 0x41, 0x7F, 0x40, 100, 0, 1);
+    health = p_building->Health - (((short)hp) >> 1);
+    if (health < 0)
+        collapse_building(p_building->X >> 8, p_building->Y >> 8, p_building->Z >> 8, p_building);
+    p_building->Health = (short)health;
+}
+
+void bul_hit_vector(int x, int y, int z, short col, int hp, int type)
+{
+    FNCHK_VOID("bul_hit_vector", bul_hit_vector_asm(x, y, z, col, hp, type),
+      bul_hit_vector_c(x, y, z, col, hp, type));
 }
 
 void rotate_object(struct Thing *p_object)

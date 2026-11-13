@@ -9061,10 +9061,58 @@ void person_dieing(struct Thing *p_person)
     FNCHK_VOID("person_dieing", person_dieing_asm(p_person), person_dieing_c(p_person));
 }
 
-void person_dead(struct Thing *p_person)
+#ifdef SW_FNCHK
+static void person_dead_asm(struct Thing *p_person)
 {
     asm volatile ("call ASM_person_dead\n"
-        : : "a" (p_person));
+        : : "a" (p_person) : "cc", "memory");
+}
+#endif
+
+/** A dead person: the end of a special death animation (SubState 0x1A);
+ * in a network game a dead agent in direct control gives the player a new
+ * one.  Remade from person_dead.
+ */
+static void person_dead_c(struct Thing *p_person)
+{
+    if (p_person->SubState == 0x1A)
+    {
+        p_person->Timer1 -= fifties_per_gameturn;
+        p_person->Radius = 40;
+        if (p_person->Timer1 < 0)
+        {
+            ushort nxframe;
+
+            p_person->Timer1 = p_person->StartTimer1;
+            nxframe = frame[(ushort)p_person->Frame].Next;
+            if ((frame[nxframe].Flags & 0x01) != 0) {
+                p_person->SubState = 0;
+                p_person->Flag |= 0x02000000;
+            } else {
+                p_person->Frame = nxframe;
+            }
+        }
+    }
+    if (in_network_game && ((net_game_play_flags & 0x04) != 0) &&
+      ((p_person->Flag & TngF_SelectedAgent) != 0))
+    {
+        PlayerIdx plyr;
+
+        for (plyr = 0; plyr < 8; plyr++)
+        {
+            if ((ingame.InNetGame_UNSURE & (1 << plyr)) == 0)
+                continue;
+            p_person->Flag &= ~TngF_SelectedAgent;
+            if ((ushort)p_person->ThingOffset != players[plyr].DirectControl[0])
+                continue;
+            place_default_player(plyr, 0);
+        }
+    }
+}
+
+void person_dead(struct Thing *p_person)
+{
+    FNCHK_VOID("person_dead", person_dead_asm(p_person), person_dead_c(p_person));
 }
 
 void person_kill_person(struct Thing *p_person)

@@ -6132,11 +6132,40 @@ void make_peeps_scatter(struct Thing *p_person, int x, int z)
         : : "a" (p_person), "d" (x), "b" (z));
 }
 
-int limit_mood(struct Thing *p_thing, short mood)
+#ifdef SW_FNCHK
+static int limit_mood_asm(struct Thing *p_thing, short mood)
 {
     int ret;
     asm volatile ("call ASM_limit_mood\n"
-        : "=r" (ret) : "a" (p_thing), "d" (mood));
+        : "=a" (ret) : "a" (p_thing), "d" (mood) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Mood (drug level) of a person limited by its stamina: at most
+ * +-88 * Stamina / MaxStamina.  Remade from limit_mood.
+ */
+static int limit_mood_c(struct Thing *p_thing, short mood)
+{
+    s32 range;
+
+    if ((p_thing < &things[0]) || (p_thing > &things[THINGS_LIMIT]))
+        return 0;
+    if (p_thing->U.UPerson.MaxStamina == 0)
+        return 0;
+    range = (s32)p_thing->U.UPerson.Stamina * 88 / p_thing->U.UPerson.MaxStamina;
+    if (mood > range)
+        mood = (short)range;
+    range = -(s32)p_thing->U.UPerson.Stamina * 88 / p_thing->U.UPerson.MaxStamina;
+    if (mood < range)
+        mood = (short)range;
+    return mood;
+}
+
+int limit_mood(struct Thing *p_thing, short mood)
+{
+    int ret;
+    FNCHK_RET("limit_mood", ret, limit_mood_asm(p_thing, mood), limit_mood_c(p_thing, mood));
     return ret;
 }
 

@@ -46,6 +46,10 @@
 #include "sound.h"
 #include "thing.h"
 #include "swlog.h"
+#include "fncheck.h"
+#include "people.h"
+#include "weapon.h"
+#include "frame_sprani.h"
 /******************************************************************************/
 struct ShortPacket shpackets[8];
 
@@ -130,19 +134,197 @@ void thing_goto_point_rel_fast(struct Thing *p_thing, short x, short y, short z,
         : : "a" (p_thing), "d" (x), "b" (y), "c" (z), "g" (plyr));
 }
 
-void thing_goto_point_fast(struct Thing *p_thing, short x, short y, short z, int plyr)
+void set_person_animmode_run(struct Thing *p_person);
+int start_goto_vehicle(struct Thing *p_vehicle, int x, int z);
+ushort build_navigate_path(struct Thing *p_thing, int x, int z, int face);
+void thing_goto_point(struct Thing *p_thing, short x, short y, short z);
+
+#ifdef SW_FNCHK
+static void thing_goto_point_fast_asm(struct Thing *p_thing, short x, short y, short z, int plyr)
 {
     asm volatile (
       "push %4\n"
       "call ASM_thing_goto_point_fast\n"
-        : : "a" (p_thing), "d" (x), "b" (y), "c" (z), "g" (plyr));
+        : : "a" (p_thing), "d" (x), "b" (y), "c" (z), "g" (plyr) : "cc", "memory");
+}
+
+static void thing_goto_point_asm(struct Thing *p_thing, short x, short y, short z)
+{
+    asm volatile (
+      "call ASM_thing_goto_point\n"
+        : : "a" (p_thing), "d" (x), "b" (y), "c" (z) : "cc", "memory");
+}
+#endif
+
+/** Agents of the player protecting the leader start running with him, if
+ * they have stamina to spare.
+ * Remade from set_player_peeps_to_run.
+ */
+static void set_player_peeps_to_run(struct Thing *p_leader, ushort plyr)
+{
+    ushort plagent;
+
+    for (plagent = 0; plagent < playable_agents; plagent++)
+    {
+        struct Thing *p_agent;
+
+        p_agent = players[plyr].MyAgent[plagent];
+        if ((p_agent == NULL) || (p_agent == p_leader))
+            continue;
+        if ((p_agent->Flag & TngF_Destroyed) != 0)
+            continue;
+        if ((ushort)p_agent->State != PerSt_PROTECT_PERSON)
+            continue;
+        if (p_agent->GotoThingIndex != (ushort)p_leader->ThingOffset)
+            continue;
+        if (p_agent->U.UPerson.Stamina <= (p_agent->U.UPerson.MaxStamina >> 2) + 64)
+            continue;
+        p_agent->U.UPerson.Target2 = 0;
+        p_agent->Flag &= ~TngF_TriggerUse;
+        p_agent->PTarget = NULL;
+        set_person_animmode_run(p_agent);
+        p_agent->Flag2 |= 0x80000000;
+    }
+}
+
+/** Agents of the player protecting the given one lose their paths.
+ * Remade from clear_player_protectors_paths.
+ */
+static void clear_player_protectors_paths(struct Thing *p_leader)
+{
+    ushort plyr, plagent;
+
+    plyr = p_leader->U.UPerson.ComCur >> 2;
+    for (plagent = 0; plagent < playable_agents; plagent++)
+    {
+        struct Thing *p_agent;
+
+        p_agent = players[plyr].MyAgent[plagent];
+        if (p_agent == NULL)
+            continue;
+        if ((ushort)p_agent->State != PerSt_PROTECT_PERSON)
+            continue;
+        if (p_agent->GotoThingIndex != (ushort)p_leader->ThingOffset)
+            continue;
+        remove_path(p_agent);
+        p_agent->U.UPerson.ComTimer = -1;
+    }
+}
+
+/** Animation of a person after AnimMode changed. */
+static void thing_goto_set_anim_frames(struct Thing *p_thing)
+{
+    ushort base;
+
+    base = people_frames[p_thing->SubType][p_thing->U.UPerson.AnimMode];
+    p_thing->StartFrame = base - 1;
+    p_thing->Frame = nstart_ani[base + p_thing->U.UPerson.Angle];
+}
+
+/** Send a thing (a person, or the vehicle it drives) to a point.
+ * Remade from thing_goto_point; y is not used.
+ */
+static void thing_goto_point_c(struct Thing *p_thing, short x, short y, short z)
+{
+    ushort state;
+
+    if ((p_thing->Flag & (TngF_Unkn40000000 | TngF_StationrSht | TngF_Destroyed | TngF_Unkn0001)) != 0)
+        return;
+    p_thing->Flag2 &= ~(TgF2_Unkn00020000 | TgF2_Unkn0040);
+    if ((ushort)p_thing->State == PerSt_DEAD)
+        return;
+    if ((p_thing->Flag2 & TgF2_Unkn0001) != 0)
+        finalise_razor_wire(p_thing);
+
+    if ((p_thing->Flag & TngF_InVehicle) != 0)
+    {
+        if (start_goto_vehicle(&things[p_thing->U.UPerson.Vehicle], x, z) == 0) {
+            p_thing->Flag2 |= TgF2_Unkn0040;
+            return;
+        }
+        p_thing->U.UPerson.GotoX = x;
+        p_thing->U.UPerson.GotoZ = z;
+        return;
+    }
+    if ((p_thing->Flag & TngF_SelectedAgent) != 0)
+        clear_player_protectors_paths(p_thing);
+    if ((p_thing->Flag & TngF_PlayerAgent) != 0)
+        players[p_thing->U.UPerson.ComCur >> 2].GotoFace = 0;
+    p_thing->Flag2 &= ~TgF2_Unkn00020000;
+
+    state = (ushort)p_thing->State & 0x7FFF;
+    switch (state)
+    {
+    case PerSt_NONE:
+    case PerSt_GOTO_POINT:
+    case PerSt_WAIT:
+    case PerSt_GOTO_PERSON:
+    case PerSt_GET_ITEM:
+    case PerSt_USE_VEHICLE:
+        break;
+    case PerSt_DRIVING_VEHICLE:
+        start_goto_vehicle(&things[p_thing->U.UPerson.Vehicle], x, z);
+        return;
+    default:
+        return;
+    }
+
+    p_thing->U.UPerson.ComTimer = -1;
+    p_thing->Timer1 = 48;
+    p_thing->StartTimer1 = 48;
+    p_thing->SubState = 0;
+    p_thing->U.UPerson.Target2 = 0;
+    p_thing->U.UPerson.GotoX = x;
+    p_thing->U.UPerson.GotoZ = z;
+    p_thing->State = PerSt_GOTO_POINT;
+    p_thing->U.UPerson.ComRange = 1;
+    if (p_thing->U.UPerson.PathIndex != 0)
+        remove_path(p_thing);
+    p_thing->U.UPerson.PathIndex = 0;
+    build_navigate_path(p_thing, x, z, 0);
+
+    if ((p_thing->Flag2 & TgF2_Unkn00080000) != 0)
+    {
+        if (p_thing->U.UPerson.AnimMode == ANIM_PERS_Unkn19)
+            return;
+        p_thing->U.UPerson.AnimMode = ANIM_PERS_Unkn19;
+        thing_goto_set_anim_frames(p_thing);
+    }
+    else
+    {
+        if (p_thing->U.UPerson.AnimMode != ANIM_PERS_Unkn19)
+            return;
+        p_thing->U.UPerson.AnimMode = gun_out_anim(p_thing, 0);
+        thing_goto_set_anim_frames(p_thing);
+    }
+}
+
+/** Send a thing to a point, running; the protectors of a player's agent
+ * run with it.  Remade from thing_goto_point_fast.
+ */
+static void thing_goto_point_fast_c(struct Thing *p_thing, short x, short y, short z, int plyr)
+{
+    if ((p_thing->Flag & (TngF_Unkn40000000 | TngF_Destroyed | TngF_Unkn0001)) != 0)
+        return;
+    p_thing->Flag2 &= ~(TgF2_Unkn00080000 | TgF2_Unkn00020000 | TgF2_Unkn0040);
+    p_thing->Flag2 |= TgF2_Unkn00080000;
+    thing_goto_point(p_thing, x, y, z);
+    if ((p_thing->Flag2 & TgF2_Unkn0040) != 0)
+        return;
+    set_person_animmode_run(p_thing);
+    set_player_peeps_to_run(p_thing, (ushort)plyr);
+}
+
+void thing_goto_point_fast(struct Thing *p_thing, short x, short y, short z, int plyr)
+{
+    FNCHK_VOID("thing_goto_point_fast", thing_goto_point_fast_asm(p_thing, x, y, z, plyr),
+      thing_goto_point_fast_c(p_thing, x, y, z, plyr));
 }
 
 void thing_goto_point(struct Thing *p_thing, short x, short y, short z)
 {
-    asm volatile (
-      "call ASM_thing_goto_point\n"
-        : : "a" (p_thing), "d" (x), "b" (y), "c" (z));
+    FNCHK_VOID("thing_goto_point", thing_goto_point_asm(p_thing, x, y, z),
+      thing_goto_point_c(p_thing, x, y, z));
 }
 
 void thing_goto_point_on_face_fast(struct Thing *p_thing, short x, short z, short face, int plyr)
@@ -180,11 +362,47 @@ void unkn_player_group_prot(sbyte a1, ubyte a2)
         :  : "a" (a1), "d" (a2));
 }
 
-void peep_change_weapon(struct Thing *p_person)
+#ifdef SW_FNCHK
+static void peep_change_weapon_asm(struct Thing *p_person)
 {
     asm volatile (
       "call ASM_peep_change_weapon\n"
-        : : "a" (p_person));
+        : : "a" (p_person) : "cc", "memory");
+}
+#endif
+
+/** A person changed weapon: the sounds of the old one stop, a player's
+ * agent remembers the new one as its previous weapon.
+ * Remade from peep_change_weapon.
+ */
+static void peep_change_weapon_c(struct Thing *p_person)
+{
+    ushort plagent;
+
+    if ((p_person->Flag & TngF_WepCharging) != 0)
+    {
+        stop_sample_using_heap(p_person->ThingOffset, 7);
+        stop_sample_using_heap(p_person->ThingOffset, 52);
+    }
+    if ((p_person->Flag2 & TgF2_Unkn0200) != 0)
+    {
+        plagent = ((p_person->Flag & TngF_PlayerAgent) != 0) ? (p_person->U.UPerson.ComCur & 3) : 0;
+        ReleaseLoopedSample(p_person->ThingOffset, 80 + plagent);
+        plagent = ((p_person->Flag & TngF_PlayerAgent) != 0) ? (p_person->U.UPerson.ComCur & 3) : 0;
+        ReleaseLoopedSample(p_person->ThingOffset, 84 + plagent);
+        ReleaseLoopedSample(p_person->ThingOffset, 14);
+        p_person->Flag2 &= ~TgF2_Unkn0200;
+    }
+    if (((p_person->Flag & TngF_PlayerAgent) != 0) && (p_person->U.UPerson.CurrentWeapon != 0))
+    {
+        players[p_person->U.UPerson.ComCur >> 2].PrevWeapon[p_person->U.UPerson.ComCur & 3] =
+          p_person->U.UPerson.CurrentWeapon;
+    }
+}
+
+void peep_change_weapon(struct Thing *p_person)
+{
+    FNCHK_VOID("peep_change_weapon", peep_change_weapon_asm(p_person), peep_change_weapon_c(p_person));
 }
 
 void player_agent_weapon_switch(PlayerIdx plyr, ThingIdx person, short shift)

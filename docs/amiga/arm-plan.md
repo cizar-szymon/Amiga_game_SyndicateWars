@@ -228,3 +228,14 @@ ekranu – ~15% nadrysowania) albo innego algorytmu. Do sprawdzenia: `draw_scree
 `object_face_get_visible_max_depth`, przejścia ściana → punkt → punkt ekranu), obiekty 0,6, obiekty
 proste 0,8, samo przechodzenie kafli i list `mapwho` ~3,4 ms. Koszt to głównie odczyty rozrzucone po
 dużych tablicach – bez zmiany układu danych silnika nie widać szybkiego zysku.
+
+### Czy pomoże 68060 (pytanie użytkownika, 13.11.2026)
+
+W wersji ARM 68060 jest prawie wolny (pobiera klatkę ~5,7 ms z 62,5 ms tury), ale nie widzi pamięci
+ARM – dane przechodzą tylko przez łącze (`extFetch`, ~60 MB/s). Opłaca się więc dać mu pracę z małym
+wejściem i wyjściem prosto na ekran RTG:
+- **dźwięk** (miksowanie albo odtwarzanie strumienia) – plan w `sound-plan.md`;
+- **panel HUD i skaner** (~2,5 + 4,8 ms ARM w 640×480): ARM wysyła mały rekord stanu (zdrowie,
+  broń, pozycje kropek skanera), 68k rysuje panel z własnych sprite'ów na ekranie po pobraniu klatki –
+  zysk do ~7 ms ARM (ok. 13%), duża praca (rysowanie panelu i skanera na 68k, zgodność obrazu);
+- symulacji i rysowania 3D nie – potrzebują całego stanu gry (MB danych).

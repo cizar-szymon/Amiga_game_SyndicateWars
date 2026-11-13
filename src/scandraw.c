@@ -20,6 +20,7 @@
 #include "scandraw.h"
 
 #include <stdlib.h>
+#include "bigmap.h"
 #include "bfanywnd.h"
 #include "bfendian.h"
 #include "bfgentab.h"
@@ -2076,6 +2077,90 @@ void SCANNER_draw_sthing(struct SimpleThing *p_sthing, int pos_mx, int pos_mz, i
     SCANNER_draw_circle_line(x, y, 1, col, true);
 }
 
+#if defined(SW_AMIGA) || defined(SW_WARP)
+int amiga_check_enabled(void);
+#endif
+
+/** Check mode of the scanner dots skip: ENV:SyndWarsCheck on the Amiga,
+ * SW_DRAWCHECK environment variable elsewhere. */
+static TbBool scanner_skip_check_on(void)
+{
+    static int check_mode = -1;
+
+    if (check_mode < 0) {
+#if defined(SW_AMIGA) || defined(SW_WARP)
+        check_mode = amiga_check_enabled();
+#else
+        check_mode = (getenv("SW_DRAWCHECK") != NULL);
+#endif
+    }
+    return check_mode;
+}
+
+/** Check mode: a thing skipped as beyond the scanner must not be one
+ * SCANNER_draw_thing() draws. */
+static void SCANNER_check_skipped_thing(struct Thing *p_thing, int pos_mx, int pos_mz,
+  int sh_x, int sh_y)
+{
+    static ulong checked, failed;
+    int tng_x, tng_z, base_x, base_y;
+
+    if ((p_thing->Type == TT_PERSON) && ((p_thing->Flag & TngF_Unkn4000) != 0)) {
+        tng_z = things[p_thing->U.UPerson.Vehicle].Z;
+        tng_x = things[p_thing->U.UPerson.Vehicle].X;
+    } else {
+        tng_z = p_thing->Z;
+        tng_x = p_thing->X;
+    }
+    tng_z = ((tng_z << 8) - (__CFSHL__(tng_z << 8 >> 31, 7) + (tng_z << 8 >> 31 << 7))) >> 7;
+    tng_x = ((tng_x << 8) - (__CFSHL__(tng_x << 8 >> 31, 7) + (tng_x << 8 >> 31 << 7))) >> 7;
+    map_coords_to_scanner(&base_x, &base_y, sh_x, sh_y, tng_x - pos_mx, tng_z - pos_mz);
+    checked++;
+    if (!((base_y < 0) || (ingame.Scanner.Y1 + base_y > ingame.Scanner.Y2)
+      || (base_x < 0) || (base_x > SCANNER_width[base_y])))
+    {
+        failed++;
+        if (failed <= 10)
+            LOGERR("thing %d skipped as beyond the scanner is at %d,%d",
+              (int)p_thing->ThingOffset, base_x, base_y);
+    }
+    if ((checked % 100000) == 0)
+        LOGWARN("scanner dots skip check: %lu things, %lu failed", checked, failed);
+}
+
+static TbBool thing_in_scanner_group(struct Thing *p_thing)
+{
+    int i;
+
+    for (i = 0; i < ingame.Scanner.GroupCount; i++) {
+        if (ingame.Scanner.Group[i] == p_thing->U.UObject.EffectiveGroup)
+            return (ingame.Scanner.GroupCol[i] != 0);
+    }
+    return false;
+}
+
+/** Is the thing surely beyond the scanner square (seen from its centre, a
+ * scanner pixel is Zoom/2 map coords; the square may be turned, so its
+ * round plus a margin is taken). Such a thing is not drawn, and
+ * SCANNER_draw_thing() needs its position only for the nearest target
+ * arrow, from the tracked groups. Computing the position for each person
+ * and vehicle of the map every frame (4 multiplications, 2 divisions) was
+ * most of the scanner dots time. */
+static TbBool scanner_thing_surely_outside(struct Thing *p_thing, int half_map)
+{
+    struct Thing *p_pos;
+    int dx, dz;
+
+    if ((scanner_arrow_mode == SCANNER_ARROW_NEAREST_TARGET) && thing_in_scanner_group(p_thing))
+        return false;
+    p_pos = p_thing;
+    if ((p_thing->Type == TT_PERSON) && ((p_thing->Flag & TngF_Unkn4000) != 0))
+        p_pos = &things[p_thing->U.UPerson.Vehicle];
+    dx = PRCCOORD_TO_MAPCOORD(p_pos->X) - (ingame.Scanner.MX << 7);
+    dz = PRCCOORD_TO_MAPCOORD(p_pos->Z) - (ingame.Scanner.MZ << 7);
+    return (abs(dx) > half_map) || (abs(dz) > half_map);
+}
+
 void SCANNER_draw_things_dots(int pos_mx, int pos_mz, int sh_x, int sh_y, int pos_x1, int pos_y1, int range)
 {
     struct Thing *p_thing;
@@ -2083,6 +2168,14 @@ void SCANNER_draw_things_dots(int pos_mx, int pos_mz, int sh_x, int sh_y, int po
     struct NearestPos nearest;
     long limit;
     short thing;
+    int half_px, half_map;
+    TbBool check;
+
+    half_px = (ingame.Scanner.X2 - ingame.Scanner.X1) >> 1;
+    if (((ingame.Scanner.Y2 - ingame.Scanner.Y1) >> 1) > half_px)
+        half_px = (ingame.Scanner.Y2 - ingame.Scanner.Y1) >> 1;
+    half_map = (half_px * 3 / 2) * ingame.Scanner.Zoom / 2 + TILE_TO_MAPCOORD(2, 0);
+    check = scanner_skip_check_on();
 
     nearest.dist = 0x7FFFFFFF;
     limit = things_used;
@@ -2096,6 +2189,12 @@ void SCANNER_draw_things_dots(int pos_mx, int pos_mz, int sh_x, int sh_y, int po
             continue;
 
         if (thing_visible_on_scanner_this_turn(p_thing)) {
+            if (scanner_thing_surely_outside(p_thing, half_map))
+            {
+                if (check)
+                    SCANNER_check_skipped_thing(p_thing, pos_mx, pos_mz, sh_x, sh_y);
+                continue;
+            }
             SCANNER_draw_thing(p_thing, &nearest, pos_mx, pos_mz, sh_x, sh_y, pos_x1, pos_y1);
         }
     }

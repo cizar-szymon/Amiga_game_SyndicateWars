@@ -20,6 +20,8 @@
 #include "hud_panel.h"
 
 #include <assert.h>
+#include <stdlib.h>
+#include <string.h>
 #include "bfanywnd.h"
 #include "bffont.h"
 #include "bfgentab.h"
@@ -2278,6 +2280,102 @@ void draw_new_panel_energy_overlay(short panel, ushort plagent, TbBool darkened)
 void draw_new_panel_weapon_overlay(short panel, ushort plagent, TbBool darkened)
 {
 }
+#if defined(SW_AMIGA)
+int amiga_getenv_int(const char *name, int dflt);
+#endif
+
+/* Scanner drawn every 2nd frame (option, off by default): on the other
+ * frames its pixels from the frame before are put back. The scanner is
+ * see-through, so the view under it then changes every 2nd frame only.
+ * ENV:SyndWarsRadar2 on the Amiga and the Warp ARM, SW_RADAR2 elsewhere. */
+static TbBool scanner_half_rate_on(void)
+{
+    static int level = -1;
+
+    if (level < 0)
+    {
+#if defined(SW_AMIGA)
+        level = amiga_getenv_int("SyndWarsRadar2", 0);
+#else
+        const char *s = getenv("SW_RADAR2");
+        level = (s != NULL) ? atoi(s) : 0;
+#endif
+        if (level != 1)
+            level = 0;
+        else
+            LOGWARN("scanner drawn every 2nd frame");
+    }
+    return level;
+}
+
+#define SCANNER_KEEP_MARGIN 2
+static ubyte *scanner_keep_buf;
+static int scanner_keep_x, scanner_keep_y, scanner_keep_w, scanner_keep_h;
+static long scanner_keep_stride;
+static TbBool scanner_keep_valid;
+
+static void scanner_keep_rect(int *p_x, int *p_y, int *p_w, int *p_h)
+{
+    int x1, y1, x2, y2;
+
+    x1 = ingame.Scanner.X1 - SCANNER_KEEP_MARGIN;
+    y1 = ingame.Scanner.Y1 - SCANNER_KEEP_MARGIN;
+    x2 = ingame.Scanner.X2 + SCANNER_KEEP_MARGIN;
+    y2 = ingame.Scanner.Y2 + SCANNER_KEEP_MARGIN;
+    if (x1 < 0) x1 = 0;
+    if (y1 < 0) y1 = 0;
+    if (x2 >= lbDisplay.GraphicsScreenWidth) x2 = lbDisplay.GraphicsScreenWidth - 1;
+    if (y2 >= lbDisplay.GraphicsScreenHeight) y2 = lbDisplay.GraphicsScreenHeight - 1;
+    *p_x = x1;
+    *p_y = y1;
+    *p_w = x2 - x1 + 1;
+    *p_h = y2 - y1 + 1;
+}
+
+/** Draws the scanner, or puts back its pixels from the frame before. */
+static void SCANNER_draw_new_transparent_maybe_kept(void)
+{
+    static ulong frame_no;
+    int x, y, w, h, i;
+    ubyte *p_scr;
+
+    frame_no++;
+    if (!scanner_half_rate_on()) {
+        SCANNER_draw_new_transparent();
+        return;
+    }
+    scanner_keep_rect(&x, &y, &w, &h);
+    if ((w <= 0) || (h <= 0)) {
+        SCANNER_draw_new_transparent();
+        return;
+    }
+    if (scanner_keep_valid && ((frame_no & 1) != 0) && (x == scanner_keep_x) && (y == scanner_keep_y)
+      && (w == scanner_keep_w) && (h == scanner_keep_h) && (lbDisplay.GraphicsScreenWidth == scanner_keep_stride))
+    {
+        p_scr = lbDisplay.WScreen + y * lbDisplay.GraphicsScreenWidth + x;
+        for (i = 0; i < h; i++)
+            memcpy(p_scr + i * lbDisplay.GraphicsScreenWidth, scanner_keep_buf + i * w, w);
+        return;
+    }
+    SCANNER_draw_new_transparent();
+    if ((scanner_keep_buf == NULL) || (w * h > scanner_keep_w * scanner_keep_h)) {
+        free(scanner_keep_buf);
+        scanner_keep_buf = malloc(w * h);
+        scanner_keep_valid = false;
+        if (scanner_keep_buf == NULL)
+            return;
+    }
+    p_scr = lbDisplay.WScreen + y * lbDisplay.GraphicsScreenWidth + x;
+    for (i = 0; i < h; i++)
+        memcpy(scanner_keep_buf + i * w, p_scr + i * lbDisplay.GraphicsScreenWidth, w);
+    scanner_keep_x = x;
+    scanner_keep_y = y;
+    scanner_keep_w = w;
+    scanner_keep_h = h;
+    scanner_keep_stride = lbDisplay.GraphicsScreenWidth;
+    scanner_keep_valid = true;
+}
+
 
 void draw_new_panel(void)
 {
@@ -2515,7 +2613,7 @@ void draw_new_panel(void)
             AMIGA_PROF_BEGIN(15);
             SCANNER_process_turn();
             AMIGA_PROF_END(15);
-            SCANNER_draw_new_transparent();
+            SCANNER_draw_new_transparent_maybe_kept();
             AMIGA_PROF_END(29);
             break;
         case PanT_Objective:

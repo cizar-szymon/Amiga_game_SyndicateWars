@@ -268,11 +268,13 @@ void amiga_sampler_start(void) { }
 
 /* ENV: variables do not reach the ARM core; swhost passes the ones used
  * here on the core's command line (wmain.c) */
-extern int w_civlod;
+extern int w_civlod, w_radar2;
 
 int amiga_getenv_int(const char *name, int dflt)
 {
     if ((strcmp(name, "SyndWarsCivLOD") == 0) && (w_civlod >= 0))
         return w_civlod;
+    if ((strcmp(name, "SyndWarsRadar2") == 0) && (w_radar2 >= 0))
+        return w_radar2;
     return dflt;
 }

@@ -554,6 +554,9 @@ int main(int argc, char **argv)
         if ((GetVar((STRPTR)"SyndWarsCivLOD", (STRPTR)civ, sizeof(civ), 0) >= 0)
           && (civ[0] >= '0') && (civ[0] <= '9'))
             sprintf(args + strlen(args) - 1, " civlod=%c |", civ[0]);
+        if ((GetVar((STRPTR)"SyndWarsRadar2", (STRPTR)civ, sizeof(civ), 0) >= 0)
+          && (civ[0] >= '0') && (civ[0] <= '9'))
+            sprintf(args + strlen(args) - 1, " radar2=%c |", civ[0]);
     }
     for (i = 1; i < argc; i++) {
         if (strncmp(argv[i], "STAGE=", 6) == 0) {

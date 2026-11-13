@@ -1613,10 +1613,47 @@ static void scanner_coords_line_clip(int *x1, int *y1, int *x2, int *y2, int sc_
     }
 }
 
+/** (n << 16) / d as a 64-bit quotient, kept in a 32-bit long and
+ * shifted right by 16, as the original computes it - but with a 32-bit
+ * division when n fits in 32 bits (the quotient >> 16 is the floor of
+ * n / d, apart from negative values within 1/65536 below an integer;
+ * the 32-bit long keeps its low 16 bits).  The 64-bit division is a slow
+ * library call on the 68060 and the ARM.  Checked against the original on
+ * 50 million random and edge values (0 differences).
+ */
+static int scanner_div_q16(s64 n, s32 d)
+{
+    s32 r;
+
+    if ((d <= 0) || (n > 0x7FFFFFFF) || (n < -0x7FFFFFFF))
+    {
+        long prec;
+
+        prec = (long)((n << 16) / d);
+        return prec >> 16;
+    }
+    if (n >= 0)
+    {
+        r = (s32)n / d;
+    }
+    else
+    {
+        s32 m, k, rem;
+
+        m = (s32)(-n);
+        k = m / d;
+        rem = m - k * d;
+        if (rem == 0)
+            r = -k;
+        else
+            r = -k - ((rem >= (s32)(((u32)d + 65535u) >> 16)) ? 1 : 0);
+    }
+    return (short)r;
+}
+
 static void map_coords_to_scanner(int *sc_x, int *sc_y, int sh_x, int sh_y, int bsh_x, int bsh_y)
 {
     int rval_xy, rval_yy, rval_yx, rval_xx, rval_div;
-    long prec_x, prec_y;
 
     rval_xy = mul_shift16_sign_pad_lo(sh_x, bsh_y);
 
@@ -1629,11 +1666,24 @@ static void map_coords_to_scanner(int *sc_x, int *sc_y, int sh_x, int sh_y, int 
     rval_div = mul_shift16_sign_pad_lo(sh_y, sh_y)
       + mul_shift16_sign_pad_lo(sh_x, sh_x);
 
-    prec_y = ((rval_yx - (s64)rval_xy) << 16) / rval_div;
-    prec_x = ((rval_xx + (s64)rval_yy) << 16) / rval_div;
+    *sc_y = scanner_div_q16(rval_yx - (s64)rval_xy, rval_div);
+    *sc_x = scanner_div_q16(rval_xx + (s64)rval_yy, rval_div);
+#ifdef SW_FNCHK
+    {   // check build: the original 64-bit computation must give the same
+        static ulong checked, bad;
+        long prec_x, prec_y;
 
-    *sc_y = prec_y >> 16;
-    *sc_x = prec_x >> 16;
+        prec_y = ((rval_yx - (s64)rval_xy) << 16) / rval_div;
+        prec_x = ((rval_xx + (s64)rval_yy) << 16) / rval_div;
+        checked++;
+        if ((*sc_y != (prec_y >> 16)) || (*sc_x != (prec_x >> 16))) {
+            bad++;
+            LOGERR("map_coords_to_scanner: differs, %lu of %lu", bad, checked);
+        }
+        if ((checked & 0xFFFF) == 0)
+            LOGWARN("map_coords_to_scanner: %lu checked, %lu differ", checked, bad);
+    }
+#endif
 }
 
 /** Draws the BigBlip markers and their boundary-trail lines on top of the scanner map.
@@ -1939,7 +1989,10 @@ void SCANNER_draw_thing(struct Thing *p_thing, struct NearestPos *p_nearest, int
         tng_x = ((tng_x << 8) - (__CFSHL__(tng_x << 8 >> 31, 7) + (tng_x << 8 >> 31 << 7))) >> 7;
         bsh_y = tng_z - pos_mz;
         bsh_x = tng_x - pos_mx;
+        AMIGA_SIM_CNT(7);
+        AMIGA_PROF_BEGIN(57);
         map_coords_to_scanner(&base_x, &base_y, sh_x, sh_y, bsh_x, bsh_y);
+        AMIGA_PROF_END(57);
     }
 
     SCANNER_check_nearest(p_thing, p_nearest, base_x, base_y, pos_x1, pos_y1);
@@ -2047,6 +2100,7 @@ void SCANNER_draw_things_dots(int pos_mx, int pos_mz, int sh_x, int sh_y, int po
         }
     }
 
+    AMIGA_PROF_BEGIN(58);
     limit = sthings_used;
     for (thing = sthings_used_head; thing < 0; thing = p_sthing->LinkChild)
     {
@@ -2059,6 +2113,7 @@ void SCANNER_draw_things_dots(int pos_mx, int pos_mz, int sh_x, int sh_y, int po
 
         SCANNER_draw_sthing(p_sthing, pos_mx, pos_mz, sh_x, sh_y);
     }
+    AMIGA_PROF_END(58);
 
     switch (scanner_arrow_mode)
     {

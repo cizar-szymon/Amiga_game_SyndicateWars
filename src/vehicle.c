@@ -36,6 +36,9 @@
 #include "enginsngtxtr.h"
 #include "engintrns.h"
 #include "game.h"
+#include "febrief.h"
+#include "misstat.h"
+#include "frame_sprani.h"
 #include "game_speed.h"
 #include "matrix.h"
 #include "pathtrig.h"
@@ -2119,10 +2122,150 @@ int check_for_a_vehicle_here(int x, int z, struct Thing *p_vehicle)
     return ret;
 }
 
-void person_hit_by_car(struct Thing *p_person, struct Thing *p_vehicle)
+#ifdef SW_FNCHK
+static void person_hit_by_car_asm(struct Thing *p_person, struct Thing *p_vehicle)
 {
     asm volatile ("call ASM_person_hit_by_car\n"
-        : : "a" (p_person), "d" (p_vehicle));
+        : : "a" (p_person), "d" (p_vehicle) : "cc", "memory");
+}
+#endif
+
+short person_move(struct Thing *p_person);
+void person_go_sleep(struct Thing *p_person);
+
+/** A person hit by a car is pushed by the car's motion, turned to the side
+ * farther from the car; the push stays only if the person was destroyed.
+ * Remade from person_poke. */
+static void person_poke(struct Thing *p_person, s32 cvx, s32 cvz, struct Thing *p_car)
+{
+    s32 px, pz, cx, cz, a, b, d1, d2, mvx, mvz;
+    s32 old_vx, old_vz;
+    short old_speed;
+
+    px = p_person->X >> 8;
+    pz = p_person->Z >> 8;
+    cx = p_car->X >> 8;
+    cz = p_car->Z >> 8;
+    a = abs(px - cvz - cx);
+    b = abs(pz + cvx - cz);
+    if (a > b)
+        b >>= 1;
+    else
+        a >>= 1;
+    d1 = a + b;
+    a = abs(cx - px) + cvz;
+    b = abs(cz - pz) - cvx;
+    if (a > b)
+        b >>= 1;
+    else
+        a >>= 1;
+    d2 = a + b;
+    mvx = cvx;
+    mvz = cvz;
+    if (d2 > d1) {
+        mvx = -cvx;
+        mvz = -cvz;
+    }
+    old_vx = p_person->VX;
+    old_vz = p_person->VZ;
+    old_speed = p_person->Speed;
+    p_person->VX = cvx - mvz;
+    p_person->VZ = cvz + mvx;
+    p_person->Speed = 16;
+    person_move(p_person);
+    if ((p_person->Flag & 0x0002) == 0)
+    {
+        p_person->VX = old_vx;
+        p_person->VZ = old_vz;
+        p_person->Speed = old_speed;
+    }
+}
+
+/** A person hit by a car: pushed away and knocked down; a player agent
+ * loses health and may die (counted in the mission stats for the driver's
+ * side), others are knocked out.  Remade from person_hit_by_car. */
+static void person_hit_by_car_c(struct Thing *p_person, struct Thing *p_vehicle)
+{
+    short dx, dz, angle, angle2;
+    ushort base, driver;
+    ubyte lost;
+
+    dx = (short)((p_person->X - p_vehicle->X) >> 8);
+    dz = (short)((p_person->Z - p_vehicle->Z) >> 8);
+    person_poke(p_person, p_vehicle->VX, p_vehicle->VZ, p_vehicle);
+    dx = (short)(dx + (short)p_vehicle->VZ);
+    dz = (short)(dz - (short)p_vehicle->VX);
+    angle = (short)arctan(dx, -dz);
+    p_person->U.UPerson.RecoilTimer = 9;
+    p_person->U.UPerson.RecoilDir = (ubyte)(angle >> 3);
+    angle2 = (short)((angle & 0x00FF) | ((((angle >> 8) + 4) & 7) << 8));
+    p_person->U.UPerson.Angle = (ubyte)(angle2 >> 8);
+    if (((p_person->Flag & 0x00010000) == 0) && (p_person->U.UPerson.AnimMode != 0x10))
+        p_person->U.UPerson.OldAnimMode = p_person->U.UPerson.AnimMode;
+    p_person->U.UPerson.AnimMode = 0x10;
+    base = people_frames[p_person->SubType][p_person->U.UPerson.AnimMode];
+    p_person->Frame = nstart_ani[base + p_person->U.UPerson.Angle];
+    p_person->StartFrame = people_frames[p_person->SubType][p_person->U.UPerson.AnimMode] - 1;
+    p_person->U.UPerson.ShieldEnergy -= 0x23;
+    p_person->Flag |= 0x00010000;
+    if (p_person->U.UPerson.ShieldEnergy > 0)
+    {
+        if ((p_person->U.UPerson.WeaponsCarried & 0x00400000) != 0)
+            p_person->Flag |= 0x00200000;
+        return;
+    }
+    if ((p_person->Flag & TngF_PlayerAgent) == 0)
+    {
+        if (p_person->SubType != 7)
+            person_go_sleep(p_person);
+        return;
+    }
+    p_person->Health -= 200;
+    if (p_person->Health > 0)
+        return;
+    if (((ushort)p_person->State == 0x0C) || ((ushort)p_person->State == 0x0D))
+        return;
+    lost = 0;
+    if (!in_network_game)
+        lost = mission_status[open_brief].AgentsLost;
+    set_person_dead(p_person, 10);
+    driver = (ushort)p_vehicle->U.UVehicle.PassengerHead;
+    if (driver == 0)
+        return;
+    if (!in_network_game)
+    {
+        if (things[driver].U.UPerson.EffectiveGroup != ingame.MyGroup)
+            return;
+        switch (p_person->SubType)
+        {
+        case 1: case 2: case 3: case 9: case 12:
+            if (mission_status[open_brief].AgentsLost == lost)
+                mission_status[open_brief].SP.EnemiesKilled++;
+            break;
+        case 4: case 5: case 10: case 11: case 13: case 14:
+            mission_status[open_brief].SP.CivsKilled++;
+            break;
+        case 6: case 7: case 8:
+            mission_status[open_brief].SP.SecurityKilled++;
+            break;
+        default:
+            break;
+        }
+    }
+    else
+    {
+        struct Thing *p_driver;
+
+        p_driver = &things[driver];
+        if (((p_driver->Flag & TngF_PlayerAgent) != 0) && ((p_person->Flag & TngF_PlayerAgent) != 0))
+            mission_status[(ushort)p_driver->U.UPerson.ComCur >> 2].MP.AgentsKilled[(ushort)p_person->U.UPerson.ComCur >> 2]++;
+    }
+}
+
+void person_hit_by_car(struct Thing *p_person, struct Thing *p_vehicle)
+{
+    FNCHK_VOID("person_hit_by_car", person_hit_by_car_asm(p_person, p_vehicle),
+      person_hit_by_car_c(p_person, p_vehicle));
 }
 
 /** Checks if the vehicle collides with another object, provided as separate params.

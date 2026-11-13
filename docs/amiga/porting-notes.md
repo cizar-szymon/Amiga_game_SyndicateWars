@@ -255,6 +255,8 @@ Pomiary: profiler próbkujący (`ENV:SyndWarsProf=3`, timer CIA-B) i próbnik ad
 | omijanie ludzi: puste kafelki bez wywołania (`check_for_other_people`) | `d94eb5a7` | symulacja −1,0 ms (misja 21 −1,7) | wspólny C – jest; niezmierzone |
 | bez cyklicznych wpisów do `error.log` w zwykłej grze | `98987063` | drobne szarpnięcia co 5 s | ARM pisze log osobno – do sprawdzenia |
 | pomijanie podłogi poza ekranem (`lvdraw_do_floor`, siatka wysokości 8×8 kafelków) | `f25d66cd` | podłoga 8,6 → 4,8 ms (640×480: 12,8 → 6,2) | wspólny C – jest; ARM 640×480 55,0 → 52,4 ms |
+| kropki radaru tylko w kadrze (`SCANNER_draw_things_dots`) | `d3da6c85` | kropki 3,0 → 1,5 ms | wspólny C – jest |
+| opcja radaru co 2. klatkę (`SyndWarsRadar2 1`, domyślnie wył.) | `92b6fa10` | radar 3,4 → 2,0 ms | `swhost` przekazuje `radar2=N` |
 | opcja dalekich przechodniów (`SyndWarsCivLOD` 1/2) | `e80c891a` | symulacja 18,8 → 12,5 / 8,8 ms, 13,4 → 15,4 tury/s | `7088a07c`: `swhost` przekazuje `civlod=N`; domyślnie poziom 3 (Amiga i ARM), ARM 40,2 → 30,8 ms na turę |
 
 Sprawdzone, bez zysku (wycofane): przestawienie pętli pikseli `gpoly_lines_shaded_68k` pod 68060 –

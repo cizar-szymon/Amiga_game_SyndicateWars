@@ -208,3 +208,18 @@ Na ARM dostępna pamięć na chipie: ITCM 32 KB (kod), SRAM 64 KB + 16 KB (`env-
 
 Dalej: pętla pikseli ręcznie w asm ARM z przeplotem dwóch pikseli (z trybem porównania z C), koszty
 na odcinek (13 tys.), skaner, obiekty; w symulacji `check_for_other_people`.
+
+Dalsze próby tej nocy (bench, 640×480; łatki w `docs/amiga/experiments/`):
+
+| próba | wynik |
+|---|---|
+| pętla pikseli w asm Thumb-2, 2 piksele w przeplocie (13 instr./piksel), tryb porównania na ARM: 0 różnic na 7 mln odcinków | bez zmian (piksele 14,8 ms) |
+| ta pętla w ITCM (kod bez pobierania z SDRAM) | bez zmian |
+| pomiar: bez zapisu do ekranu / tekstura i tablica cieni przycięte do 256 B (zawsze w cache) | bez zmian (14,6–15,2 ms) |
+| pomiar: bez pętli pikseli | piksele 14,8 → 3,8 ms, `draw_screen` 25,5 → 13,5 ms |
+
+Wniosek: pętla pikseli to ~11 ms przy 353 tys. pikseli (~15 cykli na piksel) i nie zależy ani od
+pamięci, ani od miejsca kodu – ogranicza ją szeregowy łańcuch przeniesień (4 zależne instrukcje na
+piksel) i zależne odczyty. Dalszy zysk tylko z mniejszej liczby pikseli (353 tys. na 307 tys. pikseli
+ekranu – ~15% nadrysowania) albo innego algorytmu. Do sprawdzenia: `draw_screen` poza pikselami
+(~10,7 ms: przekształcenia, sortowanie, obsługa 425 trójkątów), symulacja, skaner.

@@ -3234,11 +3234,37 @@ StateChRes person_init_scare_person(struct Thing *p_person, short targetng)
     return StCh_ACCEPTED;
 }
 
-void person_init_follow_person(struct Thing *p_person, struct Thing *p_other)
+#ifdef SW_FNCHK
+static void person_init_follow_person_asm(struct Thing *p_person, struct Thing *p_other)
 {
     asm volatile (
       "call ASM_person_init_follow_person\n"
-        : : "a" (p_person), "d" (p_other));
+        : : "a" (p_person), "d" (p_other) : "cc", "memory");
+}
+#endif
+
+/** Remade from person_init_follow_person. */
+static void person_init_follow_person_c(struct Thing *p_person, struct Thing *p_other)
+{
+    if ((p_person->Flag & (TngF_StationrSht | TngF_Destroyed)) != 0)
+        return;
+    if ((p_person->Flag2 & TgF2_Unkn0001) != 0)
+        finalise_razor_wire(p_person);
+    p_person->State = PerSt_GOTO_PERSON;
+    p_person->U.UPerson.ComTimer = -1;
+    p_person->U.UPerson.ComRange = 4;
+    p_person->U.UPerson.Timer2 = 50;
+    p_person->U.UPerson.StartTimer2 = 50;
+    p_person->SubState = 0;
+    p_person->Timer1 = 48;
+    p_person->StartTimer1 = 48;
+    p_person->GotoThingIndex = p_other->ThingOffset;
+}
+
+void person_init_follow_person(struct Thing *p_person, struct Thing *p_other)
+{
+    FNCHK_VOID("person_init_follow_person", person_init_follow_person_asm(p_person, p_other),
+      person_init_follow_person_c(p_person, p_other));
 }
 
 StateChRes person_init_cmd_follow_person(struct Thing *p_person, short targetng)
@@ -8151,12 +8177,65 @@ short person_hit_razor_wire(struct Thing *p_person, ThingIdx thing)
     return ret;
 }
 
-ubyte create_intelligent_door(short col)
+#ifdef SW_FNCHK
+static ubyte create_intelligent_door_asm(short col)
 {
     ubyte ret;
     asm volatile (
       "call ASM_create_intelligent_door\n"
-        : "=r" (ret) : "a" (col));
+        : "=a" (ret) : "a" (col) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** A person bumped into the door face of collision vector col: opens the
+ * door (creates its door sthing, or asks the existing one to open).
+ * Returns true if the door is already open.  Remade from
+ * create_intelligent_door; the original reads the locked state of the
+ * thing of word_1AA390 (high half of a 32-bit read of word_1AA38E).
+ */
+static ubyte create_intelligent_door_c(short col)
+{
+    struct ColVect *p_cvect;
+    struct SingleObjectFace4 *p_face4;
+    struct SimpleThing *p_door;
+    short door;
+
+    if ((things[game_col_vects_list[word_1AA390].Object].Flag & TngF_PassageLocked) != 0)
+        return 0;
+    p_cvect = &game_col_vects[col];
+    p_face4 = &game_object_faces4[-p_cvect->Face];
+    if (p_face4->WalkHeader != 0)
+    {
+        p_door = &sthings[(short)p_face4->WalkHeader];
+        p_door->Flag |= TngF_Unkn0001;
+        return ((p_door->Flag & TngF_Destroyed) != 0);
+    }
+    if (sthings_used > 0x5D7)
+        return 0;
+    door = get_new_sthing();
+    if ((door == 0) || (door > -1) || (door < -1500))
+        return 0;
+    p_face4->WalkHeader = door;
+    p_door = &sthings[door];
+    p_door->X = (p_cvect->X1 + p_cvect->X2) << 7;
+    p_door->Z = (p_cvect->Z1 + p_cvect->Z2) << 7;
+    p_door->Y = (p_cvect->Y1 + p_cvect->Y2) << 7;
+    p_door->Frame = 0;
+    p_door->StartFrame = 0;
+    p_door->Next = 0;
+    p_door->Type = SmTT_INTELLIG_DOOR;
+    p_door->Parent = -p_cvect->Face;
+    p_door->State = 1;
+    play_dist_ssample(p_door, 0x32, 0x7F, 0x40, 100, 0, 1);
+    return 0;
+}
+
+ubyte create_intelligent_door(short col)
+{
+    ubyte ret;
+    FNCHK_RET("create_intelligent_door", ret, create_intelligent_door_asm(col),
+      create_intelligent_door_c(col));
     return ret;
 }
 

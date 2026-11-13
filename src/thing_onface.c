@@ -124,12 +124,140 @@ ushort set_thing_height_on_face_tri(struct Thing *p_thing, int x, int z, short f
     return ret;
 }
 
-ushort set_thing_height_on_face_quad(struct Thing *p_thing, int x, int z, short face)
+#ifdef SW_FNCHK
+static ushort set_thing_height_on_face_quad_asm(struct Thing *p_thing, int x, int z, short face)
 {
     ushort ret;
     asm volatile (
       "call ASM_set_thing_height_on_face_quad\n"
-        : "=r" (ret) : "a" (p_thing), "d" (x), "b" (z), "c" (face));
+        : "=a" (ret) : "a" (p_thing), "d" (x), "b" (z), "c" (face) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Sign of a*b - c*d, computed in 64 bits. */
+static int sign_cross64(s32 a, s32 b, s32 c, s32 d)
+{
+    s64 v;
+
+    v = (s64)a * b - (s64)c * d;
+    return (v > 0) - (v < 0);
+}
+
+/** Is the map point (in 1/256 of map coordinates) inside the quad face,
+ * seen from above: 1 in triangle 0-1-2, 2 in the other half, 0 outside.
+ * Remade from inside_the_quad.
+ */
+static int inside_the_quad(struct SingleObjectFace4 *p_face4, int x, int z)
+{
+    struct SingleObject *p_obj;
+    struct SinglePoint *p_pt;
+    int x0, z0, x1, z1, x2, z2, x3, z3;
+    int px, pz;
+
+    p_obj = &game_objects[p_face4->Object];
+    p_pt = &game_object_points[(ushort)p_face4->PointNo[0]];
+    x0 = p_obj->MapX + p_pt->X; z0 = p_obj->MapZ + p_pt->Z;
+    p_pt = &game_object_points[(ushort)p_face4->PointNo[1]];
+    x1 = p_obj->MapX + p_pt->X; z1 = p_obj->MapZ + p_pt->Z;
+    p_pt = &game_object_points[(ushort)p_face4->PointNo[2]];
+    x2 = p_obj->MapX + p_pt->X; z2 = p_obj->MapZ + p_pt->Z;
+    p_pt = &game_object_points[(ushort)p_face4->PointNo[3]];
+    x3 = p_obj->MapX + p_pt->X; z3 = p_obj->MapZ + p_pt->Z;
+    px = x >> 8;
+    pz = z >> 8;
+
+    if ((sign_cross64(x1 - x0, pz - z1, z1 - z0, px - x1) >= 0) &&
+      (sign_cross64(x2 - x1, pz - z2, z2 - z1, px - x2) >= 0) &&
+      (sign_cross64(x0 - x2, pz - z0, z0 - z2, px - x0) >= 0))
+        return 1;
+    if (sign_cross64(x2 - x3, pz - z2, z2 - z3, px - x2) < 0)
+        return 0;
+    if (sign_cross64(x1 - x2, pz - z1, z1 - z2, px - x1) < 0)
+        return 0;
+    if (sign_cross64(x3 - x1, pz - z3, z3 - z1, px - x3) < 0)
+        return 0;
+    return 2;
+}
+
+/** 16.16 fixed point product (the middle 32 bits of the 64-bit one). */
+static s32 fix_mul16(s32 a, s32 b)
+{
+    return (s32)(((s64)a * b) >> 16);
+}
+
+/** 16.16 fixed point quotient. */
+static s32 fix_div16(s32 a, s32 b)
+{
+    return (s32)(((s64)a << 16) / b);
+}
+
+/** Sets the height of the thing standing at (x,z) on the plane of the quad
+ * face (points 0, 1, 2).  Returns 0 outside, else 1 or 2 for the half.
+ * Remade from set_thing_height_on_face_quad64.
+ */
+static ushort set_thing_height_on_face_quad64(struct Thing *p_thing, int x, int z, ushort face)
+{
+    struct SingleObjectFace4 *p_face4;
+    struct SingleObject *p_obj;
+    struct SinglePoint *p_pt;
+    int x0, y0, z0, x1, y1, z1, x2, y2, z2;
+    s32 dx1, dy1, dz1, dx2, dy2, dz2, px, pz;
+    s32 den, u, v, s, y;
+
+    if (face > next_object_face4)
+        return 0;
+    p_face4 = &game_object_faces4[face];
+    p_obj = &game_objects[p_face4->Object];
+    p_pt = &game_object_points[(ushort)p_face4->PointNo[0]];
+    x0 = p_obj->MapX + p_pt->X; y0 = p_obj->OffsetY + p_pt->Y; z0 = p_obj->MapZ + p_pt->Z;
+    p_pt = &game_object_points[(ushort)p_face4->PointNo[1]];
+    x1 = p_obj->MapX + p_pt->X; y1 = p_obj->OffsetY + p_pt->Y; z1 = p_obj->MapZ + p_pt->Z;
+    p_pt = &game_object_points[(ushort)p_face4->PointNo[2]];
+    x2 = p_obj->MapX + p_pt->X; y2 = p_obj->OffsetY + p_pt->Y; z2 = p_obj->MapZ + p_pt->Z;
+
+    dx1 = (x1 - x0) << 8;
+    dy1 = (y1 - y0) << 8;
+    dz1 = (z1 - z0) << 8;
+    dy2 = (y2 - y0) << 8;
+    dx2 = (x2 - x0) << 8;
+    dz2 = (z2 - z0) << 8;
+    px = x - (x0 << 8);
+    pz = z - (z0 << 8);
+
+    den = fix_mul16(dz2, dx1) - fix_mul16(dx2, dz1);
+    if (den == 0)
+        den = 1;
+    u = fix_div16(fix_mul16(px, dz2) - fix_mul16(pz, dx2), den);
+    v = fix_div16(fix_mul16(pz, dx1) - fix_mul16(px, dz1), den);
+    if ((u < 0) || (u > 0x10000) || (v < 0) || (v > 0x10000))
+        return 0;
+    s = u + v;
+    if (s > 0x20000)
+        return 0;
+    y = (y0 << 8) + fix_mul16(u, dy1) + fix_mul16(v, dy2);
+    p_thing->Y = y >> 3;
+    return (s > 0x10000) ? 2 : 1;
+}
+
+/** Remade from set_thing_height_on_face_quad. */
+static ushort set_thing_height_on_face_quad_c(struct Thing *p_thing, int x, int z, short face)
+{
+    int inside;
+
+    inside = inside_the_quad(&game_object_faces4[(ushort)face], x, z);
+    if (inside == 0)
+        return 0;
+    set_thing_height_on_face_quad64(p_thing, x, z, (ushort)face);
+    return inside;
+}
+
+ushort set_thing_height_on_face_quad(struct Thing *p_thing, int x, int z, short face)
+{
+    ushort ret;
+    FNCHK_RET("set_thing_height_on_face_quad", ret,
+      set_thing_height_on_face_quad_asm(p_thing, x, z, face),
+      set_thing_height_on_face_quad_c(p_thing, x, z, face));
     return ret;
 }
 

@@ -411,12 +411,60 @@ int alt_change_at_tile(short tile_x, short tile_z, int *change_xz)
     return abs(alt_max - alt_min);
 }
 
-int is_this_a_nice_place_for_a_picnic(s32 prc_x, s32 prc_z)
+#ifdef SW_FNCHK
+static int is_this_a_nice_place_for_a_picnic_asm(s32 prc_x, s32 prc_z)
 {
     int ret;
     asm volatile (
       "call ASM_is_this_a_nice_place_for_a_picnic\n"
-        : "=r" (ret) : "a" (prc_x), "d" (prc_z));
+        : "=a" (ret) : "a" (prc_x), "d" (prc_z) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Is the tile at the point a flat (within 12 units), walkable ground
+ * without a column?  Remade from is_this_a_nice_place_for_a_picnic.
+ */
+static int is_this_a_nice_place_for_a_picnic_c(s32 prc_x, s32 prc_z)
+{
+    int tile_x, tile_z, tx0, tz0, tx1, tz1;
+    int alt00, alt10, alt01, alt11, alt_max, alt_min;
+    ubyte bits;
+
+    if ((prc_x < 0) || (prc_z < 0) || (prc_x > 0x800000) || (prc_z > 0x800000))
+        return 0;
+    tile_x = prc_x >> 16;
+    tile_z = prc_z >> 16;
+    if ((game_my_big_map[tile_z * MAP_TILE_WIDTH + tile_x].ColumnHead & 0x0FFF) != 0)
+        return 0;
+    tx0 = tile_x & 0x7F;
+    tz0 = tile_z & 0x7F;
+    tx1 = (tile_x + 1) & 0x7F;
+    tz1 = (tile_z + 1) & 0x7F;
+    alt00 = game_my_big_map[tz0 * MAP_TILE_WIDTH + tx0].Alt;
+    alt10 = game_my_big_map[tz0 * MAP_TILE_WIDTH + tx1].Alt;
+    alt01 = game_my_big_map[tz1 * MAP_TILE_WIDTH + tx0].Alt;
+    alt11 = game_my_big_map[tz1 * MAP_TILE_WIDTH + tx1].Alt;
+    alt_max = (alt00 > alt10) ? alt00 : alt10;
+    if (alt_max <= alt01) alt_max = alt01;
+    if (alt_max <= alt11) alt_max = alt11;
+    alt_min = (alt00 < alt10) ? alt00 : alt10;
+    if (alt_min >= alt01) alt_min = alt01;
+    if (alt_min >= alt11) alt_min = alt11;
+    bits = get_my_texture_bits((short)(game_my_big_map[tile_z * MAP_TILE_WIDTH + tile_x].Texture & 0x3FFF));
+    if (abs(alt_max - alt_min) > 12)
+        bits |= 0x02;
+    if ((bits & 0x02) != 0)
+        return 0;
+    return 1;
+}
+
+int is_this_a_nice_place_for_a_picnic(s32 prc_x, s32 prc_z)
+{
+    int ret;
+    FNCHK_RET("is_this_a_nice_place_for_a_picnic", ret,
+      is_this_a_nice_place_for_a_picnic_asm(prc_x, prc_z),
+      is_this_a_nice_place_for_a_picnic_c(prc_x, prc_z));
     return ret;
 }
 

@@ -786,10 +786,199 @@ void process_mounted_gun(struct Thing *p_building)
     }
 }
 
-void process_gate1(struct Thing *p_building)
+#ifdef SW_FNCHK
+static void process_gate1_asm(struct Thing *p_building)
 {
     asm volatile ("call ASM_process_gate1\n"
-        : : "a" (p_building));
+        : : "a" (p_building) : "cc", "memory");
+}
+#endif
+
+/** Moves the points of one wing of a gate object along x (or z if dx is
+ * 0): the even wing (flag 0) and the odd one use different point sets.
+ * Remade from apply_object_morph.
+ */
+static void apply_object_morph(ushort obj, short dx, short dz, ushort flag)
+{
+    static const ubyte pts_on[5] = {0, 3, 4, 7, 9};
+    static const ubyte pts_off[5] = {1, 2, 5, 6, 8};
+    const ubyte *pts;
+    ushort start;
+    int i;
+
+    pts = (flag != 0) ? pts_on : pts_off;
+    start = game_objects[obj].StartPoint;
+    if (dx != 0)
+    {
+        for (i = 0; i < 5; i++)
+            game_object_points[start + pts[i]].X += dx;
+    }
+    else if (dz != 0)
+    {
+        for (i = 0; i < 5; i++)
+            game_object_points[start + pts[i]].Z += dz;
+    }
+}
+
+/** One wing pair (wing 1 and 3, or 2 and 4) of a gate: the height of its
+ * objects follows RaiseY, the points slide by (sx,sz). */
+static void gate_set_wing_y(struct Thing *p_building, ushort wing, short y)
+{
+    game_objects[p_building->U.UObject.Object + wing].OffsetY = y;
+}
+
+/** A gate opening (state 0x0D, wings sliding down/apart) or closing (0x0F),
+ * and waiting closed/open (0x13) for a request.
+ * Remade from process_gate1.
+ */
+static void process_gate1_c(struct Thing *p_building)
+{
+    struct TngUObject *p_obj;
+    short tdx, tdz;
+
+    p_obj = &p_building->U.UObject;
+    tdx = p_obj->TargetDX;
+    tdz = p_obj->TargetDZ;
+    switch ((ushort)p_building->State)
+    {
+    case 0x0D:
+        if (p_obj->Timer[0] == 0)
+        {
+            if (p_obj->RaiseY[0] > -500)
+            {
+                apply_object_morph(p_obj->Object + 1, -tdx, -tdz, 1);
+                apply_object_morph(p_obj->Object + 3, tdx, tdz, 0);
+                gate_set_wing_y(p_building, 1, p_obj->RaiseY[0] + p_obj->MinY[0] + 500);
+                gate_set_wing_y(p_building, 3, p_obj->RaiseY[0] + p_obj->MinY[0] + 500);
+                p_obj->RaiseY[0] += p_obj->RaiseDY[0];
+            }
+            else
+            {
+                gate_set_wing_y(p_building, 1, p_obj->MinY[0]);
+                gate_set_wing_y(p_building, 3, p_obj->MinY[0]);
+            }
+        }
+        else
+        {
+            p_obj->Timer[0]--;
+        }
+        if (p_obj->Timer[1] == 0)
+        {
+            if (p_obj->RaiseY[1] > -500)
+            {
+                apply_object_morph(p_obj->Object + 2, -tdx, -tdz, 0);
+                apply_object_morph(p_obj->Object + 4, tdx, tdz, 1);
+                gate_set_wing_y(p_building, 2, p_obj->RaiseY[1] + p_obj->MinY[0] + 500);
+                gate_set_wing_y(p_building, 4, p_obj->RaiseY[1] + p_obj->MinY[0] + 500);
+                p_obj->RaiseY[1] += p_obj->RaiseDY[1];
+            }
+            else
+            {
+                gate_set_wing_y(p_building, 2, p_obj->MinY[0]);
+                gate_set_wing_y(p_building, 4, p_obj->MinY[0]);
+            }
+        }
+        else
+        {
+            p_obj->Timer[1]--;
+        }
+        if ((p_obj->RaiseY[0] <= -500) && (p_obj->RaiseY[1] <= -500))
+        {
+            p_building->Flag = 0x40;
+            p_building->State = 0x13;
+        }
+        break;
+    case 0x0F:
+        if ((p_building->Flag & 0x20) != 0)
+        {
+            p_building->State = 0x0D;
+            p_building->Flag = 0;
+            p_obj->Timer[0] = 3;
+            p_obj->Timer[1] = 0;
+            p_obj->RaiseDY[0] = -50;
+            p_obj->RaiseDY[1] = -50;
+            break;
+        }
+        if (p_obj->Timer[0] == 0)
+        {
+            if (p_obj->RaiseY[0] < 0)
+            {
+                apply_object_morph(p_obj->Object + 1, tdx, tdz, 1);
+                apply_object_morph(p_obj->Object + 3, -tdx, -tdz, 0);
+                gate_set_wing_y(p_building, 1, p_obj->RaiseY[0] + p_obj->MinY[0] + 500);
+                gate_set_wing_y(p_building, 3, p_obj->RaiseY[0] + p_obj->MinY[0] + 500);
+                p_obj->RaiseY[0] += p_obj->RaiseDY[0];
+            }
+            else
+            {
+                gate_set_wing_y(p_building, 1, p_obj->MinY[0] + 500);
+                gate_set_wing_y(p_building, 3, p_obj->MinY[0] + 500);
+            }
+        }
+        else
+        {
+            p_obj->Timer[0]--;
+        }
+        if (p_obj->Timer[1] == 0)
+        {
+            if (p_obj->RaiseY[1] < 0)
+            {
+                apply_object_morph(p_obj->Object + 2, tdx, tdz, 0);
+                apply_object_morph(p_obj->Object + 4, -tdx, -tdz, 1);
+                gate_set_wing_y(p_building, 2, p_obj->RaiseY[1] + p_obj->MinY[0] + 500);
+                gate_set_wing_y(p_building, 4, p_obj->RaiseY[1] + p_obj->MinY[0] + 500);
+                p_obj->RaiseY[1] += p_obj->RaiseDY[1];
+            }
+            else
+            {
+                gate_set_wing_y(p_building, 2, p_obj->MinY[0] + 500);
+                gate_set_wing_y(p_building, 4, p_obj->MinY[0] + 500);
+            }
+        }
+        else
+        {
+            p_obj->Timer[1]--;
+        }
+        if ((p_obj->RaiseY[0] >= 0) && (p_obj->RaiseY[1] >= 0))
+        {
+            p_obj->RaiseY[0] = 0;
+            p_obj->RaiseY[1] = 0;
+            gate_set_wing_y(p_building, 1, p_obj->MinY[0] + 500);
+            gate_set_wing_y(p_building, 3, p_obj->MinY[0] + 500);
+            gate_set_wing_y(p_building, 2, p_obj->MinY[0] + 500);
+            gate_set_wing_y(p_building, 4, p_obj->MinY[0] + 500);
+            p_building->Flag = 0x80;
+            p_building->State = 0x13;
+        }
+        break;
+    case 0x13:
+        if ((p_building->Flag & 0x20) != 0)
+        {
+            p_building->State = 0x0D;
+            p_building->Flag = 0;
+            p_obj->Timer[0] = 3;
+            p_obj->Timer[1] = 0;
+            p_obj->RaiseDY[0] = -50;
+            p_obj->RaiseDY[1] = -50;
+        }
+        if ((p_building->Flag & 0x100) != 0)
+        {
+            p_building->State = 0x0F;
+            p_building->Flag = 0;
+            p_obj->Timer[0] = 0;
+            p_obj->Timer[1] = 3;
+            p_obj->RaiseDY[0] = 50;
+            p_obj->RaiseDY[1] = 50;
+        }
+        break;
+    default:
+        break;
+    }
+}
+
+void process_gate1(struct Thing *p_building)
+{
+    FNCHK_VOID("process_gate1", process_gate1_asm(p_building), process_gate1_c(p_building));
 }
 
 void process_bld36(struct Thing *p_building)

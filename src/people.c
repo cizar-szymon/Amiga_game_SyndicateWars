@@ -2206,6 +2206,11 @@ static short check_for_other_people_body(int x, int y, int z, struct Thing *p_pe
             cur_tile_z = tile_z_center + dz;
             if ((cur_tile_z <= 0) || (cur_tile_z >= MAP_TILE_HEIGHT))
                 continue;
+            // Most of the 9 tiles are empty, and the check of an empty tile
+            // changes nothing: skip the call (7 arguments, on a 68k mostly
+            // the cost of this whole function).
+            if (game_my_big_map[MAP_TILE_WIDTH * cur_tile_z + cur_tile_x].Child == 0)
+                continue;
 
             found = check_for_other_people_on_tile(x, y, z,
               cur_tile_x, cur_tile_z, p_person, found);

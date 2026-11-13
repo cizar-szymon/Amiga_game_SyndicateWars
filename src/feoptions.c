@@ -45,7 +45,7 @@
 /** How many pixels the slider is spill outside of its active rect area.
  */
 #define HORIZ_PROSLIDER_MAIN_SPILL_W 6
-#define GFX_TOGGLE_OPTIONS_COUNT 7
+#define GFX_TOGGLE_OPTIONS_COUNT 9
 #define GFX_MULTIVAL_OPTIONS_COUNT 2
 
 struct ScreenBox audio_tracks_box = {0};
@@ -408,10 +408,10 @@ ubyte show_options_visual_main_box(struct ScreenBox *p_box)
               lbDisplay.LeftButton = 0;
               switch (i)
               {
-              case 15:
+              case GFX_TOGGLE_OPTIONS_COUNT * 2 + 1:
                   game_option_inc(GOpt_TrenchcoatPreference);
                   break;
-              case 14:
+              case GFX_TOGGLE_OPTIONS_COUNT * 2 + 0:
                   game_option_inc(GOpt_PanelPermutation);
                   break;
               }
@@ -1020,14 +1020,35 @@ void init_options_gfx_screen_boxes(void)
     n++;
     start_y += 18;
 
+    /* Speed options of the Amiga port; no national texts for them */
+    assert(n == 7);
+    init_screen_label(&options_gfx_labels[n],  213 + 20,  start_y,
+      "FAR PEDESTRIANS", 6, med_font, 1, 0);
+    init_screen_button(&options_gfx_buttons[14], 213 + 243, start_y,
+      gui_strings[478], 6, med2_font, 1, 0);
+    init_screen_button(&options_gfx_buttons[15], 213 + 331, start_y,
+      gui_strings[479], 6, med2_font, 1, 0);
+    n++;
+    start_y += 18;
+
+    assert(n == 8);
+    init_screen_label(&options_gfx_labels[n],  213 + 20,  start_y,
+      "RADAR HALF RATE", 6, med_font, 1, 0);
+    init_screen_button(&options_gfx_buttons[16], 213 + 243, start_y,
+      gui_strings[478], 6, med2_font, 1, 0);
+    init_screen_button(&options_gfx_buttons[17], 213 + 331, start_y,
+      gui_strings[479], 6, med2_font, 1, 0);
+    n++;
+    start_y += 18;
+
     assert(n == GFX_TOGGLE_OPTIONS_COUNT + 0);
     val = abs(ingame.PanelPermutation);
     init_screen_label(&options_gfx_labels[n],  213 + 20,  start_y,
       game_option_desc(GOpt_PanelPermutation), 6, med_font, 1, 0);
-    init_screen_button(&options_gfx_buttons[14], 320u, 274u,
+    init_screen_button(&options_gfx_buttons[GFX_TOGGLE_OPTIONS_COUNT * 2 + 0], 320u, 274u + 36,
         gui_strings[579 + val], 6, med2_font, 1, 0);
-    options_gfx_buttons[14].CallBackFn = change_panel_permutation;
-    options_gfx_buttons[14].Width += 60;
+    options_gfx_buttons[GFX_TOGGLE_OPTIONS_COUNT * 2 + 0].CallBackFn = change_panel_permutation;
+    options_gfx_buttons[GFX_TOGGLE_OPTIONS_COUNT * 2 + 0].Width += 60;
     n++;
     start_y += 18;
 
@@ -1035,10 +1056,10 @@ void init_options_gfx_screen_boxes(void)
     val = ingame.TrenchcoatPreference;
     init_screen_label(&options_gfx_labels[n],  213 + 20,  start_y,
       game_option_desc(GOpt_TrenchcoatPreference), 6, med_font, 1, 0);
-    init_screen_button(&options_gfx_buttons[15], 320u, 310u,
+    init_screen_button(&options_gfx_buttons[GFX_TOGGLE_OPTIONS_COUNT * 2 + 1], 320u, 310u + 36,
         gui_strings[583 + val], 6, med2_font, 1, 0);
-    options_gfx_buttons[15].CallBackFn = change_trenchcoat_preference;
-    options_gfx_buttons[15].Width = options_gfx_buttons[14].Width;
+    options_gfx_buttons[GFX_TOGGLE_OPTIONS_COUNT * 2 + 1].CallBackFn = change_trenchcoat_preference;
+    options_gfx_buttons[GFX_TOGGLE_OPTIONS_COUNT * 2 + 1].Width = options_gfx_buttons[GFX_TOGGLE_OPTIONS_COUNT * 2 + 0].Width;
 
     val = 0;
     for (i = 0; i < 2; i++)
@@ -1108,6 +1129,24 @@ void init_options_gfx_screen_boxes(void)
         val++;
     }
 
+    // far pedestrians: OFF is the original, ON the level not processing
+    // them off the view and the scanner
+    for (i = 14; i < 16; i++)
+    {
+        options_gfx_buttons[i].Radio = &game_far_pedestrians;
+        options_gfx_buttons[i].RadioValue = (i == 14) ? 0 : 3;
+        options_gfx_buttons[i].Flags |= GBxFlg_RadioBtn;
+    }
+
+    val = 0;
+    for (i = 16; i < 18; i++)
+    {
+        options_gfx_buttons[i].Radio = &game_scanner_half_rate;
+        options_gfx_buttons[i].RadioValue = val;
+        options_gfx_buttons[i].Flags |= GBxFlg_RadioBtn;
+        val++;
+    }
+
     // Reposition the components to current resolution
 
     start_x = unkn13_SYSTEM_button.X + unkn13_SYSTEM_button.Width;
@@ -1149,7 +1188,9 @@ void init_options_gfx_screen_boxes(void)
         val = (options_gfx_box.Width -
           options_gfx_buttons[i].Width) / 2;
         options_gfx_buttons[i].X = options_gfx_box.X + val + 9;
-        options_gfx_buttons[i].Y = options_gfx_buttons[12].Y + (i - 12) * 36;
+        // below the last toggle row
+        options_gfx_buttons[i].Y = options_gfx_buttons[GFX_TOGGLE_OPTIONS_COUNT * 2 - 2].Y
+          + (i - (GFX_TOGGLE_OPTIONS_COUNT * 2 - 2)) * 36;
 
         val = (options_gfx_box.Width -
           options_gfx_labels[k].Width) / 2;

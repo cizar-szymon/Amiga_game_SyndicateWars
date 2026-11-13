@@ -203,6 +203,14 @@ extern ubyte net_game_play_flags;
 extern ubyte game_gfx_advanced_lights;
 extern ubyte game_billboard_movies;
 extern ubyte game_gfx_deep_radar;
+/** Speed options of the Amiga port (the PC build has them too, off):
+ * far pedestrians - level 0 off, 1/2 processed every 2nd/4th turn, 3 not
+ * processed while off the view and the scanner (see src/thing.c);
+ * the scanner drawn every 2nd frame (see src/hud_panel.c). */
+extern ubyte game_far_pedestrians;
+extern ubyte game_scanner_half_rate;
+
+void set_default_speed_options(void);
 
 /** User set in-game brightess. */
 extern short user_sel_brightness;

@@ -1985,29 +1985,30 @@ int amiga_getenv_int(const char *name, int dflt);
  * from the view (mission 1: 285 of 308 people). They walk slower there,
  * which cannot be seen. Not in network games and packet recording or
  * playback, which need the original course of the game.
- * ENV:SyndWarsCivLOD on the Amiga and the Warp ARM (default 3 there),
- * SW_CIVLOD elsewhere (default 0: the PC build stays the reference).
+ * Set in the options menu ("FAR PEDESTRIANS": off 0, on 3), kept in the user
+ * settings; start value from ENV:SyndWarsCivLOD on the Amiga and the Warp ARM
+ * (default 3 there), SW_CIVLOD elsewhere (default 0: the PC build stays
+ * the reference) - see set_default_speed_options().
  */
 static int far_civilians_level(void)
 {
-    static int level = -1;
+    static int level_logged = -1;
+    int level;
 
-    if (level < 0)
+    // set in the options menu, start value from the ENV: variable
+    // (set_default_speed_options())
+    level = game_far_pedestrians;
+    if (level > 3)
+        level = 0;
+    if (level != level_logged)
     {
-#if defined(SW_AMIGA)
-        // on by default on the Amiga and the Warp ARM (the user found no
-        // change in the game); SyndWarsCivLOD 0 turns it off
-        level = amiga_getenv_int("SyndWarsCivLOD", 3);
-#else
-        const char *s = getenv("SW_CIVLOD");
-        level = (s != NULL) ? atoi(s) : 0;
-#endif
-        if ((level < 0) || (level > 3))
-            level = 0;
         if (level == 3)
             LOGWARN("far civilians off the scanner not processed");
         else if (level > 0)
             LOGWARN("far civilians processed every %d turns", 1 << level);
+        else
+            LOGWARN("far civilians processed as in the original");
+        level_logged = level;
     }
     return level;
 }

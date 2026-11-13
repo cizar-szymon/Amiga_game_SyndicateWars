@@ -348,6 +348,13 @@ void read_user_settings(void)
         locflags &= ~UsrF_Cheats; // Cheats are per-session setting, not per-user
         ingame.UserFlags |= locflags; // Do not replace these, add to them
         LbFileRead(fh, &save_mortal_salt, sizeof(save_mortal_salt));
+        {   // speed options, added at the end: older files keep the defaults
+            ubyte opt;
+            if (LbFileRead(fh, &opt, sizeof(opt)) == sizeof(opt) && (opt <= 3))
+                game_far_pedestrians = opt;
+            if (LbFileRead(fh, &opt, sizeof(opt)) == sizeof(opt) && (opt <= 1))
+                game_scanner_half_rate = opt;
+        }
         LbFileClose(fh);
 
         apply_user_settings();
@@ -410,6 +417,8 @@ TbBool save_user_settings(void)
     LbFileWrite(fh, &ingame.UseMultiMedia, sizeof(ingame.UseMultiMedia));
     LbFileWrite(fh, &ingame.UserFlags, sizeof(ingame.UserFlags));
     LbFileWrite(fh, &save_mortal_salt, sizeof(save_mortal_salt));
+    LbFileWrite(fh, &game_far_pedestrians, sizeof(game_far_pedestrians));
+    LbFileWrite(fh, &game_scanner_half_rate, sizeof(game_scanner_half_rate));
     LbFileClose(fh);
     return 0;
 }

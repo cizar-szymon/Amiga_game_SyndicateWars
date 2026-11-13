@@ -2287,25 +2287,14 @@ int amiga_getenv_int(const char *name, int dflt);
 /* Scanner drawn every 2nd frame (option, off by default): on the other
  * frames its pixels from the frame before are put back. The scanner is
  * see-through, so the view under it then changes every 2nd frame only.
- * ENV:SyndWarsRadar2 on the Amiga and the Warp ARM, SW_RADAR2 elsewhere. */
+ * Set in the options menu ("RADAR HALF RATE"), kept in the user settings;
+ * start value from ENV:SyndWarsRadar2 on the Amiga and the Warp ARM,
+ * SW_RADAR2 elsewhere. */
 static TbBool scanner_half_rate_on(void)
 {
-    static int level = -1;
-
-    if (level < 0)
-    {
-#if defined(SW_AMIGA)
-        level = amiga_getenv_int("SyndWarsRadar2", 0);
-#else
-        const char *s = getenv("SW_RADAR2");
-        level = (s != NULL) ? atoi(s) : 0;
-#endif
-        if (level != 1)
-            level = 0;
-        else
-            LOGWARN("scanner drawn every 2nd frame");
-    }
-    return level;
+    // set in the options menu, start value from the ENV: variable
+    // (set_default_speed_options())
+    return (game_scanner_half_rate == 1);
 }
 
 #define SCANNER_KEEP_MARGIN 2

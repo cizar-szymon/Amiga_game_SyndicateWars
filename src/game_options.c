@@ -16,6 +16,7 @@
  *     (at your option) any later version.
  */
 /******************************************************************************/
+#include <stdlib.h>
 #include "game_options.h"
 
 #include <assert.h>
@@ -37,6 +38,8 @@ ubyte net_game_play_flags = 0;
 ubyte game_gfx_advanced_lights;
 ubyte game_billboard_movies;
 ubyte game_gfx_deep_radar;
+ubyte game_far_pedestrians;
+ubyte game_scanner_half_rate;
 
 short user_sel_brightness = 0;
 
@@ -547,6 +550,36 @@ void set_default_gfx_settings(void)
     game_perspective = ProjM_Perspective;
     deep_radar_surface_col = 216;
     deep_radar_line_col = 100;
+    set_default_speed_options();
+}
+
+#if defined(SW_AMIGA)
+int amiga_getenv_int(const char *name, int dflt);
+#endif
+
+void set_default_speed_options(void)
+{
+    int far_peds, scan_half;
+
+#if defined(SW_AMIGA)
+    /* on by default on the Amiga and the Warp ARM - the user found no
+     * change in the game; ENV: variables set the start values */
+    far_peds = amiga_getenv_int("SyndWarsCivLOD", 3);
+    scan_half = amiga_getenv_int("SyndWarsRadar2", 0);
+#else
+    /* the PC build stays the reference */
+    {
+        const char *s;
+        s = getenv("SW_CIVLOD");
+        far_peds = (s != NULL) ? atoi(s) : 0;
+        s = getenv("SW_RADAR2");
+        scan_half = (s != NULL) ? atoi(s) : 0;
+    }
+#endif
+    if ((far_peds < 0) || (far_peds > 3))
+        far_peds = 0;
+    game_far_pedestrians = far_peds;
+    game_scanner_half_rate = (scan_half == 1);
 }
 
 void set_default_visual_prefernces(void)

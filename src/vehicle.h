@@ -257,6 +257,7 @@ ushort veh_passenger_count(struct Thing *p_veh);
 
 void VNAV_unkn_func_207(struct Thing *p_thing);
 int start_goto_vehicle(struct Thing *p_vehicle, int x, int z);
+void process_next_vnav_turn(struct Thing *p_vehicle);
 
 void process_tank_turret(struct Thing *p_tank);
 

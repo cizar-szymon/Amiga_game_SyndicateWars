@@ -247,13 +247,6 @@ short get_next_tnode(struct Thing *p_vehicle, struct TrafficNode *p_tnode)
     return ret;
 }
 
-void process_next_vnav_turn(struct Thing *p_vehicle)
-{
-    asm volatile ("call ASM_process_next_vnav_turn\n"
-        : : "a" (p_vehicle));
-    return;
-}
-
 void add_agphase1_lock(struct Thing *p_vehicle)
 {
     struct TrafficNode *p_tnode;

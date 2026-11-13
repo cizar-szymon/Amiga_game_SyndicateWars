@@ -6,6 +6,12 @@
 #include <devices/timer.h>
 #include <proto/timer.h>
 #include <proto/dos.h>
+#include <proto/exec.h>
+#include <proto/cia.h>
+#include <resources/cia.h>
+#include <hardware/cia.h>
+#include <exec/interrupts.h>
+#include <stdlib.h>
 #include "bftypes.h"
 #include "bflog.h"
 #include "bftime.h"
@@ -65,24 +71,110 @@ static ULONG prof_now(void)
  *   of E-clock reads per frame, several ms). */
 int amiga_prof_level;
 
+/* Level 3: sampling. A CIA-B timer interrupt (PROF_SAMPLE_HZ) adds one
+ * sample to every slot open at that moment; the slot markers only keep a
+ * stack of open slots, with no clock reads, so they cost next to nothing
+ * and do not bend the shares as the E-clock reads of level 2 do. */
+#define PROF_SAMPLE_HZ 4000
+#define PROF_STACK 16
+extern struct CIA ciab;
+struct Library *CiaBBase;
+static struct Interrupt prof_int;
+static int prof_int_bit = -1;
+static UWORD prof_latch;
+static volatile UBYTE prof_stack[PROF_STACK];
+static volatile int prof_depth;
+static volatile ULONG prof_samples[PROF_SLOTS];
+
+static void prof_sample_irq(void)
+{
+    int i, n;
+
+    n = prof_depth;
+    if (n > PROF_STACK)
+        n = PROF_STACK;
+    for (i = 0; i < n; i++)
+        prof_samples[prof_stack[i]]++;
+}
+
+static void prof_sampling_stop(void)
+{
+    if (prof_int_bit < 0)
+        return;
+    AbleICR(CiaBBase, 1 << prof_int_bit);
+    if (prof_int_bit == CIAICRB_TA)
+        ciab.ciacra &= ~CIACRAF_START;
+    else
+        ciab.ciacrb &= ~CIACRBF_START;
+    RemICRVector(CiaBBase, prof_int_bit, &prof_int);
+    prof_int_bit = -1;
+}
+
+static int prof_sampling_start(void)
+{
+    struct EClockVal ev;
+    ULONG freq;
+
+    CiaBBase = (struct Library *)OpenResource((CONST_STRPTR)CIABNAME);
+    if (CiaBBase == NULL)
+        return 0;
+    if (TimerBase == NULL)
+        LbTimerClock();
+    freq = (TimerBase != NULL) ? ReadEClock(&ev) : 709379;
+    prof_freq = freq;
+    prof_latch = (UWORD)(freq / PROF_SAMPLE_HZ);
+    prof_int.is_Node.ln_Type = NT_INTERRUPT;
+    prof_int.is_Node.ln_Name = (char *)"SyndWars prof";
+    prof_int.is_Code = (void (*)(void))prof_sample_irq;
+    prof_int.is_Data = NULL;
+    if (AddICRVector(CiaBBase, CIAICRB_TB, &prof_int) == NULL) {
+        prof_int_bit = CIAICRB_TB;
+        ciab.ciacrb &= CIACRBF_ALARM;
+        ciab.ciatblo = prof_latch & 0xFF;
+        ciab.ciatbhi = prof_latch >> 8;
+        ciab.ciacrb |= CIACRBF_LOAD | CIACRBF_START;
+    } else if (AddICRVector(CiaBBase, CIAICRB_TA, &prof_int) == NULL) {
+        prof_int_bit = CIAICRB_TA;
+        ciab.ciacra &= ~(CIACRAF_RUNMODE | CIACRAF_INMODE | CIACRAF_START);
+        ciab.ciatalo = prof_latch & 0xFF;
+        ciab.ciatahi = prof_latch >> 8;
+        ciab.ciacra |= CIACRAF_LOAD | CIACRAF_START;
+    } else {
+        return 0;
+    }
+    AbleICR(CiaBBase, (1 << prof_int_bit) | CIAICRF_SETCLR);
+    atexit(prof_sampling_stop);
+    return 1;
+}
+
 void amiga_prof_init(void)
 {
     char buf[4];
 
     if (GetVar((STRPTR)"SyndWarsProf", (STRPTR)buf, sizeof(buf), 0) >= 0)
-        amiga_prof_level = (buf[0] == '2') ? 2 : 1;
+        amiga_prof_level = (buf[0] == '2') ? 2 : (buf[0] == '3') ? 3 : 1;
     else
         amiga_prof_level = 0;
+    if ((amiga_prof_level == 3) && !prof_sampling_start()) {
+        LbWarnLog("prof: no free CIA-B timer, level 1 instead\n");
+        amiga_prof_level = 1;
+    }
     LbWarnLog("prof: level %d\n", amiga_prof_level);
 }
 
 static int prof_fine_on(void)
 {
-    return (amiga_prof_level >= 2);
+    return (amiga_prof_level == 2);
 }
 
 void amiga_prof_begin(int slot)
 {
+    if (amiga_prof_level == 3) {
+        if (prof_depth < PROF_STACK)
+            prof_stack[prof_depth] = slot;
+        prof_depth++;
+        return;
+    }
     if (amiga_prof_level < ((slot >= 32) ? 2 : 1))
         return;
     prof_start[slot] = prof_now();
@@ -90,6 +182,18 @@ void amiga_prof_begin(int slot)
 
 void amiga_prof_end(int slot)
 {
+    if (amiga_prof_level == 3) {
+        int i;
+
+        /* back to the depth of this slot, also when an inner end was missed */
+        for (i = ((prof_depth < PROF_STACK) ? prof_depth : PROF_STACK) - 1; i >= 0; i--) {
+            if (prof_stack[i] == slot) {
+                prof_depth = i;
+                return;
+            }
+        }
+        return;
+    }
     if (amiga_prof_level < ((slot >= 32) ? 2 : 1))
         return;
     prof_sum[slot] += prof_now() - prof_start[slot];
@@ -146,6 +250,14 @@ void amiga_prof_frame(void)
     for (i = 0; i < 8; i++) amiga_sim_cnt[i] = 0;
     amiga_prof_pixels = 0;
     amiga_prof_spans = 0;
+    if (amiga_prof_level == 3) {
+        Disable();
+        for (i = 0; i < PROF_SLOTS; i++) {
+            prof_sum[i] = prof_samples[i] * prof_latch;
+            prof_samples[i] = 0;
+        }
+        Enable();
+    }
     for (i = 0; i < PROF_SLOTS; i++)
     {
         ULONG per10;

@@ -27,6 +27,9 @@
 #include <string.h>
 
 #include "bigmap.h"
+#include "fncheck.h"
+#include "engincam.h"
+#include "game_options.h"
 #include "bmbang.h"
 #include "enginpriobjs.h"
 #include "enginsngobjs.h"
@@ -1058,10 +1061,47 @@ void process_tank(struct Thing *p_vehicle)
         : : "a" (p_vehicle));
 }
 
-void set_passengers_location(struct Thing *p_vehicle)
+#ifdef SW_FNCHK
+static void set_passengers_location_asm(struct Thing *p_vehicle)
 {
     asm volatile ("call ASM_set_passengers_location\n"
-        : : "a" (p_vehicle));
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+#endif
+
+/** The passengers of a vehicle are where the vehicle is; a selected agent
+ * among them marks the vehicle (Flag2 0x2000).  Remade from
+ * set_passengers_location (a second, counting-only loop of the original
+ * for long passenger lists has no effect and is left out).
+ */
+static void set_passengers_location_c(struct Thing *p_vehicle)
+{
+    ThingIdx passngr;
+    ushort n;
+
+    p_vehicle->Flag2 &= ~TgF2_Unkn2000;
+    passngr = p_vehicle->U.UVehicle.PassengerHead;
+    for (n = 0; (passngr != 0) && (n < 410); n++)
+    {
+        struct Thing *p_passngr;
+
+        p_passngr = &things[(ushort)passngr];
+        p_passngr->X = p_vehicle->X;
+        if (p_vehicle->SubType == SubTT_VEH_FLYING)
+            p_passngr->Y = p_vehicle->Y >> 3;
+        else
+            p_passngr->Y = p_vehicle->Y;
+        p_passngr->Z = p_vehicle->Z;
+        passngr = p_passngr->U.UPerson.LinkPassenger;
+        if ((p_passngr->Flag & TngF_SelectedAgent) != 0)
+            p_vehicle->Flag2 |= TgF2_Unkn2000;
+    }
+}
+
+void set_passengers_location(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("set_passengers_location", set_passengers_location_asm(p_vehicle),
+      set_passengers_location_c(p_vehicle));
 }
 
 void move_flying_vehicle(struct Thing *p_vehicle)
@@ -1203,10 +1243,132 @@ void train_unkn_st18_func_2(struct Thing *p_vehicle)
         : : "a" (p_vehicle));
 }
 
-void move_vehicle(struct Thing *p_vehicle)
+#ifdef SW_FNCHK
+static void move_vehicle_asm(struct Thing *p_vehicle)
 {
     asm volatile ("call ASM_move_vehicle\n"
-        : : "a" (p_vehicle));
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+#endif
+
+extern ushort last_swoosh_thing;
+extern ulong last_swoosh_turn;
+
+/** Rotation matrix (14-bit fixed point) of the three angles (0..0x7FF).
+ * Remade from rotate_obj.
+ */
+static void rotate_obj(short angle_a, short angle_b, short angle_c, struct M33 *p_mat)
+{
+    s32 s1, c1, s2, c2, s3, c3;
+    s32 a, b, c;
+
+    a = angle_a & 0x7FF;
+    b = angle_b & 0x7FF;
+    c = angle_c & 0x7FF;
+    s1 = lbSinTable[a] >> 1;
+    c1 = lbSinTable[a + 512] >> 1;
+    s3 = lbSinTable[c] >> 1;
+    c3 = lbSinTable[c + 512] >> 1;
+    s2 = lbSinTable[b] >> 1;
+    c2 = lbSinTable[b + 512] >> 1;
+
+    p_mat->R[0][0] = (c3 * c2) >> 16;
+    p_mat->R[0][1] = (-(c2 * s3)) >> 16;
+    p_mat->R[0][2] = s2 >> 1;
+    p_mat->R[1][0] = (c1 * s3 + ((c3 * s1) >> 15) * s2) >> 16;
+    p_mat->R[1][1] = (c3 * c1 - ((s1 * s3) >> 15) * s2) >> 16;
+    p_mat->R[1][2] = (-(s1 * c2)) >> 16;
+    p_mat->R[2][0] = (s1 * s3 - ((c3 * c1) >> 15) * s2) >> 16;
+    p_mat->R[2][1] = (c3 * s1 + ((c1 * s2) >> 15) * s3) >> 16;
+    p_mat->R[2][2] = (c1 * c2) >> 16;
+}
+
+/** The swoosh of a passing car near the camera.  Remade from swoosh_veh. */
+static void swoosh_veh(struct Thing *p_vehicle)
+{
+    int adx, adz, dist;
+
+    if ((last_swoosh_thing == (ushort)p_vehicle->ThingOffset) &&
+      ((ulong)(gameturn - last_swoosh_turn) < 150))
+        return;
+    if (ingame.TrackThing == p_vehicle->ThingOffset)
+        return;
+    if ((p_vehicle->SubType != 0x28) && (p_vehicle->SubType != 0x2B) &&
+      (p_vehicle->SubType != SubTT_VEH_FLYING))
+        return;
+    adx = abs((p_vehicle->X >> 8) - engn_xc);
+    adz = abs((p_vehicle->Z >> 8) - engn_zc);
+    if (adx > adz)
+        dist = adx + (adz >> 1);
+    else
+        dist = adz + (adx >> 1);
+    if (dist >= 0x400)
+        return;
+    if (IsSamplePlaying((ushort)p_vehicle->ThingOffset, 0x11, 0))
+        return;
+    last_swoosh_thing = p_vehicle->ThingOffset;
+    last_swoosh_turn = gameturn;
+    play_dist_sample(p_vehicle, 0x11, 0x7F, 0x40, 100, 0, 1);
+}
+
+/** A vehicle turns, tilts and moves on (its matrix from the angles, the
+ * velocity along its heading).  Remade from move_vehicle.
+ */
+static void move_vehicle_c(struct Thing *p_vehicle)
+{
+    struct TngUVehicle *p_veh;
+    struct M33 *p_mat;
+    short dt;
+    int speed;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    if ((((ushort)p_vehicle->ThingOffset + gameturn) & 3) == 0)
+        swoosh_veh(p_vehicle);
+    if ((p_vehicle->SubType != SubTT_VEH_TRAIN) && (p_vehicle->SubType != SubTT_VEH_FLYING))
+        check_vehicle_col(p_vehicle);
+
+    p_veh->AngleY = (p_veh->AngleY + (p_veh->AngleDY >> 3)) & 0x7FF;
+    dt = p_veh->AngleZ - p_veh->AngleDY;
+    if (p_vehicle->SubType == SubTT_VEH_TRAIN)
+        p_veh->AngleZ = 0;
+    else if (dt < -100)
+        p_veh->AngleZ += 100;
+    else if (dt > 100)
+        p_veh->AngleZ -= 100;
+    else if (abs(dt) > 50)
+        p_veh->AngleZ = p_veh->AngleDY;
+
+    p_mat = &local_mats[p_veh->MatrixIndex];
+    rotate_obj(0, -p_veh->AngleY, -(p_veh->AngleZ >> 1), p_mat);
+    if (p_veh->AngleX != 0)
+        rotate_object_axis(p_mat, 0, p_veh->AngleX, 0);
+    speed = p_vehicle->Speed;
+    p_vehicle->VX = (speed * -p_mat->R[0][2]) >> 10;
+    if (p_vehicle->SubType == SubTT_VEH_TRAIN)
+        p_vehicle->VY = (speed * -p_mat->R[1][2]) >> 10;
+    else
+        p_vehicle->VY = 0;
+    p_vehicle->VZ = (speed * -p_mat->R[2][2]) >> 10;
+    if (p_veh->AngleX != 0)
+        rotate_object_axis(p_mat, 0, p_veh->AngleX, 0);
+
+    if ((ushort)p_vehicle->State == 0x36)
+    {
+        p_vehicle->VX += p_veh->AccelX << 5;
+        p_vehicle->VZ += p_veh->AccelZ << 5;
+    }
+    else if (((ushort)p_vehicle->State == 0x38) && ((p_veh->WorkPlace & 0x0200) == 0))
+    {
+        p_vehicle->VX -= p_veh->AccelX << 5;
+        p_vehicle->VZ -= p_veh->AccelZ << 5;
+    }
+    move_mapwho(p_vehicle, p_vehicle->X + p_vehicle->VX, p_vehicle->Y + p_vehicle->VY,
+      p_vehicle->Z + p_vehicle->VZ);
+}
+
+void move_vehicle(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("move_vehicle", move_vehicle_asm(p_vehicle), move_vehicle_c(p_vehicle));
 }
 
 void train_unkn_st20_func_1(struct Thing *p_vehicle)
@@ -1251,10 +1413,38 @@ void process_my_land_vehicle(struct Thing *p_vehicle)
         : : "a" (p_vehicle));
 }
 
-void set_vehicle_alt(struct Thing *p_vehicle)
+#ifdef SW_FNCHK
+static void set_vehicle_alt_asm(struct Thing *p_vehicle)
 {
     asm volatile ("call ASM_set_vehicle_alt\n"
-        : : "a" (p_vehicle));
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+#endif
+
+/** A ground vehicle on a traffic node follows the ground height (with
+ * some lag), and tilts with it.  Remade from set_vehicle_alt.
+ */
+static void set_vehicle_alt_c(struct Thing *p_vehicle)
+{
+    struct MyMapElement *p_mapel;
+    int dy;
+
+    if (p_vehicle->U.UVehicle.TNode >= 0)
+        return;
+    p_mapel = &game_my_big_map[((p_vehicle->Z >> 16) << 7) + (p_vehicle->X >> 16)];
+    if ((p_mapel->Flags2 & 0x08) != 0)
+        return;
+    if ((p_mapel->ColumnHead & 0x0FFF) != 0)
+        return;
+    dy = (alt_at_point((short)(p_vehicle->X >> 8), (short)(p_vehicle->Z >> 8)) + 0xF00
+      - p_vehicle->Y) >> 3;
+    p_vehicle->Y += dy;
+    p_vehicle->U.UVehicle.AngleX = (short)((-dy) >> 3);
+}
+
+void set_vehicle_alt(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("set_vehicle_alt", set_vehicle_alt_asm(p_vehicle), set_vehicle_alt_c(p_vehicle));
 }
 
 void process_unstopping(struct Thing *p_vehicle)

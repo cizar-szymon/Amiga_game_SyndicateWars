@@ -3963,11 +3963,124 @@ void init_mech_rocket(struct Thing *p_owner, struct Thing *p_mech, int x, int y,
     shot_alerts_peeps(p_shot);
 }
 
-void give_take_me_weapon(struct Thing *p_person, int item, int giveortake, short id)
+#ifdef SW_FNCHK
+static void give_take_me_weapon_asm(struct Thing *p_person, int item, int giveortake, short id)
 {
     asm volatile (
       "call ASM_give_take_me_weapon\n"
-        : : "a" (p_person), "d" (item), "b" (giveortake), "c" (id));
+        : : "a" (p_person), "d" (item), "b" (giveortake), "c" (id) : "cc", "memory");
+}
+#endif
+
+/** The FourPacks row of a consumable weapon type of a player agent, or -1. */
+static int give_take_fourpack_row(int wtype)
+{
+    switch (wtype)
+    {
+    case 12: return 0;
+    case 13: return 1;
+    case 6:  return 2;
+    case 10: return 3;
+    case 11: return 4;
+    default: return -1;
+    }
+}
+
+/** Gives (giveortake 1) or takes (-1) a weapon of the type `item` to/from a
+ * person; for player agents the four-pack counts and the previous weapon
+ * are kept.  Type 0x1F is a cybernetic mod (the item's Ammo is its level).
+ * Remade from give_take_me_weapon.
+ */
+static void give_take_me_weapon_c(struct Thing *p_person, int item, int giveortake, short id)
+{
+    u32 bit;
+    TbBool fourpack;
+    ushort cc;
+
+    if (item == 0)
+        return;
+    if (item == 0x1F)
+    {
+        ushort lv;
+
+        lv = sthings[id].U.UWeapon.Ammo & 0x0F;
+        p_person->U.UPerson.UMod.Mods &= 0x0FFF;
+        p_person->U.UPerson.UMod.Mods |= lv << 12;
+        return;
+    }
+    bit = 1u << ((item - 1) & 31);
+    if ((p_person->Flag & TngF_PlayerAgent) == 0)
+    {
+        if (giveortake == 1)
+            p_person->U.UPerson.WeaponsCarried |= bit;
+        else
+            p_person->U.UPerson.WeaponsCarried &= ~bit;
+        return;
+    }
+
+    cc = p_person->U.UPerson.ComCur;
+    fourpack = false;
+    {
+        int row;
+
+        row = give_take_fourpack_row(item);
+        if (row >= 0)
+        {
+            ubyte *p_cnt;
+
+            p_cnt = &players[(cc & 0x1C) >> 2].FourPacks[row][cc & 3];
+            *p_cnt += (ubyte)giveortake;
+            fourpack = true;
+            if (*p_cnt != 0)
+            {
+                p_person->U.UPerson.WeaponsCarried |= bit;
+                if (row <= 1)
+                    stop_sample_using_heap(id, 0x26);
+            }
+            else
+            {
+                p_person->U.UPerson.WeaponsCarried &= ~bit;
+            }
+        }
+        else
+        {
+            if (giveortake == 1)
+                p_person->U.UPerson.WeaponsCarried |= bit;
+            else
+                p_person->U.UPerson.WeaponsCarried &= ~bit;
+        }
+    }
+
+    if (giveortake >= 0)
+    {
+        if (giveortake == 0)
+            return;
+        if (((p_person->Flag2 & TgF2_Unkn0800) == 0) &&
+          (p_person->U.UPerson.CurrentWeapon == 0) &&
+          (players[cc >> 2].PrevWeapon[cc & 3] == 0))
+            players[cc >> 2].PrevWeapon[cc & 3] = find_nth_weapon_held(p_person->ThingOffset, 1);
+        return;
+    }
+    if (fourpack)
+    {
+        if ((p_person->U.UPerson.WeaponsCarried & bit) != 0)
+            return;
+        if ((p_person->Flag2 & TgF2_Unkn0800) == 0)
+            players[cc >> 2].PrevWeapon[cc & 3] = find_nth_weapon_held(p_person->ThingOffset, 1);
+        p_person->U.UPerson.CurrentWeapon = 0;
+        return;
+    }
+    if (((p_person->Flag2 & TgF2_Unkn0800) == 0) &&
+      (players[cc >> 2].PrevWeapon[cc & 3] == item))
+        players[cc >> 2].PrevWeapon[cc & 3] = find_nth_weapon_held(p_person->ThingOffset, 1);
+    if (p_person->U.UPerson.CurrentWeapon == item)
+        p_person->U.UPerson.CurrentWeapon = 0;
+}
+
+void give_take_me_weapon(struct Thing *p_person, int item, int giveortake, short id)
+{
+    FNCHK_VOID("give_take_me_weapon", give_take_me_weapon_asm(p_person, item, giveortake, id),
+      give_take_me_weapon_c(p_person, item, giveortake, id));
 }
 
 ushort set_player_weapon_turn(struct Thing *p_person, ushort delay_turns)

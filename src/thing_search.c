@@ -31,6 +31,7 @@
 #include "weapon.h"
 #include "game.h"
 #include "fncheck.h"
+#include "enginsngobjs.h"
 #include <stdlib.h>
 
 extern ushort word_17FA58[400];
@@ -1008,11 +1009,78 @@ ThingIdx search_things_for_uniqueid(short uniqid, ubyte flag)
     return ret;
 }
 
+#ifdef SW_FNCHK
+static ThingIdx find_nearest_object2_asm(short mx, short mz, ushort sub_type)
+{
+    int ret;
+    asm volatile ("call ASM_find_nearest_object2\n"
+        : "=a" (ret) : "a" (mx), "d" (mz), "b" (sub_type) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** The building (of the subtype, if not 0) whose object is nearest to the
+ * map point, among the 40x40 tiles around it.  Remade from
+ * find_nearest_object2.
+ */
+static ThingIdx find_nearest_object2_c(short mx, short mz, ushort sub_type)
+{
+    int tile_x, tile_z, tx, tz;
+    u32 best;
+    ThingIdx found;
+
+    best = 0x7FFFFFFF;
+    found = 0;
+    tx = mx >> 8;
+    tz = mz >> 8;
+    for (tile_x = tx - 20; tile_x < tx + 20; tile_x++)
+    {
+        for (tile_z = tz - 20; tile_z < tz + 20; tile_z++)
+        {
+            ThingIdx thing;
+
+            if ((tile_x >= MAP_TILE_WIDTH) || (tile_z >= MAP_TILE_HEIGHT) ||
+              (tile_x <= 0) || (tile_z <= 0))
+                continue;
+            for (thing = game_my_big_map[(tile_z << 7) + tile_x].Child; thing != 0; )
+            {
+                if (thing <= 0) {
+                    thing = sthings[thing].Next;
+                    continue;
+                }
+                {
+                    struct Thing *p_thing;
+
+                    p_thing = &things[thing];
+                    if ((p_thing->Type == TT_BUILDING) &&
+                      ((sub_type == 0) || (p_thing->SubType == sub_type)))
+                    {
+                        struct SingleObject *p_obj;
+                        int dx, dz;
+                        u32 dist;
+
+                        p_obj = &game_objects[p_thing->U.UObject.Object];
+                        dx = p_obj->MapX - mx;
+                        dz = p_obj->MapZ - mz;
+                        dist = (u32)(dx * dx + dz * dz);
+                        if (dist < best) {
+                            best = dist;
+                            found = thing;
+                        }
+                    }
+                    thing = p_thing->Next;
+                }
+            }
+        }
+    }
+    return found;
+}
+
 ThingIdx find_nearest_object2(short mx, short mz, ushort sub_type)
 {
     ThingIdx ret;
-    asm volatile ("call ASM_find_nearest_object2\n"
-        : "=r" (ret) : "a" (mx), "d" (mz), "b" (sub_type));
+    FNCHK_RET("find_nearest_object2", ret, find_nearest_object2_asm(mx, mz, sub_type),
+      find_nearest_object2_c(mx, mz, sub_type));
     return ret;
 }
 

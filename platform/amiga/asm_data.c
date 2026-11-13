@@ -86,7 +86,9 @@ short hmhead[2]; /* struct HeapMgrHeader * hmhead, src\sound.c */
 ulong ipx_got_player_send_packet_count[8]; /* src\network.c, 32 bytes */
 ulong ipx_send_packet_count[8][8]; /* src\network.c, 256 bytes */
 int last_pkt_size; /* src\network.c, 4 bytes */
-short link__MapColListEmptyHead; /* src\pathtrig.c, 2 bytes */
+ushort last_swoosh_thing; /* src\vehicle.c, 2 bytes */
+ulong last_swoosh_turn; /* src\vehicle.c, 4 bytes */
+short link__MapColListEmptyHead; /* src\bmbang.c, 2 bytes */
 short link__MapColVectEmptyHead; /* src\pathtrig.c, 10 bytes */
 ubyte low_trans_grey_bright_limit[256]; /* swrendersoft\include\app_sprite.h, 256 bytes */
 ubyte map_crater_first; /* src\bmcrater.c, 1 bytes */

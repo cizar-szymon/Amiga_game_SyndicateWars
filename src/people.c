@@ -243,6 +243,9 @@ static void person_set_anim_frames(struct Thing *p_person);
 ubyte vector_in_way(struct Thing *p_thing, int dx, int dz);
 short do_move_colide(struct Thing *p_person, int dx, int dz, struct MyMapElement *p_mapel);
 ubyte check_person_within(struct Command *p_cmd, int x, int z);
+static u32 do_i_have_weapon(struct Thing *p_person, ushort wtype);
+static int weapon_fourpack_row(ushort wtype);
+void give_take_me_weapon(struct Thing *p_person, int item, int giveortake, short id);
 void path_init8_unkn3(struct Path *p_path, int ax8, int ay8, int bx8, int by8, int a6);
 extern s32 navi2_unkn_counter;
 extern u32 nav_stats__ThisTurn;
@@ -3199,10 +3202,71 @@ void person_init_drop(struct Thing *p_person, ThingIdx item)
     p_person->U.UPerson.OldAnimMode = PrevAnimMode;
 }
 
-void person_init_pickup(struct Thing *p_person, ThingIdx item)
+#ifdef SW_FNCHK
+static void person_init_pickup_asm(struct Thing *p_person, ThingIdx item)
 {
     asm volatile ("call ASM_person_init_pickup\n"
-        : : "a" (p_person), "d" (item));
+        : : "a" (p_person), "d" (item) : "cc", "memory");
+}
+#endif
+
+/** A person starts picking up the item at its feet: the crouch animation
+ * (AnimMode 13), state 7; a player agent only if it can take the weapon.
+ * Remade from person_init_pickup.
+ */
+static void person_init_pickup_c(struct Thing *p_person, ThingIdx item)
+{
+    struct SimpleThing *p_item;
+    ushort wtype;
+    ushort base;
+
+    if ((p_person->Flag & (TngF_Unkn40000000 | TngF_WepRecoil | TngF_StationrSht | TngF_Destroyed)) != 0)
+        return;
+    p_item = &sthings[item];
+    wtype = p_item->U.UWeapon.WeaponType;
+    if (wtype != 0)
+    {
+        TbBool can_take;
+
+        can_take = (do_i_have_weapon(p_person, wtype) == 0);
+        if ((p_person->Flag & TngF_PlayerAgent) != 0)
+        {
+            int row;
+
+            row = weapon_fourpack_row(wtype);
+            if ((row >= 0) && !can_take)
+            {
+                ushort plyr, plagent;
+
+                plyr = (p_person->U.UPerson.ComCur >> 2) & 0xFF;
+                plagent = p_person->U.UPerson.ComCur & 3;
+                if (((p_person->U.UPerson.WeaponsCarried & (1u << (wtype - 1))) != 0) &&
+                  (players[plyr].FourPacks[row][plagent] != 4))
+                    can_take = true;
+            }
+        }
+        if (!can_take)
+            return;
+    }
+    if (p_item->Type == 0x1A)
+        return;
+    p_person->Flag |= TngF_Unkn0001;
+    base = people_frames[p_person->SubType][ANIM_PERS_Unkn13];
+    p_person->Frame = nstart_ani[base + p_person->U.UPerson.Angle];
+    p_person->State = 7;
+    p_person->Timer1 = 48;
+    p_person->U.UPerson.Timer2 = 3;
+    p_person->StartTimer1 = 48;
+    p_person->U.UPerson.Vehicle = item;
+    p_person->StartFrame = base - 1;
+    p_person->U.UPerson.OldAnimMode = p_person->U.UPerson.AnimMode;
+    p_person->U.UPerson.AnimMode = ANIM_PERS_Unkn13;
+}
+
+void person_init_pickup(struct Thing *p_person, ThingIdx item)
+{
+    FNCHK_VOID("person_init_pickup", person_init_pickup_asm(p_person, item),
+      person_init_pickup_c(p_person, item));
 }
 
 #ifdef SW_FNCHK
@@ -8972,10 +9036,217 @@ void person_wait(struct Thing *p_person)
         p_person->Frame = frame[p_person->Frame].Next;
 }
 
-void person_pickup(struct Thing *p_person)
+#ifdef SW_FNCHK
+static void person_pickup_asm(struct Thing *p_person)
 {
     asm volatile ("call ASM_person_pickup\n"
-        : : "a" (p_person));
+        : : "a" (p_person) : "cc", "memory");
+}
+#endif
+
+/** A person crouching for an item: at the right moment of the animation
+ * the item is taken, at its end the person goes on (with its next command,
+ * or back to protecting its leader).  Remade from person_pickup.
+ */
+static void person_pickup_c(struct Thing *p_person)
+{
+    ushort base;
+
+    p_person->Timer1 -= fifties_per_gameturn;
+    if (p_person->Timer1 >= 0)
+        return;
+    p_person->Timer1 = p_person->StartTimer1;
+    p_person->Frame = frame[(ushort)p_person->Frame].Next;
+    p_person->U.UPerson.Timer2--;
+    if (p_person->U.UPerson.Timer2 < 0)
+    {
+        short item;
+        TbBool reset;
+
+        reset = true;
+        item = p_person->U.UPerson.Vehicle;
+        if (item < 0)
+        {
+            struct SimpleThing *p_item;
+
+            p_item = &sthings[item];
+            if (p_item->Type != SmTT_DROPPED_ITEM)
+            {
+                reset = false;
+            }
+            else if (do_i_have_weapon(p_person, p_item->U.UWeapon.WeaponType) == 0)
+            {
+                play_dist_sample(p_person, 0x45, 0x7F, 0x40, 100, 0, 1);
+                if (p_item->Type != 0x1A)
+                {
+                    delete_snode(p_item);
+                    p_item->Type = 0x1A;
+                    p_item->U.UWeapon.Owner = p_person->ThingOffset;
+                    if (p_item->U.UWeapon.WeaponType != 0)
+                    {
+                        give_take_me_weapon(p_person, p_item->U.UWeapon.WeaponType, 1,
+                          p_item->ThingOffset);
+                        remove_sthing(p_item->ThingOffset);
+                        ingame.fld_unkCB7--;
+                    }
+                    p_person->U.UPerson.Vehicle = 0;
+                }
+            }
+        }
+        if (reset)
+            p_person->U.UPerson.Timer2 = 50;
+    }
+    if ((frame[(ushort)p_person->Frame].Flags & 0x01) == 0)
+        return;
+
+    p_person->U.UPerson.AnimMode = p_person->U.UPerson.OldAnimMode;
+    p_person->Flag &= ~TngF_Unkn0001;
+    base = people_frames[p_person->SubType][p_person->U.UPerson.AnimMode];
+    p_person->Frame = nstart_ani[base + p_person->U.UPerson.Angle];
+    p_person->StartFrame = base - 1;
+    if ((p_person->Flag2 & 0x08000000) != 0)
+    {
+        p_person->State = PerSt_NONE;
+        p_person->Flag2 &= ~0x08000000;
+        return;
+    }
+    if (((p_person->Flag & TngF_PlayerAgent) == 0) && (p_person->U.UPerson.ComCur != 0))
+        p_person->U.UPerson.ComCur = game_commands[p_person->U.UPerson.ComCur].Next;
+    if ((p_person->Flag2 & 0x10000000) != 0)
+    {
+        p_person->GotoThingIndex = p_person->Owner;
+        p_person->State = PerSt_PROTECT_PERSON;
+        p_person->U.UPerson.ComRange =
+          follow_dist[things[(ushort)p_person->Owner].U.UPerson.ComCur & 3][p_person->U.UPerson.ComCur & 3];
+        p_person->Flag2 &= ~0x10000000;
+        return;
+    }
+    if ((p_person->Flag & TngF_PlayerAgent) != 0) {
+        p_person->State = PerSt_NONE;
+        return;
+    }
+    person_init_command(p_person, 6);
+}
+
+void person_pickup(struct Thing *p_person)
+{
+    FNCHK_VOID("person_pickup", person_pickup_asm(p_person), person_pickup_c(p_person));
+}
+
+/** Is the item lying on the 3x3 tiles around the person, touching it?
+ * Then it becomes the person's item (Vehicle) and Flag 0x08000000 is set.
+ * Remade from search_floor_for_item.
+ */
+static short search_floor_for_item(struct Thing *p_person, short item)
+{
+    short dtx, dtz;
+    int tile_x, tile_z;
+
+    for (dtx = -1; dtx < 2; dtx++)
+    {
+        for (dtz = -1; dtz < 2; dtz++)
+        {
+            ThingIdx thing;
+            ushort n;
+
+            tile_x = (short)(p_person->X >> 16) + dtx;
+            if ((tile_x <= 0) || (tile_x >= MAP_TILE_WIDTH))
+                continue;
+            tile_z = (short)(p_person->Z >> 16) + dtz;
+            if ((tile_z <= 0) || (tile_z >= MAP_TILE_HEIGHT))
+                continue;
+            thing = game_my_big_map[(tile_z << 7) + tile_x].Child;
+            for (n = 0; (thing != 0) && (n < 410); n++)
+            {
+                if (thing > 0) {
+                    thing = things[thing].Next;
+                    continue;
+                }
+                {
+                    struct SimpleThing *p_sthing;
+                    int dy;
+
+                    p_sthing = &sthings[thing];
+                    if (p_sthing->Type == SmTT_DROPPED_ITEM)
+                    {
+                        dy = (p_sthing->Y - p_person->Y) >> 8;
+                        if ((dy < 25) && (dy > -25))
+                        {
+                            int adx, adz, dist;
+
+                            adx = abs((p_sthing->X - p_person->X) >> 8);
+                            adz = abs((p_sthing->Z - p_person->Z) >> 8);
+                            if (adx > adz)
+                                dist = adx + (adz >> 1);
+                            else
+                                dist = adz + (adx >> 1);
+                            if ((dist < (ushort)p_sthing->Radius + (ushort)p_person->Radius) &&
+                              (item == p_sthing->ThingOffset))
+                            {
+                                p_person->U.UPerson.Vehicle = p_sthing->ThingOffset;
+                                p_person->Flag |= 0x08000000;
+                                return 1;
+                            }
+                        }
+                    }
+                    thing = p_sthing->Next;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+#ifdef SW_FNCHK
+static void person_get_item_asm(struct Thing *p_person)
+{
+    asm volatile ("call ASM_person_get_item\n"
+        : : "a" (p_person) : "cc", "memory");
+}
+#endif
+
+/** A person walking to an item to pick it up.  Remade from person_get_item. */
+static void person_get_item_c(struct Thing *p_person)
+{
+    struct SimpleThing *p_item;
+    int adx, adz, big, small, dist;
+
+    p_item = &sthings[p_person->GotoThingIndex];
+    if (p_item->Type != SmTT_DROPPED_ITEM)
+    {
+        p_person->State = PerSt_NONE;
+        p_person->Flag2 &= ~0x08000000;
+        return;
+    }
+    person_goto_point(p_person);
+    if ((p_person->Flag & 0x08000000) != 0)
+    {
+        if ((p_person->U.UPerson.Vehicle == p_person->GotoThingIndex) ||
+          (search_floor_for_item(p_person, p_person->GotoThingIndex) == 1))
+            person_init_pickup(p_person, p_person->GotoThingIndex);
+        return;
+    }
+    if ((p_person->Flag & TngF_Persuaded) != 0)
+        return;
+    if (p_person->State != 0)
+        return;
+    adx = abs(p_person->X - p_item->X);
+    adz = abs(p_person->Z - p_item->Z);
+    if (adx >= adz) {
+        big = adx;
+        small = adz;
+    } else {
+        big = adz;
+        small = adx;
+    }
+    dist = big - (big >> 5) - (big >> 7) + (small >> 2) + (small >> 3) + (small >> 6) + (small >> 7);
+    if (dist < 0x10000)
+        person_init_pickup(p_person, p_person->GotoThingIndex);
+}
+
+void person_get_item(struct Thing *p_person)
+{
+    FNCHK_VOID("person_get_item", person_get_item_asm(p_person), person_get_item_c(p_person));
 }
 
 void plant_mine(struct Thing *p_person)
@@ -9134,11 +9405,6 @@ void person_save_victim(struct Thing *p_person)
         : : "a" (p_person));
 }
 
-void person_get_item(struct Thing *p_person)
-{
-    asm volatile ("call ASM_person_get_item\n"
-        : : "a" (p_person));
-}
 
 void person_run_away(struct Thing *p_person)
 {

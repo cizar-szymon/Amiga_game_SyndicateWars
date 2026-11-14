@@ -153,6 +153,7 @@ static void thing_goto_point_asm(struct Thing *p_thing, short x, short y, short 
 short get_next_player_agent(ushort player);
 void should_i_get_item(struct Thing *p_person, struct SimpleThing *p_sthing);
 void build_navigate_path_to_face(struct Thing *p_thing, short face);
+int can_i_see_building(struct Thing *p_i, struct Thing *p_thing, int max_dist, ushort flags);
 
 void set_player_peeps_to_run(struct Thing *p_leader, ushort plyr)
 {
@@ -1934,6 +1935,18 @@ static void test_cmds_process(void)
     case 65:
         get_next_player_agent(local_player_no);
         break;
+    case 60:
+    case 61:
+    case 62:
+    case 63:
+    {
+        struct Thing *p_bld;
+
+        p_bld = test_cmds_nearest_thing(p_agent, TT_BUILDING, false);
+        if (p_bld != NULL)
+            can_i_see_building(p_agent, p_bld, 0x100000 >> ((gameturn % 4) * 3), gameturn & 1);
+        break;
+    }
     case 20:
         create_crater((p_agent->X >> 16) + 2, (p_agent->Z >> 16) + 1, 20 + (gameturn % 50));
         break;

@@ -5610,13 +5610,92 @@ ubyte is_command_completed(struct Thing *p_person)
 #endif
 }
 
-int can_i_see_building(struct Thing *p_i, struct Thing *p_thing,
+#ifdef SW_FNCHK
+static int can_i_see_building_asm(struct Thing *p_i, struct Thing *p_thing,
         int max_dist, ushort flags)
 {
     int ret;
     asm volatile (
       "call ASM_can_i_see_building\n"
-        : "=r" (ret) : "a" (p_i), "d" (p_thing), "b" (max_dist), "c" (flags));
+        : "=a" (ret), "+d" (p_thing), "+b" (max_dist), "+c" (flags) : "0" (p_i) : "cc", "memory");
+    return ret;
+}
+#endif
+
+struct MyMapElement;
+int do_fvect_colide(int x1, int z1, int x2, int z2, struct MyMapElement *p_mapel);
+
+/** Can the person see the building (a thing): 0 when farther than
+ * sqrt(max_dist) or (without flag 1) not in front of the person, -1 when a
+ * wall of another object is in the way, else the distance (at least 1).
+ * With flag 1 the person turns towards the building.  The line is checked
+ * in steps of about 128.  Remade from can_i_see_building. */
+static int can_i_see_building_c(struct Thing *p_i, struct Thing *p_thing,
+        int max_dist, ushort flags)
+{
+    s32 dx, dz, dist2, dist, x, z, stepx, stepz;
+    short angle;
+    ushort steps;
+    short cnt;
+
+    dx = (p_thing->X - p_i->X) >> 8;
+    dz = (p_thing->Z - p_i->Z) >> 8;
+    dist2 = (s32)((u32)dx * (u32)dx + (u32)dz * (u32)dz);
+    if (max_dist < dist2)
+        return 0;
+    angle = arctan(dx, -dz);
+    if ((flags & 1) != 0)
+    {
+        s32 dir;
+
+        dir = angle >> 8;
+        if (dir != p_i->U.UPerson.Angle)
+            change_person_angle(p_i, (ushort)dir);
+    }
+    else
+    {
+        short da;
+
+        da = (short)((((p_i->U.UPerson.Angle << 8) - angle) + 0x800) & 0x7FF);
+        if ((da > 200) && (da < 0x737))
+            return 0;
+    }
+    dist = LbSqrL(dist2);
+    steps = (ushort)(dist >> 7);
+    if (steps == 0)
+        steps = 1;
+    stepx = dx / (s32)steps;
+    stepz = dz / (s32)steps;
+    x = p_i->X >> 8;
+    z = p_i->Z >> 8;
+    for (cnt = (short)steps; cnt > 0; cnt--, x += stepx, z += stepz)
+    {
+        struct MyMapElement *p_mapel;
+        short colv;
+
+        if (((x >> 8) < 0) || ((x >> 8) >= 128) || ((z >> 8) < 0) || ((z >> 8) >= 128))
+            continue;
+        p_mapel = &game_my_big_map[((z >> 8) << 7) + (x >> 8)];
+        if (p_mapel->ColHead == 0)
+            continue;
+        colv = (short)do_fvect_colide(x, z, x + stepx, z + stepz, p_mapel);
+        if (colv == 0)
+            continue;
+        if (game_col_vects_list[colv].Object == (ushort)p_thing->ThingOffset)
+            return dist;
+        return -1;
+    }
+    if (dist == 0)
+        dist = 1;
+    return dist;
+}
+
+int can_i_see_building(struct Thing *p_i, struct Thing *p_thing,
+        int max_dist, ushort flags)
+{
+    int ret;
+    FNCHK_RET("can_i_see_building", ret, can_i_see_building_asm(p_i, p_thing, max_dist, flags),
+      can_i_see_building_c(p_i, p_thing, max_dist, flags));
     return ret;
 }
 

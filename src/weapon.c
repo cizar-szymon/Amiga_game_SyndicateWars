@@ -1677,7 +1677,7 @@ static int bul_path_end_asm(int x1, int y1, int z1, int *x2, int *y2, int *z2,
  * (x1,z1)-(x2,z2).  Returns its ColVectList index, negated if the face is
  * see-through (or an open door), or 0.  Remade from do_fvect_colide.
  */
-static int do_fvect_colide(int x1, int z1, int x2, int z2, struct MyMapElement *p_mapel)
+int do_fvect_colide(int x1, int z1, int x2, int z2, struct MyMapElement *p_mapel)
 {
     ushort cvl;
     int res;

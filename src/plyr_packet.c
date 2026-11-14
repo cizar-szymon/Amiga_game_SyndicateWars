@@ -154,6 +154,7 @@ short get_next_player_agent(ushort player);
 void should_i_get_item(struct Thing *p_person, struct SimpleThing *p_sthing);
 void build_navigate_path_to_face(struct Thing *p_thing, short face);
 int can_i_see_building(struct Thing *p_i, struct Thing *p_thing, int max_dist, ushort flags);
+void get_soul(struct Thing *p_dead, struct Thing *p_person);
 
 void set_player_peeps_to_run(struct Thing *p_leader, ushort plyr)
 {
@@ -1947,6 +1948,19 @@ static void test_cmds_process(void)
             can_i_see_building(p_agent, p_bld, 0x100000 >> ((gameturn % 4) * 3), gameturn & 1);
         break;
     }
+    case 66:
+    {
+        struct Thing *p_pers;
+
+        p_pers = test_cmds_nearest_thing(p_agent, TT_PERSON, false);
+        if (p_pers != NULL)
+            get_soul(p_pers, p_agent);
+        break;
+    }
+    case 67:
+        if ((gameturn % 480) < 120)
+            create_time_pod((p_agent->X >> 8) + 0x300, p_agent->Y >> 8, p_agent->Z >> 8, 50);
+        break;
     case 20:
         create_crater((p_agent->X >> 16) + 2, (p_agent->Z >> 16) + 1, 20 + (gameturn % 50));
         break;

@@ -5040,10 +5040,43 @@ short process_persuadertron(struct Thing *p_person, ubyte target_select, ushort 
       p_person->ThingOffset, target_select, energy_reqd);
 }
 
-void get_soul(struct Thing *p_dead, struct Thing *p_person)
+#ifdef SW_FNCHK
+static void get_soul_asm(struct Thing *p_dead, struct Thing *p_person)
 {
     asm volatile ("call ASM_get_soul\n"
-        : : "a" (p_dead), "d" (p_person));
+        : "+a" (p_dead), "+d" (p_person) : : "cc", "memory");
+}
+#endif
+
+/** The soul of a dead person leaves the body and goes to the person who
+ * took it.  Remade from get_soul. */
+static void get_soul_c(struct Thing *p_dead, struct Thing *p_person)
+{
+    struct SimpleThing *p_soul;
+    ThingIdx thing;
+
+    thing = get_new_sthing();
+    if (thing == 0)
+        return;
+    p_dead->Flag2 |= TgF2_SoulDepleted;
+    p_soul = &sthings[thing];
+    p_soul->X = p_dead->X;
+    p_soul->Y = p_dead->Y;
+    p_soul->Type = SmTT_SOUL;
+    p_soul->State = 0;
+    p_soul->Z = p_dead->Z;
+    p_soul->U.UEffect.VX = 0;
+    p_soul->U.UEffect.VY = 0;
+    p_soul->U.UEffect.VZ = 0;
+    p_soul->Owner2 = p_person->ThingOffset;
+    add_node_sthing(thing);
+    p_soul->Timer1 = 15;
+    p_soul->StartTimer1 = 50;
+}
+
+void get_soul(struct Thing *p_dead, struct Thing *p_person)
+{
+    FNCHK_VOID("get_soul", get_soul_asm(p_dead, p_person), get_soul_c(p_dead, p_person));
 }
 
 void choose_best_weapon_for_range(struct Thing *p_person, int dist)

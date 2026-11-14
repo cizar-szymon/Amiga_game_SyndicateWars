@@ -2487,18 +2487,141 @@ void find_and_time_travel(struct SimpleThing *p_sthing)
     }
 }
 
-void process_time_pod(struct SimpleThing *p_sthing)
+#ifdef SW_FNCHK
+static void process_time_pod_asm(struct SimpleThing *p_sthing)
 {
     asm volatile (
       "call ASM_process_time_pod\n"
-        : : "a" (p_sthing));
+        : "+a" (p_sthing) : : "cc", "memory");
+}
+
+static void process_soul_asm(struct SimpleThing *p_sthing)
+{
+    asm volatile (
+      "call ASM_process_soul\n"
+        : "+a" (p_sthing) : : "cc", "memory");
+}
+#endif
+
+static void move_smapwho_c(struct SimpleThing *p_sthing, int *x, int y, int *z);
+
+/** The looped sound of a time pod, started or with its volume changed. */
+static void time_pod_sound(struct SimpleThing *p_sthing, ushort vol)
+{
+    if (!IsSamplePlaying(p_sthing->ThingOffset, 0x38, 0))
+        play_dist_ssample(p_sthing, 0x38, vol, 0x40, 100, -1, 1);
+    else
+        set_dist_volume(p_sthing, 0x38, vol);
+}
+
+/** A time pod: grows (state 0) taking people near it back in time, then
+ * shrinks (state 1), with a sound getting louder and quieter, and goes
+ * (state 2).  Remade from process_time_pod. */
+static void process_time_pod_c(struct SimpleThing *p_sthing)
+{
+    p_sthing->Timer1--;
+    switch ((ushort)p_sthing->State)
+    {
+    case 0:
+        p_sthing->Radius += 0x10;
+        time_pod_sound(p_sthing, (ushort)((50 - p_sthing->Timer1) * 2));
+        if (p_sthing->Timer1 < 0) {
+            p_sthing->Timer1 = 0x17;
+            p_sthing->State++;
+        }
+        find_and_time_travel(p_sthing);
+        break;
+    case 1:
+        p_sthing->Radius -= 0x20;
+        if (p_sthing->Timer1 > 0)
+            time_pod_sound(p_sthing, (ushort)(p_sthing->Timer1 * 4));
+        if (p_sthing->Timer1 < 0) {
+            p_sthing->Timer1 = 0x19;
+            p_sthing->State++;
+        }
+        break;
+    case 2:
+        stop_sample_using_heap(p_sthing->ThingOffset, 0x38);
+        delete_snode(p_sthing);
+        remove_sthing(p_sthing->ThingOffset);
+        break;
+    }
+}
+
+/** A soul of a killed person: rises waving (state 0), then flies to its
+ * owner (state 1, faster each turn), who on reaching it gets 256 health
+ * (at most twice its maximum).  Remade from process_soul. */
+static void process_soul_c(struct SimpleThing *p_sthing)
+{
+    int x, y, z;
+
+    x = p_sthing->X;
+    z = p_sthing->Z;
+    y = p_sthing->Y;
+    if ((ushort)p_sthing->State == 0)
+    {
+        int a, b;
+        short timer;
+
+        y += p_sthing->U.UEffect.VY;
+        a = (gameturn << 5) & 0x7FF;
+        b = ((gameturn << 5) + 0x780) & 0x7FF;
+        x += (lbSinTable[a] - lbSinTable[b]) >> 1;
+        z += (lbSinTable[a + 512] - lbSinTable[b + 512]) >> 1;
+        p_sthing->U.UEffect.VY += 0x200;
+        timer = p_sthing->Timer1;
+        p_sthing->Timer1--;
+        if (timer == 0) {
+            p_sthing->Timer1 = 0;
+            p_sthing->State++;
+        }
+    }
+    else if ((ushort)p_sthing->State == 1)
+    {
+        struct Thing *p_owner;
+        s32 dx, dy, dz, dist, vx, vy, vz;
+
+        p_owner = &things[(ushort)p_sthing->Owner2];
+        p_sthing->Timer1++;
+        dx = (p_owner->X - p_sthing->X) >> 8;
+        dy = (p_owner->Y - p_sthing->Y) >> 8;
+        dz = (p_owner->Z - p_sthing->Z) >> 8;
+        dist = LbSqrL((u32)dx * (u32)dx + (u32)dz * (u32)dz + (u32)dy * (u32)dy);
+        if (dist == 0)
+            dist = 1;
+        vx = (dx << 8) / dist;
+        vy = (dy << 8) / dist;
+        vz = (dz << 8) / dist;
+        p_sthing->U.UEffect.VY = vy;
+        p_sthing->U.UEffect.VX = vx;
+        p_sthing->U.UEffect.VZ = vz;
+        if (dist < 0x80)
+        {
+            if ((p_owner->Flag2 & TgF2_KnockedOut) == 0)
+                init_recoil(p_owner, (short)vx, (short)vy, (short)vz, 1);
+            p_owner->Health += 0x100;
+            if (p_owner->Health > 2 * p_owner->U.UPerson.MaxHealth)
+                p_owner->Health = 2 * p_owner->U.UPerson.MaxHealth;
+            play_dist_sample(p_owner, 0x37, 0x7F, 0x40, 100, 0, 1);
+            delete_snode(p_sthing);
+            remove_sthing(p_sthing->ThingOffset);
+            return;
+        }
+        x += (p_sthing->U.UEffect.VX * p_sthing->Timer1) << 2;
+        y += (p_sthing->U.UEffect.VY * p_sthing->Timer1) << 2;
+        z += (p_sthing->U.UEffect.VZ * p_sthing->Timer1) << 2;
+    }
+    move_smapwho_c(p_sthing, &x, y, &z);
+}
+
+void process_time_pod(struct SimpleThing *p_sthing)
+{
+    FNCHK_VOID("process_time_pod", process_time_pod_asm(p_sthing), process_time_pod_c(p_sthing));
 }
 
 void process_soul(struct SimpleThing *p_sthing)
 {
-    asm volatile (
-      "call ASM_process_soul\n"
-        : : "a" (p_sthing));
+    FNCHK_VOID("process_soul", process_soul_asm(p_sthing), process_soul_c(p_sthing));
 }
 
 #ifdef SW_FNCHK

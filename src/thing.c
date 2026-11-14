@@ -29,6 +29,7 @@
 
 #include "bigmap.h"
 #include "engincam.h"
+#include "enginzoom.h"
 #include "building.h"
 #include "bmcrater.h"
 #include "bmbang.h"
@@ -458,12 +459,428 @@ void init_things(void)
     init_commands();
 }
 
-void quick_light_unkn_func_04(short a1, int a2, short a3, short a4)
+#ifdef SW_FNCHK
+static void quick_light_unkn_func_04_asm(short a1, int a2, short a3, short a4)
 {
     asm volatile (
       "call ASM_quick_light_unkn_func_04\n"
-        : : "a" (a1), "d" (a2), "b" (a3), "c" (a4));
-    return;
+        : "+a" (a1), "+d" (a2), "+b" (a3), "+c" (a4) : : "cc", "memory");
+}
+
+static void apply_full_light_asm(short lx, short ly, ushort lz, ushort intens, ushort lid)
+{
+    asm volatile (
+      "push %4\n"
+      "call ASM_apply_full_light\n"
+        : "+a" (lx), "+d" (ly), "+b" (lz), "+c" (intens) : "g" ((u32)lid) : "cc", "memory");
+}
+#endif
+
+ushort obj_face3_create_normal(short face);
+ushort obj_face4_create_normal(short face);
+/** Lights not placed because too far (asm data). */
+extern s32 dword_176D6C;
+
+/** Takes out of a quick light chain the entries of light `light`; at most
+ * `limit` entries are looked at (-1: no limit).  As the original, after
+ * taking an entry out the previous entry stays the same. */
+static void quick_light_chain_remove(ushort *p_head, ushort light, int limit)
+{
+    ushort prev, cur;
+    int n;
+
+    prev = 0;
+    n = 0;
+    for (cur = *p_head; cur != 0; cur = game_quick_lights[cur].NextQuick)
+    {
+        struct QuickLight *p_qlight;
+
+        if ((limit >= 0) && (n++ >= limit))
+            break;
+        p_qlight = &game_quick_lights[cur];
+        if (p_qlight->Light != light) {
+            prev = cur;
+            continue;
+        }
+        next_quick_light--;
+        if (prev == 0)
+            *p_head = p_qlight->NextQuick;
+        else
+            game_quick_lights[prev].NextQuick = p_qlight->NextQuick;
+        p_qlight->Light = 0;
+    }
+}
+
+/** Puts a new quick light entry (light, ratio) at the head of a chain. */
+static void quick_light_chain_add(ushort *p_head, ushort light, ushort ratio)
+{
+    struct QuickLight *p_qlight;
+
+    p_qlight = &game_quick_lights[next_quick_light];
+    p_qlight->NextQuick = *p_head;
+    *p_head = next_quick_light;
+    p_qlight->Light = light;
+    p_qlight->Ratio = ratio;
+    next_quick_light++;
+}
+
+/** Takes light `light` off all faces of a model.  Returns NextObject.
+ * Remade from quick_light_unkn_func_07. */
+static ushort quick_light_unkn_func_07(ushort object, ushort light)
+{
+    struct SingleObject *p_obj;
+    ushort i;
+
+    p_obj = &game_objects[object];
+    for (i = 0; i < p_obj->NumbFaces; i++)
+    {
+        struct SingleObjectFace3 *p_face;
+
+        p_face = &game_object_faces3[p_obj->StartFace + i];
+        quick_light_chain_remove(&p_face->Light0, light, 201);
+        quick_light_chain_remove(&p_face->Light1, light, 201);
+        quick_light_chain_remove(&p_face->Light2, light, 201);
+    }
+    for (i = 0; i < p_obj->NumbFaces4; i++)
+    {
+        struct SingleObjectFace4 *p_face;
+
+        p_face = &game_object_faces4[p_obj->StartFace4 + i];
+        quick_light_chain_remove((ushort *)&p_face->Light0, light, 201);
+        quick_light_chain_remove((ushort *)&p_face->Light1, light, 201);
+        quick_light_chain_remove((ushort *)&p_face->Light2, light, 201);
+        quick_light_chain_remove((ushort *)&p_face->Light3, light, 201);
+    }
+    return p_obj->NextObject;
+}
+
+/** Takes light `light` off a map tile.  Remade from quick_light_unkn_func_09. */
+static void quick_light_unkn_func_09(struct MyMapElement *p_mapel, ushort light)
+{
+    quick_light_chain_remove(&p_mapel->Shade, light, -1);
+}
+
+/** Lights one point of a face: the light ratio of the face scaled by the
+ * squared distance; added when bright enough. */
+static void quick_light_face_point(ushort *p_head, struct SinglePoint *p_pt,
+  s32 ox, s32 oy, s32 oz, s32 lx, s32 ly, s32 lz, s32 ratio, ushort light)
+{
+    s32 px, py, pz, d2, r;
+
+    px = p_pt->X + ox - lx;
+    py = p_pt->Y + oy - ly;
+    pz = p_pt->Z + oz - lz;
+    d2 = (s32)((u32)px * (u32)px + (u32)py * (u32)py + (u32)pz * (u32)pz) >> 8;
+    if (d2 == 0)
+        d2 = 1;
+    r = (ratio << 8) / d2;
+    if (((game_full_lights[light].Intensity * r) >> 8) <= 3)
+        return;
+    quick_light_chain_add(p_head, light, r);
+}
+
+/** Ratio of light on a face from its normal (computed once per light,
+ * kept in the normal); -1 when the face looks away. */
+static s32 quick_light_face_ratio(struct Normal *p_nrm, s32 nx, s32 ny, s32 nz)
+{
+    s32 ratio;
+
+    if (p_nrm->LightRatio != -1)
+        return p_nrm->LightRatio;
+    ratio = (p_nrm->NX * nx + p_nrm->NY * ny + p_nrm->NZ * nz) >> 8;
+    if (ratio < 0)
+        return -1;
+    p_nrm->LightRatio = ratio;
+    return ratio;
+}
+
+/** Lights the faces of a model with full light `light` at (lx,ly,lz).
+ * Remade from quick_light_unkn_func_06. */
+static ushort quick_light_unkn_func_06(ushort object, s32 lx, s32 ly, s32 lz,
+  s32 tile_x8, s32 tile_z8, ushort light)
+{
+    struct SingleObject *p_obj;
+    s32 ox, oy, oz, dx, dy, dz, len, nx, ny, nz;
+    ushort i;
+
+    p_obj = &game_objects[object];
+    ox = p_obj->MapX;
+    oy = p_obj->OffsetY;
+    oz = p_obj->MapZ;
+    dx = lx - ox;
+    dy = ly - oy;
+    dz = lz - oz;
+    len = LbSqrL((u32)dy * (u32)dy + (u32)dx * (u32)dx + (u32)dz * (u32)dz);
+    if (len == 0)
+        len = 1;
+    nx = ((-dx) << 8) / len;
+    ny = ((-dy) << 8) / len;
+    nz = ((-dz) << 8) / len;
+    for (i = 0; i < p_obj->NumbFaces; i++)
+    {
+        struct SingleObjectFace3 *p_face;
+
+        p_face = &game_object_faces3[p_obj->StartFace + i];
+        if ((p_face->FaceNormal < 1) || (p_face->FaceNormal >= 10000))
+            p_face->FaceNormal = obj_face3_create_normal(p_obj->StartFace + i);
+        game_normals[p_face->FaceNormal].LightRatio = -1;
+    }
+    for (i = 0; i < p_obj->NumbFaces4; i++)
+    {
+        struct SingleObjectFace4 *p_face;
+
+        p_face = &game_object_faces4[p_obj->StartFace4 + i];
+        if ((p_face->FaceNormal < 1) || (p_face->FaceNormal >= 10000))
+            p_face->FaceNormal = obj_face4_create_normal(p_obj->StartFace4 + i);
+        game_normals[p_face->FaceNormal].LightRatio = -1;
+    }
+    for (i = 0; i < p_obj->NumbFaces; i++)
+    {
+        struct SingleObjectFace3 *p_face;
+        s32 ratio;
+
+        if (next_quick_light >= 0xFA00)
+            return p_obj->NextObject;
+        p_face = &game_object_faces3[p_obj->StartFace + i];
+        ratio = quick_light_face_ratio(&game_normals[p_face->FaceNormal], nx, ny, nz);
+        if (ratio < 0)
+            continue;
+        quick_light_face_point(&p_face->Light0, &game_object_points[(ushort)p_face->PointNo[0]],
+          ox, oy, oz, lx, ly, lz, ratio, light);
+        quick_light_face_point(&p_face->Light1, &game_object_points[(ushort)p_face->PointNo[1]],
+          ox, oy, oz, lx, ly, lz, ratio, light);
+        quick_light_face_point(&p_face->Light2, &game_object_points[(ushort)p_face->PointNo[2]],
+          ox, oy, oz, lx, ly, lz, ratio, light);
+    }
+    for (i = 0; i < p_obj->NumbFaces4; i++)
+    {
+        struct SingleObjectFace4 *p_face;
+        s32 ratio;
+
+        if (next_quick_light >= 0xFA00)
+            break;
+        p_face = &game_object_faces4[p_obj->StartFace4 + i];
+        ratio = quick_light_face_ratio(&game_normals[p_face->FaceNormal], nx, ny, nz);
+        if (ratio < 0)
+            continue;
+        quick_light_face_point((ushort *)&p_face->Light0, &game_object_points[(ushort)p_face->PointNo[0]],
+          ox, oy, oz, lx, ly, lz, ratio, light);
+        quick_light_face_point((ushort *)&p_face->Light1, &game_object_points[(ushort)p_face->PointNo[1]],
+          ox, oy, oz, lx, ly, lz, ratio, light);
+        quick_light_face_point((ushort *)&p_face->Light2, &game_object_points[(ushort)p_face->PointNo[2]],
+          ox, oy, oz, lx, ly, lz, ratio, light);
+        quick_light_face_point((ushort *)&p_face->Light3, &game_object_points[(ushort)p_face->PointNo[3]],
+          ox, oy, oz, lx, ly, lz, ratio, light);
+    }
+    return p_obj->NextObject;
+}
+
+/** Lights a map tile with full light `light` at (lx,ly,lz), by the
+ * distance and the height above the ground.  Remade from
+ * quick_light_unkn_func_08. */
+static void quick_light_unkn_func_08(ushort tile_x, ushort tile_z, s32 lx, s32 ly,
+  s32 lz, ushort light)
+{
+    struct MyMapElement *p_mapel;
+    s32 dx, dy, dz, sum, len, cosv, d2, r;
+
+    p_mapel = &game_my_big_map[(tile_z << 7) + tile_x];
+    dx = lx - (tile_x << 8);
+    dy = (ly - (p_mapel->Alt << 3)) << 4;
+    dz = lz - (tile_z << 8);
+    sum = (s32)((u32)dz * (u32)dz + ((u32)dy * (u32)dy + (u32)dx * (u32)dx));
+    if (sum > 0x4640000) {
+        dword_176D6C++;
+        return;
+    }
+    len = LbSqrL(sum);
+    if (len == 0)
+        len = 1;
+    cosv = (dy << 8) / len;
+    if (next_quick_light >= 0xFA00)
+        return;
+    d2 = (s32)((u32)(dy >> 3) * (u32)(dy >> 3) + (u32)dx * (u32)dx + (u32)dz * (u32)dz) >> 8;
+    if (d2 == 0)
+        d2 = 1;
+    r = (cosv << 8) / d2;
+    if (r > 0x100)
+        r = 0x100;
+    if (((game_full_lights[light].Intensity * r) >> 8) <= 3)
+        return;
+    quick_light_chain_add(&p_mapel->Shade, light, r);
+}
+
+/** Puts a new full light at (x,y,z): on the tiles and building faces within
+ * 7 tiles around.  Remade from quick_light_unkn_func_05. */
+static void quick_light_unkn_func_05(short x, short y, short z, ushort intens)
+{
+    struct FullLight *p_flight;
+    short tile_x, tile_z, dx, dz;
+
+    p_flight = &game_full_lights[next_full_light];
+    p_flight->lgtfld_10 = 0;
+    p_flight->lgtfld_12 = 0;
+    p_flight->Intensity = intens;
+    p_flight->TrueIntensity = intens;
+    p_flight->lgtfld_E = intens;
+    p_flight->Z = z;
+    p_flight->X = x;
+    p_flight->Y = y;
+    tile_x = x >> 8;
+    tile_z = z >> 8;
+    for (dx = -7; dx < 7; dx++)
+    {
+        for (dz = -7; dz < 7; dz++)
+        {
+            int cx, cz;
+            ThingIdx thing;
+
+            cx = tile_x + dx;
+            if ((cx <= 0) || (cx >= 128))
+                continue;
+            cz = tile_z + dz;
+            if ((cz <= 0) || (cz >= 128))
+                continue;
+            quick_light_unkn_func_08((ushort)(tile_x + dx), (ushort)(tile_z + dz), x, y, z, next_full_light);
+            thing = game_my_big_map[(cz << 7) + cx].Child;
+            while (thing != 0)
+            {
+                if (thing > 0)
+                {
+                    struct Thing *p_thing;
+
+                    p_thing = &things[thing];
+                    if ((p_thing->Type == TT_BUILDING) && (p_thing->SubType != 0x20))
+                    {
+                        short k;
+
+                        for (k = 0; k < p_thing->U.UObject.NumbObjects; k++)
+                            quick_light_unkn_func_06((ushort)(p_thing->U.UObject.Object + k), x, y, z,
+                              (tile_x + dx) << 8, (tile_z + dz) << 8, next_full_light);
+                    }
+                    thing = p_thing->Next;
+                }
+                else
+                {
+                    thing = sthings[thing].Next;
+                }
+            }
+        }
+    }
+    next_full_light++;
+}
+
+/** Takes the last full light off the tiles and buildings within 7 tiles
+ * of (x,z).  Remade from quick_light_unkn_func_04. */
+static void quick_light_unkn_func_04_c(short x, int y, short z, short light)
+{
+    short tile_x, tile_z, dx, dz;
+
+    tile_x = x >> 8;
+    tile_z = z >> 8;
+    for (dx = -7; dx < 7; dx++)
+    {
+        for (dz = -7; dz < 7; dz++)
+        {
+            int cx, cz;
+            struct MyMapElement *p_mapel;
+            ThingIdx thing;
+
+            cx = tile_x + dx;
+            if ((cx <= 0) || (cx >= 128))
+                continue;
+            cz = tile_z + dz;
+            if ((cz <= 0) || (cz >= 128))
+                continue;
+            p_mapel = &game_my_big_map[(cz << 7) + cx];
+            if (p_mapel->Shade != 0)
+                quick_light_unkn_func_09(p_mapel, (ushort)light);
+            thing = p_mapel->Child;
+            while (thing != 0)
+            {
+                if (thing > 0)
+                {
+                    struct Thing *p_thing;
+
+                    p_thing = &things[thing];
+                    if (((p_thing->Type == TT_BUILDING) || (p_thing->Type == 0x37))
+                      && (p_thing->SubType != 0x20))
+                    {
+                        short k;
+
+                        for (k = 0; k < p_thing->U.UObject.NumbObjects; k++)
+                            quick_light_unkn_func_07((ushort)(p_thing->U.UObject.Object + k), (ushort)light);
+                    }
+                    thing = p_thing->Next;
+                }
+                else
+                {
+                    thing = sthings[thing].Next;
+                }
+            }
+        }
+    }
+    next_full_light--;
+}
+
+void quick_light_unkn_func_04(short a1, int a2, short a3, short a4)
+{
+    FNCHK_VOID("quick_light_unkn_func_04", quick_light_unkn_func_04_asm(a1, a2, a3, a4),
+      quick_light_unkn_func_04_c(a1, a2, a3, a4));
+}
+
+/** A short flash of light (a shot, an explosion) at (x,y,z) near the camera:
+ * remembered in unkn_full_lights to be taken off next turn; one per light
+ * id and at most 9.  Only with the advanced lights option, not in network
+ * games.  Remade from apply_full_light. */
+static void apply_full_light_c(short x, short y, ushort z, ushort intens, ushort lid)
+{
+    struct UnkFLight *p_ufl;
+
+    if (lid != 0)
+    {
+        ushort i;
+
+        for (i = 0; i < next_unkn_full_light; i++)
+        {
+            ushort ufl_id;
+
+            /* the asm compares unfulgt_8 and unfulgt_9 as one 16-bit value */
+            memcpy(&ufl_id, &unkn_full_lights[i].unfulgt_8, 2);
+            if (ufl_id == lid)
+                return;
+        }
+    }
+    if (engn_xc - (render_area_a << 7) >= x)
+        return;
+    if (engn_xc + (render_area_a << 7) <= x)
+        return;
+    if (engn_zc - (render_area_b << 7) >= z)
+        return;
+    /* the original checks z against render_area_a here */
+    if (engn_zc + (render_area_a << 7) <= z)
+        return;
+    if (next_unkn_full_light >= 10)
+        return;
+    /* the asm also needed data_17fa52 == 0; it is never set */
+    if ((ingame.Flags & GamF_AdvLights) == 0)
+        return;
+    if (in_network_game)
+        return;
+    quick_light_unkn_func_05(x, y, z, intens);
+    p_ufl = &unkn_full_lights[next_unkn_full_light];
+    p_ufl->unfulgt_2 = x;
+    p_ufl->unfulgt_4 = y;
+    p_ufl->unfulgt_6 = z;
+    memcpy(&p_ufl->unfulgt_8, &lid, 2);
+    p_ufl->unfulgt_0 = next_full_light - 1;
+    next_unkn_full_light++;
+}
+
+void apply_full_light(short lx, short ly, ushort lz, ushort intens, ushort lid)
+{
+    FNCHK_VOID("apply_full_light", apply_full_light_asm(lx, ly, lz, intens, lid),
+      apply_full_light_c(lx, ly, lz, intens, lid));
 }
 
 void unkn_full_update_lights(void)
@@ -479,14 +896,6 @@ void unkn_full_update_lights(void)
     next_unkn_full_light = 1;
 }
 
-void apply_full_light(short lx, short lz, ushort b, ushort intens, ushort lid)
-{
-    asm volatile (
-      "push %4\n"
-      "call ASM_apply_full_light\n"
-        : : "a" (lx), "d" (lz), "b" (b), "c" (intens), "g" ((u32)lid));
-    return;
-}
 
 int process_things_mines_explode(int affected_max)
 {

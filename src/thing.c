@@ -1786,10 +1786,10 @@ struct SimpleThing *create_temp_light(int prc_x, int prc_y, int prc_z,
     return p_sthing;
 }
 
-struct SimpleThing *create_growing_e_strand(int x, int y, int z,
+#ifdef SW_FNCHK
+static struct SimpleThing *create_growing_e_strand_asm(int x, int y, int z,
   struct Thing *p_thing, int health, int owner)
 {
-#if 1
     struct SimpleThing *ret;
     // Pushed through a register holding them: a "g" operand may be placed
     // relative to the stack pointer, which each push moves.
@@ -1802,25 +1802,264 @@ struct SimpleThing *create_growing_e_strand(int x, int y, int z,
       "push 4(%5)\n"
       "push 0(%5)\n"
       "call ASM_create_growing_e_strand\n"
-        : "=r" (ret)
+        : "=a" (ret)
         : "a" ((s32)x), "d" ((s32)y), "b" ((s32)z), "c" (p_thing), "S" (stkargs)
         : "cc", "memory");
     return ret;
+}
 #endif
+
+/** An electric strand from (x,y,z) holding a person: the person is
+ * marked (Flag2 0x20) and hurt; a person in a vehicle gets a fixed big
+ * hit at a random point of the vehicle, which is marked as hit too.
+ * The strand lives `health` turns.  Remade from create_growing_e_strand. */
+static struct SimpleThing *create_growing_e_strand_c(int x, int y, int z,
+  struct Thing *p_thing, int health, int owner)
+{
+    struct SimpleThing *p_strand;
+    ThingIdx thing;
+    s32 ox, oy, oz, tx, ty, tz, dmg;
+
+    thing = get_new_sthing();
+    ox = 0;
+    oy = 0;
+    oz = 0;
+    if (thing == 0)
+        return NULL;
+    p_thing->Flag2 |= 0x20;
+    if ((p_thing->Flag & 0x10000000) != 0)
+    {
+        ox = ((ushort)LbRandomAnyShort() % 320) - 160;
+        oy = ((ushort)LbRandomAnyShort() % 320) - 160;
+        oz = ((ushort)LbRandomAnyShort() % 320) - 160;
+        dmg = 5000;
+        things[p_thing->U.UPerson.Vehicle].U.UVehicle.WorkPlace |= 0x80;
+    }
+    else
+    {
+        dmg = weapon_defs[12].HitDamage;
+    }
+    tx = (p_thing->X >> 8) + ox;
+    ty = (p_thing->Y >> 5) + oy;
+    tz = (p_thing->Z >> 8) + oz;
+    p_strand = &sthings[thing];
+    p_strand->X = x << 8;
+    p_strand->Z = z << 8;
+    p_strand->Y = y << 8;
+    p_strand->U.UEffect.VX = tx;
+    p_strand->U.UEffect.VY = ty;
+    p_strand->U.UEffect.VZ = tz;
+    add_node_sthing(p_strand->ThingOffset);
+    p_strand->Timer1 = health;
+    p_strand->StartTimer1 = health;
+    p_strand->Type = 0x1B;
+    p_strand->SubType = 6;
+    p_strand->Object = arctan(tx - x, -(tz - z));
+    p_strand->Radius = p_thing->ThingOffset;
+    p_strand->Owner2 = owner;
+    play_dist_ssample(p_strand, 0x28, 0x7F, 0x40, 100, 0, 1);
+    thing_hit_by_bullet(p_thing, (short)dmg, (short)(x - tx), (short)(y - ty), (short)(z - tz),
+      &things[(ushort)owner], 0x0A);
+    if ((p_thing->Flag & 0x00080000) != 0)
+        stop_being_persuaded(p_thing);
+    return p_strand;
+}
+
+struct SimpleThing *create_growing_e_strand(int x, int y, int z,
+  struct Thing *p_thing, int health, int owner)
+{
+    struct SimpleThing *ret;
+
+    FNCHK_RET("create_growing_e_strand", ret,
+      create_growing_e_strand_asm(x, y, z, p_thing, health, owner),
+      create_growing_e_strand_c(x, y, z, p_thing, health, owner));
+    return ret;
+}
+
+#ifdef SW_FNCHK
+static void create_another_strand_asm(struct SimpleThing *p_sthing)
+{
+    asm volatile (
+      "call ASM_create_another_strand\n"
+        : : "a" (p_sthing) : "cc", "memory");
+}
+
+static void process_electric_strand_asm(struct SimpleThing *p_sthing)
+{
+    asm volatile (
+      "call ASM_process_electric_strand\n"
+        : : "a" (p_sthing) : "cc", "memory");
+}
+#endif
+
+/** An electric strand running over a building goes on: from its end, to
+ * a neighbouring point of a random face sharing the strand's point (OZ),
+ * not the face it is on (OY), of the same model (OX).
+ * Remade from create_another_strand. */
+static void create_another_strand_c(struct SimpleThing *p_sthing)
+{
+    struct SingleObject *p_obj;
+    struct SimpleThing *p_new;
+    short face_idx[100], corner[100];
+    short cur_face, map_x, map_z, off_y, cnt;
+    ushort *p_pointno;
+    short idx, c, new_face;
+    ubyte g;
+
+    cur_face = p_sthing->U.UEffect.OY;
+    p_obj = &game_objects[p_sthing->U.UEffect.OX];
+    map_x = p_obj->MapX;
+    map_z = p_obj->MapZ;
+    off_y = p_obj->OffsetY;
+    cnt = 0;
+    if (p_obj->NumbFaces != 0)
+    {
+        short f;
+
+        for (f = p_obj->StartFace; f < p_obj->StartFace + p_obj->NumbFaces; f++)
+        {
+            struct SingleObjectFace3 *p_face;
+            short k;
+
+            if (f == cur_face)
+                continue;
+            p_face = &game_object_faces3[(ushort)f];
+            for (k = 0; k < 3; k++)
+            {
+                if ((ushort)p_face->PointNo[k] != p_sthing->U.UEffect.OZ)
+                    continue;
+                face_idx[cnt] = f;
+                corner[cnt] = k + 1;
+                cnt++;
+                face_idx[cnt] = f;
+                corner[cnt] = k + 2;
+                cnt++;
+            }
+        }
+    }
+    if (p_obj->NumbFaces4 != 0)
+    {
+        short f;
+
+        for (f = p_obj->StartFace4; f < p_obj->StartFace4 + p_obj->NumbFaces4; f++)
+        {
+            struct SingleObjectFace4 *p_face;
+            short k;
+
+            if (f == -cur_face)
+                continue;
+            p_face = &game_object_faces4[(ushort)f];
+            for (k = 0; k < 4; k++)
+            {
+                if ((ushort)p_face->PointNo[k] != p_sthing->U.UEffect.OZ)
+                    continue;
+                face_idx[cnt] = -f;
+                corner[cnt] = k + 1;
+                cnt++;
+                face_idx[cnt] = -f;
+                corner[cnt] = k + 2;
+                cnt++;
+                face_idx[cnt] = -f;
+                corner[cnt] = k + 3;
+                cnt++;
+            }
+        }
+    }
+    if (cnt <= 0)
+        return;
+    idx = (short)(((u32)(ushort)LbRandomAnyShort() + gameturn) % (u32)(s32)cnt);
+    new_face = face_idx[idx];
+    c = corner[idx];
+    if (new_face > 0)
+    {
+        if (c > 2)
+            c -= 2;
+        p_pointno = (ushort *)&game_object_faces3[new_face].PointNo[c];
+    }
+    else
+    {
+        if (c > 3)
+            c -= 3;
+        p_pointno = (ushort *)&game_object_faces4[-new_face].PointNo[c];
+    }
+    g = gameturn & 1;
+    {
+        struct SinglePoint *p_pt;
+
+        p_pt = &game_object_points[*p_pointno];
+        p_new = create_electric_strand(p_sthing->U.UEffect.VX, p_sthing->U.UEffect.VY,
+          p_sthing->U.UEffect.VZ, p_pt->X + map_x, p_pt->Y + off_y, p_pt->Z + map_z, g);
+    }
+    if (p_new == NULL)
+        return;
+    p_new->U.UEffect.OX = p_sthing->U.UEffect.OX;
+    p_new->U.UEffect.OY = new_face;
+    p_new->U.UEffect.OZ = *p_pointno;
+    p_new->StartTimer1 = p_sthing->StartTimer1 + 1;
 }
 
 void create_another_strand(struct SimpleThing *p_sthing)
 {
-    asm volatile (
-      "call ASM_create_another_strand\n"
-        : : "a" (p_sthing));
+    FNCHK_VOID("create_another_strand", create_another_strand_asm(p_sthing),
+      create_another_strand_c(p_sthing));
+}
+
+/** Electric strands: one on a building (subtype 0) goes on along it a few
+ * times; one holding a person (subtype 6) jumps on to the next person
+ * near the end.  Remade from process_electric_strand. */
+static void process_electric_strand_c(struct SimpleThing *p_sthing)
+{
+    short timer;
+
+    if (p_sthing->SubType == 0)
+    {
+        timer = p_sthing->Timer1;
+        p_sthing->Timer1--;
+        if (timer == 0)
+        {
+            delete_snode(p_sthing);
+            remove_sthing(p_sthing->ThingOffset);
+        }
+        if ((p_sthing->Timer1 == 4) && (p_sthing->StartTimer1 < 15))
+            create_another_strand(p_sthing);
+        return;
+    }
+    if (p_sthing->SubType == 6)
+    {
+        int dist;
+        short person;
+
+        timer = p_sthing->Timer1;
+        p_sthing->Timer1--;
+        if (timer == 0)
+        {
+            things[(ushort)p_sthing->Radius].Flag2 &= ~0x20;
+            delete_snode(p_sthing);
+            remove_sthing(p_sthing->ThingOffset);
+            return;
+        }
+        if (p_sthing->Timer1 != p_sthing->StartTimer1 - 1)
+        {
+            if ((LbRandomAnyShort() & 0xF) >= 7)
+                return;
+        }
+        dist = 0;
+        person = find_nearest_person_min(p_sthing->X >> 8, p_sthing->Y >> 8, p_sthing->Z >> 8,
+          dist, &dist, p_sthing->Object, (u32)-1);
+        if (person == 0)
+            return;
+        if (dist >= 0x200000)
+            return;
+        create_growing_e_strand(p_sthing->U.UEffect.VX, p_sthing->U.UEffect.VY,
+          p_sthing->U.UEffect.VZ, &things[person], (ushort)p_sthing->Timer1,
+          (ushort)p_sthing->Owner2);
+    }
 }
 
 void process_electric_strand(struct SimpleThing *p_sthing)
 {
-    asm volatile (
-      "call ASM_process_electric_strand\n"
-        : : "a" (p_sthing));
+    FNCHK_VOID("process_electric_strand", process_electric_strand_asm(p_sthing),
+      process_electric_strand_c(p_sthing));
 }
 
 void process_canister(struct SimpleThing *p_sthing)
@@ -4599,10 +4838,10 @@ struct SimpleThing *create_time_pod(MapCoord x, MapCoord y, MapCoord z,
     return p_podtng;
 }
 
-struct SimpleThing *create_electric_strand(MapCoord x, MapCoord y, MapCoord z,
+#ifdef SW_FNCHK
+static struct SimpleThing *create_electric_strand_asm(MapCoord x, MapCoord y, MapCoord z,
   MapCoord x2, MapCoord y2, MapCoord z2, int sound)
 {
-#if 1
     struct SimpleThing *ret;
     // Pushed through a register holding them: a "g" operand may be placed
     // relative to the stack pointer, which each push moves.
@@ -4617,11 +4856,53 @@ struct SimpleThing *create_electric_strand(MapCoord x, MapCoord y, MapCoord z,
       "push 4(%5)\n"
       "push 0(%5)\n"
       "call ASM_create_electric_strand\n"
-        : "=r" (ret)
+        : "=a" (ret)
         : "a" ((s32)x), "d" ((s32)y), "b" ((s32)z), "c" ((s32)x2), "S" (stkargs)
         : "cc", "memory");
     return ret;
+}
 #endif
+
+/** A straight electric strand from (x,y,z) to (x2,y2,z2), 5 turns long,
+ * with a sound when asked.  NULL off the map or when there is no free
+ * simple thing.  Remade from create_electric_strand. */
+static struct SimpleThing *create_electric_strand_c(MapCoord x, MapCoord y, MapCoord z,
+  MapCoord x2, MapCoord y2, MapCoord z2, int sound)
+{
+    struct SimpleThing *p_strand;
+    ThingIdx thing;
+
+    if ((x < 0) || (z < 0))
+        return NULL;
+    thing = get_new_sthing();
+    if (thing == 0)
+        return NULL;
+    p_strand = &sthings[thing];
+    p_strand->X = x << 8;
+    p_strand->Z = z << 8;
+    p_strand->U.UEffect.VY = y2;
+    p_strand->U.UEffect.VZ = z2;
+    p_strand->Y = y << 8;
+    p_strand->U.UEffect.VX = x2;
+    add_node_sthing(p_strand->ThingOffset);
+    p_strand->Type = 0x1B;
+    p_strand->SubType = 0;
+    p_strand->Radius = 0x32;
+    p_strand->Timer1 = 5;
+    if ((ubyte)sound != 0)
+        play_dist_ssample(p_strand, 0x28, 0x7F, 0x40, 100, 0, 1);
+    return p_strand;
+}
+
+struct SimpleThing *create_electric_strand(MapCoord x, MapCoord y, MapCoord z,
+  MapCoord x2, MapCoord y2, MapCoord z2, int sound)
+{
+    struct SimpleThing *ret;
+
+    FNCHK_RET("create_electric_strand", ret,
+      create_electric_strand_asm(x, y, z, x2, y2, z2, sound),
+      create_electric_strand_c(x, y, z, x2, y2, z2, sound));
+    return ret;
 }
 
 void mine_detonate(struct Thing *p_thing)

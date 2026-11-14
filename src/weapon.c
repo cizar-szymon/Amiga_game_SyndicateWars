@@ -1270,10 +1270,85 @@ struct SimpleThing *init_spark(int x, int y, int z)
     return p_sthing;
 }
 
-void elec_hit_building(int x, int y, int z, short col)
+#ifdef SW_FNCHK
+static void elec_hit_building_asm(int x, int y, int z, short col)
 {
     asm volatile ("call ASM_elec_hit_building\n"
-        : : "a" (x), "d" (y), "b" (z), "c" (col));
+        : "+a" (x), "+d" (y), "+b" (z), "+c" (col) : : "cc", "memory");
+}
+#endif
+
+/** An electric shot hitting a building face (collision list entry `col`):
+ * strands from the hit point to corners 0 and 2 of the face, which then
+ * run on along the building.  Remade from elec_hit_building. */
+static void elec_hit_building_c(int x, int y, int z, short col)
+{
+    struct ColVectList *p_cvlist;
+    struct ColVect *p_cvect;
+    struct SingleObject *p_obj;
+    short face, map_x, map_z, off_y, obj_thing;
+    ushort k;
+
+    p_cvlist = &game_col_vects_list[col];
+    obj_thing = p_cvlist->Object;
+    if (obj_thing == 0)
+        return;
+    p_cvect = &game_col_vects[p_cvlist->Vect];
+    face = p_cvect->Face;
+    if (face == 0)
+        return;
+    p_obj = &game_objects[things[obj_thing].U.UObject.Object];
+    map_x = p_obj->MapX;
+    map_z = p_obj->MapZ;
+    off_y = p_obj->OffsetY;
+    if (face < 0)
+    {
+        struct SingleObjectFace4 *p_face;
+
+        p_face = &game_object_faces4[-face];
+        for (k = 0; k < 4; k += 2)
+        {
+            struct SinglePoint *p_pt;
+            struct SimpleThing *p_strand;
+
+            p_pt = &game_object_points[(ushort)p_face->PointNo[k]];
+            p_strand = create_electric_strand(x, y, z, p_pt->X + map_x, p_pt->Y + off_y,
+              p_pt->Z + map_z, (k == 0));
+            if (p_strand == NULL)
+                continue;
+            p_strand->U.UEffect.OX = things[game_col_vects_list[col].Object].U.UObject.Object;
+            p_strand->U.UEffect.OY = face;
+            p_strand->StartTimer1 = 1;
+            p_strand->U.UEffect.OZ = p_face->PointNo[k];
+        }
+        return;
+    }
+    {
+        struct SingleObjectFace3 *p_face;
+
+        p_face = &game_object_faces3[face];
+        for (k = 0; k < 3; k += 2)
+        {
+            struct SinglePoint *p_pt;
+            struct SimpleThing *p_strand;
+
+            p_pt = &game_object_points[(ushort)p_face->PointNo[k]];
+            p_strand = create_electric_strand(x, y, z, p_pt->X + map_x, p_pt->Y + off_y,
+              p_pt->Z + map_z, (k == 0));
+            if (p_strand == NULL)
+                continue;
+            p_strand->U.UEffect.OX = things[game_col_vects_list[col].Object].U.UObject.Object;
+            p_strand->U.UEffect.OY = p_cvect->Face;
+            p_strand->StartTimer1 = 1;
+            p_strand->U.UEffect.OZ = p_face->PointNo[k];
+        }
+    }
+}
+
+void elec_hit_building(int x, int y, int z, short col)
+{
+    FNCHK_VOID("elec_hit_building", elec_hit_building_asm(x, y, z, col),
+      elec_hit_building_c(x, y, z, col));
 }
 
 void init_shoot_recoil(struct Thing *p_person, short vx, short vy, short vz)

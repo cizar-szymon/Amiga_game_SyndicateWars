@@ -2635,10 +2635,43 @@ ubyte conditional_command_state_true(ushort cmd, struct Thing *p_me, ubyte from)
     return unmet;
 }
 
-void person_init_drop_special(struct Thing *p_person, ThingIdx item)
+#ifdef SW_FNCHK
+static void person_init_drop_special_asm(struct Thing *p_person, ThingIdx item)
 {
     asm volatile ("call ASM_person_init_drop_special\n"
-        : : "a" (p_person), "d" (item));
+        : "+a" (p_person), "+d" (item) : : "cc", "memory");
+}
+#endif
+
+/** Starts dropping a special item (a simple thing) which the person owns;
+ * when it is not the owner it just goes back to state 0.
+ * Remade from person_init_drop_special. */
+static void person_init_drop_special_c(struct Thing *p_person, ThingIdx item)
+{
+    ushort anim;
+
+    if ((p_person->Flag & (TngF_Unkn40000000|TngF_WepRecoil|TngF_StationrSht|TngF_Destroyed)) != 0)
+        return;
+    if (sthings[item].U.UWeapon.Owner != p_person->ThingOffset) {
+        p_person->State = 0;
+        return;
+    }
+    p_person->U.UPerson.TempWeapon = item;
+    p_person->Flag |= TngF_Unkn0001;
+    p_person->Flag2 |= TgF2_Unkn00010000;
+    anim = people_frames[p_person->SubType][13];
+    p_person->Frame = nstart_ani[anim + p_person->U.UPerson.Angle];
+    p_person->State = 8;
+    p_person->U.UPerson.Timer2 = 3;
+    p_person->StartFrame = anim - 1;
+    p_person->U.UPerson.OldAnimMode = p_person->U.UPerson.AnimMode;
+    p_person->U.UPerson.AnimMode = 13;
+}
+
+void person_init_drop_special(struct Thing *p_person, ThingIdx item)
+{
+    FNCHK_VOID("person_init_drop_special", person_init_drop_special_asm(p_person, item),
+      person_init_drop_special_c(p_person, item));
 }
 
 
@@ -8280,11 +8313,111 @@ int limit_mood(struct Thing *p_thing, short mood)
     return ret;
 }
 
-void person_self_destruct(struct Thing *p_person)
+struct SimpleThing *init_nuclear_bomb(MapCoord x, MapCoord y, MapCoord z);
+
+#ifdef SW_FNCHK
+static void person_self_destruct_asm(struct Thing *p_person)
 {
     asm volatile (
       "call ASM_person_self_destruct\n"
-        : : "a" (p_person));
+        : "+a" (p_person) : : "cc", "memory");
+}
+#endif
+
+/** Takes a person out of its vehicle's passenger list and puts it on the
+ * ground.  As the original, the height is read at (X,X), not (X,Z).
+ * Remade from yank_from_vehicle. */
+static void yank_from_vehicle(struct Thing *p_person)
+{
+    struct Thing *p_vehicle;
+
+    p_vehicle = &things[p_person->U.UPerson.Vehicle];
+    if (p_vehicle->U.UVehicle.PassengerHead == p_person->ThingOffset)
+    {
+        p_vehicle->U.UVehicle.PassengerHead = p_person->U.UPerson.LinkPassenger;
+    }
+    else
+    {
+        short prev, cur;
+
+        prev = 0;
+        for (cur = p_vehicle->U.UVehicle.PassengerHead; cur != 0;
+          cur = things[cur].U.UPerson.LinkPassenger)
+        {
+            if (cur == (ushort)p_person->ThingOffset) {
+                things[prev].U.UPerson.LinkPassenger = p_person->U.UPerson.LinkPassenger;
+                break;
+            }
+            prev = cur;
+        }
+    }
+    p_person->Flag &= ~TngF_InVehicle;
+    p_person->U.UPerson.Vehicle = 0;
+    p_person->Y = alt_at_point((short)(p_person->X >> 8), (short)(p_person->X >> 8));
+    add_node_thing(p_person->ThingOffset);
+}
+
+/** An agent with a chest mod (level 3 in a network game) blows itself up:
+ * in a vehicle it dies and the vehicle crashes, else a nuclear blast
+ * (with a bang for chest level 2 and 3).  Remade from person_self_destruct. */
+static void person_self_destruct_c(struct Thing *p_person)
+{
+    ubyte chest;
+    s32 x, y, z;
+    struct SimpleThing *p_bomb;
+
+    if ((p_person->Flag & (TngF_Destroyed|TngF_Unkn4000)) != 0)
+        return;
+    chest = cybmod_chest_level(&p_person->U.UPerson.UMod);
+    if (in_network_game && (chest < 3))
+        return;
+    if (chest < 1)
+        return;
+    if (in_network_game && ((p_person->Flag & TngF_PlayerAgent) != 0))
+    {
+        ushort plyr;
+
+        plyr = p_person->U.UPerson.ComCur >> 2;
+        mission_status[plyr].MP.AgentsKilled[plyr] += 3;
+    }
+    if ((p_person->Flag & TngF_InVehicle) != 0)
+    {
+        struct Thing *p_vehicle;
+        short vehicle;
+
+        vehicle = p_person->U.UPerson.Vehicle;
+        yank_from_vehicle(p_person);
+        if (((p_person->Flag & TngF_Destroyed) == 0) && ((ushort)p_person->State != 0xD))
+            set_person_dead(p_person, 0xC);
+        p_person->Flag |= TngF_Unkn02000000;
+        p_vehicle = &things[vehicle];
+        if ((ushort)p_vehicle->State == 0xD)
+            return;
+        p_vehicle->OldTarget = p_person->ThingOffset;
+        start_crashing(p_vehicle);
+        return;
+    }
+    x = p_person->X >> 8;
+    y = (p_person->Y >> 8) + 10;
+    z = p_person->Z >> 8;
+    if (chest == 2)
+        bang_new4(x << 8, y << 8, z << 8, 0x14);
+    else if (chest == 3)
+        bang_new4(x << 8, y << 8, z << 8, 0x0A);
+    p_bomb = init_nuclear_bomb(x, y, z);
+    if (p_bomb == NULL)
+        return;
+    play_dist_ssample(p_bomb, 0x25, 0x7F, 0x40, 100, 0, 3);
+    p_bomb->Timer1 = 0x13;
+    p_bomb->Owner2 = p_person->Owner;
+    p_bomb->Radius = -5;
+    set_person_dead(p_person, 0x12);
+}
+
+void person_self_destruct(struct Thing *p_person)
+{
+    FNCHK_VOID("person_self_destruct", person_self_destruct_asm(p_person),
+      person_self_destruct_c(p_person));
 }
 
 void person_scare_person(struct Thing *p_person)
@@ -10135,16 +10268,126 @@ void person_dead(struct Thing *p_person)
     FNCHK_VOID("person_dead", person_dead_asm(p_person), person_dead_c(p_person));
 }
 
-void person_kill_person(struct Thing *p_person)
+#ifdef SW_FNCHK
+static void person_kill_person_asm(struct Thing *p_person)
 {
     asm volatile ("call ASM_person_kill_person\n"
-        : : "a" (p_person));
+        : "+a" (p_person) : : "cc", "memory");
+}
+#endif
+
+/** A bodyguard (flag 0x800000) whose job ends lets its owner go and
+ * leaves the state. */
+static void kill_person_guard_done(struct Thing *p_person)
+{
+    things[(ushort)p_person->Owner].Flag &= ~TngF_Unkn00400000;
+    p_person->Flag &= ~(TngF_Unkn00800000|TngF_Unkn0040);
+    p_person->State = 0;
+    p_person->Flag |= TngF_Unkn0040;
+}
+
+/** A person with the kill state shoots at its target (PTarget) until it is
+ * dead; a member of a "kill group member" command now and then gives up a
+ * target of another group.  Remade from person_kill_person. */
+static void person_kill_person_c(struct Thing *p_person)
+{
+    struct Thing *p_target;
+    ubyte turn;
+
+    if ((p_person->Flag & TngF_Destroyed) != 0)
+        return;
+    if (((ushort)p_person->State == 0xD) || ((ushort)p_person->State == 0xC))
+        return;
+    turn = (ubyte)((ushort)p_person->ThingOffset + gameturn);
+    if ((turn & 0x0F) == 0)
+    {
+        struct Command *p_cmd;
+
+        p_cmd = &game_commands[p_person->U.UPerson.ComCur];
+        if ((p_cmd->Type == 6) && (p_person->PTarget != NULL))
+        {
+            if ((p_person->PTarget->U.UPerson.EffectiveGroup != p_cmd->OtherThing) ||
+              ((turn & 0x7F) == 0))
+            {
+                p_person->State = 0;
+                p_person->U.UPerson.Target2 = 0;
+                return;
+            }
+        }
+    }
+    p_target = p_person->PTarget;
+    if ((p_target == NULL) || ((p_target->Flag & TngF_Destroyed) != 0)) {
+        p_person->State = 0;
+        return;
+    }
+    p_person->U.UPerson.Target2 = p_target->ThingOffset;
+    person_kill_target2(p_person);
+    if (((p_person->Flag2 & TgF2_Unkn0040) != 0) &&
+      ((p_person->Flag & TngF_Unkn00800000) != 0))
+    {
+        kill_person_guard_done(p_person);
+        p_person->U.UPerson.Target2 = 0;
+        return;
+    }
+    if ((p_person->Flag & TngF_Destroyed) != 0)
+        return;
+    if (p_person->U.UPerson.Target2 == 0)
+    {
+        if ((p_person->Flag & TngF_PlayerAgent) != 0) {
+            p_person->State = 0;
+            p_person->Flag &= ~TngF_TriggerUse;
+        } else if ((p_person->Flag & TngF_Unkn00800000) != 0) {
+            kill_person_guard_done(p_person);
+        }
+    }
+    p_target = p_person->PTarget;
+    if ((p_target == NULL) || ((p_target->Flag & TngF_Destroyed) != 0))
+    {
+        p_person->U.UPerson.Target2 = 0;
+        if ((p_person->Flag & TngF_PlayerAgent) != 0)
+            p_person->State = 0;
+        else if ((p_person->Flag & TngF_Unkn00800000) != 0)
+            kill_person_guard_done(p_person);
+    }
+    p_person->U.UPerson.Target2 = 0;
+}
+
+void person_kill_person(struct Thing *p_person)
+{
+    FNCHK_VOID("person_kill_person", person_kill_person_asm(p_person),
+      person_kill_person_c(p_person));
+}
+
+#ifdef SW_FNCHK
+static void person_save_victim_asm(struct Thing *p_person)
+{
+    asm volatile ("call ASM_person_save_victim\n"
+        : "+a" (p_person) : : "cc", "memory");
+}
+#endif
+
+/** A person in state 14 (to save a victim) attacks its target.
+ * Remade from person_save_victim. */
+static void person_save_victim_c(struct Thing *p_person)
+{
+    int range;
+
+    if ((ushort)p_person->State != 0xE)
+        return;
+    check_weapon(p_person, 0x500);
+    p_person->State = 0x1B;
+    p_person->Flag |= TngF_Unkn0040;
+    p_person->U.UPerson.ComTimer = -1;
+    range = get_weapon_range(p_person);
+    p_person->U.UPerson.Timer2 = 50;
+    p_person->U.UPerson.StartTimer2 = 50;
+    p_person->U.UPerson.ComRange = (ubyte)(range >> 6);
 }
 
 void person_save_victim(struct Thing *p_person)
 {
-    asm volatile ("call ASM_person_save_victim\n"
-        : : "a" (p_person));
+    FNCHK_VOID("person_save_victim", person_save_victim_asm(p_person),
+      person_save_victim_c(p_person));
 }
 
 

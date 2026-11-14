@@ -2070,11 +2070,93 @@ void process_unkn58(struct SimpleThing *p_sthing)
     p_sthing->Frame = frm;
 }
 
+#ifdef SW_FNCHK
+static ubyte napalm_person_asm(struct Thing *p_person, ushort multi)
+{
+    int ret;
+    asm volatile ("call ASM_napalm_person\n"
+        : "=a" (ret), "+d" (multi) : "0" (p_person) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Burning by napalm: a static loses health and may catch fire; a person
+ * (not well protected) loses health, and when it is gone starts burning
+ * to death (state 0x24), else gets pushed back.  Returns 1 when the person
+ * starts burning (or a guard with Flag2 0x10 dies).
+ * Remade from napalm_person. */
+static ubyte napalm_person_c(struct Thing *p_person, ushort multi)
+{
+    struct TngUPerson *p_pers;
+    ushort dmg, mods;
+
+    if ((ushort)p_person->State == 0x24)
+        return 0;
+    if ((p_person->Flag & 0x0002) != 0)
+        return 0;
+    if (p_person->Type == 5)
+    {
+        struct SimpleThing *p_static;
+
+        p_static = (struct SimpleThing *)p_person;
+        p_static->U.UScenery.Health -= weapon_defs[8].HitDamage;
+        if (p_static->U.UScenery.Health <= 0)
+            set_static_on_fire(p_static);
+        return 0;
+    }
+    if (p_person->SubType == 7)
+        return 0;
+    p_pers = &p_person->U.UPerson;
+    mods = p_pers->UMod.Mods;
+    if (((ushort)(mods << 7) >> 13) > 3)
+        return 0;
+    dmg = weapon_defs[8].HitDamage;
+    if ((mods >> 12) == 2)
+        dmg >>= 2;
+    p_person->Health -= (ushort)(dmg * multi);
+    if (p_person->Health > 0)
+    {
+        if ((p_person->Flag2 & 0x10) == 0)
+        {
+            short v;
+
+            v = lbSinTable[p_pers->RecoilDir * 8 + 512];
+            init_recoil(p_person, v, 0, v, 7);
+        }
+        return 0;
+    }
+    if ((p_person->Flag2 & 0x10) != 0)
+    {
+        set_person_dead(p_person, 0x12);
+        return 1;
+    }
+    if ((p_person->Flag & 0x00080000) != 0)
+        stop_being_persuaded(p_person);
+    p_person->State = 0x24;
+    p_pers->FrameId.Version[0] = 0;
+    play_dist_sample(p_person, 0x1D, 0x7F, 0x40, 100, -1, 2);
+    p_person->Flag |= 0x40000000;
+    p_pers->RecoilTimer = (LbRandomAnyShort() + 0x32) & 0x1F;
+    p_person->Flag &= 0xFFF6FF7E;
+    p_pers->Timer2 = 10;
+    p_pers->StartTimer2 = 10;
+    p_person->Timer1 = 10;
+    p_person->StartTimer1 = 10;
+    p_pers->AnimMode = 0x11;
+    p_pers->OldAnimMode = 0x11;
+    p_person->Flag2 &= ~0x18;
+    p_person->Frame = nstart_ani[people_frames[p_person->SubType][p_pers->AnimMode] + p_pers->Angle];
+    p_pers->Target2 = 0;
+    p_person->StartFrame = people_frames[p_person->SubType][p_pers->AnimMode] - 1;
+    return 1;
+}
+
 ubyte napalm_person(struct Thing *p_person, ushort multi)
 {
     ubyte ret;
-    asm volatile ("call ASM_napalm_person\n"
-        : "=r" (ret) : "a" (p_person), "d" (multi));
+
+    FNCHK_RET("napalm_person", ret, napalm_person_asm(p_person, multi),
+      napalm_person_c(p_person, multi));
     return ret;
 }
 
@@ -2336,18 +2418,163 @@ void process_special_drift_smoke(struct SimpleThing *p_sthing, ThingIdx thing_it
       process_special_drift_smoke_c(p_sthing, thing_item));
 }
 
-void process_napalm_flame(struct SimpleThing *p_sthing, ThingIdx thing_item)
+#ifdef SW_FNCHK
+static void process_napalm_flame_asm(struct SimpleThing *p_sthing, ThingIdx thing_item)
 {
     asm volatile (
       "call ASM_process_napalm_flame\n"
-        : : "a" (p_sthing), "d" (thing_item));
+        : "+d" (thing_item) : "a" (p_sthing) : "cc", "memory");
+}
+
+static void process_flame1_asm(struct SimpleThing *p_sthing)
+{
+    asm volatile (
+      "call ASM_process_flame1\n"
+        : : "a" (p_sthing) : "cc", "memory");
+}
+#endif
+
+/** A flame touching a person turns the person to face away from it (the
+ * flee direction) unless the person is guarding (Flag2 0x10), and burns
+ * it; a burning death is counted.  Shared code of the flames. */
+static void flame_burn_victim(struct SimpleThing *p_flame, struct Thing *p_victim)
+{
+    if ((p_victim->Type != 5) && ((p_victim->Flag2 & 0x10) == 0))
+    {
+        short angle;
+        ubyte dir;
+
+        angle = arctan((p_flame->X >> 8) - (p_victim->X >> 8),
+          -((p_flame->Z >> 8) - (p_victim->Z >> 8)));
+        dir = (ubyte)((((s32)angle + 0x80) >> 8) + 8) & 7;
+        p_victim->U.UPerson.RecoilDir = dir;
+        change_person_angle(p_victim, (dir + 4) & 7);
+    }
+    if (napalm_person(p_victim, 1))
+        drift_smoke_count_kill(p_victim, &things[(ushort)p_flame->Owner2]);
+}
+
+/** A flying napalm flame: moves with its velocity (stopping at walls),
+ * grows, burns what it touches and lights the area.
+ * Remade from process_napalm_flame. */
+static void process_napalm_flame_c(struct SimpleThing *p_sthing, ThingIdx thing_item)
+{
+    struct STngUEffect *p_eff;
+    struct Thing *p_victim;
+    s32 intens;
+
+    p_eff = &p_sthing->U.UEffect;
+    if ((((ushort)p_sthing->ThingOffset + gameturn) & 1) != 0)
+        p_sthing->Frame = frame[(ushort)p_sthing->Frame].Next;
+    if ((p_sthing->Flag & 0x0008) == 0)
+    {
+        int x, y, z;
+
+        x = p_sthing->X + (p_eff->VX << 2);
+        y = p_sthing->Y + (p_eff->VY << 2);
+        z = p_sthing->Z + (p_eff->VZ << 2);
+        if (((x >> 16) < 0) || ((x >> 16) >= 128) || ((z >> 16) < 0) || ((z >> 16) >= 128))
+        {
+            p_sthing->Timer1 = -1;
+        }
+        else
+        {
+            if (check_col_collision(x >> 8, (y >> 8) + 8, z >> 8))
+                p_sthing->Flag |= 0x0008;
+            else
+                move_smapwho_c(p_sthing, &x, y, &z);
+            p_eff->VX += p_eff->OX;
+            p_eff->VY += p_eff->OY;
+            p_eff->VZ += p_eff->OZ;
+        }
+    }
+    /* the asm compares Timer1 but adds the word at 0x26, StartFrame */
+    if (p_sthing->Timer1 < 10)
+        p_sthing->Object += p_sthing->StartFrame;
+    else
+        p_sthing->Object += 5;
+    p_sthing->Timer1--;
+    if (p_sthing->Timer1 <= 0)
+    {
+        remove_sthing(thing_item);
+        delete_snode(p_sthing);
+        ingame.FlameCount--;
+        return;
+    }
+    p_victim = check_for_radius_hit_person(p_sthing->X, p_sthing->Y, p_sthing->Z,
+      (ushort)p_sthing->Object, NULL, 0, 0);
+    if ((p_victim != NULL) && (p_victim->Type != TT_VEHICLE))
+    {
+        TbBool burn;
+
+        burn = true;
+        if (p_victim->Type != 5)
+        {
+            if ((p_victim->ThingOffset == p_sthing->Owner2) ||
+              (p_victim->U.UPerson.EffectiveGroup ==
+                things[(ushort)p_sthing->Owner2].U.UPerson.EffectiveGroup) ||
+              ((ushort)p_victim->State == 0x24) || ((ushort)p_victim->State == 0x0C) ||
+              ((p_victim->Flag & 0x0002) != 0))
+                burn = false;
+        }
+        if (burn)
+        {
+            p_sthing->Flag |= 0x0008;
+            flame_burn_victim(p_sthing, p_victim);
+        }
+    }
+    intens = (LbRandomAnyShort() & 0x1F) + 0x50;
+    if ((ushort)ingame.FlameCount < 20)
+        intens = (intens * (ushort)ingame.FlameCount) / 20;
+    apply_full_light(p_sthing->X >> 8, (p_sthing->Y >> 8) + 100, p_sthing->Z >> 8,
+      (short)intens, p_sthing->Owner2);
+}
+
+void process_napalm_flame(struct SimpleThing *p_sthing, ThingIdx thing_item)
+{
+    FNCHK_VOID("process_napalm_flame", process_napalm_flame_asm(p_sthing, thing_item),
+      process_napalm_flame_c(p_sthing, thing_item));
+}
+
+/** A standing flame: burns out (it is removed when its timer runs out, but
+ * still burns that turn, as the original) and burns what it touches.
+ * Remade from process_flame1. */
+static void process_flame1_c(struct SimpleThing *p_sthing)
+{
+    struct Thing *p_victim;
+
+    if ((((ushort)p_sthing->ThingOffset + gameturn) & 1) != 0)
+        p_sthing->Frame = frame[(ushort)p_sthing->Frame].Next;
+    if (p_sthing->Timer1 > 0)
+    {
+        p_sthing->Timer1--;
+        if (p_sthing->Timer1 == 0)
+        {
+            remove_sthing(p_sthing->ThingOffset);
+            delete_snode(p_sthing);
+        }
+    }
+    p_victim = check_for_radius_hit_person(p_sthing->X, p_sthing->Y, p_sthing->Z,
+      (ushort)p_sthing->Object, NULL, 0, 0);
+    if ((p_victim == NULL) || (p_victim->Type == TT_VEHICLE))
+        return;
+    if (p_victim->Type != 5)
+    {
+        if (p_victim->ThingOffset == p_sthing->Owner2)
+            return;
+        if (p_victim->U.UPerson.EffectiveGroup ==
+          things[(ushort)p_sthing->Owner2].U.UPerson.EffectiveGroup)
+            return;
+        if ((ushort)p_victim->State == 0x24)
+            return;
+    }
+    p_sthing->Flag |= 0x0008;
+    flame_burn_victim(p_sthing, p_victim);
 }
 
 void process_flame1(struct SimpleThing *p_sthing)
 {
-    asm volatile (
-      "call ASM_process_flame1\n"
-        : : "a" (p_sthing));
+    FNCHK_VOID("process_flame1", process_flame1_asm(p_sthing), process_flame1_c(p_sthing));
 }
 
 void process_splash(struct SimpleThing *p_sthing)

@@ -506,6 +506,7 @@ TbBool person_use_medikit(struct Thing *p_person, PlayerIdx plyr);
 
 void set_person_persuaded(struct Thing *p_person, struct Thing *p_attacker, ushort energy);
 void stop_being_persuaded(struct Thing *p_person);
+void init_recoil(struct Thing *p_person, short vx, short vy, short vz, ushort type);
 void unpersuade_my_peeps(struct Thing *p_owntng);
 
 StateChRes person_init_drop_item_where_standing(struct Thing *p_person, ThingIdx item);

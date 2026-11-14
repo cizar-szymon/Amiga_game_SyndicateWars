@@ -62,6 +62,7 @@
 #include "vehtraffic.h"
 #include "weapon.h"
 #include "swlog.h"
+#include "fncheck.h"
 /******************************************************************************/
 #pragma pack(1)
 
@@ -896,11 +897,72 @@ void fix_level_indexes(short missi, u32 fmtver, ubyte reload, TbBool deep)
     }
 }
 
+#ifdef SW_FNCHK
+static int map_things_unkn_func_04_asm(short subtype)
+{
+    int ret;
+    asm volatile ("call ASM_map_things_unkn_func_04\n"
+        : "=a" (ret) : "0" (subtype) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** The building (of the subtype, if not 0) nearest to the camera, among
+ * the 40x40 tiles around it (map edges excluded); 0 if none.  The old asm
+ * wrapper returned only the low byte of the thing index.
+ * Remade from map_things_unkn_func_04. */
+static int map_things_unkn_func_04_c(short subtype)
+{
+    int tile_x, tile_z, cx, cz;
+    u32 best;
+    ThingIdx found;
+
+    best = 0x7FFFFFFF;
+    found = 0;
+    cx = engn_xc >> 8;
+    cz = engn_zc >> 8;
+    for (tile_x = cx - 20; tile_x < cx + 20; tile_x++)
+    {
+        for (tile_z = cz - 20; tile_z < cz + 20; tile_z++)
+        {
+            ThingIdx thing;
+
+            if ((tile_x >= 128) || (tile_z >= 128) || (tile_x <= 0) || (tile_z <= 0))
+                continue;
+            for (thing = game_my_big_map[(tile_z << 7) + tile_x].Child; thing != 0; )
+            {
+                struct Thing *p_thing;
+                s32 dx, dz;
+                u32 dist;
+
+                if (thing < 0) {
+                    thing = sthings[thing].Next;
+                    continue;
+                }
+                p_thing = &things[thing];
+                if ((p_thing->Type == TT_BUILDING) &&
+                  (((ushort)subtype == 0) || (p_thing->SubType == (ushort)subtype)))
+                {
+                    dx = (p_thing->X >> 8) - engn_xc;
+                    dz = (p_thing->Z >> 8) - engn_zc;
+                    dist = (u32)dx * (u32)dx + (u32)dz * (u32)dz;
+                    if (dist < best) {
+                        best = dist;
+                        found = thing;
+                    }
+                }
+                thing = things[thing].Next;
+            }
+        }
+    }
+    return found;
+}
+
 int map_things_unkn_func_04(short subtype)
 {
-    ubyte ret;
-    asm volatile ("call ASM_map_things_unkn_func_04\n"
-        : "=r" (ret) : "a" (subtype));
+    int ret;
+    FNCHK_RET("map_things_unkn_func_04", ret, map_things_unkn_func_04_asm(subtype),
+      map_things_unkn_func_04_c(subtype));
     return ret;
 }
 

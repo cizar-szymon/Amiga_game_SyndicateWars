@@ -336,12 +336,40 @@ struct Thing *effective_owner_of_thing(struct Thing *p_thing)
     return p_thing;
 }
 
+#ifdef SW_FNCHK
+static ubyte on_mapwho_asm(struct Thing *p_thing)
+{
+    int ret;
+    asm volatile (
+      "call ASM_on_mapwho\n"
+        : "=a" (ret) : "0" (p_thing) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** True when the thing is in the list of things of its map tile.
+ * Remade from on_mapwho. */
+static ubyte on_mapwho_c(struct Thing *p_thing)
+{
+    ThingIdx thing;
+
+    thing = game_my_big_map[((p_thing->Z >> 16) << 7) + (p_thing->X >> 16)].Child;
+    while (thing != 0)
+    {
+        if (thing == (ushort)p_thing->ThingOffset)
+            return 1;
+        if (thing > 0)
+            thing = things[thing].Next;
+        else
+            thing = sthings[thing].Next;
+    }
+    return 0;
+}
+
 ubyte on_mapwho(struct Thing *p_thing)
 {
     ubyte ret;
-    asm volatile (
-      "call ASM_on_mapwho\n"
-        : "=r" (ret) : "a" (p_thing));
+    FNCHK_RET("on_mapwho", ret, on_mapwho_asm(p_thing), on_mapwho_c(p_thing));
     return ret;
 }
 

@@ -155,6 +155,7 @@ void should_i_get_item(struct Thing *p_person, struct SimpleThing *p_sthing);
 void build_navigate_path_to_face(struct Thing *p_thing, short face);
 int can_i_see_building(struct Thing *p_i, struct Thing *p_thing, int max_dist, ushort flags);
 void get_soul(struct Thing *p_dead, struct Thing *p_person);
+int map_things_unkn_func_04(short subtype);
 
 void set_player_peeps_to_run(struct Thing *p_leader, ushort plyr)
 {
@@ -1960,6 +1961,16 @@ static void test_cmds_process(void)
     case 67:
         if ((gameturn % 480) < 120)
             create_time_pod((p_agent->X >> 8) + 0x300, p_agent->Y >> 8, p_agent->Z >> 8, 50);
+        break;
+    case 68:
+    case 69:
+        on_mapwho(p_agent);
+        break;
+    case 72:
+        map_things_unkn_func_04(0);
+        break;
+    case 73:
+        map_things_unkn_func_04(0x20);
         break;
     case 20:
         create_crater((p_agent->X >> 16) + 2, (p_agent->Z >> 16) + 1, 20 + (gameturn % 50));

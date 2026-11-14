@@ -2805,10 +2805,44 @@ void set_xz_for_quad210(struct SingleObjectFace4 *p_face, int *x, int *z)
     set_xz_for_quad_corner(p_face, 3, 1, 2, x, z);
 }
 
-/** Remade from set_xz_for_quad_unkn03. */
+/** Sign of the side test of point (px,pz) against the edge from (ax,az) to
+ * (bx,bz), as the asm computes it (in 64 bits). */
+static int quad_edge_side(s32 ax, s32 az, s32 bx, s32 bz, s32 px, s32 pz)
+{
+    s64 v;
+
+    v = (s64)(bx - ax) * (pz - bz) - (s64)(bz - az) * (px - bx);
+    return (v > 0) - (v < 0);
+}
+
+/** A point inside the quad face near its corner 0, as set_xz_for_quad210
+ * does for corner 3; when that point is not inside the triangle of corners
+ * 0, 1, 2, the original gives corner 0 in the object's own coordinates
+ * (without the object's map position), which is kept.
+ * Remade from set_xz_for_quad_unkn03. */
 void set_xz_for_quad_unkn03(struct SingleObjectFace4 *p_face, int *x, int *z)
 {
+    struct SingleObject *p_obj;
+    struct SinglePoint *p_pt0, *p_pt1, *p_pt2;
+    s32 ax, az, bx, bz, cx, cz;
+
     set_xz_for_quad_corner(p_face, 0, 1, 2, x, z);
+    p_obj = &game_objects[p_face->Object];
+    p_pt0 = &game_object_points[(ushort)p_face->PointNo[0]];
+    p_pt1 = &game_object_points[(ushort)p_face->PointNo[1]];
+    p_pt2 = &game_object_points[(ushort)p_face->PointNo[2]];
+    ax = p_obj->MapX + p_pt0->X;
+    az = p_obj->MapZ + p_pt0->Z;
+    bx = p_obj->MapX + p_pt1->X;
+    bz = p_obj->MapZ + p_pt1->Z;
+    cx = p_obj->MapX + p_pt2->X;
+    cz = p_obj->MapZ + p_pt2->Z;
+    if ((quad_edge_side(ax, az, bx, bz, *x, *z) >= 0) &&
+      (quad_edge_side(bx, bz, cx, cz, *x, *z) >= 0) &&
+      (quad_edge_side(cx, cz, ax, az, *x, *z) >= 0))
+        return;
+    *x = p_pt0->X;
+    *z = p_pt0->Z;
 }
 
 /** Which half triangle of the quad face is the point (x,z) in.
@@ -3456,10 +3490,106 @@ ushort build_navigate_path_to_person(struct Thing *p_thing, struct Thing *p_thin
     return ret;
 }
 
-void build_navigate_path_to_face(struct Thing *p_thing, short face)
+#ifdef SW_FNCHK
+static void build_navigate_path_to_face_asm(struct Thing *p_thing, short face)
 {
     asm volatile ("call ASM_build_navigate_path_to_face\n"
-        : : "a" (p_thing), "d" (face));
+        : "+a" (p_thing), "+d" (face) : : "cc", "memory");
+}
+#endif
+
+/** Finds a path for a thing to the middle of an object face (a quad if
+ * face >= 0, a triangle -face otherwise) and gives it to the thing.  As
+ * the original, a start point on a triangle face is not scaled by 256
+ * (on a quad it is).  Remade from build_navigate_path_to_face. */
+static void build_navigate_path_to_face_c(struct Thing *p_thing, short face)
+{
+    s32 x8, z8;
+    int fx, fz;
+    short tri_beg, tri_end;
+    short on_face;
+
+    if ((p_thing->Flag & TngF_InVehicle) != 0)
+        return;
+    if (((p_thing->Flag & TngF_PlayerAgent) == 0) &&
+      ((p_thing->Flag2 & TgF2_Unkn00020000) != 0)) {
+        p_thing->Flag2 |= (TgF2_Unkn00020000 | TgF2_Unkn0040);
+        return;
+    }
+    p_thing->U.UPerson.LastDist = 32000;
+    if ((p_thing->Flag2 & TgF2_Unkn0008) == 0)
+        p_thing->U.UPerson.BumpCount = 0;
+    if (((p_thing->X >> 8) < 0) || ((p_thing->X >> 8) >= 0x8000) ||
+      ((p_thing->Z >> 8) < 0) || ((p_thing->Z >> 8) >= 0x8000)) {
+        p_thing->Flag2 |= (TgF2_Unkn00020000 | TgF2_Unkn0040);
+        return;
+    }
+    tri_beg = -1;
+    x8 = p_thing->X;
+    z8 = p_thing->Z;
+    on_face = p_thing->U.UPerson.OnFace;
+    if (on_face > 0)
+    {
+        int sx, sz;
+        struct SingleObjectFace3 *p_face3 = &game_object_faces3[on_face];
+
+        tri_beg = p_face3->UnknTringl;
+        sx = x8;
+        sz = z8;
+        set_xz_for_tri(p_face3, &sx, &sz);
+        x8 = sx;
+        z8 = sz;
+    }
+    else if (on_face < 0)
+    {
+        int sx, sz;
+        struct SingleObjectFace4 *p_face4 = &game_object_faces4[-on_face];
+
+        sx = x8;
+        sz = z8;
+        if ((p_thing->Flag & TngF_Unkn0020) != 0) {
+            tri_beg = p_face4->UnknTringl2;
+            set_xz_for_quad210(p_face4, &sx, &sz);
+        } else {
+            tri_beg = p_face4->UnknTringl1;
+            set_xz_for_quad_unkn03(p_face4, &sx, &sz);
+        }
+        x8 = sx << 8;
+        z8 = sz << 8;
+    }
+    if (face < 0) {
+        struct SingleObjectFace3 *p_face3 = &game_object_faces3[-face];
+        tri_end = p_face3->UnknTringl;
+        set_xz_for_tri(p_face3, &fx, &fz);
+    } else {
+        struct SingleObjectFace4 *p_face4 = &game_object_faces4[face];
+        tri_end = p_face4->UnknTringl1;
+        set_xz_for_quad_unkn03(p_face4, &fx, &fz);
+    }
+    nav_stats__ThisTurn++;
+    tri_path_init8(tri_beg, tri_end, &g_nav_data, x8, z8, fx << 8, fz << 8, -2);
+    if (g_nav_data.PathLength == 0)
+    {
+        g_fat_data.ax8 = x8;
+        g_fat_data.ay8 = z8;
+        g_fat_data.bx8 = fx << 8;
+        g_fat_data.by8 = fz << 8;
+        g_fat_data.WayPoints[0].x8 = fx << 8;
+        g_fat_data.WayPoints[0].y8 = fz << 8;
+        g_fat_data.PathLength = 1;
+        use_nav_data(p_thing);
+        count_fnavs(0);
+        p_thing->Flag2 |= (TgF2_Unkn00020000 | TgF2_Unkn0040);
+        return;
+    }
+    fatter_than_nothing(&g_nav_data, &g_fat_data, 0x80);
+    use_nav_data(p_thing);
+}
+
+void build_navigate_path_to_face(struct Thing *p_thing, short face)
+{
+    FNCHK_VOID("build_navigate_path_to_face", build_navigate_path_to_face_asm(p_thing, face),
+      build_navigate_path_to_face_c(p_thing, face));
 }
 
 #ifdef SW_FNCHK

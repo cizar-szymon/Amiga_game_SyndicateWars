@@ -151,6 +151,7 @@ static void thing_goto_point_asm(struct Thing *p_thing, short x, short y, short 
  */
 short get_next_player_agent(ushort player);
 void should_i_get_item(struct Thing *p_person, struct SimpleThing *p_sthing);
+void build_navigate_path_to_face(struct Thing *p_thing, short face);
 
 void set_player_peeps_to_run(struct Thing *p_leader, ushort plyr)
 {
@@ -1932,6 +1933,22 @@ static void test_cmds_process(void)
     case 65:
         get_next_player_agent(local_player_no);
         break;
+    case 50:
+    case 110:
+    {
+        struct Thing *p_bld;
+        struct SingleObject *p_obj;
+
+        p_bld = test_cmds_nearest_thing(p_agent, TT_BUILDING, true);
+        if (p_bld == NULL)
+            break;
+        p_obj = &game_objects[p_bld->U.UObject.Object];
+        if (((gameturn % 240) < 120) || (p_obj->NumbFaces == 0))
+            build_navigate_path_to_face(p_agent, p_obj->StartFace4 + (gameturn % p_obj->NumbFaces4));
+        else
+            build_navigate_path_to_face(p_agent, -(short)(p_obj->StartFace + (gameturn % p_obj->NumbFaces)));
+        break;
+    }
     case 35:
         call_protect(p_agent, local_player_no);
         count_protect(p_agent, local_player_no);

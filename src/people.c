@@ -9381,10 +9381,49 @@ void process_im_shoved(struct Thing *p_person)
     FNCHK_VOID("process_im_shoved", process_im_shoved_asm(p_person), process_im_shoved_c(p_person));
 }
 
-void try_and_kill_target(struct Thing *p_person)
+#ifdef SW_FNCHK
+static void try_and_kill_target_asm(struct Thing *p_person)
 {
     asm volatile ("call ASM_try_and_kill_target\n"
-        : : "a" (p_person));
+        : "+a" (p_person) : : "cc", "memory");
+}
+#endif
+
+/** A person fires at its target (PTarget) when it sees it within the
+ * weapon range (and its vehicle fires too); a dead or dying target is
+ * dropped.  Remade from try_and_kill_target. */
+static void try_and_kill_target_c(struct Thing *p_person)
+{
+    struct Thing *p_target;
+    ushort state;
+    int range;
+
+    if (p_person->U.UPerson.WeaponTurn != 0)
+        return;
+    p_target = p_person->PTarget;
+    state = (ushort)p_target->State;
+    if ((state == 0x0C) || (state == 0x24) || ((p_target->Flag & TngF_Destroyed) != 0)) {
+        p_person->PTarget = NULL;
+        return;
+    }
+    range = get_weapon_range(p_person);
+    if (can_i_see_thing(p_person, p_person->PTarget, range * range, 1) > 0)
+    {
+        p_person->Flag &= ~(TngF_Unkn00200000 | TngF_TriggerUse | TngF_PersSupShld);
+        p_person->Flag |= TngF_TriggerUse;
+        if ((p_person->Flag & TngF_InVehicle) != 0)
+            things[p_person->U.UPerson.Vehicle].Flag |= TngF_Unkn01000000;
+    }
+    else
+    {
+        p_person->Flag &= ~TngF_TriggerUse;
+    }
+}
+
+void try_and_kill_target(struct Thing *p_person)
+{
+    FNCHK_VOID("try_and_kill_target", try_and_kill_target_asm(p_person),
+      try_and_kill_target_c(p_person));
 }
 
 ubyte protect_person_simultaneous_fire(struct Thing *p_person, struct Thing *p_protng)
@@ -11367,10 +11406,46 @@ void person_persuade_person(struct Thing *p_person)
     }
 }
 
-void process_support_person(struct Thing *p_person)
+#ifdef SW_FNCHK
+static void process_support_person_asm(struct Thing *p_person)
 {
     asm volatile ("call ASM_process_support_person\n"
-        : : "a" (p_person));
+        : "+a" (p_person) : : "cc", "memory");
+}
+#endif
+
+/** A person supporting another (GotoThingIndex) takes its mood and its
+ * target, and attacks the target or follows the leader; when the leader
+ * dies it goes on with the leader's commands.
+ * Remade from process_support_person. */
+static void process_support_person_c(struct Thing *p_person)
+{
+    struct Thing *p_leader;
+
+    p_leader = &things[(short)p_person->GotoThingIndex];
+    if (p_person->U.UPerson.Mood != p_leader->U.UPerson.Mood)
+    {
+        p_person->U.UPerson.Mood = p_leader->U.UPerson.Mood;
+        p_person->Speed = calc_person_speed(p_person);
+    }
+    if ((p_leader->Flag & TngF_Destroyed) != 0)
+    {
+        p_person->State = PerSt_NONE;
+        p_person->U.UPerson.ComCur = p_leader->U.UPerson.ComCur;
+        return;
+    }
+    if ((p_leader->PTarget != NULL) && (p_leader->U.UPerson.WeaponTurn != 0))
+        p_person->PTarget = p_leader->PTarget;
+    if (p_person->PTarget != NULL)
+        try_and_kill_target(p_person);
+    else
+        person_goto_person_nav(p_person);
+}
+
+void process_support_person(struct Thing *p_person)
+{
+    FNCHK_VOID("process_support_person", process_support_person_asm(p_person),
+      process_support_person_c(p_person));
 }
 
 void person_use_vehicle(struct Thing *p_person)

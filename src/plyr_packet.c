@@ -1969,6 +1969,35 @@ static void test_cmds_process(void)
     case 72:
         map_things_unkn_func_04(0);
         break;
+    case 74:
+    {
+        struct Thing *p_pers;
+
+        // a nearby person starts supporting the agent
+        p_pers = NULL;
+        {
+            ThingIdx thing;
+            s32 best = 0x7FFFFFFF;
+            for (thing = things_used_head; thing > 0; thing = things[thing].LinkChild)
+            {
+                struct Thing *p_thing = &things[thing];
+                s32 d;
+                if ((p_thing->Type != TT_PERSON) ||
+                  ((p_thing->Flag & (TngF_PlayerAgent | TngF_Destroyed)) != 0))
+                    continue;
+                d = abs((p_thing->X - p_agent->X) >> 8) + abs((p_thing->Z - p_agent->Z) >> 8);
+                if (d < best) {
+                    best = d;
+                    p_pers = p_thing;
+                }
+            }
+        }
+        if (p_pers != NULL) {
+            p_pers->State = PerSt_SUPPORT_PERSON;
+            p_pers->GotoThingIndex = p_agent->ThingOffset;
+        }
+        break;
+    }
     case 73:
         map_things_unkn_func_04(0x20);
         break;

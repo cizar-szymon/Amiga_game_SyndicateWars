@@ -267,6 +267,8 @@ extern ushort people_frames[SubTT_PERS_COUNT][22];
 extern ushort word_1531DA;
 
 extern struct MyPath my_paths[1600];
+
+TbBool do_next_navigate_index(struct Thing *p_person);
 extern ushort path_count;
 extern ushort head_my_path;
 

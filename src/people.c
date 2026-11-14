@@ -5824,7 +5824,7 @@ static void person_goto_point_asm(struct Thing *p_person)
  * path returns true and the person has no path any more.
  * Remade from do_next_navigate_index.
  */
-static TbBool do_next_navigate_index(struct Thing *p_person)
+TbBool do_next_navigate_index(struct Thing *p_person)
 {
     ushort path, head;
     ubyte offs;

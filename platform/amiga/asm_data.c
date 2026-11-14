@@ -51,7 +51,7 @@ s32 * SCANNER_width; /* src\scanner.h, 4 bytes */
 short VNAV_nearnodes[5]; /* src\vehicle.c, 6 bytes */
 s32 VNAV_nodedists[5]; /* src\vehicle.c, 20 bytes */
 short VNAV_route[128]; /* src\vehicle.c, 2 bytes */
-s32 bangdetail[21]; /* src\game.c, 84 bytes */
+s32 bangdetail[21]; /* src\bmbang.c, 84 bytes */
 int bat_unknvalA_max; /* src\bat.c, 4 bytes */
 int bat_unknvalA_min; /* src\bat.c, 4 bytes */
 int bat_unknvalB_max; /* src\bat.c, 4 bytes */
@@ -65,7 +65,7 @@ ushort current_map; /* src\game.h, 2 bytes */
 ushort data_1c42fe; /* src\game.c, 2 bytes */
 ushort data_1c4300; /* src\game.c, 2 bytes */
 ushort data_1c8468; /* src\game.c, 2 bytes */
-s32 data_1c84f4[17]; /* src\vehtraffic.c, 4 bytes */
+s32 data_1c84f4[17]; /* src\vehicle.c, 4 bytes */
 s32 data_1dd91c; /* src\vehtraffic.h, 4 bytes */
 short datagram_backup[2200]; /* struct IPXDatagramBackup datagram_backup[8], src\network.c */
 s32 dword_152E38[5] = {-1, -1, -1, -1, -1};
@@ -101,9 +101,10 @@ ubyte master_glare[][2] = {0, 1, 1, 2, 3, 1, 4, 2, 6, 2, 0, 0, 8, 2, 10, 2, 12, 
 short netunkst_1E81E0[514]; /* struct TbUnknCommSt netunkst_1E81E0, src\network.c */
 char panel_objective_text[360]; /* src\hud_panel.c, 360 bytes */
 ubyte player_loggon; /* src\network.c, 3 bytes */
-short redo_scanner[256]; /* struct rectangle redo_scanner[128], src\scanner.c */
-s32 redo_scanner_first; /* src\scanner.c, 4 bytes */
-s32 redo_scanner_last; /* src\scanner.c, 4 bytes */
+u32 rand_d = 1063886995;
+ubyte redo_scanner[128][4]; /* src\building.c, 1 bytes */
+s32 redo_scanner_first; /* src\building.c, 4 bytes */
+s32 redo_scanner_last; /* src\building.c, 4 bytes */
 short route_fwd_path[1034]; /* struct Path route_fwd_path, src\pathtrig.c */
 s32 route_heap[257]; /* src\pathtrig.c, 0 bytes */
 s32 route_heap_end; /* src\pathtrig.c, 0 bytes */

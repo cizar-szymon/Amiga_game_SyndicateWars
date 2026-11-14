@@ -48,6 +48,8 @@
 #include "people.h"
 #include "sound.h"
 #include "thing.h"
+#include "lvwalk.h"
+#include "thing_onface.h"
 #include "swlog.h"
 #include "weapon.h"
 /******************************************************************************/
@@ -2732,18 +2734,6 @@ void start_crashing(struct Thing *p_vehicle)
     FNCHK_VOID("start_crashing", start_crashing_asm(p_vehicle), start_crashing_c(p_vehicle));
 }
 
-void start_landing(struct Thing *p_vehicle)
-{
-    asm volatile ("call ASM_start_landing\n"
-        : : "a" (p_vehicle));
-}
-
-void process_shuttle_pod(struct Thing *p_vehicle)
-{
-    asm volatile ("call ASM_process_shuttle_pod\n"
-        : : "a" (p_vehicle));
-}
-
 #ifdef SW_FNCHK
 static void init_vehicle_explode_asm(struct Thing *p_vehicle)
 {
@@ -2811,18 +2801,6 @@ void init_vehicle_explode(struct Thing *p_vehicle)
       init_vehicle_explode_c(p_vehicle));
 }
 
-void process_tank_stationary(struct Thing *p_vehicle)
-{
-    asm volatile ("call ASM_process_tank_stationary\n"
-        : : "a" (p_vehicle));
-}
-
-void process_tank(struct Thing *p_vehicle)
-{
-    asm volatile ("call ASM_process_tank\n"
-        : : "a" (p_vehicle));
-}
-
 #ifdef SW_FNCHK
 static void set_passengers_location_asm(struct Thing *p_vehicle)
 {
@@ -2864,12 +2842,6 @@ void set_passengers_location(struct Thing *p_vehicle)
 {
     FNCHK_VOID("set_passengers_location", set_passengers_location_asm(p_vehicle),
       set_passengers_location_c(p_vehicle));
-}
-
-void move_flying_vehicle(struct Thing *p_vehicle)
-{
-    asm volatile ("call ASM_move_flying_vehicle\n"
-        : : "a" (p_vehicle));
 }
 
 void process_tank_turret(struct Thing *p_tank)
@@ -2951,24 +2923,6 @@ void process_tank_turret(struct Thing *p_tank)
     p_turret->U.UMGun.AngleY -= dt_angle;
     p_tank->OldTarget = abs(angle);
     p_turret->U.UMGun.AngleY = (p_turret->U.UMGun.AngleY + 2*LbFPMath_PI) & LbFPMath_AngleMask;
-}
-
-void process_ship(struct Thing *p_vehicle)
-{
-    asm volatile ("call ASM_process_ship\n"
-        : : "a" (p_vehicle));
-}
-
-void process_mech_stationary(struct Thing *p_vehicle)
-{
-    asm volatile ("call ASM_process_mech_stationary\n"
-        : : "a" (p_vehicle));
-}
-
-void process_mech(struct Thing *p_vehicle)
-{
-    asm volatile ("call ASM_process_mech\n"
-        : : "a" (p_vehicle));
 }
 
 void process_mech_unknown1(struct Thing *p_vehicle)
@@ -3094,26 +3048,6 @@ int process_my_crashing_vehicle(struct Thing *p_vehicle)
     FNCHK_RET("process_my_crashing_vehicle", ret, process_my_crashing_vehicle_asm(p_vehicle),
       process_my_crashing_vehicle_c(p_vehicle));
     return ret;
-}
-
-int train_unkn_st21_exit_func_1(struct Thing *p_vehicle)
-{
-    int ret;
-    asm volatile ("call ASM_train_unkn_st21_exit_func_1\n"
-        : "=r" (ret) : "a" (p_vehicle));
-    return ret;
-}
-
-void train_unkn_st18_func_1(struct Thing *p_vehicle)
-{
-    asm volatile ("call ASM_train_unkn_st18_func_1\n"
-        : : "a" (p_vehicle));
-}
-
-void train_unkn_st18_func_2(struct Thing *p_vehicle)
-{
-    asm volatile ("call ASM_train_unkn_st18_func_2\n"
-        : : "a" (p_vehicle));
 }
 
 #ifdef SW_FNCHK
@@ -3244,18 +3178,6 @@ void move_vehicle(struct Thing *p_vehicle)
     FNCHK_VOID("move_vehicle", move_vehicle_asm(p_vehicle), move_vehicle_c(p_vehicle));
 }
 
-void train_unkn_st20_func_1(struct Thing *p_vehicle)
-{
-    asm volatile ("call ASM_train_unkn_st20_func_1\n"
-        : : "a" (p_vehicle));
-}
-
-void process_my_flying_vehicle(struct Thing *p_vehicle)
-{
-    asm volatile ("call ASM_process_my_flying_vehicle\n"
-        : : "a" (p_vehicle));
-}
-
 #ifdef SW_FNCHK
 static void process_stop_as_soon_as_you_can_asm(struct Thing *p_vehicle)
 {
@@ -3315,24 +3237,6 @@ void process_stop_as_soon_as_you_can(struct Thing *p_vehicle)
       process_stop_as_soon_as_you_can_c(p_vehicle));
 }
 
-void process_hovering_vehicle(struct Thing *p_vehicle)
-{
-    asm volatile ("call ASM_process_hovering_vehicle\n"
-        : : "a" (p_vehicle));
-}
-
-void process_my_takeoff(struct Thing *p_vehicle)
-{
-    asm volatile ("call ASM_process_my_takeoff\n"
-        : : "a" (p_vehicle));
-}
-
-void process_my_land_vehicle(struct Thing *p_vehicle)
-{
-    asm volatile ("call ASM_process_my_land_vehicle\n"
-        : : "a" (p_vehicle));
-}
-
 #ifdef SW_FNCHK
 static void set_vehicle_alt_asm(struct Thing *p_vehicle)
 {
@@ -3365,18 +3269,6 @@ static void set_vehicle_alt_c(struct Thing *p_vehicle)
 void set_vehicle_alt(struct Thing *p_vehicle)
 {
     FNCHK_VOID("set_vehicle_alt", set_vehicle_alt_asm(p_vehicle), set_vehicle_alt_c(p_vehicle));
-}
-
-void process_vehicle_goto_point_land(struct Thing *p_vehicle)
-{
-    asm volatile ("call ASM_process_vehicle_goto_point_land\n"
-        : : "a" (p_vehicle));
-}
-
-void process_vehicle_goto_point_fly(struct Thing *p_vehicle)
-{
-    asm volatile ("call ASM_process_vehicle_goto_point_fly\n"
-        : : "a" (p_vehicle));
 }
 
 #ifdef SW_FNCHK
@@ -3425,6 +3317,1842 @@ void process_parked_flyer(struct Thing *p_vehicle)
 {
     FNCHK_VOID("process_parked_flyer", process_parked_flyer_asm(p_vehicle),
       process_parked_flyer_c(p_vehicle));
+}
+
+#ifdef SW_FNCHK
+static void move_flying_vehicle_asm(struct Thing *p_vehicle)
+{
+    asm volatile ("call ASM_move_flying_vehicle\n"
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+
+static void process_my_flying_vehicle_asm(struct Thing *p_vehicle)
+{
+    asm volatile ("call ASM_process_my_flying_vehicle\n"
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+
+static void process_hovering_vehicle_asm(struct Thing *p_vehicle)
+{
+    asm volatile ("call ASM_process_hovering_vehicle\n"
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+
+static void process_my_takeoff_asm(struct Thing *p_vehicle)
+{
+    asm volatile ("call ASM_process_my_takeoff\n"
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+#endif
+
+/** Turns and banks a flyer, applies the wobble, rebuilds its matrix and
+ * moves it forward along its heading.  Remade from move_flying_vehicle.
+ */
+static void move_flying_vehicle_c(struct Thing *p_vehicle)
+{
+    struct TngUVehicle *p_veh;
+    struct M33 *p_mat;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    if ((((ushort)p_vehicle->ThingOffset + gameturn) & 3) == 0)
+        swoosh_veh(p_vehicle);
+    p_veh->AngleY = (p_veh->AngleY + (p_veh->AngleDY >> 3)) & 0x7FF;
+    if (p_vehicle->State != 0x45)
+    {
+        short d;
+
+        d = p_veh->AngleZ - p_veh->AngleDY;
+        if (d < -100)
+            p_veh->AngleZ += 100;
+        else if (d > 100)
+            p_veh->AngleZ -= 100;
+        else if (abs(d) > 50)
+            p_veh->AngleZ = p_veh->AngleDY;
+    }
+    if ((p_veh->WobbleZP != 0) || (p_veh->WobbleZV != 0))
+    {
+        s32 zp, zv;
+
+        p_veh->AngleZ += (p_veh->WobbleZP >> 16);
+        zp = p_veh->WobbleZP + p_veh->WobbleZV;
+        p_veh->WobbleZP = zp;
+        zv = p_veh->WobbleZV - (zp >> 4);
+        p_veh->WobbleZV = zv - (zv >> 6);
+    }
+    p_mat = &local_mats[p_veh->MatrixIndex];
+    rotate_obj(0, -p_veh->AngleY, -(p_veh->AngleZ >> 1), p_mat);
+    if (p_veh->AngleX != 0)
+        rotate_object_axis(p_mat, 0, p_veh->AngleX, 0);
+    p_vehicle->VX = (p_vehicle->Speed * -p_mat->R[0][2]) >> 10;
+    p_vehicle->VZ = (p_vehicle->Speed * -p_mat->R[2][2]) >> 10;
+    move_mapwho(p_vehicle, p_vehicle->X + p_vehicle->VX, p_vehicle->Y + p_vehicle->VY,
+      p_vehicle->Z + p_vehicle->VZ);
+}
+
+void move_flying_vehicle(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("move_flying_vehicle", move_flying_vehicle_asm(p_vehicle),
+      move_flying_vehicle_c(p_vehicle));
+}
+
+/** Height a flyer aims for: above the ground of its tile (unless it is
+ * over a building column or a no-ground tile), raised for every earlier
+ * flyer of subtype 0x32 within 2 tiles, so they stack.  Remade from flying_alt.
+ */
+static s32 flying_alt(struct Thing *p_vehicle)
+{
+    struct MyMapElement *p_mapel;
+    s32 alt;
+    int tile_x, tile_z, x, z;
+
+    alt = 0x32000;
+    tile_x = p_vehicle->X >> 16;
+    tile_z = p_vehicle->Z >> 16;
+    if (tile_x < 0 || tile_x >= 128 || tile_z < 0 || tile_z >= 128)
+        return alt;
+    p_mapel = &game_my_big_map[tile_z * 128 + tile_x];
+    if (((p_mapel->ColumnHead & 0xFFF) == 0) && ((p_mapel->Flags2 & 0x08) == 0))
+        alt += p_mapel->Alt << 11;
+    for (x = tile_x - 2; x != tile_x + 3; x++)
+    {
+        for (z = tile_z - 2; z != tile_z + 3; z++)
+        {
+            ThingIdx thing;
+
+            if (x <= 0 || x >= 128 || z <= 0 || z >= 128)
+                continue;
+            thing = game_my_big_map[z * 128 + x].Child;
+            while (thing != 0)
+            {
+                if (thing > 0)
+                {
+                    struct Thing *p_thing;
+
+                    p_thing = &things[thing];
+                    if ((p_thing->Type == TT_VEHICLE) && (p_thing->SubType == 0x32)
+                      && (p_thing < p_vehicle))
+                        alt += 0x1A000;
+                    thing = p_thing->Next;
+                }
+                else
+                {
+                    thing = sthings[thing].Next;
+                }
+            }
+        }
+    }
+    return alt;
+}
+
+/** Turns a flyer towards its goto point: snaps when within 15, otherwise
+ * sets the turn rate (with 10 extra).  Shared code of the takeoff and the
+ * flight; `angle` is the heading to the goal. */
+static void flyer_turn_to(struct TngUVehicle *p_veh, ushort angle)
+{
+    int d;
+
+    d = angle - p_veh->AngleY;
+    if (d > 0x400)
+        d -= 0x7FF;
+    if (d < -0x400)
+        d += 0x7FF;
+    if (abs(d) < 15)
+    {
+        p_veh->AngleDY = 0;
+        p_veh->AngleY = angle;
+        return;
+    }
+    p_veh->AngleDY = d;
+    if (d > 0)
+        p_veh->AngleDY = d + 10;
+    if (d < 0)
+        p_veh->AngleDY -= 10;
+}
+
+/** A flyer waiting in the air: bobs when near its flying height, else
+ * moves towards it.  Remade from process_hovering_vehicle. */
+static void process_hovering_vehicle_c(struct Thing *p_vehicle)
+{
+    struct TngUVehicle *p_veh;
+    s32 alt;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    p_veh->ReqdSpeed = 0;
+    p_veh->AngleDY = 0;
+    alt = flying_alt(p_vehicle);
+    if (abs(p_vehicle->Y - alt) < 0x6000)
+    {
+        ushort step;
+
+        step = p_veh->MaxSpeed;
+        p_veh->MaxSpeed = step + 1;
+        p_vehicle->Y += parked_flyer_quiver[step] << 7;
+    }
+    else
+    {
+        p_vehicle->Y += (alt - p_vehicle->Y) >> 3;
+    }
+    if (parked_flyer_quiver[p_veh->MaxSpeed] == 99)
+        p_veh->MaxSpeed -= 26;
+}
+
+void process_hovering_vehicle(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("process_hovering_vehicle", process_hovering_vehicle_asm(p_vehicle),
+      process_hovering_vehicle_c(p_vehicle));
+}
+
+/** A flyer climbing to its flying height; above half of it, it turns to
+ * the goal.  TNode holds the climb speed.  Near the height it flies on
+ * (state 0x42 after state 0x44, else 0x3A).  Remade from process_my_takeoff. */
+static void process_my_takeoff_c(struct Thing *p_vehicle)
+{
+    struct TngUVehicle *p_veh;
+    s32 alt, climb, y;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    alt = flying_alt(p_vehicle);
+    if ((alt >> 1) < p_vehicle->Y)
+    {
+        ushort angle;
+
+        angle = (ushort)arctan(p_veh->GotoX - (p_vehicle->X >> 8),
+          p_veh->GotoZ - (p_vehicle->Z >> 8));
+        flyer_turn_to(p_veh, angle);
+    }
+    climb = (alt - p_vehicle->Y) >> 3;
+    if (climb < 1000)
+        climb = 1000;
+    if (climb > 10000)
+        climb = 10000;
+    if (p_veh->TNode < climb)
+        p_veh->TNode += 1000;
+    if (p_veh->TNode > climb)
+        p_veh->TNode -= 1000;
+    y = p_vehicle->Y + p_veh->TNode;
+    p_vehicle->Y = y;
+    if (alt - y < 4000)
+    {
+        if (p_vehicle->State == 0x44)
+            p_vehicle->State = 0x42;
+        else
+            p_vehicle->State = 0x3A;
+        p_veh->AngleDY = 0;
+        return;
+    }
+    if ((alt - (alt >> 4) < y) && (p_veh->AngleDY < 15))
+        p_veh->ReqdSpeed = 1000;
+    else
+        p_veh->ReqdSpeed = 0;
+}
+
+void process_my_takeoff(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("process_my_takeoff", process_my_takeoff_asm(p_vehicle),
+      process_my_takeoff_c(p_vehicle));
+}
+
+/** Sets the goto point of a flyer to the current point of its path. */
+static void flyer_goto_path_point(struct Thing *p_vehicle)
+{
+    struct MyPath *p_path;
+    ubyte offs;
+
+    p_path = &my_paths[p_vehicle->U.UVehicle.PathIndex];
+    offs = p_vehicle->PathOffset & 3;
+    p_vehicle->U.UVehicle.GotoX = p_path->X[offs];
+    p_vehicle->U.UVehicle.GotoZ = p_path->Z[offs];
+}
+
+/** A flyer with nowhere to go picks a random point on a map edge and tries
+ * to route there (up to 32 tries).  Returns 1 when it flies off (state 0x42),
+ * 0 when it gives up (state 0x41).  Remade from continue_flying_wander. */
+static int continue_flying_wander(struct Thing *p_vehicle)
+{
+    int n;
+
+    for (n = 0; n < 32; n++)
+    {
+        ushort rnd;
+        int hi, lo, a, b, c, d;
+        s32 old_x, old_z, new_x, new_z;
+
+        rnd = LbRandomAnyShort();
+        hi = (rnd & 0x7F00) >> 8;
+        lo = rnd & 0x7F;
+        if (rnd & 0x80)
+        {
+            if (rnd & 0x8000) {
+                a = 3; b = lo; d = 0x7D;
+            } else {
+                a = 0x7D; b = lo; d = 3;
+            }
+            c = hi;
+        }
+        else
+        {
+            if (rnd & 0x8000) {
+                b = 3; c = 0x7D;
+            } else {
+                b = 0x7D; c = 3;
+            }
+            a = lo; d = hi;
+        }
+        /* The tile of the start becomes x a/z b, the route goes to d/c */
+        new_x = a << 16;
+        new_z = b << 16;
+        old_x = p_vehicle->X;
+        old_z = p_vehicle->Z;
+        p_vehicle->X = new_x;
+        p_vehicle->Z = new_z;
+        if (ariadne_initialise_route_asm(p_vehicle, d << 8, c << 8) <= 0)
+        {
+            p_vehicle->X = old_x;
+            p_vehicle->Z = old_z;
+            continue;
+        }
+        unkn_path_func_001(p_vehicle, 1);
+        p_vehicle->X = old_x;
+        p_vehicle->Z = old_z;
+        move_mapwho(p_vehicle, new_x, p_vehicle->Y, new_z);
+        flyer_goto_path_point(p_vehicle);
+        p_vehicle->State = 0x42;
+        p_vehicle->U.UVehicle.TNode = 0;
+        p_vehicle->U.UVehicle.AngleY = arctan(p_vehicle->U.UVehicle.GotoX - (p_vehicle->X >> 8),
+          p_vehicle->U.UVehicle.GotoZ - (p_vehicle->Z >> 8));
+        return 1;
+    }
+    p_vehicle->State = 0x41;
+    return 0;
+}
+
+/** A flyer following its path at flying height.  At the end of the path
+ * a flyer in state 0x42 heads for the nearest map edge and wanders
+ * (state 0x43); others hover (state 0x41).
+ * Remade from process_my_flying_vehicle. */
+static void process_my_flying_vehicle_c(struct Thing *p_vehicle)
+{
+    struct TngUVehicle *p_veh;
+    s32 alt, dx, dz;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    unkn_path_func_001(p_vehicle, 1);
+    alt = flying_alt(p_vehicle);
+    if (alt > p_vehicle->Y)
+        p_vehicle->Y += (alt - p_vehicle->Y) >> 2;
+    else
+        p_vehicle->Y += (alt - p_vehicle->Y) >> 4;
+    dx = p_veh->GotoX - (p_vehicle->X >> 8);
+    dz = p_veh->GotoZ - (p_vehicle->Z >> 8);
+    flyer_turn_to(p_veh, (ushort)arctan(dx, dz));
+
+    if ((s32)((u32)dx * (u32)dx + (u32)dz * (u32)dz) < 0x40000)
+    {
+        if (p_vehicle->State == 0x43)
+        {
+            continue_flying_wander(p_vehicle);
+        }
+        else if (do_next_navigate_index(p_vehicle))
+        {
+            if (p_vehicle->State == 0x42)
+            {
+                s32 x, z, ex, ez, mx, mz, m;
+
+                x = p_vehicle->X;
+                z = p_vehicle->Z;
+                ex = 0x800000 - x;
+                ez = 0x800000 - z;
+                mx = (x < ex) ? x : ex;
+                mz = (z < ez) ? z : ez;
+                m = (mx < mz) ? mx : mz;
+                if (x == m)
+                    p_veh->GotoX = 1;
+                else if (ex == m)
+                    p_veh->GotoX = 0x7E00;
+                else if (z == m)
+                    p_veh->GotoZ = 1;
+                else
+                    p_veh->GotoZ = 0x7E00;
+                p_vehicle->State = 0x43;
+            }
+            else
+            {
+                p_veh->PathIndex = 0;
+                p_vehicle->State = 0x41;
+                p_veh->TNode = 0;
+                p_veh->ReqdSpeed = 0;
+                p_veh->AngleDY = 0;
+                p_veh->MaxSpeed = 0;
+            }
+        }
+        else
+        {
+            flyer_goto_path_point(p_vehicle);
+        }
+    }
+    p_veh->ReqdSpeed = 2000 - abs(p_veh->AngleDY << 2);
+}
+
+void process_my_flying_vehicle(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("process_my_flying_vehicle", process_my_flying_vehicle_asm(p_vehicle),
+      process_my_flying_vehicle_c(p_vehicle));
+}
+
+#ifdef SW_FNCHK
+static void start_landing_asm(struct Thing *p_vehicle)
+{
+    asm volatile ("call ASM_start_landing\n"
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+
+static void process_my_land_vehicle_asm(struct Thing *p_vehicle)
+{
+    asm volatile ("call ASM_process_my_land_vehicle\n"
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+
+static void process_vehicle_goto_point_fly_asm(struct Thing *p_vehicle)
+{
+    asm volatile ("call ASM_process_vehicle_goto_point_fly\n"
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+#endif
+
+/** A flyer told to land starts landing (state 0x3B) if the place below
+ * is good for it.  Remade from start_landing. */
+static void start_landing_c(struct Thing *p_vehicle)
+{
+    if (p_vehicle->State == 0x3B)
+        return;
+    if (!is_this_a_nice_place_for_a_picnic(p_vehicle->X, p_vehicle->Z))
+        return;
+    p_vehicle->U.UVehicle.PathIndex = 0;
+    p_vehicle->State = 0x3B;
+    p_vehicle->U.UVehicle.TNode = 0;
+}
+
+void start_landing(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("start_landing", start_landing_asm(p_vehicle), start_landing_c(p_vehicle));
+}
+
+/** A landing flyer sinks towards the ground (TNode holds the sink speed),
+ * stops turning, and parks (state 0x21) when it touches down.
+ * Remade from process_my_land_vehicle. */
+static void process_my_land_vehicle_c(struct Thing *p_vehicle)
+{
+    struct TngUVehicle *p_veh;
+    s32 ground, sink;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    p_veh->ReqdSpeed = 0;
+    ground = alt_at_point((short)(p_vehicle->X >> 8), (short)(p_vehicle->Z >> 8)) * 8 + 0x5DC0;
+    sink = (ground - p_vehicle->Y) >> 3;
+    if (sink > -500)
+        sink = -500;
+    if (sink < -10000)
+        sink = -10000;
+    if (p_veh->TNode < sink)
+        p_veh->TNode += 1500;
+    if (p_veh->TNode > sink)
+        p_veh->TNode -= 1500;
+    p_vehicle->Y += p_veh->TNode;
+    p_veh->AngleDY = p_veh->AngleDY - (p_veh->AngleDY >> 3);
+    if (abs(p_veh->AngleDY) < 8)
+        p_veh->AngleDY = 0;
+    if (ground > p_vehicle->Y)
+    {
+        p_vehicle->State = 0x21;
+        p_veh->MaxSpeed = 0;
+    }
+}
+
+void process_my_land_vehicle(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("process_my_land_vehicle", process_my_land_vehicle_asm(p_vehicle),
+      process_my_land_vehicle_c(p_vehicle));
+}
+
+/** Looks 5 steps ahead along the flyer's velocity for the highest ground
+ * and pitches the flyer (AngleX, limited to +-0x8C) to clear it.
+ * Returns the highest ground, 0 when the flyer does not move.
+ * Remade from scan_max_height_ahead. */
+static s32 scan_max_height_ahead(struct Thing *p_vehicle)
+{
+    struct TngUVehicle *p_veh;
+    s32 len, step_x, step_z, pos_x, pos_z, max_alt, dy;
+    ushort i, best;
+    short angle;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    max_alt = -100000;
+    len = LbSqrL((u32)p_vehicle->VX * (u32)p_vehicle->VX + (u32)p_vehicle->VZ * (u32)p_vehicle->VZ);
+    if (len == 0)
+        return 0;
+    step_x = (p_vehicle->VX << 8) / len;
+    step_z = (p_vehicle->VZ << 8) / len;
+    pos_x = p_vehicle->X >> 8;
+    pos_z = p_vehicle->Z >> 8;
+    best = 0;
+    for (i = 0; i < 5; i++)
+    {
+        s32 alt;
+
+        alt = alt_at_point((short)pos_x, (short)pos_z);
+        if (alt >= max_alt)
+        {
+            max_alt = alt;
+            best = i;
+        }
+        pos_x += step_x;
+        pos_z += step_z;
+    }
+    dy = (max_alt * 8 + 0x19000 - p_vehicle->Y) >> 3;
+    angle = arctan((s32)((u32)dy * (u32)dy), ((s32)best * best) << 16) - 0x400;
+    if (angle > 0xA0)
+        angle = 0xA0;
+    else if (angle < -0xA0)
+        angle = -0xA0;
+    if (dy < 0)
+        p_veh->AngleX = p_veh->AngleX - (angle >> 1);
+    else
+        p_veh->AngleX = p_veh->AngleX + (angle >> 1);
+    if (p_veh->AngleX > 0x8C)
+        p_veh->AngleX = 0x8C;
+    else if (p_veh->AngleX < -0x8C)
+        p_veh->AngleX = -0x8C;
+    return max_alt;
+}
+
+/** A flyer flying to a point: keeps clear of the ground ahead, carries
+ * its passengers, slows down near the point and turns towards it.
+ * Remade from process_vehicle_goto_point_fly. */
+static void process_vehicle_goto_point_fly_c(struct Thing *p_vehicle)
+{
+    struct TngUVehicle *p_veh;
+    s32 dx, dz, dist2;
+    short diff;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    scan_max_height_ahead(p_vehicle);
+    set_passengers_location(p_vehicle);
+    dx = p_veh->GotoX - (p_vehicle->X >> 8);
+    dz = p_veh->GotoZ - (p_vehicle->Z >> 8);
+    dist2 = (s32)((u32)dx * (u32)dx + (u32)dz * (u32)dz);
+    if (dist2 < 0x8000)
+        p_vehicle->SubState = 7;
+    diff = p_veh->AngleY - arctan(dx, dz);
+    if (diff < -0x400)
+        diff += 0x800;
+    else if (diff > 0x400)
+        diff -= 0x800;
+    if (dist2 > 0x400000)
+        p_veh->ReqdSpeed = 0x5E8;
+    else if (dist2 > 0x100000)
+        p_veh->ReqdSpeed = 0x400;
+    else
+        p_veh->ReqdSpeed = 0x200;
+    if (diff < 0)
+    {
+        if (diff > -50)
+            p_veh->AngleDY = -diff * 2;
+        else
+            p_veh->AngleDY = 0x200;
+    }
+    else if (diff > 0)
+    {
+        if (diff < 50)
+            p_veh->AngleDY = -(diff * 2);
+        else
+            p_veh->AngleDY = -0x200;
+    }
+}
+
+void process_vehicle_goto_point_fly(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("process_vehicle_goto_point_fly", process_vehicle_goto_point_fly_asm(p_vehicle),
+      process_vehicle_goto_point_fly_c(p_vehicle));
+}
+
+#ifdef SW_FNCHK
+static void process_vehicle_goto_point_land_asm(struct Thing *p_vehicle)
+{
+    asm volatile ("call ASM_process_vehicle_goto_point_land\n"
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+#endif
+
+/** A flyer coming down on a point: carries its passengers, sinks until
+ * it reaches the ground (state 0x21) and levels its pitch.
+ * Remade from process_vehicle_goto_point_land. */
+static void process_vehicle_goto_point_land_c(struct Thing *p_vehicle)
+{
+    struct TngUVehicle *p_veh;
+    s32 ground;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    set_passengers_location(p_vehicle);
+    ground = alt_at_point((short)(p_vehicle->X >> 8), (short)(p_vehicle->Z >> 8)) << 3;
+    if (ground < p_vehicle->Y)
+    {
+        p_vehicle->Speed = 0;
+        p_vehicle->Y -= 0x800;
+    }
+    else
+    {
+        p_vehicle->State = 0x21;
+    }
+    if (p_veh->AngleX > 20)
+        p_veh->AngleX -= 20;
+    else if (p_veh->AngleX < -20)
+        p_veh->AngleX += 20;
+}
+
+void process_vehicle_goto_point_land(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("process_vehicle_goto_point_land", process_vehicle_goto_point_land_asm(p_vehicle),
+      process_vehicle_goto_point_land_c(p_vehicle));
+}
+
+#ifdef SW_FNCHK
+static void process_tank_stationary_asm(struct Thing *p_vehicle)
+{
+    asm volatile ("call ASM_process_tank_stationary\n"
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+#endif
+
+/** True for statics a tank crushes (and sets on fire) when running over them.
+ * Remade from can_the_tank_run_over. */
+static TbBool can_the_tank_run_over(struct SimpleThing *p_sthing)
+{
+    ushort frame;
+
+    frame = p_sthing->StartFrame;
+    if ((frame > 0x400) && (frame < 0x405))
+        return true;
+    if ((frame > 0x3EC) && (frame < 0x3F0))
+        return true;
+    switch (frame)
+    {
+    case 0x3E7: case 0x3E9: case 0x3EA: case 0x3EC: case 0x3F0:
+    case 0x406: case 0x408: case 0x40A: case 0x40B: case 0x40D:
+    case 0x40E: case 0x417: case 0x419: case 0x41A:
+        return true;
+    }
+    return false;
+}
+
+/** A parked or landed car (subtype 0x28) run over by a tank is squashed:
+ * its model points and its height shrink by 1/16.
+ * Remade from flatten_vehicle. */
+static void flatten_vehicle(struct Thing *p_vehicle)
+{
+    struct SingleObject *p_obj;
+    ushort pt;
+
+    if (p_vehicle->SubType != 0x28)
+        return;
+    if ((p_vehicle->State != 0x21) && (p_vehicle->State != 0x3D))
+        return;
+    p_obj = &game_objects[p_vehicle->U.UVehicle.Object];
+    for (pt = p_obj->StartPoint; pt <= p_obj->EndPoint; pt++)
+    {
+        struct SinglePoint *p_pt;
+
+        p_pt = &game_object_points[pt];
+        p_pt->Y = p_pt->Y - (p_pt->Y >> 4);
+    }
+    if (p_vehicle->Y > 0)
+        p_vehicle->Y -= p_vehicle->Y >> 4;
+}
+
+/** Distance estimate used by the tank: the larger axis plus half the smaller. */
+static s32 tank_dist(s32 dx, s32 dz)
+{
+    dx = abs(dx);
+    dz = abs(dz);
+    if (dx > dz)
+        dz >>= 1;
+    else
+        dx >>= 1;
+    return dx + dz;
+}
+
+/** A tank rams the vehicles near its front and back: both are damaged
+ * (another tank, subtype 0x33, just stops it), crushed cars are flattened,
+ * and statics it can run over catch fire.  Remade from check_tank_collision. */
+static void check_tank_collision(struct Thing *p_tank)
+{
+    struct M33 *p_mat;
+    s32 ax, az, front_x, front_z, back_x, back_z;
+    int tile_x, tile_z, x, z;
+
+    p_mat = &local_mats[p_tank->U.UVehicle.MatrixIndex];
+    ax = (-p_mat->R[0][2]) << 2;
+    az = (-p_mat->R[2][2]) << 2;
+    front_x = p_tank->X + ax + (ax >> 4);
+    back_x = p_tank->X - ax + (ax >> 4);
+    front_z = p_tank->Z + az + (az >> 4);
+    back_z = p_tank->Z - az + (az >> 4);
+    tile_x = p_tank->X >> 16;
+    tile_z = p_tank->Z >> 16;
+    for (x = tile_x - 3; x != tile_x + 4; x++)
+    {
+        if (x < 0 || x > 127)
+            continue;
+        for (z = tile_z - 3; z != tile_z + 4; z++)
+        {
+            ThingIdx thing;
+
+            if (z < 0 || z > 127)
+                continue;
+            thing = game_my_big_map[z * 128 + x].Child;
+            while (thing != 0)
+            {
+                if (thing > 0)
+                {
+                    struct Thing *p_thing;
+                    s32 d_front, d_back, range;
+
+                    p_thing = &things[thing];
+                    thing = p_thing->Next;
+                    if ((p_thing->Type != TT_VEHICLE) || (p_thing == p_tank))
+                        continue;
+                    if (abs(p_tank->Y - p_thing->Y) >= 0x1000)
+                        continue;
+                    d_front = tank_dist(p_thing->X - front_x, p_thing->Z - front_z);
+                    d_back = tank_dist(p_thing->X - back_x, p_thing->Z - back_z);
+                    range = ((ushort)p_thing->Radius << 8) + 0x13800;
+                    if ((d_front >= range) && (d_back >= range))
+                        continue;
+                    if (p_thing->SubType == 0x33)
+                    {
+                        struct Thing *p_pasngr;
+
+                        p_pasngr = &things[(ushort)p_tank->U.UVehicle.PassengerHead];
+                        if ((p_pasngr->Flag & 0x2000) != 0)
+                            p_tank->U.UVehicle.ReqdSpeed = 0;
+                        else if (p_tank < p_thing)
+                            p_tank->U.UVehicle.ReqdSpeed = 0;
+                        continue;
+                    }
+                    p_thing->Health = p_thing->Health - (p_thing->Health >> 2) - 16;
+                    p_thing->U.UVehicle.RecoilTimer = 5;
+                    if (p_thing->Health <= 0)
+                    {
+                        init_vehicle_explode(p_thing);
+                        p_thing->Flag |= 0x0002;
+                    }
+                    p_tank->Health--;
+                    p_tank->U.UVehicle.RecoilTimer = 5;
+                    if (p_tank->Health <= 0)
+                    {
+                        start_crashing(p_tank);
+                        p_tank->Flag |= 0x0002;
+                    }
+                    flatten_vehicle(p_thing);
+                }
+                else
+                {
+                    struct SimpleThing *p_sthing;
+                    s32 d_front, d_back, adx, adz, range;
+
+                    p_sthing = &sthings[thing];
+                    thing = p_sthing->Next;
+                    if ((p_sthing->Flag & 0x0200) != 0)
+                        continue;
+                    d_front = tank_dist(p_sthing->X - front_x, p_sthing->Z - front_z);
+                    adx = abs(p_sthing->X - back_x);
+                    adz = abs(p_sthing->Z - back_z);
+                    d_back = tank_dist(adx, adz);
+                    range = ((ushort)p_sthing->Radius << 8) + 0x13800;
+                    if ((range <= d_front) && (d_back >= range))
+                        continue;
+                    if ((adx == 2) || (adz == 2))
+                        continue;
+                    if (can_the_tank_run_over(p_sthing))
+                        set_static_on_fire(p_sthing);
+                }
+            }
+        }
+    }
+}
+
+/** Every 8 turns: starts the engine loop of a manned tank, stops it
+ * when the tank is empty. */
+static void tank_engine_sound(struct Thing *p_vehicle)
+{
+    if ((gameturn & 7) != 0)
+        return;
+    if (!IsSamplePlaying((ushort)p_vehicle->ThingOffset, 0x31, 0))
+    {
+        if (p_vehicle->U.UVehicle.PassengerHead != 0)
+            play_dist_sample(p_vehicle, 0x31, 0x7F, 0x40, 100, -1, 1);
+    }
+    else if (p_vehicle->U.UVehicle.PassengerHead == 0)
+    {
+        stop_sample_using_heap((ushort)p_vehicle->ThingOffset, 0x31);
+    }
+}
+
+/** A tank standing still: turns its turret, plays its engine sound while
+ * manned, rams what is near, and blows up on bad ground.
+ * Remade from process_tank_stationary. */
+static void process_tank_stationary_c(struct Thing *p_vehicle)
+{
+    struct Thing *p_turret;
+    struct MyMapElement *p_mapel;
+
+    p_turret = &things[p_vehicle->U.UVehicle.SubThing];
+    rotate_obj(0, p_turret->U.UVehicle.AngleY, 0, &local_mats[p_turret->U.UVehicle.MatrixIndex]);
+    tank_engine_sound(p_vehicle);
+    check_tank_collision(p_vehicle);
+    p_mapel = &game_my_big_map[(p_vehicle->Z >> 16) * 128 + (p_vehicle->X >> 16)];
+    if (((p_mapel->Flags2 & 0x05) != 0) && ((p_mapel->Flags2 & 0x08) == 0))
+        init_vehicle_explode(p_vehicle);
+}
+
+void process_tank_stationary(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("process_tank_stationary", process_tank_stationary_asm(p_vehicle),
+      process_tank_stationary_c(p_vehicle));
+}
+
+#ifdef SW_FNCHK
+static void process_tank_asm(struct Thing *p_vehicle)
+{
+    asm volatile ("call ASM_process_tank\n"
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+#endif
+
+/** True when tile flags make a tank blow up (water-like, not bridged). */
+static TbBool tank_bad_tile(s32 x, s32 z)
+{
+    ubyte flags;
+
+    flags = game_my_big_map[(z >> 16) * 128 + (x >> 16)].Flags2;
+    return ((flags & 0x05) != 0) && ((flags & 0x08) == 0);
+}
+
+/** A tank or mech eases to 0xDAC above the ground, unless the tile has
+ * no ground. */
+static void walker_follow_ground(struct Thing *p_vehicle)
+{
+    s32 ground;
+
+    if ((game_my_big_map[(p_vehicle->Z >> 16) * 128 + (p_vehicle->X >> 16)].Flags2 & 0x08) != 0)
+        return;
+    ground = alt_at_point((short)(p_vehicle->X >> 8), (short)(p_vehicle->Z >> 8)) + 0xDAC;
+    if (ground > p_vehicle->Y)
+        p_vehicle->Y += ((ground - p_vehicle->Y) >> 4) + 0x40;
+    if (ground < p_vehicle->Y)
+        p_vehicle->Y -= ((p_vehicle->Y - ground) >> 4) + 0x40;
+}
+
+/** A driving tank: follows the ground, turns towards its path point
+ * (slower when turning), stops at the end of the path (state 0x33, then
+ * parked 0x21), rams what is near and drives on unless the next tile is bad.
+ * Remade from process_tank. */
+static void process_tank_c(struct Thing *p_vehicle)
+{
+    struct TngUVehicle *p_veh;
+    struct Thing *p_turret;
+    struct M33 *p_mat;
+    s32 dx, dz, dist2, nx, ny, nz;
+    int d;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    tank_engine_sound(p_vehicle);
+    walker_follow_ground(p_vehicle);
+    dx = p_veh->GotoX - (p_vehicle->X >> 8);
+    dz = p_veh->GotoZ - (p_vehicle->Z >> 8);
+    d = (ushort)arctan(dx, dz) - p_veh->AngleY;
+    if (d > 0x400)
+        d -= 0x7FF;
+    if (d < -0x400)
+        d += 0x7FF;
+    p_veh->AngleDY = d >> 1;
+    if (p_veh->AngleDY > 300)
+        p_veh->AngleDY = 300;
+    else if (p_veh->AngleDY < -300)
+        p_veh->AngleDY = -300;
+    dist2 = (s32)((u32)dx * (u32)dx + (u32)dz * (u32)dz);
+    p_veh->ReqdSpeed = 500 - 2 * abs(p_veh->AngleDY) - abs(p_veh->AngleDY);
+    if (p_vehicle->State == 0x33)
+    {
+        p_veh->ReqdSpeed = 0;
+        if (p_veh->AngleDY > 0)
+            p_veh->AngleDY -= 8;
+        if (p_veh->AngleDY < 0)
+            p_veh->AngleDY += 8;
+        if (p_veh->AngleDY <= 8)
+            p_veh->AngleDY = 0;
+        if (p_vehicle->Speed == 0)
+            p_vehicle->State = 0x21;
+    }
+    else if (dist2 < 0x30000)
+    {
+        if (do_next_navigate_index(p_vehicle))
+        {
+            p_veh->PathIndex = 0;
+            p_vehicle->State = 0x33;
+        }
+        else
+        {
+            flyer_goto_path_point(p_vehicle);
+        }
+    }
+    check_tank_collision(p_vehicle);
+    if (p_vehicle->Speed < p_veh->ReqdSpeed)
+        p_vehicle->Speed += 12;
+    if (p_vehicle->Speed > p_veh->ReqdSpeed)
+        p_vehicle->Speed -= 0x26;
+    p_veh->AngleY = (p_veh->AngleY + (p_veh->AngleDY >> 3)) & 0x7FF;
+    p_mat = &local_mats[p_veh->MatrixIndex];
+    p_turret = &things[p_veh->SubThing];
+    rotate_obj(0, p_turret->U.UVehicle.AngleY, 0, &local_mats[p_turret->U.UVehicle.MatrixIndex]);
+    rotate_obj(0, -p_veh->AngleY, 0, p_mat);
+    p_vehicle->VX = (-p_mat->R[0][2] * p_vehicle->Speed) >> 10;
+    p_vehicle->VY = (-p_mat->R[1][2] * p_vehicle->Speed) >> 10;
+    p_vehicle->VZ = (-p_mat->R[2][2] * p_vehicle->Speed) >> 10;
+    nx = p_vehicle->X + p_vehicle->VX;
+    ny = p_vehicle->Y + p_vehicle->VY;
+    nz = p_vehicle->Z + p_vehicle->VZ;
+    if (tank_bad_tile(p_vehicle->X, p_vehicle->Z))
+    {
+        init_vehicle_explode(p_vehicle);
+        return;
+    }
+    if (tank_bad_tile(nx, nz))
+        return;
+    move_mapwho(p_vehicle, nx, ny, nz);
+}
+
+void process_tank(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("process_tank", process_tank_asm(p_vehicle), process_tank_c(p_vehicle));
+}
+
+#ifdef SW_FNCHK
+static void process_shuttle_pod_asm(struct Thing *p_vehicle)
+{
+    asm volatile ("call ASM_process_shuttle_pod\n"
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+#endif
+
+/** Sets the draw mode of all faces of a model; mode 5 also sets fixed
+ * shades 0x80/0x3F on its quads, others 0x20.  Remade from set_object_flag. */
+static void set_object_flag(ushort object, ushort flag)
+{
+    struct SingleObject *p_obj;
+    ushort face, end;
+
+    p_obj = &game_objects[object];
+    end = p_obj->StartFace + p_obj->NumbFaces;
+    for (face = p_obj->StartFace; face < end; face++)
+        game_object_faces3[face].Flags = flag;
+    end = p_obj->StartFace4 + p_obj->NumbFaces4;
+    for (face = p_obj->StartFace4; face < end; face++)
+    {
+        struct SingleObjectFace4 *p_face4;
+
+        p_face4 = &game_object_faces4[face];
+        p_face4->Flags = flag;
+        if (flag == 5)
+        {
+            p_face4->Shade0 = 0x80;
+            p_face4->Shade1 = 0x80;
+            p_face4->Shade2 = 0x3F;
+            p_face4->Shade3 = 0x3F;
+        }
+        else
+        {
+            p_face4->Shade0 = 0x20;
+            p_face4->Shade1 = 0x20;
+            p_face4->Shade2 = 0x20;
+            p_face4->Shade3 = 0x20;
+        }
+    }
+}
+
+/** Lets out the next passenger of an arrived pod at its exit tile.
+ * Returns 1 when the pod is empty.  Remade from exit_pod. */
+static int exit_pod(struct Thing *p_pod)
+{
+    struct Thing *p_person;
+    short pasngr;
+
+    pasngr = p_pod->U.UVehicle.PassengerHead;
+    if (pasngr == 0)
+    {
+        stop_sample_using_heap((ushort)p_pod->ThingOffset, 9);
+        return 1;
+    }
+    if (pasngr < 0)
+        return 1;
+    p_person = &things[pasngr];
+    p_person->X = (p_pod->VX << 16) + 0x8000;
+    p_person->Z = (p_pod->VZ << 16) + 0x8000;
+    p_person->Y = alt_at_point((short)(p_person->X >> 8), (short)(p_person->Z >> 8));
+    p_person->Flag = (p_person->Flag & 0xFFFFBFEB) | 0x14;
+    p_pod->U.UVehicle.PassengerHead = p_person->Next;
+    add_node_thing((ushort)p_person->ThingOffset);
+    return 0;
+}
+
+/** A shuttle pod rides with its carrier (TNode, lit while it rides) until
+ * the carrier ends its path; then TNode is negated and the pod unloads,
+ * and when empty it is removed.  Remade from process_shuttle_pod. */
+static void process_shuttle_pod_c(struct Thing *p_vehicle)
+{
+    struct Thing *p_carrier;
+    short tnode;
+
+    tnode = p_vehicle->U.UVehicle.TNode;
+    if (tnode < 0)
+    {
+        if (exit_pod(p_vehicle) != 0)
+        {
+            set_object_flag(things[(ushort)-tnode].U.UVehicle.Object, 0x15);
+            remove_thing(p_vehicle->ThingOffset);
+        }
+        return;
+    }
+    p_carrier = &things[tnode];
+    set_object_flag(things[(ushort)tnode].U.UVehicle.Object, 5);
+    if (p_carrier->U.UVehicle.UniqueID != 0)
+        set_object_flag(things[p_carrier->U.UVehicle.UniqueID].U.UVehicle.Object, 0x15);
+    p_vehicle->X = p_carrier->X;
+    p_vehicle->Y = p_carrier->Y;
+    p_vehicle->Z = p_carrier->Z;
+    if (p_carrier->U.UVehicle.PathIndex == 0)
+    {
+        p_vehicle->U.UVehicle.TNode = -p_vehicle->U.UVehicle.TNode;
+        p_vehicle->VX = p_carrier->VX;
+        p_vehicle->VZ = p_carrier->VZ;
+        return;
+    }
+    p_vehicle->U.UVehicle.TNode = p_carrier->U.UVehicle.PathIndex;
+}
+
+void process_shuttle_pod(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("process_shuttle_pod", process_shuttle_pod_asm(p_vehicle),
+      process_shuttle_pod_c(p_vehicle));
+}
+
+#ifdef SW_FNCHK
+static void process_mech_stationary_asm(struct Thing *p_vehicle)
+{
+    asm volatile ("call ASM_process_mech_stationary\n"
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+#endif
+
+/** Turn rate of a mech towards a point: the angle difference (kept also
+ * in OldTarget as its absolute value), wrapped and limited to +-0x186. */
+static void mech_turn_to(struct Thing *p_vehicle, s32 x, s32 z)
+{
+    int d;
+
+    d = (ushort)arctan(x - (p_vehicle->X >> 8), z - (p_vehicle->Z >> 8))
+      - p_vehicle->U.UVehicle.AngleY;
+    p_vehicle->OldTarget = abs(d);
+    if (d > 0x400)
+        d -= 0x7FF;
+    if (d < -0x400)
+        d += 0x7FF;
+    if (d > 0x186)
+        d = 0x186;
+    if (d < -0x186)
+        d = -0x186;
+    p_vehicle->U.UVehicle.AngleDY = d;
+}
+
+/** A standing mech turns towards its target thing or target point, else
+ * its turning slows down.  Remade from process_mech_stationary. */
+static void process_mech_stationary_c(struct Thing *p_vehicle)
+{
+    struct TngUVehicle *p_veh;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    if (p_vehicle->PTarget != NULL)
+    {
+        mech_turn_to(p_vehicle, p_vehicle->PTarget->X >> 8, p_vehicle->PTarget->Z >> 8);
+    }
+    else if ((p_vehicle->Flag & 0x20000000) != 0)
+    {
+        mech_turn_to(p_vehicle, p_veh->TargetDX, p_veh->TargetDZ);
+    }
+    else
+    {
+        p_veh->AngleDY = p_veh->AngleDY - (p_veh->AngleDY >> 4);
+        if (abs(p_veh->AngleDY) < 16)
+            p_veh->AngleDY = 0;
+    }
+    p_veh->AngleY = (p_veh->AngleY + (p_veh->AngleDY >> 2)) & 0x7FF;
+    rotate_obj(0, -p_veh->AngleY, 0, &local_mats[p_veh->MatrixIndex]);
+}
+
+void process_mech_stationary(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("process_mech_stationary", process_mech_stationary_asm(p_vehicle),
+      process_mech_stationary_c(p_vehicle));
+}
+
+#ifdef SW_FNCHK
+static void process_mech_asm(struct Thing *p_vehicle)
+{
+    asm volatile ("call ASM_process_mech\n"
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+#endif
+
+/** A walking mech: stomps (sound), follows the ground, walks along its
+ * path; at the end (state 0x33) it turns to its target and stops, then
+ * stands (state 0x21).  Remade from process_mech. */
+static void process_mech_c(struct Thing *p_vehicle)
+{
+    struct TngUVehicle *p_veh;
+    struct M33 *p_mat;
+    s32 cx, cz, tx, tz, dx, dz, dist2;
+    int d;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    if ((((ushort)p_vehicle->ThingOffset + gameturn) & 0x7F) == 0)
+        play_dist_sample(p_vehicle, 0x63, 0x7F, 0x40, 100, 0, 3);
+    walker_follow_ground(p_vehicle);
+    cx = p_vehicle->X >> 8;
+    cz = p_vehicle->Z >> 8;
+    if ((p_vehicle->State == 0x33) &&
+      ((p_vehicle->PTarget != NULL) || ((p_vehicle->Flag & 0x20000000) != 0)))
+    {
+        if (p_vehicle->PTarget != NULL) {
+            tx = p_vehicle->PTarget->X >> 8;
+            tz = p_vehicle->PTarget->Z >> 8;
+        } else {
+            tx = p_veh->TargetDX;
+            tz = p_veh->TargetDZ;
+        }
+    }
+    else
+    {
+        tx = p_veh->GotoX;
+        tz = p_veh->GotoZ;
+    }
+    dx = tx - cx;
+    dz = tz - cz;
+    d = (ushort)arctan(dx, dz) - p_veh->AngleY;
+    if (d > 0x400)
+        d -= 0x7FF;
+    if (d < -0x400)
+        d += 0x7FF;
+    if (d > 0x186)
+        d = 0x186;
+    if (d < -0x186)
+        d = -0x186;
+    p_veh->AngleDY = d;
+    p_veh->ReqdSpeed = 900 - 2 * abs(p_veh->AngleDY);
+    dist2 = (s32)((u32)dx * (u32)dx + (u32)dz * (u32)dz);
+    if (p_vehicle->State == 0x33)
+    {
+        p_veh->ReqdSpeed = 0;
+        if (abs(p_vehicle->Speed) < 50)
+        {
+            p_vehicle->State = 0x21;
+            p_vehicle->Speed = 0;
+        }
+    }
+    else if (dist2 < 0x30000)
+    {
+        if (do_next_navigate_index(p_vehicle))
+        {
+            p_veh->PathIndex = 0;
+            p_vehicle->State = 0x33;
+        }
+        else
+        {
+            flyer_goto_path_point(p_vehicle);
+        }
+    }
+    if (p_vehicle->Speed < p_veh->ReqdSpeed)
+        p_vehicle->Speed += 0x30;
+    if (p_vehicle->Speed > p_veh->ReqdSpeed)
+        p_vehicle->Speed -= 0x30;
+    p_veh->AngleY = (p_veh->AngleY + (p_veh->AngleDY >> 3)) & 0x7FF;
+    p_mat = &local_mats[p_veh->MatrixIndex];
+    rotate_obj(0, -p_veh->AngleY, 0, p_mat);
+    p_vehicle->VX = (-p_mat->R[0][2] * p_vehicle->Speed) >> 10;
+    p_vehicle->VY = (-p_mat->R[1][2] * p_vehicle->Speed) >> 10;
+    p_vehicle->VZ = (-p_mat->R[2][2] * p_vehicle->Speed) >> 10;
+    move_mapwho(p_vehicle, p_vehicle->X + p_vehicle->VX, p_vehicle->Y + p_vehicle->VY,
+      p_vehicle->Z + p_vehicle->VZ);
+}
+
+void process_mech(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("process_mech", process_mech_asm(p_vehicle), process_mech_c(p_vehicle));
+}
+
+#ifdef SW_FNCHK
+static void train_unkn_st18_func_1_asm(struct Thing *p_vehicle)
+{
+    asm volatile ("call ASM_train_unkn_st18_func_1\n"
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+
+static void train_unkn_st18_func_2_asm(struct Thing *p_vehicle)
+{
+    asm volatile ("call ASM_train_unkn_st18_func_2\n"
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+#endif
+
+/** Keeps a train wagon at its distance from the wagon `other`: speeds up
+ * by `delta` when too far, slows down when too close.
+ * Remade from thing_unkn_change_speed. */
+static void thing_unkn_change_speed(struct Thing *p_vehicle, ushort other, short delta)
+{
+    struct Thing *p_other;
+    s32 r1, r2, dist, dx, dz, d2;
+
+    p_other = &things[other];
+    r1 = ((ushort)p_vehicle->Radius * 386) >> 8;
+    r2 = ((ushort)p_other->Radius * 386) >> 8;
+    dist = r1 + r2 + 0x40;
+    dist = dist * dist;
+    dx = (p_vehicle->X - p_other->X) >> 8;
+    dz = (p_vehicle->Z - p_other->Z) >> 8;
+    d2 = dx * dx + dz * dz;
+    if (d2 > dist + 0x100)
+        p_vehicle->Speed += delta;
+    else if (d2 < dist - 0x100)
+        p_vehicle->Speed -= delta;
+}
+
+/** The station 4 links on from `station` along the station list (NextThing or PrevThing). */
+static short train_station_hop4(short station, TbBool forward)
+{
+    int i;
+
+    for (i = 0; i < 4; i++)
+    {
+        if (forward)
+            station = things[station].U.UObject.NextThing;
+        else
+            station = things[station].U.UObject.PrevThing;
+    }
+    return station;
+}
+
+/** Pitch of a train towards the height of its station. `sign` is the
+ * pitch sign used when the station is higher. */
+static void train_pitch_to_station(struct Thing *p_vehicle, s32 dx, s32 dz,
+  s32 st_y, int sign_up)
+{
+    s32 cy;
+    short angle;
+
+    cy = (st_y >> 6) - (p_vehicle->Y >> 6);
+    angle = arctan((s32)((u32)cy * (u32)cy), (s32)((u32)dz * (u32)dz + (u32)dx * (u32)dx)) - 0x400;
+    if (angle > 100)
+        angle = 100;
+    else if (angle < -100)
+        angle = -100;
+    if (sign_up > 0 ? (cy > 0) : (cy < 0))
+        p_vehicle->U.UVehicle.AngleX = -angle;
+    else
+        p_vehicle->U.UVehicle.AngleX = angle;
+}
+
+/** A train going backwards along its stations (Flag 0x08000000 set means
+ * forwards): follows the wagon in GotoX, at the end station turns
+ * around (state 0x13).  Remade from train_unkn_st18_func_1. */
+static void train_unkn_st18_func_1_c(struct Thing *p_vehicle)
+{
+    struct TngUVehicle *p_veh;
+    struct Thing *p_station;
+    s32 dx, dz, d2, st_y;
+    short tnode, diff;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    tnode = p_veh->TNode;
+    p_station = &things[tnode];
+    dx = (p_station->X >> 8) - (p_vehicle->X >> 8);
+    st_y = (p_station->Y + 0xF00) >> 3;
+    dz = (p_station->Z >> 8) - (p_vehicle->Z >> 8);
+    d2 = (s32)((u32)dx * (u32)dx + (u32)dz * (u32)dz);
+    p_veh->ReqdSpeed = -0x546;
+    if (p_veh->GotoX != 0)
+    {
+        struct Thing *p_lead;
+
+        p_lead = &things[p_veh->GotoX];
+        p_veh->ReqdSpeed = p_lead->U.UVehicle.ReqdSpeed;
+        if ((p_vehicle->Flag & 0x08000000) != (p_lead->Flag & 0x08000000))
+        {
+            p_veh->TNode = train_station_hop4(p_station->U.UObject.NextThing, true);
+            p_vehicle->Flag &= ~0x08000000;
+            if (p_veh->ComHead != 0)
+                play_dist_sample(p_vehicle, 0x62, 0x7F, 0x40, 100, 0, 1);
+            p_lead = &things[p_veh->GotoX];
+            p_vehicle->State = 0x15;
+            p_veh->ComHead = p_lead->U.UVehicle.ComHead;
+            p_veh->ComCur = p_lead->U.UVehicle.ComCur;
+            p_veh->ReqdSpeed = 0;
+        }
+        else
+        {
+            thing_unkn_change_speed(p_vehicle, (ushort)p_veh->GotoX, -200);
+        }
+    }
+    if ((p_vehicle->State != 0x15) && (d2 < 0x40000) && (tnode > 0))
+    {
+        if (p_station->U.UObject.PrevThing != 0)
+        {
+            p_veh->TNode = p_station->U.UObject.PrevThing;
+        }
+        else if (p_vehicle->Speed != 0)
+        {
+            p_veh->ReqdSpeed = 0;
+        }
+        else
+        {
+            p_vehicle->Flag &= ~0x08000000;
+            p_veh->TNode = train_station_hop4(p_station->U.UObject.NextThing, true);
+            p_vehicle->State = 0x13;
+            p_veh->ComHead = p_station->U.UObject.ComHead;
+            p_veh->ComCur = p_station->U.UObject.ComCur;
+            p_veh->ReqdSpeed = 0;
+        }
+    }
+    if (d2 > 0x4000)
+        train_pitch_to_station(p_vehicle, dx, dz, st_y, 1);
+    diff = p_veh->AngleY - (short)(((ushort)arctan(dx, dz) + 0x400) & 0x7FF);
+    if (diff < -0x400)
+        diff += 0x800;
+    else if (diff > 0x400)
+        diff -= 0x800;
+    if (diff < 0)
+    {
+        if (diff < -100)
+            p_vehicle->Speed = 0;
+        if (diff > -50)
+            p_veh->AngleDY = -diff * 2;
+        else
+            p_veh->AngleDY = 0x1E0;
+    }
+    else if (diff > 0)
+    {
+        if (diff > 100)
+            p_vehicle->Speed = 0;
+        if (diff < 50)
+            p_veh->AngleDY = -(diff * 2);
+        else
+            p_veh->AngleDY = -0x1E0;
+    }
+}
+
+void train_unkn_st18_func_1(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("train_unkn_st18_func_1", train_unkn_st18_func_1_asm(p_vehicle),
+      train_unkn_st18_func_1_c(p_vehicle));
+}
+
+/** A train going forwards along its stations: follows the wagon in Owner,
+ * at the end station turns around (state 0x13).
+ * Remade from train_unkn_st18_func_2. */
+static void train_unkn_st18_func_2_c(struct Thing *p_vehicle)
+{
+    struct TngUVehicle *p_veh;
+    struct Thing *p_station;
+    s32 dx, dz, d2, st_y;
+    short tnode, diff;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    tnode = p_veh->TNode;
+    p_station = &things[tnode];
+    dx = (p_station->X >> 8) - (p_vehicle->X >> 8);
+    st_y = (p_station->Y + 0xF00) >> 3;
+    dz = (p_station->Z >> 8) - (p_vehicle->Z >> 8);
+    d2 = (s32)((u32)dx * (u32)dx + (u32)dz * (u32)dz);
+    p_veh->ReqdSpeed = 0x546;
+    if (p_vehicle->Owner != 0)
+    {
+        struct Thing *p_lead;
+
+        p_lead = &things[(ushort)p_vehicle->Owner];
+        p_veh->ReqdSpeed = p_lead->U.UVehicle.ReqdSpeed;
+        if ((p_vehicle->Flag & 0x08000000) != (p_lead->Flag & 0x08000000))
+        {
+            p_vehicle->Flag |= 0x08000000;
+            p_veh->TNode = train_station_hop4(p_station->U.UObject.PrevThing, false);
+            p_vehicle->State = 0x15;
+            if (p_veh->ComHead != 0)
+                play_dist_sample(p_vehicle, 0x62, 0x7F, 0x40, 100, 0, 1);
+            p_lead = &things[(ushort)p_vehicle->Owner];
+            p_veh->ComHead = p_lead->U.UVehicle.ComHead;
+            p_veh->ReqdSpeed = 0;
+            p_veh->ComCur = p_lead->U.UVehicle.ComCur;
+        }
+        else
+        {
+            thing_unkn_change_speed(p_vehicle, (ushort)p_vehicle->Owner, 200);
+        }
+    }
+    if ((p_vehicle->State != 0x15) && (d2 < 0x40000) && (tnode > 0))
+    {
+        if (p_station->U.UObject.NextThing != 0)
+        {
+            p_veh->TNode = p_station->U.UObject.NextThing;
+        }
+        else if (p_vehicle->Speed != 0)
+        {
+            p_veh->ReqdSpeed = 0;
+        }
+        else
+        {
+            p_vehicle->Flag |= 0x08000000;
+            p_veh->TNode = train_station_hop4(p_station->U.UObject.PrevThing, false);
+            p_vehicle->State = 0x13;
+            p_veh->ComHead = p_station->U.UObject.ComHead;
+            p_veh->ComCur = p_station->U.UObject.ComCur;
+            p_veh->ReqdSpeed = 0;
+        }
+    }
+    if (d2 > 0x4000)
+        train_pitch_to_station(p_vehicle, dx, dz, st_y, -1);
+    diff = p_veh->AngleY - arctan(dx, dz);
+    if (diff < -0x400)
+        diff += 0x800;
+    else if (diff > 0x400)
+        diff -= 0x800;
+    if (diff < 0)
+    {
+        if (diff < -100)
+            p_vehicle->Speed = 0;
+        if (diff > -50)
+            p_veh->AngleDY = -diff * 2;
+        else
+            p_veh->AngleDY = (0x800 - (p_vehicle->Speed >> 3)) >> 2;
+    }
+    else if (diff > 0)
+    {
+        if (diff > 100)
+            p_vehicle->Speed = 0;
+        if (diff < 50)
+            p_veh->AngleDY = -(diff * 2);
+        else
+            p_veh->AngleDY = -((0x800 - (p_vehicle->Speed >> 3)) >> 2);
+    }
+}
+
+void train_unkn_st18_func_2(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("train_unkn_st18_func_2", train_unkn_st18_func_2_asm(p_vehicle),
+      train_unkn_st18_func_2_c(p_vehicle));
+}
+
+#ifdef SW_FNCHK
+static int train_unkn_st21_exit_func_1_asm(struct Thing *p_vehicle)
+{
+    int ret;
+    asm volatile ("call ASM_train_unkn_st21_exit_func_1\n"
+        : "=a" (ret) : "0" (p_vehicle) : "cc", "memory");
+    return ret;
+}
+
+static void train_unkn_st20_func_1_asm(struct Thing *p_vehicle)
+{
+    asm volatile ("call ASM_train_unkn_st20_func_1\n"
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+#endif
+
+/** A random point (in 1/16 steps) inside the triangle of the first three
+ * points of a quad face, in map coordinates.  16-bit arithmetic as in the
+ * original.  Remade from set_xz_for_unkn3. */
+static void set_xz_for_unkn3(struct SingleObjectFace4 *p_face, s32 *p_x, s32 *p_z)
+{
+    struct SingleObject *p_obj;
+    struct SinglePoint *p_pt0, *p_pt1, *p_pt2;
+    ushort r1, r2;
+    short sx, sz;
+
+    r1 = LbRandomAnyShort() & 0xF;
+    r2 = LbRandomAnyShort() & 0xF;
+    p_obj = &game_objects[(ushort)p_face->Object];
+    p_pt1 = &game_object_points[(ushort)p_face->PointNo[1]];
+    p_pt0 = &game_object_points[(ushort)p_face->PointNo[0]];
+    p_pt2 = &game_object_points[(ushort)p_face->PointNo[2]];
+    sx = (short)((ushort)(p_pt1->X - p_pt0->X) * r1 + (ushort)(p_pt2->X - p_pt0->X) * (16 - r1));
+    sz = (short)((ushort)(p_pt1->Z - p_pt0->Z) * r2 + (ushort)(p_pt2->Z - p_pt0->Z) * (16 - r2));
+    sx = (short)((sx >> 4) + p_pt0->X + p_obj->MapX);
+    sz = (short)((sz >> 4) + p_pt0->Z + p_obj->MapZ);
+    *p_x = sx;
+    *p_z = sz;
+}
+
+/** Train at a station: every passenger gets out onto a random spot of the
+ * platform face (ComCur).  Returns 0.  Remade from train_unkn_st21_exit_func_1. */
+static int train_unkn_st21_exit_func_1_c(struct Thing *p_vehicle)
+{
+    while (p_vehicle->U.UVehicle.PassengerHead != 0)
+    {
+        struct Thing *p_person;
+        s32 x, z;
+        short face;
+
+        p_person = &things[(ushort)p_vehicle->U.UVehicle.PassengerHead];
+        p_person->Flag &= ~0x12000000;
+        p_vehicle->U.UVehicle.PassengerHead = p_person->U.UPerson.LinkPassenger;
+        face = p_vehicle->U.UVehicle.ComCur;
+        set_xz_for_unkn3(&game_object_faces4[face], &x, &z);
+        p_person->X = x << 8;
+        p_person->Z = z << 8;
+        p_person->U.UPerson.OnFace = -face;
+        set_thing_height_on_face_quad(p_person, x << 8, z << 8, face);
+        p_person->Flag |= 0x0004;
+        add_node_thing((ushort)p_person->ThingOffset);
+        p_person->U.UPerson.Flag3 |= 0x80;
+    }
+    return 0;
+}
+
+int train_unkn_st21_exit_func_1(struct Thing *p_vehicle)
+{
+    int ret;
+
+    FNCHK_RET("train_unkn_st21_exit_func_1", ret, train_unkn_st21_exit_func_1_asm(p_vehicle),
+      train_unkn_st21_exit_func_1_c(p_vehicle));
+    return ret;
+}
+
+/** First person standing on the station face `face` who is waiting for
+ * a train (or riding with a group on one), or 0.
+ * Remade from train_unkn_func_02. */
+static ThingIdx train_unkn_func_02(ushort face)
+{
+    ThingIdx thing;
+
+    for (thing = same_type_head[1]; thing != 0; thing = things[(ushort)thing].LinkSame)
+    {
+        struct Thing *p_person, *p_owner;
+        short on_face;
+
+        p_person = &things[(ushort)thing];
+        on_face = p_person->U.UPerson.OnFace;
+        if (on_face >= 0)
+            continue;
+        if (-on_face != face)
+            continue;
+        if ((p_person->Flag & 0x10000000) != 0)
+            continue;
+        if ((p_person->Flag & 0x00080000) != 0)
+        {
+            p_owner = &things[(ushort)p_person->Owner];
+            if ((p_owner->Flag & 0x10000000) == 0)
+                continue;
+            if (things[p_owner->U.UPerson.Vehicle].SubType != 0x1D)
+                continue;
+            return thing;
+        }
+        if ((p_person->Flag & 0x00002000) != 0)
+        {
+            if ((p_person->U.UPerson.Flag3 & 0x20) != 0)
+                return thing;
+            if ((ushort)p_person->State != 0x2B)
+                continue;
+            p_owner = &things[(ushort)p_person->Owner];
+            if ((p_owner->U.UPerson.Flag3 & 0x20) != 0)
+                return thing;
+            if ((p_owner->Flag & 0x10000000) == 0)
+                continue;
+            if (things[p_owner->U.UPerson.Vehicle].SubType != 0x1D)
+                continue;
+            return thing;
+        }
+        if ((p_person->U.UPerson.Flag3 & 0x80) == 0)
+            return thing;
+    }
+    return 0;
+}
+
+/** Puts a person into the train: first in its passenger list, off the
+ * map, at the train position.  Remade from
+ * person_clear_route_and_teleport_to_vehicle. */
+static void person_clear_route_and_teleport_to_vehicle(struct Thing *p_vehicle,
+  struct Thing *p_person)
+{
+    short old_head;
+
+    old_head = p_vehicle->U.UVehicle.PassengerHead;
+    p_vehicle->U.UVehicle.PassengerHead = p_person->ThingOffset;
+    p_person->U.UPerson.OnFace = 0;
+    p_person->U.UPerson.LinkPassenger = old_head;
+    p_person->U.UPerson.Flag3 &= ~0x20;
+    p_person->Flag |= 0x12000000;
+    delete_node(p_person);
+    p_person->U.UPerson.Vehicle = p_vehicle->ThingOffset;
+    p_person->X = p_vehicle->X;
+    p_person->Y = p_vehicle->Y >> 3;
+    p_person->Z = p_vehicle->Z;
+}
+
+/** Train waiting at a station: takes in the people waiting on the platform
+ * faces (ComHead and the faces walkable from it); when nobody came for
+ * Timer2 turns, it leaves (state 0x12).  Remade from train_unkn_st20_func_1. */
+static void train_unkn_st20_func_1_c(struct Thing *p_vehicle)
+{
+    ushort found;
+
+    found = 0;
+    for (;;)
+    {
+        if (p_vehicle->U.UVehicle.ComHead != 0)
+        {
+            struct WalkHeader *p_wh;
+            ushort i;
+
+            found = 0;
+            p_wh = &game_walk_headers[(short)game_object_faces4[(short)p_vehicle->U.UVehicle.ComHead].WalkHeader];
+            for (i = p_wh->StartItem; i < p_wh->StartItem + p_wh->Count; i++)
+            {
+                struct WalkHeader *p_wh2;
+                short item;
+                ushort k;
+
+                item = game_walk_items[i];
+                found = train_unkn_func_02((ushort)-item);
+                if (found != 0)
+                    break;
+                p_wh2 = &game_walk_headers[(short)game_object_faces4[-item].WalkHeader];
+                for (k = p_wh2->StartItem; k < p_wh2->StartItem + p_wh2->Count; k++)
+                {
+                    found = train_unkn_func_02((ushort)-game_walk_items[k]);
+                    if (found != 0)
+                        break;
+                }
+                if (found != 0)
+                    break;
+            }
+            if (found == 0)
+                found = train_unkn_func_02(p_vehicle->U.UVehicle.ComHead);
+        }
+        if (found == 0)
+            break;
+        person_clear_route_and_teleport_to_vehicle(p_vehicle, &things[found]);
+        p_vehicle->U.UVehicle.Timer2 = 100;
+    }
+    p_vehicle->U.UVehicle.Timer2--;
+    if (p_vehicle->U.UVehicle.Timer2 <= 0)
+    {
+        p_vehicle->State = 0x12;
+        play_dist_sample(p_vehicle, 0x61, 0x7F, 0x40, 100, 0, 1);
+    }
+}
+
+void train_unkn_st20_func_1(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("train_unkn_st20_func_1", train_unkn_st20_func_1_asm(p_vehicle),
+      train_unkn_st20_func_1_c(p_vehicle));
+}
+
+#ifdef SW_FNCHK
+static void process_ship_asm(struct Thing *p_vehicle)
+{
+    asm volatile ("call ASM_process_ship\n"
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+#endif
+
+/** Random state of the ships' route choice (asm data). */
+extern u32 rand_d;
+/** Count, then up to 16 traffic nodes where ships appear (asm data). */
+extern s32 data_1c84f4[17];
+
+/** Next traffic node of a ship from node `tnode`: a random link with link
+ * flags (bits 0xC0) equal to `want` (12 tries), else the first such link.
+ * Returns 0 when there is none.  Remade from find_next_ship_tnode. */
+static short find_next_ship_tnode(short tnode, ubyte want)
+{
+    struct TrafficNode *p_tnode;
+    int n;
+
+    for (n = 0; n < 12; n++)
+    {
+        u32 r;
+        int i;
+
+        r = rand_d;
+        rand_d = ((r >> 7) | (r << 25)) + 0x16365267;
+        i = r & 3;
+        p_tnode = &game_traffic_nodes[tnode];
+        if ((p_tnode->UTraffic.Link[i] != 0) && ((p_tnode->UTraffic.Flags[i] & 0xC0) == want))
+            return -p_tnode->UTraffic.Link[i];
+    }
+    for (n = 0; n < 4; n++)
+    {
+        p_tnode = &game_traffic_nodes[tnode];
+        if ((p_tnode->UTraffic.Link[n] != 0) && ((p_tnode->UTraffic.Flags[n] & 0xC0) == want))
+            return -p_tnode->UTraffic.Link[n];
+    }
+    return 0;
+}
+
+/** A stopping ship: no wanted speed, turning eases off by 4. */
+static void ship_stop_turning(struct TngUVehicle *p_veh)
+{
+    p_veh->ReqdSpeed = 0;
+    if (p_veh->AngleDY > 0)
+        p_veh->AngleDY -= 4;
+    if (p_veh->AngleDY < 0)
+        p_veh->AngleDY += 4;
+}
+
+/** A ship sails along traffic nodes: steers to the node, at a route end
+ * (node flag 0x80) jumps to a random start node, takes the next free node
+ * in state 0x40 (marking it taken with 0x40), waits at docks (flag 0x10,
+ * LeisurePlace is the wait timer) and stops behind another ship.
+ * Remade from process_ship. */
+static void process_ship_c(struct Thing *p_vehicle)
+{
+    struct TngUVehicle *p_veh;
+    struct TrafficNode *p_tnode;
+    struct M33 *p_mat;
+    s32 dx, dz, d2;
+    int a, i;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    p_tnode = &game_traffic_nodes[p_veh->TNode];
+    dx = p_tnode->X - (p_vehicle->X >> 8);
+    dz = p_tnode->Z - (p_vehicle->Z >> 8);
+    a = (ushort)arctan(dx, dz) - p_veh->AngleY;
+    if (a > 0x400)
+        a -= 0x7FF;
+    if (a < -0x400)
+        a += 0x7FF;
+    if (a > 0xA0)
+        a = 0xA0;
+    if (a < -0xA0)
+        a = -0xA0;
+    if (abs(a) > 40)
+        a >>= 2;
+    if (p_veh->AngleDY > a)
+        p_veh->AngleDY--;
+    if (p_veh->AngleDY < a)
+        p_veh->AngleDY++;
+    p_veh->ReqdSpeed = 300 - (abs(p_veh->AngleDY) << 2);
+    d2 = (s32)((u32)dx * (u32)dx + (u32)dz * (u32)dz);
+    if (d2 < 0x100000)
+    {
+        p_tnode = &game_traffic_nodes[p_veh->TNode];
+        if ((p_tnode->Flags & 0x80) != 0)
+        {
+            if (d2 < 0x20000)
+            {
+                struct TrafficNode *p_start;
+                s32 px, pz;
+                ushort rnd;
+
+                p_tnode->Flags &= ~0x40;
+                rnd = LbRandomAnyShort();
+                p_veh->TNode = (short)data_1c84f4[1 + rnd % data_1c84f4[0]];
+                p_start = &game_traffic_nodes[p_veh->TNode];
+                px = p_start->X << 8;
+                pz = p_start->Z << 8;
+                move_mapwho(p_vehicle, px, p_vehicle->Y, pz);
+                p_start = &game_traffic_nodes[p_veh->TNode];
+                for (i = 0; i < 4; i++)
+                {
+                    struct TrafficNode *p_next;
+
+                    if (p_start->UTraffic.Link[i] == 0)
+                        continue;
+                    if ((p_start->UTraffic.Flags[i] & 0xC0) != 0)
+                        continue;
+                    p_next = &game_traffic_nodes[-p_start->UTraffic.Link[i]];
+                    dx = (p_next->X << 8) - px;
+                    dz = (p_next->Z << 8) - pz;
+                    break;
+                }
+                p_veh->AngleDY = 0;
+                p_veh->AngleY = arctan(dx, dz);
+            }
+        }
+        else if ((ushort)p_vehicle->State == 0x3F)
+        {
+            if (p_tnode->GateLink != 0)
+                p_veh->TNode = p_tnode->GateLink;
+            else
+                ship_stop_turning(p_veh);
+        }
+        else if ((ushort)p_vehicle->State == 0x40)
+        {
+            short next;
+
+            next = find_next_ship_tnode(p_veh->TNode, 0);
+            if (next == 0)
+            {
+                p_veh->ReqdSpeed = 0;
+            }
+            else if ((game_traffic_nodes[next].Flags & 0x40) != 0)
+            {
+                ship_stop_turning(p_veh);
+            }
+            else
+            {
+                game_traffic_nodes[p_veh->TNode].Flags &= ~0x40;
+                p_veh->TNode = next;
+                game_traffic_nodes[p_veh->TNode].Flags |= 0x40;
+                if ((game_traffic_nodes[p_veh->TNode].Flags & 0x810) != 0)
+                    p_veh->LeisurePlace = 200;
+            }
+        }
+    }
+    p_tnode = &game_traffic_nodes[p_veh->TNode];
+    for (i = 0; i < 4; i++)
+    {
+        if ((p_tnode->UTraffic.Flags[i] & 0x40) == 0)
+            continue;
+        if ((game_traffic_nodes[-p_tnode->UTraffic.Link[i]].Flags & 0x40) == 0)
+            continue;
+        ship_stop_turning(p_veh);
+        break;
+    }
+    if (p_veh->LeisurePlace != 0)
+    {
+        ship_stop_turning(p_veh);
+        p_veh->LeisurePlace--;
+    }
+    if (((game_traffic_nodes[p_veh->TNode].Flags & 0x10) != 0) && (p_veh->LeisurePlace != 0))
+    {
+        ship_stop_turning(p_veh);
+        p_veh->LeisurePlace--;
+        if ((p_veh->LeisurePlace == 0) && (p_veh->PassengerHead == 0))
+            p_veh->LeisurePlace = 150;
+    }
+    if (p_vehicle->Speed < p_veh->ReqdSpeed)
+        p_vehicle->Speed++;
+    if (p_vehicle->Speed > p_veh->ReqdSpeed)
+        p_vehicle->Speed -= 10;
+    p_veh->AngleY = (p_veh->AngleY + (p_veh->AngleDY >> 4)) & 0x7FF;
+    p_mat = &local_mats[p_veh->MatrixIndex];
+    rotate_obj(0, -p_veh->AngleY, 0, p_mat);
+    p_vehicle->VX = (-p_mat->R[0][2] * p_vehicle->Speed) >> 10;
+    p_vehicle->VY = (-p_mat->R[1][2] * p_vehicle->Speed) >> 10;
+    p_vehicle->VZ = (-p_mat->R[2][2] * p_vehicle->Speed) >> 10;
+    move_mapwho(p_vehicle, p_vehicle->X + p_vehicle->VX, p_vehicle->Y + p_vehicle->VY,
+      p_vehicle->Z + p_vehicle->VZ);
+}
+
+void process_ship(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("process_ship", process_ship_asm(p_vehicle), process_ship_c(p_vehicle));
 }
 
 void init_mech_explode(struct Thing *p_vehicle)

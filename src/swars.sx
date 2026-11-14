@@ -113813,7 +113813,7 @@ rand_c:	/* 0x155304 */
 GLOBAL (scrollinfo_text)	/* 0x1553C8 */
 		.long   aNoObjective
 
-rand_d:	/* 0x1554F4 */
+GLOBAL (rand_d)	/* 0x1554F4 */
 		.ascii  "\x93\xa0\x69\x3f"
 data_1554f8:
 		.fill   0x8

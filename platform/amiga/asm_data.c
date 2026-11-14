@@ -117,6 +117,11 @@ s32 route_heap_end; /* src\pathtrig.c, 0 bytes */
 short sample_table[2]; /* struct SampleTable * sample_table, src\sound.c */
 long samples_in_bank; /* src\sound.c, 4 bytes */
 ubyte save_crypto_data_state[3]; /* src\game_save.c, 1 bytes */
+ubyte save_crypto_tables_state[3]; /* src\game_save.c, 1 bytes */
+u32 save_hashtbl_01[56]; /* src\game_save.c, 220 bytes */
+u32 save_hashtbl_02[58]; /* src\game_save.c, 228 bytes */
+u32 save_hashtbl_03[59]; /* src\game_save.c, 236 bytes */
+u32 save_hashtbl_verify_code; /* src\game_save.c, 4 bytes */
 u32 save_mortal_salt; /* src\game_save.h, 4 bytes */
 int selected_triangulation_no = -1;
 ushort signal_count; /* src\scanner.c, 6 bytes */

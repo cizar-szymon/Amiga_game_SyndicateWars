@@ -113981,15 +113981,15 @@ GLOBAL (dword_176D6C)	/* 0x176d6c */
 
 GLOBAL (save_mortal_salt)	/* 0x176E3C */
 		.long	0x0
-save_hashtbl_01:	/* 0x176E40 */
+GLOBAL (save_hashtbl_01)	/* 0x176E40 */
 		.fill   0xdc
 data_176f1c:
 		.long	0x0
-save_hashtbl_02:	/* 0x176F20 */
+GLOBAL (save_hashtbl_02)	/* 0x176F20 */
 		.fill   0xe4
 data_177004:
 		.long	0x0
-save_hashtbl_03:	/* 0x177008 */
+GLOBAL (save_hashtbl_03)	/* 0x177008 */
 		.fill   0xec
 GLOBAL (save_crypto_tables_state)	/* 0x1770F4 */
 		.byte	0x0

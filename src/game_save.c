@@ -39,6 +39,7 @@
 #include "research.h"
 #include "sound.h"
 #include "swlog.h"
+#include "fncheck.h"
 #include "wrcities.h"
 
 /******************************************************************************/
@@ -56,33 +57,166 @@ short save_slot = -1;
 
 /******************************************************************************/
 
-void save_crypto_make_hashtable(ubyte simple_salt)
+/* Key generator tables (in the asm data, one after another; each one
+ * includes the long before the next one's label). */
+extern u32 save_hashtbl_01[56];
+extern u32 save_hashtbl_02[58];
+extern u32 save_hashtbl_03[59];
+extern u32 save_hashtbl_verify_code;
+
+#ifdef SW_FNCHK
+static void save_crypto_make_hashtable_asm(ubyte simple_salt)
 {
     asm volatile ("call ASM_save_crypto_make_hashtable\n"
-        :  : "a" (simple_salt));
+        : "+a" (simple_salt) : : "cc", "memory");
+}
+
+static ulong save_crypto_transform1_asm(ubyte a1)
+{
+    ulong ret;
+    asm volatile ("call ASM_save_crypto_transform1\n"
+        : "=a" (ret) : "0" (a1) : "cc", "memory");
+    return ret;
+}
+
+static ulong save_crypto_transform2_asm(ubyte a1)
+{
+    ulong ret;
+    asm volatile ("call ASM_save_crypto_transform2\n"
+        : "=a" (ret) : "0" (a1) : "cc", "memory");
+    return ret;
+}
+
+static ulong save_crypto_transform3_asm(ubyte a1)
+{
+    ulong ret;
+    asm volatile ("call ASM_save_crypto_transform3\n"
+        : "=a" (ret) : "0" (a1) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Position `pos` moved back by `lag` in a table of `len` entries, done in
+ * signed bytes as the original. */
+static int save_crypto_lag_pos(ubyte pos, ubyte lag, ubyte len)
+{
+    sbyte p;
+
+    p = (sbyte)(pos - lag);
+    if (p < 0)
+        p = (sbyte)(p + len);
+    return p;
+}
+
+/** One step of an additive lagged generator: with `advance`, the entry at
+ * the state position becomes the sum of the two lagged entries (their
+ * positions taken from `lag_state`), the state moves on and `*p_carry`
+ * tells if the sum wrapped; returns the entry at the state position. */
+static u32 save_crypto_step(u32 *tbl, ubyte len, ubyte lag1, ubyte lag2,
+  ubyte *p_state, ubyte lag_state, ubyte *p_carry, ubyte advance)
+{
+    ubyte pos;
+    int a, b;
+    u32 val;
+
+    pos = *p_state;
+    if (!advance)
+        return tbl[pos];
+    *p_carry = 0;
+    a = save_crypto_lag_pos(lag_state, lag1, len);
+    b = save_crypto_lag_pos(lag_state, lag2, len);
+    tbl[pos] = tbl[a] + tbl[b];
+    val = tbl[pos];
+    pos++;
+    if (pos > len - 1)
+        pos = 0;
+    *p_state = pos;
+    if (val < tbl[a])
+        *p_carry = 1;
+    return val;
+}
+
+/** Remade from save_crypto_transform1. */
+static ulong save_crypto_transform1_c(ubyte a1)
+{
+    return save_crypto_step(save_hashtbl_01, 56, 55, 24, &save_crypto_tables_state[0],
+      save_crypto_tables_state[0], &save_crypto_data_state[0], a1);
+}
+
+/** Remade from save_crypto_transform2. */
+static ulong save_crypto_transform2_c(ubyte a1)
+{
+    return save_crypto_step(save_hashtbl_02, 58, 57, 7, &save_crypto_tables_state[1],
+      save_crypto_tables_state[1], &save_crypto_data_state[1], a1);
+}
+
+/** As the original, the lagged positions come from the state of the first
+ * generator.  Remade from save_crypto_transform3. */
+static ulong save_crypto_transform3_c(ubyte a1)
+{
+    return save_crypto_step(save_hashtbl_03, 59, 58, 19, &save_crypto_tables_state[2],
+      save_crypto_tables_state[0], &save_crypto_data_state[2], a1);
+}
+
+/** Fills the three generator tables from the salt (or a fixed one) and
+ * makes the first step of each.  Remade from save_crypto_make_hashtable. */
+static void save_crypto_make_hashtable_c(ubyte simple_salt)
+{
+    u32 seed;
+    int i;
+
+    if (simple_salt == 0)
+        seed = save_mortal_salt;
+    else
+        seed = 0x5E280A1D;
+    for (i = 0; i < 56; i++) {
+        seed *= 0xBB40E62D;
+        save_hashtbl_01[i] = (seed >> 8) & 0xFFFF;
+    }
+    for (i = 0; i < 58; i++) {
+        seed *= 0xBB40E62D;
+        save_hashtbl_02[i] = (seed >> 8) & 0xFFFF;
+    }
+    for (i = 0; i < 59; i++) {
+        seed *= 0xBB40E62D;
+        save_hashtbl_03[i] = (seed >> 8) & 0xFFFF;
+    }
+    save_crypto_tables_state[2] = 0;
+    save_crypto_tables_state[1] = 0;
+    save_crypto_tables_state[0] = 0;
+    save_hashtbl_verify_code = seed;
+    save_crypto_transform1_c(1);
+    save_crypto_transform2_c(1);
+    save_crypto_transform3_c(1);
+}
+
+void save_crypto_make_hashtable(ubyte simple_salt)
+{
+    FNCHK_VOID("save_crypto_make_hashtable", save_crypto_make_hashtable_asm(simple_salt),
+      save_crypto_make_hashtable_c(simple_salt));
 }
 
 ulong save_crypto_transform1(ubyte a1)
 {
     ulong ret;
-    asm volatile ("call ASM_save_crypto_transform1\n"
-        : "=r" (ret) : "a" (a1));
+    FNCHK_RET("save_crypto_transform1", ret, save_crypto_transform1_asm(a1),
+      save_crypto_transform1_c(a1));
     return ret;
 }
 
 ulong save_crypto_transform2(ubyte a1)
 {
     ulong ret;
-    asm volatile ("call ASM_save_crypto_transform2\n"
-        : "=r" (ret) : "a" (a1));
+    FNCHK_RET("save_crypto_transform2", ret, save_crypto_transform2_asm(a1),
+      save_crypto_transform2_c(a1));
     return ret;
 }
 
 ulong save_crypto_transform3(ubyte a1)
 {
     ulong ret;
-    asm volatile ("call ASM_save_crypto_transform3\n"
-        : "=r" (ret) : "a" (a1));
+    FNCHK_RET("save_crypto_transform3", ret, save_crypto_transform3_asm(a1),
+      save_crypto_transform3_c(a1));
     return ret;
 }
 

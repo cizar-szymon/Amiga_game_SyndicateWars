@@ -30,6 +30,7 @@
 #include "bigmap.h"
 #include "engincam.h"
 #include "enginzoom.h"
+#include "engincolour.h"
 #include "building.h"
 #include "bmcrater.h"
 #include "bmbang.h"
@@ -1601,11 +1602,48 @@ void process_grenade(struct Thing *p_grenade)
     }
 }
 
+#ifdef SW_FNCHK
+static void process_laser_elec_asm(struct Thing *p_elec)
+{
+    asm volatile ("call ASM_process_laser_elec\n"
+        : : "a" (p_elec) : "cc", "memory");
+}
+#endif
+
+struct SimpleThing *init_spark(int x, int y, int z);
+
+/** An electric beam (the end point in VX,VY,VZ): sparks at the end (every
+ * 8 turns when it is a moving one, state not 0); a moving one drifts its
+ * end point.  Removed when its timer runs out.
+ * Remade from process_laser_elec. */
+static void process_laser_elec_c(struct Thing *p_elec)
+{
+    p_elec->Timer1--;
+    if (p_elec->Timer1 == 0)
+    {
+        remove_thing((ushort)(p_elec - things));
+        delete_node(p_elec);
+        return;
+    }
+    if ((p_elec->State == 0) || ((gameturn & 7) == 0))
+    {
+        struct SimpleThing *p_spark;
+
+        p_spark = init_spark(p_elec->VX, p_elec->VY, p_elec->VZ);
+        if (p_spark != NULL)
+            p_spark->Object = colour_lookup[4];
+    }
+    if ((p_elec->State != 0) && (p_elec->Timer1 > 10))
+    {
+        /* the drift is kept at 0x64..0x69, read here as the vehicle angles */
+        p_elec->VX -= ((p_elec->U.UVehicle.AngleX * 3 * p_elec->U.UVehicle.AngleY) >> 6) / 20;
+        p_elec->VZ -= ((p_elec->U.UVehicle.AngleZ * 3 * p_elec->U.UVehicle.AngleY) >> 6) / 20;
+    }
+}
+
 void process_laser_elec(struct Thing *p_elec)
 {
-    asm volatile (
-      "call ASM_process_laser_elec\n"
-        : : "a" (p_elec));
+    FNCHK_VOID("process_laser_elec", process_laser_elec_asm(p_elec), process_laser_elec_c(p_elec));
 }
 
 void process_razor_wire(struct Thing *p_thing)
@@ -1695,11 +1733,31 @@ void process_unkn35(struct Thing *p_thing)
     //TODO implement the rest of the state update
 }
 
+#ifdef SW_FNCHK
+static void process_laser_asm(struct Thing *p_laser)
+{
+    asm volatile ("call ASM_process_laser\n"
+        : : "a" (p_laser) : "cc", "memory");
+}
+#endif
+
+/** A laser beam (the end point in VX,VY,VZ): sparks at the end until its
+ * timer runs out.  Remade from process_laser. */
+static void process_laser_c(struct Thing *p_laser)
+{
+    p_laser->Timer1--;
+    if (p_laser->Timer1 == 0)
+    {
+        remove_thing((ushort)(p_laser - things));
+        delete_node(p_laser);
+        return;
+    }
+    init_spark(p_laser->VX, p_laser->VY, p_laser->VZ);
+}
+
 void process_laser(struct Thing *p_laser)
 {
-    asm volatile (
-      "call ASM_process_laser\n"
-        : : "a" (p_laser));
+    FNCHK_VOID("process_laser", process_laser_asm(p_laser), process_laser_c(p_laser));
 }
 
 struct SimpleThing *create_temp_light(int prc_x, int prc_y, int prc_z,

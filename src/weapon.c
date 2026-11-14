@@ -5814,11 +5814,11 @@ void process_weapon(struct Thing *p_person)
     }
 }
 
-s32 laser_hit_at(s32 cor1_x, s32 cor1_y, s32 cor1_z,
+#ifdef SW_FNCHK
+static s32 laser_hit_at_asm(s32 cor1_x, s32 cor1_y, s32 cor1_z,
   s32 *p_cor2_x, s32 *p_cor2_y, s32 *p_cor2_z,
   struct Thing *p_shot)
 {
-#if 1
     s32 ret;
     // Pushed through a register holding them: a "g" operand may be placed
     // relative to the stack pointer, which each push moves.
@@ -5833,11 +5833,120 @@ s32 laser_hit_at(s32 cor1_x, s32 cor1_y, s32 cor1_z,
       "push 4(%5)\n"
       "push 0(%5)\n"
       "call ASM_laser_hit_at\n"
-        : "=r" (ret)
+        : "=a" (ret)
         : "a" (cor1_x), "d" (cor1_y), "b" (cor1_z), "c" (p_cor2_x), "S" (stkargs)
         : "cc", "memory");
     return ret;
+}
 #endif
+
+/** Traces a laser from (x1,y1,z1) towards (*p_x2,*p_y2,*p_z2) in steps of
+ * about 128: returns the person hit (thing index), a static hit
+ * (0x40000000 | -index), a face hit (-ColVectList index), 0x20000000 for
+ * the ground or a building column, or 0 when it gets there (the end point
+ * is then restored) or leaves the map.  The end point is left where the
+ * beam stopped.  Remade from laser_hit_at. */
+static s32 laser_hit_at_c(s32 x1, s32 y1, s32 z1,
+  s32 *p_x2, s32 *p_y2, s32 *p_z2, struct Thing *p_shot)
+{
+    short dx, dy, dz;
+    s32 len, n, sx0, sy0, sz0, collided;
+
+    collided = 0;
+    dx = (short)(*p_x2 - x1);
+    dy = (short)(*p_y2 - y1);
+    dz = (short)(*p_z2 - z1);
+    sx0 = *p_x2;
+    sy0 = *p_y2;
+    sz0 = *p_z2;
+    len = LbSqrL((u32)(dx * dx + dz * dz + ((dy * dy) << 7))) / 128;
+    if (len == 0)
+        len = 1;
+    dx = dx / len;
+    dy = dy / len;
+    dz = dz / len;
+    *p_x2 = x1;
+    *p_y2 = y1;
+    *p_z2 = z1;
+    for (n = len + 1; n > 0; n--)
+    {
+        struct Thing *p_victim;
+        struct MyMapElement *p_mapel;
+        TbBool in_band;
+
+        p_victim = check_for_radius_hit_person(*p_x2 << 8, *p_y2 << 8, *p_z2 << 8,
+          (ushort)p_shot->Radius, &things[(ushort)p_shot->Owner], 1, 0);
+        if (p_victim != NULL)
+        {
+            if (p_victim->Type == 5)
+                return (-(s32)p_victim->ThingOffset) | 0x40000000;
+            return (ushort)p_victim->ThingOffset;
+        }
+        p_mapel = &game_my_big_map[((*p_z2 >> 8) << 7) + (*p_x2 >> 8)];
+        in_band = (p_mapel->Alt < *p_y2) && (p_mapel->Alt + 30 > *p_y2);
+        if (in_band && (p_mapel->ColHead != 0))
+        {
+            s32 r;
+
+            r = do_fvect_colide(x1, z1, sx0, sz0, p_mapel);
+            if (r > 0)
+                return -r;
+            collided = r;
+        }
+        if ((alt_at_point((short)*p_x2, (short)*p_z2) >> 8) > *p_y2)
+            return 0x20000000;
+        if (!in_band || (collided != 0))
+        {
+            if (check_col_collision(*p_x2, *p_y2, *p_z2))
+            {
+                if (collided == 0)
+                    return 0x20000000;
+                return collided;
+            }
+        }
+        *p_x2 += dx;
+        *p_y2 += dy;
+        *p_z2 += dz;
+        if (((*p_x2 >> 8) < 0) || ((*p_x2 >> 8) >= 128) ||
+          ((*p_z2 >> 8) < 0) || ((*p_z2 >> 8) >= 128))
+            return 0;
+    }
+    *p_x2 = sx0;
+    *p_y2 = sy0;
+    *p_z2 = sz0;
+    return 0;
+}
+
+#ifdef SW_FNCHK
+/* The end point may be in locals on the stack, which fncheck does not put
+ * back between the asm and the C run; keep it here (in bss, put back). */
+static s32 laser_hit_at_end[3];
+
+static s32 laser_hit_at_c_again(s32 cor1_x, s32 cor1_y, s32 cor1_z,
+  s32 *p_cor2_x, s32 *p_cor2_y, s32 *p_cor2_z, struct Thing *p_shot)
+{
+    *p_cor2_x = laser_hit_at_end[0];
+    *p_cor2_y = laser_hit_at_end[1];
+    *p_cor2_z = laser_hit_at_end[2];
+    return laser_hit_at_c(cor1_x, cor1_y, cor1_z, p_cor2_x, p_cor2_y, p_cor2_z, p_shot);
+}
+#endif
+
+s32 laser_hit_at(s32 cor1_x, s32 cor1_y, s32 cor1_z,
+  s32 *p_cor2_x, s32 *p_cor2_y, s32 *p_cor2_z,
+  struct Thing *p_shot)
+{
+    s32 ret;
+
+#ifdef SW_FNCHK
+    laser_hit_at_end[0] = *p_cor2_x;
+    laser_hit_at_end[1] = *p_cor2_y;
+    laser_hit_at_end[2] = *p_cor2_z;
+#endif
+    FNCHK_RET("laser_hit_at", ret,
+      laser_hit_at_asm(cor1_x, cor1_y, cor1_z, p_cor2_x, p_cor2_y, p_cor2_z, p_shot),
+      laser_hit_at_c_again(cor1_x, cor1_y, cor1_z, p_cor2_x, p_cor2_y, p_cor2_z, p_shot));
+    return ret;
 }
 
 /******************************************************************************/

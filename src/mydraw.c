@@ -27,6 +27,9 @@
 #include "game_data.h"
 #include "game_sprts.h"
 #include "swlog.h"
+#include "fncheck.h"
+#include "game_save.h"
+#include <string.h>
 #include "util.h"
 /******************************************************************************/
 const TbPixel text_colours[] = {
@@ -576,10 +579,105 @@ ushort my_draw_text(short x, short y, const char *text, ushort startline)
     return cur_line;
 }
 
-void my_preprocess_text(char *text)
+#ifdef SW_FNCHK
+static void my_preprocess_text_asm(char *text)
 {
     asm volatile ("call ASM_my_preprocess_text\n"
-        :  : "a" (text));
+        : "+a" (text) : : "cc", "memory");
+}
+#endif
+
+/** Prepares a text for my_draw_text() in place: escapes become control
+ * codes, followed by 0x1F fillers: "\\n" a new line (0x0A), "\\h"
+ * 0x0C, "\\c<digit>" a colour (0x0E and the number), "\\\\" a
+ * backslash, "\\l" the login name (the rest of the text is moved; as
+ * the original, the length is the one from the start, and the character
+ * after the name is skipped), other escapes two fillers.  Line ends become
+ * a space after a printable character, else a filler, as other control
+ * characters do.  The asm reads the login name from 3 bytes after
+ * net_host_player_no, where it was in the original data; the C uses
+ * login_name.  Remade from my_preprocess_text. */
+static void my_preprocess_text_c(char *text)
+{
+    u32 len;
+    u32 i;
+
+    if (text == NULL)
+        return;
+    len = strlen(text);
+    i = 0;
+    while (1)
+    {
+        ubyte c;
+
+        c = (ubyte)text[i];
+        if (c == 0)
+            break;
+        if ((c == 0x0D) || (c == 0x0A))
+        {
+            if ((i != 0) && ((sbyte)text[i - 1] > 0x20))
+                text[i] = ' ';
+            else
+                text[i] = 0x1F;
+            i++;
+            continue;
+        }
+        if (c == 0x5C)
+        {
+            switch ((ubyte)text[i + 1])
+            {
+            case 'N':
+            case 'n':
+                text[i] = 0x0A;
+                text[i + 1] = 0x1F;
+                i += 2;
+                break;
+            case 0x5C:
+                text[i + 1] = 0x1F;
+                i += 2;
+                break;
+            case 'H':
+            case 'h':
+                text[i] = 0x0C;
+                text[i + 1] = 0x1F;
+                i += 2;
+                break;
+            case 'C':
+            case 'c':
+                text[i] = 0x0E;
+                text[i + 1] = text[i + 2] - '0';
+                text[i + 2] = 0x1F;
+                i += 3;
+                break;
+            case 'L':
+            case 'l':
+            {
+                u32 name_len, k;
+
+                name_len = strlen(login_name);
+                memmove(text + i + name_len, text + i + 2, len - i - 1);
+                for (k = 0; login_name[k] != 0; k++)
+                    text[i++] = login_name[k];
+                i++;
+                break;
+            }
+            default:
+                text[i] = 0x1F;
+                text[i + 1] = 0x1F;
+                i += 2;
+                break;
+            }
+            continue;
+        }
+        if (c < 0x20)
+            text[i] = 0x1F;
+        i++;
+    }
+}
+
+void my_preprocess_text(char *text)
+{
+    FNCHK_VOID("my_preprocess_text", my_preprocess_text_asm(text), my_preprocess_text_c(text));
 }
 
 /******************************************************************************/

@@ -20,6 +20,7 @@
 #include "plyr_packet.h"
 
 #include <assert.h>
+#include <stdlib.h>
 #include "bfkeybd.h"
 #include "bfscd.h"
 #include "bfmemut.h"
@@ -50,6 +51,9 @@
 #include "people.h"
 #include "weapon.h"
 #include "frame_sprani.h"
+#include "enginsngobjs.h"
+#include "engintrns.h"
+#include "vehicle.h"
 /******************************************************************************/
 struct ShortPacket shpackets[8];
 
@@ -117,24 +121,9 @@ void packet_rel_position_3d_normalize(short *p_x, short *p_y, short *p_z)
     *p_z = (*p_z) * 256 / len;
 }
 
-void thing_goto_point_rel(struct Thing *p_thing, short x, short y, short z)
-{
-    // Make sure the normalization is kept when this function is remade
-    packet_rel_position_3d_normalize(&x, &y, &z);
-    asm volatile (
-      "call ASM_thing_goto_point_rel\n"
-        : : "a" (p_thing), "d" (x), "b" (y), "c" (z));
-}
-
-void thing_goto_point_rel_fast(struct Thing *p_thing, short x, short y, short z, int plyr)
-{
-    asm volatile (
-      "push %4\n"
-      "call ASM_thing_goto_point_rel_fast\n"
-        : : "a" (p_thing), "d" (x), "b" (y), "c" (z), "g" (plyr));
-}
 
 void set_person_animmode_run(struct Thing *p_person);
+void build_navigate_path_to_face_xz(struct Thing *p_thing, short face, int x, int z);
 int start_goto_vehicle(struct Thing *p_vehicle, int x, int z);
 ushort build_navigate_path(struct Thing *p_thing, int x, int z, int face);
 void thing_goto_point(struct Thing *p_thing, short x, short y, short z);
@@ -327,19 +316,256 @@ void thing_goto_point(struct Thing *p_thing, short x, short y, short z)
       thing_goto_point_c(p_thing, x, y, z));
 }
 
-void thing_goto_point_on_face_fast(struct Thing *p_thing, short x, short z, short face, int plyr)
+#ifdef SW_FNCHK
+static void thing_goto_point_rel_asm(struct Thing *p_thing, short x, short y, short z)
 {
     asm volatile (
-      "push %4\n"
+      "call ASM_thing_goto_point_rel\n"
+        : "+a" (p_thing), "+d" (x), "+b" (y), "+c" (z) : : "cc", "memory");
+}
+
+static void thing_goto_point_rel_fast_asm(struct Thing *p_thing, short x, short y, short z, int plyr)
+{
+    int stkargs[1];
+
+    stkargs[0] = plyr;
+    asm volatile (
+      "push 0(%4)\n"
+      "call ASM_thing_goto_point_rel_fast\n"
+        : "+a" (p_thing), "+d" (x), "+b" (y), "+c" (z) : "S" (stkargs) : "cc", "memory");
+}
+
+static void thing_goto_point_on_face_asm(struct Thing *p_thing, short x, short z, short face)
+{
+    asm volatile (
+      "call ASM_thing_goto_point_on_face\n"
+        : "+a" (p_thing), "+d" (x), "+b" (z), "+c" (face) : : "cc", "memory");
+}
+
+static void thing_goto_point_on_face_fast_asm(struct Thing *p_thing, short x, short z, short face, int plyr)
+{
+    int stkargs[1];
+
+    stkargs[0] = plyr;
+    asm volatile (
+      "push 0(%4)\n"
       "call ASM_thing_goto_point_on_face_fast\n"
-        : : "a" (p_thing), "d" (x), "b" (z), "c" (face), "g" (plyr));
+        : "+a" (p_thing), "+d" (x), "+b" (z), "+c" (face) : "S" (stkargs) : "cc", "memory");
+}
+#endif
+
+/** After the walk/run mode changed: the run animation (mode 19) when
+ * running, else back from it to the weapon animation. */
+static void thing_goto_update_run_anim(struct Thing *p_thing)
+{
+    if ((p_thing->Flag2 & TgF2_Unkn00080000) != 0)
+    {
+        if (p_thing->U.UPerson.AnimMode == ANIM_PERS_Unkn19)
+            return;
+        p_thing->U.UPerson.AnimMode = ANIM_PERS_Unkn19;
+    }
+    else
+    {
+        if (p_thing->U.UPerson.AnimMode != ANIM_PERS_Unkn19)
+            return;
+        p_thing->U.UPerson.AnimMode = gun_out_anim(p_thing, 0);
+    }
+    thing_goto_set_anim_frames(p_thing);
+}
+
+/** Moves a person in the direction (x,z) (keyboard / pad control): the
+ * direction goes to VX/VZ and the state becomes 35; a person firing a
+ * stationary weapon only turns.  Remade from thing_goto_point_rel. */
+static void thing_goto_point_rel_c(struct Thing *p_thing, short x, short y, short z)
+{
+    ushort state;
+
+    if ((p_thing->Flag & (TngF_Unkn40000000 | TngF_Destroyed | TngF_Unkn0001)) != 0)
+        return;
+    p_thing->Flag2 &= ~(TgF2_Unkn00020000 | TgF2_Unkn0040);
+    if ((p_thing->Flag2 & TgF2_KnockedOut) != 0)
+        return;
+    if ((p_thing->Flag & TngF_Destroyed) != 0)
+        return;
+    if ((p_thing->Flag & TngF_StationrSht) != 0)
+    {
+        ubyte dir;
+
+        dir = ((((short)angle_between_points(0, 0, x, z) + 0x80) >> 8) + 8) & 7;
+        if (dir == p_thing->U.UPerson.Angle)
+            return;
+        p_thing->U.UPerson.Angle = dir;
+        p_thing->Frame = nstart_ani[people_frames[p_thing->SubType][p_thing->U.UPerson.AnimMode]
+          + dir];
+        return;
+    }
+    if (((p_thing->Flag2 & TgF2_Unkn0001) != 0) && ((p_thing->Flag & TngF_TriggerUse) == 0))
+        finalise_razor_wire(p_thing);
+    if ((p_thing->Flag & TngF_InVehicle) != 0)
+        return;
+    if ((p_thing->Flag & TngF_PlayerAgent) != 0)
+        players[p_thing->U.UPerson.ComCur >> 2].GotoFace = 0;
+    state = (ushort)p_thing->State;
+    if (((state & 0x7FFF) != PerSt_GOTO_POINT) && ((state & 0x7FFF) != 0x23) && (state != 5))
+        return;
+    p_thing->StartTimer1 = 48;
+    p_thing->Flag2 &= ~TgF2_Unkn00020000;
+    p_thing->State = (state & 0x8000) | 0x23;
+    p_thing->VX = x;
+    p_thing->VZ = z;
+    if (p_thing->U.UPerson.PathIndex != 0)
+        remove_path(p_thing);
+    thing_goto_update_run_anim(p_thing);
+}
+
+/** As thing_goto_point_rel, running; the protectors of a player's agent run
+ * with it.  Remade from thing_goto_point_rel_fast. */
+static void thing_goto_point_rel_fast_c(struct Thing *p_thing, short x, short y, short z, int plyr)
+{
+    if ((p_thing->Flag & (TngF_Unkn40000000 | TngF_Destroyed | TngF_Unkn0001)) != 0)
+        return;
+    p_thing->Flag2 &= ~(TgF2_Unkn00080000 | TgF2_Unkn00020000 | TgF2_Unkn0040);
+    p_thing->Flag2 |= TgF2_Unkn00080000;
+    // the asm calls this through the C wrapper, which normalizes
+    packet_rel_position_3d_normalize(&x, &y, &z);
+    thing_goto_point_rel_c(p_thing, x, y, z);
+    if ((p_thing->Flag2 & TgF2_Unkn0040) != 0)
+        return;
+    set_person_animmode_run(p_thing);
+    set_player_peeps_to_run(p_thing, (ushort)plyr);
+}
+
+/** Point where a vehicle sent to a road face goes: the far end of the
+ * chain of road pieces of the face's building.
+ * Remade from find_bezier_nav_point. */
+static void find_bezier_nav_point(short face, struct Thing *p_vehicle, short *p_x, short *p_z)
+{
+    struct Thing *p_road, *p_first, *p_last;
+    ushort obj;
+    s32 dx, dz, dist_first, dist_last;
+
+    if (face > 0)
+        obj = game_object_faces3[face].Object;
+    else
+        obj = game_object_faces4[-face].Object;
+    p_road = &things[game_objects[obj].ThingNo];
+    p_first = p_road;
+    while (p_first->U.UObject.PrevThing > 0)
+        p_first = &things[p_first->U.UObject.PrevThing];
+    p_last = p_road;
+    while (p_last->U.UObject.NextThing > 0)
+        p_last = &things[p_last->U.UObject.NextThing];
+    dx = (p_vehicle->X - p_first->X) >> 9;
+    dz = (p_vehicle->Z - p_first->Z) >> 9;
+    dist_first = dx * dx + dz * dz;
+    dx = (p_vehicle->X - p_last->X) >> 9;
+    dz = (p_vehicle->Z - p_last->Z) >> 9;
+    dist_last = dx * dx + dz * dz;
+    if (dist_first < dist_last) {
+        *p_x = p_last->X >> 8;
+        *p_z = p_last->Z >> 8;
+    } else {
+        *p_x = p_first->X >> 8;
+        *p_z = p_first->Z >> 8;
+    }
+}
+
+/** Sends a person to point (x,z) on a face of an object (negative face:
+ * quad face); a person in a vehicle sends the vehicle, on a road face to
+ * the far end of the road.  Remade from thing_goto_point_on_face. */
+static void thing_goto_point_on_face_c(struct Thing *p_thing, short x, short z, short face)
+{
+    ushort state;
+
+    if ((p_thing->Flag & (TngF_Unkn40000000 | TngF_Unkn0001)) != 0)
+        return;
+    if ((p_thing->Flag & (TngF_StationrSht | TngF_Destroyed)) != 0)
+        return;
+    if ((p_thing->Flag2 & TgF2_Unkn0001) != 0)
+        finalise_razor_wire(p_thing);
+    if ((p_thing->Flag & TngF_InVehicle) != 0)
+    {
+        struct Thing *p_vehicle;
+        short gx, gz;
+
+        p_vehicle = &things[p_thing->U.UPerson.Vehicle];
+        gx = x;
+        gz = z;
+        if (face < 0)
+        {
+            ushort obj;
+
+            obj = game_object_faces4[-face].Object;
+            if (things[game_objects[obj].ThingNo].SubType == 0x15)
+                find_bezier_nav_point(face, p_vehicle, &gx, &gz);
+        }
+        else if (face == 0)
+            return;
+        p_vehicle->Flag &= ~TngF_PlayerAgent;
+        start_goto_vehicle(p_vehicle, gx, gz);
+        return;
+    }
+    p_thing->Flag2 &= ~TgF2_Unkn00020000;
+    state = (ushort)p_thing->State & 0x7FFF;
+    if ((state > PerSt_GOTO_POINT) && (state != 5) && (state != 0x10) &&
+      (state != 0x2C) && (state != 0x2D))
+        return;
+    p_thing->State = PerSt_GOTO_POINT;
+    p_thing->U.UPerson.ComTimer = -1;
+    p_thing->Timer1 = 48;
+    p_thing->StartTimer1 = 48;
+    p_thing->SubState = 0;
+    p_thing->U.UPerson.ComRange = 1;
+    p_thing->U.UPerson.GotoX = x;
+    p_thing->U.UPerson.GotoZ = z;
+    if ((p_thing->Flag & TngF_PlayerAgent) != 0)
+        players[p_thing->U.UPerson.ComCur >> 2].GotoFace = face;
+    if (p_thing->U.UPerson.PathIndex != 0)
+        remove_path(p_thing);
+    p_thing->U.UPerson.PathIndex = 0;
+    build_navigate_path_to_face_xz(p_thing, (short)-face, x, z);
+    thing_goto_update_run_anim(p_thing);
+}
+
+/** As thing_goto_point_on_face, running; the protectors of a player's
+ * agent run with it.  Remade from thing_goto_point_on_face_fast. */
+static void thing_goto_point_on_face_fast_c(struct Thing *p_thing, short x, short z, short face, int plyr)
+{
+    if ((p_thing->Flag & (TngF_Unkn40000000 | TngF_Destroyed | TngF_Unkn0001)) != 0)
+        return;
+    p_thing->Flag2 |= TgF2_Unkn00080000;
+    thing_goto_point_on_face_c(p_thing, x, z, face);
+    if ((p_thing->Flag2 & TgF2_Unkn0040) != 0)
+        return;
+    set_person_animmode_run(p_thing);
+    set_player_peeps_to_run(p_thing, (ushort)plyr);
+}
+
+void thing_goto_point_rel(struct Thing *p_thing, short x, short y, short z)
+{
+    // The normalization stays outside of the remade function
+    packet_rel_position_3d_normalize(&x, &y, &z);
+    FNCHK_VOID("thing_goto_point_rel", thing_goto_point_rel_asm(p_thing, x, y, z),
+      thing_goto_point_rel_c(p_thing, x, y, z));
+}
+
+void thing_goto_point_rel_fast(struct Thing *p_thing, short x, short y, short z, int plyr)
+{
+    FNCHK_VOID("thing_goto_point_rel_fast", thing_goto_point_rel_fast_asm(p_thing, x, y, z, plyr),
+      thing_goto_point_rel_fast_c(p_thing, x, y, z, plyr));
+}
+
+void thing_goto_point_on_face_fast(struct Thing *p_thing, short x, short z, short face, int plyr)
+{
+    FNCHK_VOID("thing_goto_point_on_face_fast",
+      thing_goto_point_on_face_fast_asm(p_thing, x, z, face, plyr),
+      thing_goto_point_on_face_fast_c(p_thing, x, z, face, plyr));
 }
 
 void thing_goto_point_on_face(struct Thing *p_thing, short x, short z, short face)
 {
-    asm volatile (
-      "call ASM_thing_goto_point_on_face\n"
-        : : "a" (p_thing), "d" (x), "b" (z), "c" (face));
+    FNCHK_VOID("thing_goto_point_on_face", thing_goto_point_on_face_asm(p_thing, x, z, face),
+      thing_goto_point_on_face_c(p_thing, x, z, face));
 }
 
 ubyte select_new_weapon(ushort index, short dir)
@@ -1605,9 +1831,100 @@ void process_packet(PlayerIdx plyr, struct Packet *p_pckt, ushort i)
     }
 }
 
+#ifdef SW_FNCHK
+/** fncheck test aid (SW_TEST_CMDS set): every few turns the local player's
+ * agents get commands which recorded games seldom have, so the remade
+ * functions behind them run under fncheck. */
+static struct Thing *test_cmds_nearest_thing(struct Thing *p_from, ubyte ttype,
+  TbBool need_faces4)
+{
+    struct Thing *p_best;
+    ThingIdx thing;
+    s32 best;
+
+    p_best = NULL;
+    best = 0x7FFFFFFF;
+    for (thing = things_used_head; thing > 0; thing = things[thing].LinkChild)
+    {
+        struct Thing *p_thing;
+        s32 dx, dz, d;
+
+        p_thing = &things[thing];
+        if (p_thing->Type != ttype)
+            continue;
+        if (need_faces4 && (game_objects[p_thing->U.UObject.Object].NumbFaces4 == 0))
+            continue;
+        dx = (p_thing->X - p_from->X) >> 8;
+        dz = (p_thing->Z - p_from->Z) >> 8;
+        d = abs(dx) + abs(dz);
+        if ((d < best) && (d > 0x100)) {
+            best = d;
+            p_best = p_thing;
+        }
+    }
+    return p_best;
+}
+
+static void test_cmds_process(void)
+{
+    static int enabled = -1;
+    PlayerInfo *p_player;
+    struct Thing *p_agent;
+    ushort n;
+
+    if (enabled < 0)
+        enabled = (getenv("SW_TEST_CMDS") != NULL);
+    if (!enabled || (gameturn < 20))
+        return;
+    p_player = &players[local_player_no];
+    n = (gameturn / 10) % playable_agents;
+    p_agent = p_player->MyAgent[n];
+    if ((p_agent == NULL) || ((p_agent->Flag & TngF_Destroyed) != 0))
+        return;
+    switch (gameturn % 120)
+    {
+    case 10:
+    case 70:
+    {
+        short dx, dz;
+        dx = lbSinTable[(gameturn * 37) & 0x7FF] >> 8;
+        dz = lbSinTable[((gameturn * 37) + 512) & 0x7FF] >> 8;
+        if ((gameturn % 240) < 120)
+            thing_goto_point_rel(p_agent, dx, 0, dz);
+        else
+            thing_goto_point_rel_fast(p_agent, dx, 0, dz, local_player_no);
+        break;
+    }
+    case 40:
+    case 100:
+    {
+        struct Thing *p_bld;
+        struct SingleObject *p_obj;
+        short face;
+
+        p_bld = test_cmds_nearest_thing(p_agent, TT_BUILDING, true);
+        if (p_bld == NULL)
+            break;
+        p_obj = &game_objects[p_bld->U.UObject.Object];
+        face = -(short)(p_obj->StartFace4 + (gameturn % p_obj->NumbFaces4));
+        if ((gameturn % 240) < 120)
+            thing_goto_point_on_face(p_agent, p_bld->X >> 8, p_bld->Z >> 8, face);
+        else
+            thing_goto_point_on_face_fast(p_agent, p_bld->X >> 8, p_bld->Z >> 8, face,
+              local_player_no);
+        break;
+    }
+    }
+}
+#endif
+
 void process_packets(void)
 {
     PlayerIdx plyr;
+
+#ifdef SW_FNCHK
+    test_cmds_process();
+#endif
 
     if (in_network_game && (net_players_num > 1))
         net_unkn_check_1();

@@ -70,6 +70,8 @@ s32 data_1dd91c; /* src\vehtraffic.h, 4 bytes */
 short datagram_backup[2200]; /* struct IPXDatagramBackup datagram_backup[8], src\network.c */
 s32 dword_152E38[5] = {-1, -1, -1, -1, -1};
 s32 dword_176D6C; /* src\thing.c, 4 bytes */
+s32 dword_1AA3A4; /* src\people.c, 4 bytes */
+s32 dword_1AA3A8; /* src\people.c, 4 bytes */
 s32 dword_1AA3AC; /* src\people.c, 4 bytes */
 s32 dword_1AA3B0; /* src\people.c, 4 bytes */
 s32 dword_1AA67C; /* src\people.c, 4 bytes */

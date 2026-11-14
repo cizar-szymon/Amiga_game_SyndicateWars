@@ -2641,14 +2641,6 @@ void person_init_drop_special(struct Thing *p_person, ThingIdx item)
         : : "a" (p_person), "d" (item));
 }
 
-int build_tank_path(struct Thing *p_thing, int x, int z)
-{
-    int ret;
-    asm volatile (
-      "call ASM_build_tank_path\n"
-        : "=r" (ret) : "a" (p_thing), "d" (x), "b" (z));
-    return ret;
-}
 
 short find_peep_in_area(struct Thing *p_me, struct Command *p_cmd)
 {
@@ -2939,6 +2931,151 @@ int ariadne_initialise_route(struct Thing *p_thing, int x, int z)
 
     FNCHK_RET("ariadne_initialise_route", ret, ariadne_initialise_route_asm(p_thing, x, z),
       ariadne_initialise_route_c(p_thing, x, z));
+    return ret;
+}
+
+#ifdef SW_FNCHK
+static int build_tank_path_asm(struct Thing *p_thing, int x, int z)
+{
+    int ret;
+    asm volatile (
+      "call ASM_build_tank_path\n"
+        : "=a" (ret), "+d" (x), "+b" (z) : "0" (p_thing) : "cc", "memory");
+    return ret;
+}
+#endif
+
+extern s32 dword_1AA3A4;
+extern s32 dword_1AA3A8;
+
+/** True when a tank may drive over the tile: no-ground tiles yes, blocked
+ * ones (flag 1, a column) no, flat-marked ones (flag 2) yes, else when the
+ * step to the next tiles east, south and south-east is at most 25.  No
+ * range check, as the original. */
+static TbBool tank_tile_passable(s32 x, s32 z)
+{
+    struct MyMapElement *p_mapel;
+    int idx;
+
+    idx = ((z >> 8) << 7) + (x >> 8);
+    p_mapel = &game_my_big_map[idx];
+    if ((p_mapel->Flags2 & 0x08) != 0)
+        return true;
+    if ((p_mapel->Flags2 & 0x01) != 0)
+        return false;
+    if ((p_mapel->ColumnHead & 0xFFF) != 0)
+        return false;
+    if ((p_mapel->Flags2 & 0x02) != 0)
+        return true;
+    if (abs(p_mapel->Alt - game_my_big_map[idx + 1].Alt) > 25)
+        return false;
+    if (abs(p_mapel->Alt - game_my_big_map[idx + 128].Alt) > 25)
+        return false;
+    if (abs(p_mapel->Alt - game_my_big_map[idx + 129].Alt) > 25)
+        return false;
+    return true;
+}
+
+/** Checks the straight drive of a tank from (x1,z1) to (x2,z2) in steps of
+ * about half a tile, with a band on both sides.  Returns 0x2A when it is
+ * free, 0 when blocked or shorter than a tile; the last free point is left
+ * in dword_1AA3A4/dword_1AA3A8 (the goal when it is too short).
+ * Remade from tank_los. */
+static int tank_los(s32 x1, s32 z1, s32 x2, s32 z2)
+{
+    s32 dx, dz, adx, adz, dist, n, sx, sz, x, z;
+
+    dx = x2 - x1;
+    dz = z2 - z1;
+    adz = abs(dz);
+    adx = abs(dx);
+    if (adx < adz)
+        dist = adz - (adz >> 5) - (adz >> 7) + (adx >> 2) + (adx >> 3) + (adx >> 6) + (adx >> 7);
+    else
+        dist = adx - (adx >> 5) - (adx >> 7) + (adz >> 2) + (adz >> 3) + (adz >> 6) + (adz >> 7);
+    dword_1AA3A4 = x2;
+    dword_1AA3A8 = z2;
+    if (dist < 0x100)
+        return 0;
+    n = dist >> 7;
+    sx = dx / n;
+    sz = dz / n;
+    x = x1;
+    z = z1;
+    while (1)
+    {
+        n--;
+        if (n == -1)
+            return 0x2A;
+        if (!tank_tile_passable(x, z))
+            return 0;
+        if (!tank_tile_passable(x + 2 * sz, z - 2 * sx))
+            return 0;
+        if (!tank_tile_passable(x - 2 * sz, z + 2 * sx))
+            return 0;
+        dword_1AA3A4 = x - sx;
+        x += sx;
+        dword_1AA3A8 = z - sz;
+        z += sz;
+    }
+}
+
+/** Path of a tank to map point (x,z): straight when in the same zip area
+ * or the straight drive is free, else through the triangulation (2), else
+ * to the last free point of the straight drive.  Returns 1, or 0 for
+ * points out of the map.  Remade from build_tank_path. */
+static int build_tank_path_c(struct Thing *p_thing, int x, int z)
+{
+    ubyte zip;
+    s32 lx, lz;
+
+    if (((p_thing->X >> 8) < 0) || ((p_thing->X >> 8) >= 0x8000) ||
+      ((p_thing->Z >> 8) < 0) || ((p_thing->Z >> 8) >= 0x8000) ||
+      (x < 0) || (x >= 0x8000) || (z < 0) || (z > 0x8000))
+        return 0;
+    zip = game_my_big_map[((p_thing->Z >> 16) << 7) + (p_thing->X >> 16)].Zip;
+    if (zip != 0)
+    {
+        gamep_unknval_14++;
+        if (game_my_big_map[((z >> 8) << 7) + (x >> 8)].Zip == zip)
+        {
+            route_single_point(p_thing, x << 8, z << 8);
+            unkn_path_func_001(p_thing, 1);
+            return 1;
+        }
+    }
+    if (tank_los(p_thing->X >> 8, p_thing->Z >> 8, x, z) != 0)
+    {
+        route_single_point(p_thing, x << 8, z << 8);
+        unkn_path_func_001(p_thing, 1);
+        return 1;
+    }
+    triangulation_select(2);
+    lx = dword_1AA3A4;
+    lz = dword_1AA3A8;
+    nav_stats__ThisTurn++;
+    path_init8_tank(&g_nav_data, p_thing->X, p_thing->Z, x << 8, z << 8);
+    if (g_nav_data.PathLength != 0)
+    {
+        fatter_than_nothing(&g_nav_data, &g_fat_data, 0x100);
+        use_nav_data(p_thing);
+        unkn_path_func_001(p_thing, 1);
+        triangulation_select(1);
+        return 1;
+    }
+    count_fnavs(-1);
+    triangulation_select(1);
+    route_single_point(p_thing, lx << 8, lz << 8);
+    unkn_path_func_001(p_thing, 1);
+    return 1;
+}
+
+int build_tank_path(struct Thing *p_thing, int x, int z)
+{
+    int ret;
+
+    FNCHK_RET("build_tank_path", ret, build_tank_path_asm(p_thing, x, z),
+      build_tank_path_c(p_thing, x, z));
     return ret;
 }
 

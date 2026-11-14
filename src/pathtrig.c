@@ -1472,12 +1472,14 @@ static s32 triangle_route_do_wide(s32 triA, s32 triB, s32 *p_route, TbBool check
  * with the shorter path kept. Unlike ma_triangle_route_3, a failed search
  * either way fails (with points A and B left swapped if the second one
  * fails, as in the original).  Remade from ma_triangle_route. */
-static s32 ma_triangle_route(s32 triA, s32 triB, s32 *p_route)
+typedef s32 (*RouteSearchFn)(s32 triA, s32 triB, s32 *p_route, TbBool check_next);
+
+static s32 ma_triangle_route_by(s32 triA, s32 triB, s32 *p_route, RouteSearchFn search)
 {
     s32 t, len_fwd, len_bak;
     int cost_fwd, cost_bak;
 
-    len_fwd = triangle_route_do_wide(triA, triB, p_route, false);
+    len_fwd = search(triA, triB, p_route, false);
     if (len_fwd == -1)
         return -1;
     if (route_to_path(tree_Ax8, tree_Ay8, tree_Bx8, tree_By8, p_route,
@@ -1485,7 +1487,7 @@ static s32 ma_triangle_route(s32 triA, s32 triB, s32 *p_route)
         return -1;
     t = tree_Ax8; tree_Ax8 = tree_Bx8; tree_Bx8 = t;
     t = tree_Ay8; tree_Ay8 = tree_By8; tree_By8 = t;
-    len_bak = triangle_route_do_wide(triB, triA, route_bak, true);
+    len_bak = search(triB, triA, route_bak, true);
     if (len_bak == -1)
         return -1;
     if (route_to_path(tree_Ax8, tree_Ay8, tree_Bx8, tree_By8, route_bak,
@@ -1501,6 +1503,135 @@ static s32 ma_triangle_route(s32 triA, s32 triB, s32 *p_route)
             p_route[len_bak - k] = route_bak[k];
     }
     return len_bak;
+}
+
+/** Remade from ma_triangle_route. */
+static s32 ma_triangle_route(s32 triA, s32 triB, s32 *p_route)
+{
+    return ma_triangle_route_by(triA, triB, p_route, triangle_route_do_wide);
+}
+
+/** Expands a triangle in the tank route search: the side neighbours which
+ * can be entered, not if the triangle (or, `check_next`, the neighbour)
+ * has solid flag 1. */
+static void route_expand_tri_tank(s32 tri, TbBool check_next)
+{
+    int k;
+
+    for (k = 0; k < 3; k++)
+    {
+        struct TrTriangle *p_tri;
+        s32 n;
+        ubyte solid;
+
+        p_tri = &triangulation[0].Triangles[tri];
+        n = p_tri->tri[k];
+        if (n == -1)
+            continue;
+        if ((p_tri->enter & (1 << k)) == 0)
+            continue;
+        if (routeTags[n] == tag_current)
+            continue;
+        if (check_next)
+            solid = triangulation[0].Triangles[n].solid;
+        else
+            solid = p_tri->solid;
+        if ((solid & 0x01) != 0)
+            continue;
+        tree_val[n] = route_tri_dist_to_A(n);
+        routeTags[n] = tag_current;
+        tree_dad[n] = tri;
+        route_heap_push(n);
+    }
+}
+
+/** Best-first search for tanks, like triangle_route_do_unkn5 (two triangles
+ * taken from the heap at a time) but only through side neighbours which
+ * can be entered and without solid flag 1 (of the triangle left, or of
+ * the one entered with `check_next`).
+ * Remade from triangle_route_do_unkn3 and triangle_route_do_unkn4. */
+static s32 triangle_route_do_tank(s32 triA, s32 triB, s32 *p_route, TbBool check_next)
+{
+    s32 cur, nxt;
+
+    tag_current++;
+    route_heap[1] = -1;
+    route_heap_end = 0;
+    if (tag_current == 0) {
+        memset(routeTags, 0, 8000);
+        tag_current = 1;
+    }
+    tree_val[triB] = 1;
+    tree_dad[triB] = triB;
+    routeTags[triB] = tag_current;
+    route_heap_push(triB);
+
+    while (1)
+    {
+        cur = route_heap[1];
+        if ((cur == triA) || (cur == -1))
+            break;
+        route_heap_pop();
+        nxt = route_heap[1];
+        if (nxt != -1)
+        {
+            if (nxt == triA)
+                break;
+            route_heap_pop();
+        }
+        route_expand_tri_tank(cur, check_next);
+        if (nxt != -1)
+            route_expand_tri_tank(nxt, check_next);
+    }
+
+    if (route_heap[1] == -1)
+        return -1;
+    {
+        s32 n, count;
+
+        n = triA;
+        count = 0;
+        while (1)
+        {
+            p_route[count] = n;
+            if (n == triB)
+                break;
+            count++;
+            n = tree_dad[n];
+        }
+        return count;
+    }
+}
+
+/** Path for a tank between two points through the triangulation selected
+ * by the caller; PathLength stays 0 when there is none.  As the asm, the
+ * altitudes are read before the triangles are checked.
+ * Remade from path_init8_tank. */
+void path_init8_tank(struct Path *p_path, s32 ax8, s32 ay8, s32 bx8, s32 by8)
+{
+    int len2;
+
+    tree_Ax8 = ax8;
+    p_path->ax8 = ax8;
+    tree_Ay8 = ay8;
+    p_path->ay8 = ay8;
+    tree_Bx8 = bx8;
+    p_path->bx8 = bx8;
+    tree_By8 = by8;
+    tree_routelen = -1;
+    p_path->by8 = by8;
+    p_path->PathLength = 0;
+    tree_triA = triangle_findSE8(ax8, ay8);
+    tree_triB = triangle_findSE8(bx8, by8);
+    tree_altA = tri_solid_sx(tree_triA);
+    tree_altB = tri_solid_sx(tree_triB);
+    if ((tree_triA == -1) || (tree_triB == -1))
+        return;
+    tree_routelen = ma_triangle_route_by(tree_triA, tree_triB, tree_route, triangle_route_do_tank);
+    if (tree_routelen == -1)
+        return;
+    p_path->PathLength = route_to_path(ax8, ay8, bx8, by8, tree_route,
+      tree_routelen, p_path, &len2);
 }
 
 /** Path for a flyer through the triangulation selected by the caller,

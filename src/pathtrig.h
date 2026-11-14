@@ -85,6 +85,7 @@ s32 ma_triangle_route_3(int triA, int triB, s32 *p_route, s32 *p_cost);
 int path_init8_thing(struct Path *p_path, int ax8, int ay8, int bx8, int by8, int a6);
 void fatter_than_nothing(struct Path *p_src, struct Path *p_dst, int fat);
 void path_init8_wide(struct Path *p_path, s32 ax8, s32 ay8, s32 bx8, s32 by8);
+void path_init8_tank(struct Path *p_path, s32 ax8, s32 ay8, s32 bx8, s32 by8);
 int tri_path_init8(int triA, int triB, struct Path *p_path, int ax8,
   int ay8, int bx8, int by8, int a8);
 

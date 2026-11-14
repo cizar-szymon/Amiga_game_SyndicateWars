@@ -5134,20 +5134,97 @@ void person_init_command(struct Thing *p_person, ushort from)
     }
 }
 
-void assign_next_target_from_group(struct Thing *p_person, ushort group, ubyte flag)
+#ifdef SW_FNCHK
+static void assign_next_target_from_group_asm(struct Thing *p_person, ushort group, ubyte flag)
 {
     asm volatile ("call ASM_assign_next_target_from_group\n"
-        : : "a" (p_person), "d" (group), "b" (flag));
-    return;
+        : "+a" (p_person), "+d" (group), "+b" (flag) : : "cc", "memory");
+}
+#endif
+
+/** Makes the person attack the nearest member of `group` (not its own
+ * group); with nobody left it goes back to state 0.
+ * Remade from assign_next_target_from_group. */
+static void assign_next_target_from_group_c(struct Thing *p_person, ushort group, ubyte flag)
+{
+    ThingIdx target;
+
+    if (group == p_person->U.UPerson.Group)
+        return;
+    target = find_nearest_from_group(p_person, group, flag);
+    if ((ushort)target == 0) {
+        p_person->State = 0;
+        return;
+    }
+    check_weapon(p_person, 0x500);
+    p_person->State = 0x1B;
+    p_person->U.UPerson.ComTimer = -1;
+    p_person->PTarget = &things[(ushort)target];
+    p_person->GotoThingIndex = target;
+    {
+        int range;
+
+        range = get_weapon_range(p_person);
+        p_person->U.UPerson.Timer2 = 10;
+        p_person->U.UPerson.StartTimer2 = 10;
+        p_person->SubState = 0;
+        p_person->U.UPerson.ComRange = (ubyte)(range >> 6);
+    }
+}
+
+void assign_next_target_from_group(struct Thing *p_person, ushort group, ubyte flag)
+{
+    FNCHK_VOID("assign_next_target_from_group",
+      assign_next_target_from_group_asm(p_person, group, flag),
+      assign_next_target_from_group_c(p_person, group, flag));
+}
+
+#ifdef SW_FNCHK
+static short is_group_all_persuaded_by_me_asm(ushort group, struct Thing *p_me, short count)
+{
+    int ret;
+    asm volatile (
+      "call ASM_is_group_all_persuaded_by_me\n"
+        : "=a" (ret), "+d" (p_me), "+b" (count) : "0" (group) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** True when at least `count` members of the group are persuaded by `p_me`;
+ * with `count` -1, when every member not dead is.
+ * Remade from is_group_all_persuaded_by_me. */
+static short is_group_all_persuaded_by_me_c(ushort group, struct Thing *p_me, short count)
+{
+    ushort num;
+    short thing;
+
+    num = 0;
+    for (thing = same_type_head[256 + group]; thing != 0;
+      thing = things[thing].LinkSameGroup)
+    {
+        struct Thing *p_thing;
+
+        p_thing = &things[thing];
+        if (((p_thing->Flag & TngF_Persuaded) != 0) &&
+          (p_thing->Owner == p_me->ThingOffset))
+            num++;
+        else if (((p_thing->Flag & TngF_Destroyed) == 0) && (count == -1))
+            return 0;
+        if ((count >= 0) && (num >= count))
+            return 1;
+    }
+    if (count == -1)
+        return 1;
+    return (num >= count) ? 1 : 0;
 }
 
 short is_group_all_persuaded_by_me(ushort group, struct Thing *p_me, short count)
 {
-    // looks like a variation on group_has_no_less_members_persuaded_by_person(); reuse?
     short ret;
-    asm volatile (
-      "call ASM_is_group_all_persuaded_by_me\n"
-        : "=r" (ret) : "a" (group), "d" (p_me), "b" (count));
+
+    FNCHK_RET("is_group_all_persuaded_by_me", ret,
+      is_group_all_persuaded_by_me_asm(group, p_me, count),
+      is_group_all_persuaded_by_me_c(group, p_me, count));
     return ret;
 }
 
@@ -8925,10 +9002,180 @@ void calc_lighting(struct Thing *p_person)
     FNCHK_VOID("calc_lighting", calc_lighting_asm(p_person), calc_lighting_c(p_person));
 }
 
-void process_persuaded(struct Thing *p_person)
+#ifdef SW_FNCHK
+static void process_persuaded_asm(struct Thing *p_person)
 {
     asm volatile ("call ASM_process_persuaded\n"
-        : : "a" (p_person));
+        : "+a" (p_person) : : "cc", "memory");
+}
+#endif
+
+void peep_change_weapon(struct Thing *p_person);
+void person_pickup(struct Thing *p_person);
+void person_get_item(struct Thing *p_person);
+
+/** A persuaded person takes out the same kind of weapon as its owner, or
+ * puts its own away when the owner has none.  Remade from
+ * copy_owner_with_weapon. */
+static void copy_owner_with_weapon(struct Thing *p_person, struct Thing *p_owner)
+{
+    ubyte own_wep, owner_wep;
+
+    own_wep = p_person->U.UPerson.CurrentWeapon;
+    owner_wep = p_owner->U.UPerson.CurrentWeapon;
+    if (own_wep == owner_wep)
+        return;
+    if (owner_wep != 0)
+    {
+        if (own_wep != 0)
+            return;
+        if (p_person->U.UPerson.TempWeapon != 0)
+            p_person->U.UPerson.CurrentWeapon = (ubyte)p_person->U.UPerson.TempWeapon;
+        else if ((p_person->U.UPerson.WeaponsCarried & (1u << ((owner_wep - 1) & 0x1F))) != 0)
+            p_person->U.UPerson.CurrentWeapon = owner_wep;
+        else
+            choose_best_weapon_for_range(p_person, 0x500);
+        if (p_person->U.UPerson.CurrentWeapon == 0)
+            return;
+        peep_change_weapon(p_person);
+        p_person->U.UPerson.TempWeapon = p_person->U.UPerson.CurrentWeapon;
+        p_person->Frame -= wander_anim_frame(p_person);
+        p_person->U.UPerson.AnimMode = gun_out_anim(p_person, 0);
+    }
+    else
+    {
+        if (own_wep == 0)
+            return;
+        peep_change_weapon(p_person);
+        p_person->U.UPerson.TempWeapon = p_person->U.UPerson.CurrentWeapon;
+        p_person->U.UPerson.CurrentWeapon = 0;
+        p_person->Frame -= wander_anim_frame(p_person);
+        p_person->U.UPerson.AnimMode = 0;
+    }
+    p_person->Frame += wander_anim_frame(p_person);
+    p_person->StartFrame = people_frames[p_person->SubType][p_person->U.UPerson.AnimMode] - 1;
+}
+
+/** A persuaded person follows its owner: same mood and weapon, the owner's
+ * target, into and out of vehicles with it, and an agent's follower aims
+ * where the player aims.  Goes back when the owner dies.
+ * Remade from process_persuaded. */
+static void process_persuaded_c(struct Thing *p_person)
+{
+    struct Thing *p_owner;
+
+    if ((p_person->U.UPerson.Target2 != 0) &&
+      ((things[p_person->U.UPerson.Target2].Flag & TngF_Destroyed) != 0))
+        p_person->U.UPerson.Target2 = 0;
+    p_owner = &things[(ushort)p_person->Owner];
+    if (p_person->U.UPerson.Mood != p_owner->U.UPerson.Mood)
+    {
+        p_person->U.UPerson.Mood = p_owner->U.UPerson.Mood;
+        p_person->Speed = calc_person_speed(p_person);
+    }
+    if ((p_owner->Flag2 & TgF2_Unkn8000) != 0)
+    {
+        p_owner->Flag2 &= ~TgF2_Unkn8000;
+        remove_path(p_person);
+        p_person->U.UPerson.ComTimer = -1;
+    }
+    if ((p_owner->Flag & TngF_Destroyed) != 0)
+    {
+        stop_being_persuaded(p_person);
+        return;
+    }
+    if ((p_person->Flag2 & TgF2_Unkn08000000) != 0)
+    {
+        p_person->U.UPerson.ComRange = 0;
+        if ((ushort)p_person->State == 7)
+            person_pickup(p_person);
+        else if (((ushort)p_person->State == 0x2C) && (p_person->U.UPerson.BumpCount == 0))
+            person_get_item(p_person);
+        else {
+            p_person->U.UPerson.ComRange = 3;
+            p_person->Flag2 &= ~TgF2_Unkn08000000;
+        }
+        p_person->U.UPerson.ComRange = 8;
+        return;
+    }
+    copy_owner_with_weapon(p_person, p_owner);
+    if ((p_person->PTarget != NULL) &&
+      (p_person->PTarget->U.UPerson.EffectiveGroup == p_person->U.UPerson.EffectiveGroup))
+        p_person->PTarget = NULL;
+    if ((p_owner->PTarget != NULL) && (p_owner->U.UPerson.WeaponTurn != 0))
+        p_person->PTarget = p_owner->PTarget;
+    else
+        p_person->PTarget = NULL;
+
+    if ((p_person->Flag & TngF_InVehicle) != 0)
+    {
+        if ((p_owner->Flag & TngF_InVehicle) != 0)
+            return;
+        person_attempt_to_leave_vehicle(p_person);
+        return;
+    }
+    if (((ushort)p_person->State != 0x30) && ((p_owner->Flag & TngF_InVehicle) != 0))
+    {
+        p_person->State = 0x30;
+        p_person->U.UPerson.ComTimer = -1;
+        remove_path(p_person);
+    }
+    if ((ushort)p_person->State == 0x30)
+    {
+        if ((p_owner->Flag & TngF_InVehicle) == 0)
+        {
+            p_person->State = 0;
+        }
+        else
+        {
+            ThingIdx goto_bak;
+
+            goto_bak = p_person->GotoThingIndex;
+            p_person->GotoThingIndex = p_person->Owner;
+            p_person->U.UPerson.ComRange = 0;
+            person_goto_person_nav(p_person);
+            p_person->GotoThingIndex = goto_bak;
+            if (((p_person->Flag & TngF_Unkn01000000) != 0) &&
+              (p_person->U.UPerson.Vehicle == p_owner->U.UPerson.Vehicle))
+                person_enter_vehicle(p_person, &things[p_person->U.UPerson.Vehicle]);
+        }
+    }
+    else
+    {
+        if (p_person->PTarget != NULL)
+            try_and_kill_target(p_person);
+        if (p_person->PTarget == NULL)
+        {
+            p_person->GotoThingIndex = p_person->Owner;
+            p_person->U.UPerson.ComRange = (abs(p_owner->U.UPerson.Mood) >> 3) + 2;
+            person_goto_person_nav(p_person);
+        }
+    }
+    if (((p_owner->Flag & (TngF_WepCharging|TngF_TriggerUse)) != 0) &&
+      ((p_owner->Flag & TngF_ShootAtPos) != 0) && (p_owner->PTarget == NULL) &&
+      (p_person->U.UPerson.Target2 == 0))
+        p_person->Flag |= TngF_ShootAtPos|TngF_TriggerUse;
+
+    if (((p_owner->Flag & TngF_PlayerAgent) != 0) &&
+      ((p_person->Flag & (TngF_ShootAtPos|TngF_TriggerUse)) == (TngF_ShootAtPos|TngF_TriggerUse)))
+    {
+        PlayerInfo *p_player;
+        ubyte dir;
+
+        p_player = &players[p_owner->U.UPerson.ComCur >> 2];
+        dir = ((((short)angle_between_points(p_person->X >> 8, p_person->Z >> 8,
+          p_player->SpecialItems[0], p_player->SpecialItems[2]) + 0x80) >> 8) + 8) & 7;
+        if (dir != p_person->U.UPerson.Angle)
+        {
+            p_person->U.UPerson.Angle = dir;
+            p_person->Frame = wander_anim_frame(p_person);
+        }
+    }
+}
+
+void process_persuaded(struct Thing *p_person)
+{
+    FNCHK_VOID("process_persuaded", process_persuaded_asm(p_person), process_persuaded_c(p_person));
 }
 
 #ifdef SW_FNCHK
@@ -9977,10 +10224,54 @@ void person_run_away(struct Thing *p_person)
     FNCHK_VOID("person_run_away", person_run_away_asm(p_person), person_run_away_c(p_person));
 }
 
-void person_becomes_persuaded(struct Thing *p_person, ushort energy)
+#ifdef SW_FNCHK
+static void person_becomes_persuaded_asm(struct Thing *p_person, ushort energy)
 {
     asm volatile ("call ASM_person_becomes_persuaded\n"
-        : : "a" (p_person), "d" (energy));
+        : "+a" (p_person), "+d" (energy) : : "cc", "memory");
+}
+#endif
+
+/** The target of a persuading person (not an agent, not in state 13)
+ * becomes its follower; the persuader pays `energy` and gains persuade
+ * power.  Remade from person_becomes_persuaded. */
+static void person_becomes_persuaded_c(struct Thing *p_person, ushort energy)
+{
+    struct Thing *p_target;
+
+    p_target = p_person->PTarget;
+    if (p_target == NULL)
+        return;
+    if ((p_target->Flag & TngF_PlayerAgent) != 0)
+        return;
+    if ((ushort)p_target->State == 0xD)
+        return;
+    play_dist_sample(p_person, 0x14, 0x7F, 0x40, 100, 0, 3);
+    remove_path(p_person->PTarget);
+    set_person_animmode_walk(p_person);
+    p_person->U.UPerson.Energy -= energy;
+    if (p_person->U.UPerson.Energy < 0)
+        p_person->U.UPerson.Energy = 0;
+    p_target = p_person->PTarget;
+    p_target->PTarget = NULL;
+    p_target->State = 0;
+    p_target->Owner = p_person->ThingOffset;
+    p_target->Flag |= TngF_Persuaded;
+    p_target->State = 0;
+    p_target->U.UPerson.ComTimer = -1;
+    p_target->U.UPerson.ComRange = 3;
+    p_target->U.UPerson.Timer2 = 5;
+    p_target->U.UPerson.StartTimer2 = 5;
+    p_target->SubState = 0;
+    p_target->U.UPerson.EffectiveGroup = p_person->U.UPerson.EffectiveGroup;
+    p_person->U.UPerson.PersuadePower += peep_type_stats[p_target->SubType].PersuadeWorth;
+    group_actions[p_target->U.UPerson.Group].Persuaded++;
+}
+
+void person_becomes_persuaded(struct Thing *p_person, ushort energy)
+{
+    FNCHK_VOID("person_becomes_persuaded", person_becomes_persuaded_asm(p_person, energy),
+      person_becomes_persuaded_c(p_person, energy));
 }
 
 void person_persuade_person(struct Thing *p_person)

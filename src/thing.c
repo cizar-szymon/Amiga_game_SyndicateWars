@@ -2789,11 +2789,58 @@ void process_drift_smoke(struct SimpleThing *p_sthing, ThingIdx thing_item)
       process_drift_smoke_c(p_sthing, thing_item));
 }
 
-void process_mushroom(struct SimpleThing *p_sthing, ThingIdx thing_item)
+#ifdef SW_FNCHK
+static void process_mushroom_asm(struct SimpleThing *p_sthing, ThingIdx thing_item)
 {
     asm volatile (
       "call ASM_process_mushroom\n"
-        : : "a" (p_sthing), "d" (thing_item));
+        : "+d" (thing_item) : "a" (p_sthing) : "cc", "memory");
+}
+#endif
+
+/** A piece of the nuclear mushroom cloud: rises (slowing near the top, OY
+ * is the ground height), drawn in while low and spread out while high,
+ * grows, and goes when its timer runs out.  Remade from process_mushroom. */
+static void process_mushroom_c(struct SimpleThing *p_sthing, ThingIdx thing_item)
+{
+    struct STngUEffect *p_eff;
+    int x, y, z, h, d;
+
+    p_eff = &p_sthing->U.UEffect;
+    h = (p_sthing->Y >> 8) - p_eff->OY;
+    if (h < 0x50)
+    {
+        d = h >> 1;
+        x = p_sthing->X - p_eff->VX * d;
+        z = p_sthing->Z - p_eff->VZ * d;
+    }
+    else
+    {
+        d = (h - 0x50) >> 2;
+        x = p_sthing->X + p_eff->VX * d;
+        z = p_sthing->Z + p_eff->VZ * d;
+    }
+    p_eff->VY += (0x50 - h) << 3;
+    if (p_eff->VY < -2000)
+        p_eff->VY = -2000;
+    y = p_sthing->Y + (p_eff->VY >> 1);
+    move_smapwho_c(p_sthing, &x, y, &z);
+    p_sthing->Object += 4;
+    if (p_sthing->Timer1 > 0)
+    {
+        p_sthing->Timer1--;
+        if (p_sthing->Timer1 == 0)
+        {
+            remove_sthing(thing_item);
+            delete_snode(p_sthing);
+        }
+    }
+}
+
+void process_mushroom(struct SimpleThing *p_sthing, ThingIdx thing_item)
+{
+    FNCHK_VOID("process_mushroom", process_mushroom_asm(p_sthing, thing_item),
+      process_mushroom_c(p_sthing, thing_item));
 }
 
 #ifdef SW_FNCHK
@@ -3015,11 +3062,49 @@ void process_flame1(struct SimpleThing *p_sthing)
     FNCHK_VOID("process_flame1", process_flame1_asm(p_sthing), process_flame1_c(p_sthing));
 }
 
-void process_splash(struct SimpleThing *p_sthing)
+#ifdef SW_FNCHK
+static void process_splash_asm(struct SimpleThing *p_sthing)
 {
     asm volatile (
       "call ASM_process_splash\n"
-        : : "a" (p_sthing));
+        : : "a" (p_sthing) : "cc", "memory");
+}
+#endif
+
+/** A splash in water: every other turn a drop around it, and it goes at
+ * the end of its animation.  Remade from process_splash. */
+static void process_splash_c(struct SimpleThing *p_sthing)
+{
+    ushort next;
+
+    p_sthing->Timer1--;
+    if ((p_sthing->Timer1 > 0) && ((p_sthing->Timer1 & 1) != 0))
+    {
+        short x, z;
+        struct SimpleThing *p_drop;
+
+        x = (p_sthing->X >> 8) + (LbRandomAnyShort() & 0xFF) - 0x80;
+        z = (p_sthing->Z >> 8) + (LbRandomAnyShort() & 0xFF) - 0x80;
+        p_drop = create_scale_effect((ushort)x, alt_at_point(x, z) >> 8, (ushort)z, 0x43F, 0);
+        if (p_drop != NULL)
+        {
+            p_drop->SubType = 0x3C;
+            p_drop->Object = (LbRandomAnyShort() & 0x7F) + 0x3E;
+        }
+    }
+    next = frame[(ushort)p_sthing->Frame].Next;
+    if ((frame[next].Flags & 0x01) != 0)
+    {
+        remove_sthing(p_sthing->ThingOffset);
+        delete_snode(p_sthing);
+        return;
+    }
+    p_sthing->Frame = next;
+}
+
+void process_splash(struct SimpleThing *p_sthing)
+{
+    FNCHK_VOID("process_splash", process_splash_asm(p_sthing), process_splash_c(p_sthing));
 }
 
 void process_scale_effect(struct SimpleThing *p_sthing, ThingIdx thing_item)

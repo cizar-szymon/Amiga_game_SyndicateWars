@@ -2069,17 +2069,158 @@ void process_canister(struct SimpleThing *p_sthing)
         : : "a" (p_sthing));
 }
 
-void process_stasis_pod(struct SimpleThing *p_sthing)
+#ifdef SW_FNCHK
+static void process_stasis_pod_asm(struct SimpleThing *p_sthing)
 {
     asm volatile (
       "call ASM_process_stasis_pod\n"
-        : : "a" (p_sthing));
+        : : "a" (p_sthing) : "cc", "memory");
+}
+
+static void find_and_stasis_asm(struct SimpleThing *p_stasis, int radius)
+{
+    asm volatile ("call ASM_find_and_stasis\n"
+        : "+d" (radius) : "a" (p_stasis) : "cc", "memory");
+}
+#endif
+
+/** Volume of a sample already playing for a simple thing (the sound code
+ * is still the original). */
+static void set_dist_volume(struct SimpleThing *p_sthing, ushort smptbl_id, ushort vol)
+{
+    asm volatile ("call ASM_set_dist_volume\n"
+        : : "a" (p_sthing), "d" ((u32)smptbl_id), "b" ((u32)vol) : "cc", "memory");
+}
+
+/** A stasis field freezes (Flag2 0x02000000) everything within `radius`
+ * (plus its own radius) and a similar height, except the people of the
+ * owner's group.  Remade from find_and_stasis. */
+static void find_and_stasis_c(struct SimpleThing *p_stasis, int radius)
+{
+    s32 cx, cy, cz;
+    short tile_x, tile_z, i, k;
+    ushort rtiles;
+
+    cx = p_stasis->X >> 8;
+    cy = p_stasis->Y >> 8;
+    cz = p_stasis->Z >> 8;
+    rtiles = (ushort)(radius >> 8);
+    if (rtiles < 1)
+        rtiles = 1;
+    tile_x = cx >> 8;
+    tile_z = cz >> 8;
+    for (i = -(short)rtiles; i <= (s32)rtiles; i++)
+    {
+        for (k = -(short)rtiles; k <= (s32)rtiles; k++)
+        {
+            int tx, tz;
+            ThingIdx thing;
+
+            tx = tile_x + i;
+            if ((tx <= 0) || (tx >= 128))
+                continue;
+            tz = tile_z + k;
+            if ((tz <= 0) || (tz >= 128))
+                continue;
+            thing = game_my_big_map[(tz << 7) + tx].Child;
+            while (thing != 0)
+            {
+                if (thing > 0)
+                {
+                    struct Thing *p_thing;
+                    s32 dy, adx, adz, dist;
+
+                    p_thing = &things[thing];
+                    thing = p_thing->Next;
+                    if ((p_thing->Type == TT_PERSON) && (p_thing->U.UPerson.Group ==
+                      things[(ushort)p_stasis->Owner2].U.UPerson.Group))
+                        continue;
+                    dy = (p_thing->Y >> 8) - cy;
+                    if ((dy >= 0x55) || (dy <= -0x55))
+                        continue;
+                    adx = abs((p_thing->X >> 8) - cx);
+                    adz = abs((p_thing->Z >> 8) - cz);
+                    if (adx <= adz)
+                        dist = adz + (adx >> 1);
+                    else
+                        dist = adx + (adz >> 1);
+                    if (dist < (ushort)p_thing->Radius + radius)
+                        p_thing->Flag2 |= 0x02000000;
+                }
+                else
+                {
+                    /* the asm measures simple things too but does nothing with them */
+                    thing = sthings[thing].Next;
+                }
+            }
+        }
+    }
 }
 
 void find_and_stasis(struct SimpleThing *p_stasis, int radius)
 {
-    asm volatile ("call ASM_find_and_stasis\n"
-        :  : "a" (p_stasis), "d" (radius));
+    FNCHK_VOID("find_and_stasis", find_and_stasis_asm(p_stasis, radius),
+      find_and_stasis_c(p_stasis, radius));
+}
+
+/** A stasis field: it grows (with a rising hum) for 50 turns, holds 100,
+ * shrinks for 23, then goes; while growing and holding it freezes what is
+ * inside.  Remade from process_stasis_pod. */
+static void process_stasis_pod_c(struct SimpleThing *p_sthing)
+{
+    p_sthing->Timer1--;
+    switch ((ushort)p_sthing->State)
+    {
+    case 0:
+        p_sthing->Radius += 0x10;
+        if (!IsSamplePlaying(p_sthing->ThingOffset, 0x2C, 0))
+            play_dist_ssample(p_sthing, 0x2C, (ushort)((50 - p_sthing->Timer1) * 2), 0x40, 100, -1, 1);
+        else
+            set_dist_volume(p_sthing, 0x2C, (ushort)((50 - p_sthing->Timer1) * 2));
+        if (p_sthing->Timer1 < 0)
+        {
+            p_sthing->Timer1 = 100;
+            p_sthing->State++;
+        }
+        find_and_stasis(p_sthing, (ushort)p_sthing->Radius);
+        break;
+    case 1:
+        if (p_sthing->Timer1 < 0)
+        {
+            p_sthing->State++;
+            p_sthing->Timer1 = 0x17;
+        }
+        find_and_stasis(p_sthing, (ushort)p_sthing->Radius);
+        break;
+    case 2:
+        if (p_sthing->Timer1 > 0)
+        {
+            if (!IsSamplePlaying(p_sthing->ThingOffset, 0x2C, 0))
+                play_dist_ssample(p_sthing, 0x2C, (ushort)((50 - p_sthing->Timer1) * 2), 0x40, 100, -1, 1);
+            else
+                set_dist_volume(p_sthing, 0x2C, (ushort)(p_sthing->Timer1 << 2));
+        }
+        p_sthing->Radius -= 0x20;
+        if (p_sthing->Timer1 < 0)
+        {
+            p_sthing->Timer1 = 0x19;
+            p_sthing->State++;
+        }
+        break;
+    case 3:
+        stop_sample_using_heap(p_sthing->ThingOffset, 0x2C);
+        delete_snode(p_sthing);
+        remove_sthing(p_sthing->ThingOffset);
+        break;
+    default:
+        break;
+    }
+}
+
+void process_stasis_pod(struct SimpleThing *p_sthing)
+{
+    FNCHK_VOID("process_stasis_pod", process_stasis_pod_asm(p_sthing),
+      process_stasis_pod_c(p_sthing));
 }
 
 void find_and_time_travel(struct SimpleThing *p_sthing)
@@ -4789,14 +4930,59 @@ struct SimpleThing *create_sound_effect(int x, int y, int z, ushort sample, int 
     return ret;
 }
 
-struct SimpleThing *create_stasis_pod(MapCoord x, MapCoord y, MapCoord z,
+#ifdef SW_FNCHK
+static struct SimpleThing *create_stasis_pod_asm(MapCoord x, MapCoord y, MapCoord z,
   ushort timer, struct Thing *p_owner)
 {
     struct SimpleThing *ret;
     asm volatile (
-      "push %5\n"
+      "push %%esi\n"
       "call ASM_create_stasis_pod\n"
-        : "=r" (ret) : "a" (x), "d" (y), "b" (z), "c" (timer), "g" (p_owner));
+        : "=a" (ret) : "a" ((s32)x), "d" ((s32)y), "b" ((s32)z), "c" ((u32)timer), "S" (p_owner)
+        : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** A new stasis field at (x,y,z) with its timer; NULL off the map or when
+ * the simple things run short (over 1495 used).  Remade from
+ * create_stasis_pod. */
+static struct SimpleThing *create_stasis_pod_c(MapCoord x, MapCoord y, MapCoord z,
+  ushort timer, struct Thing *p_owner)
+{
+    struct SimpleThing *p_pod;
+    ThingIdx thing;
+
+    if (sthings_used > 0x5D7)
+        return NULL;
+    if ((x < 0) || (z < 0))
+        return NULL;
+    thing = get_new_sthing();
+    if (thing == 0)
+        return NULL;
+    if ((thing > -1) || (thing < -1500))
+        return NULL;
+    p_pod = &sthings[thing];
+    p_pod->Radius = 0;
+    p_pod->StartFrame = 0;
+    p_pod->Type = 0x24;
+    p_pod->Z = z << 8;
+    p_pod->State = 0;
+    p_pod->X = x << 8;
+    p_pod->Y = y << 8;
+    p_pod->Timer1 = timer;
+    p_pod->Owner2 = p_owner->ThingOffset;
+    add_node_sthing(thing);
+    return p_pod;
+}
+
+struct SimpleThing *create_stasis_pod(MapCoord x, MapCoord y, MapCoord z,
+  ushort timer, struct Thing *p_owner)
+{
+    struct SimpleThing *ret;
+
+    FNCHK_RET("create_stasis_pod", ret, create_stasis_pod_asm(x, y, z, timer, p_owner),
+      create_stasis_pod_c(x, y, z, timer, p_owner));
     return ret;
 }
 

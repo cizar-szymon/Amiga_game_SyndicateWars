@@ -2309,11 +2309,91 @@ void process_electric_strand(struct SimpleThing *p_sthing)
       process_electric_strand_c(p_sthing));
 }
 
-void process_canister(struct SimpleThing *p_sthing)
+#ifdef SW_FNCHK
+static void process_canister_asm(struct SimpleThing *p_sthing)
 {
     asm volatile (
       "call ASM_process_canister\n"
-        : : "a" (p_sthing));
+        : "+a" (p_sthing) : : "cc", "memory");
+}
+#endif
+
+extern s32 engn_nuclear_shade_timer;
+extern TbBool nuclear_overexposure;
+static void set_dist_volume(struct SimpleThing *p_sthing, ushort smptbl_id, ushort vol);
+
+/** A gas canister (subtype 4, or 5 with another cloud animation) lets out
+ * four clouds in a turning ring every turn, its sound gets louder at the
+ * start and quieter at the end, and it goes after 200 turns.  It also
+ * drives the nuclear shade timer.  The asm clears nuclear_overexposure as
+ * a long; in C it is one byte.  Remade from process_canister. */
+static void process_canister_c(struct SimpleThing *p_sthing)
+{
+    s32 x, y, z;
+    int angle;
+    ushort smpl;
+
+    x = p_sthing->X >> 8;
+    y = p_sthing->Y >> 8;
+    z = p_sthing->Z >> 8;
+    p_sthing->Radius = 0;
+    engn_nuclear_shade_timer = p_sthing->Timer1;
+    for (angle = 0; angle != 0x800; angle += 0x200)
+    {
+        struct SimpleThing *p_cloud;
+        s32 vx, vz, cs, sn;
+        int a, r;
+        ushort timer;
+
+        a = ((p_sthing->Timer1 << 6) + angle) & 0x7FF;
+        cs = lbSinTable[a + 512];
+        sn = lbSinTable[a];
+        vx = (cs >> 4) - (cs >> 6);
+        vz = (sn >> 4) - (sn >> 6);
+        vx += (int)(ushort)LbRandomAnyShort() % 800 - 400;
+        r = (int)(ushort)LbRandomAnyShort() % 800;
+        timer = (LbRandomAnyShort() & 0x0F) + 20;
+        vz += r - 400;
+        p_cloud = create_scale_effect(x, y, z, 0x398, timer);
+        if (p_cloud == NULL)
+            continue;
+        p_cloud->SubType = 0x1E;
+        p_cloud->Object = 0x20;
+        p_cloud->StartFrame = 12;
+        p_cloud->U.UEffect.VY = 8;
+        p_cloud->U.UEffect.OY = 0;
+        p_cloud->Frame = frame[frame[(ushort)p_cloud->Frame].Next].Next;
+        p_cloud->U.UEffect.VX = vx;
+        p_cloud->U.UEffect.VZ = vz;
+        p_cloud->U.UEffect.OX = (-vx) >> 5;
+        p_cloud->U.UEffect.OZ = (-vz) >> 5;
+        p_cloud->Owner2 = p_sthing->Owner2;
+        if (p_sthing->SubType == 4)
+            p_cloud->Flag |= 0x10;
+        else if (p_sthing->SubType == 5) {
+            p_cloud->Flag |= 0x20;
+            p_cloud->Frame = frame[frame[nstart_ani[908]].Next].Next;
+        }
+    }
+    p_sthing->Timer1++;
+    smpl = (p_sthing->SubType == 4) ? 0x20 : 0x1F;
+    if (p_sthing->Timer1 < 10)
+        set_dist_volume(p_sthing, smpl, (ushort)(p_sthing->Timer1 * 10));
+    if (p_sthing->Timer1 > 190)
+        set_dist_volume(p_sthing, smpl, (ushort)((301 - p_sthing->Timer1) * 10));
+    if (p_sthing->Timer1 > 200)
+    {
+        stop_sample_using_heap(p_sthing->ThingOffset, smpl);
+        remove_sthing(p_sthing->ThingOffset);
+        delete_snode(p_sthing);
+        nuclear_overexposure = 0;
+    }
+}
+
+void process_canister(struct SimpleThing *p_sthing)
+{
+    FNCHK_VOID("process_canister", process_canister_asm(p_sthing),
+      process_canister_c(p_sthing));
 }
 
 #ifdef SW_FNCHK

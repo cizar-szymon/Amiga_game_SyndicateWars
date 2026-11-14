@@ -156,6 +156,7 @@ void build_navigate_path_to_face(struct Thing *p_thing, short face);
 int can_i_see_building(struct Thing *p_i, struct Thing *p_thing, int max_dist, ushort flags);
 void get_soul(struct Thing *p_dead, struct Thing *p_person);
 int map_things_unkn_func_04(short subtype);
+struct SimpleThing *init_nuclear_bomb(MapCoord x, MapCoord y, MapCoord z);
 
 void set_player_peeps_to_run(struct Thing *p_leader, ushort plyr)
 {
@@ -1968,6 +1969,20 @@ static void test_cmds_process(void)
         break;
     case 72:
         map_things_unkn_func_04(0);
+        break;
+    case 76:
+        if ((gameturn % 240) < 120)
+        {
+            struct SimpleThing *p_bomb;
+
+            // a gas canister like from a grenade, subtype 4 or 5
+            p_bomb = init_nuclear_bomb((p_agent->X >> 8) - 0x200, p_agent->Y >> 8, p_agent->Z >> 8);
+            if (p_bomb != NULL) {
+                p_bomb->Type = SmTT_CANISTER;
+                p_bomb->SubType = ((gameturn % 480) < 240) ? 4 : 5;
+                p_bomb->Owner2 = p_agent->ThingOffset;
+            }
+        }
         break;
     case 74:
     {

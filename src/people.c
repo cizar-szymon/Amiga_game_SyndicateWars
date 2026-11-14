@@ -2807,6 +2807,141 @@ void use_nav_data(struct Thing *p_thing)
     FNCHK_VOID("use_nav_data", use_nav_data_asm(p_thing), use_nav_data_c(p_thing));
 }
 
+extern s32 dword_1AA3AC;
+extern s32 dword_1AA3B0;
+
+/** True when the tile under map point (x,z) has a collision column with
+ * bit 0x40 (a wall too high to fly over). No range check, as the original. */
+static TbBool route_tile_blocked(s32 x, s32 z)
+{
+    struct ColColumn *p_ccol;
+    ushort col;
+
+    col = game_my_big_map[((z >> 8) << 7) + (x >> 8)].ColumnHead & 0xFFF;
+    if (col == 0)
+        return false;
+    p_ccol = &game_col_columns[col];
+    return ((p_ccol->QBits[0] | p_ccol->QBits[1] | p_ccol->QBits[2] | p_ccol->QBits[3]) & 0x40) != 0;
+}
+
+/** Checks the straight flight from (x1,z1) to (x2,z2), in steps of about
+ * half a tile, with a band on both sides. Returns 0x2A when it is free,
+ * 0 when blocked or shorter than a tile; the last free point is left in
+ * dword_1AA3AC/dword_1AA3B0.  Remade from func_5fe50. */
+static int route_flight_line_free(s32 x1, s32 z1, s32 x2, s32 z2)
+{
+    s32 dx, dz, adx, adz, dist, n, sx, sz, x, z;
+
+    dz = z2 - z1;
+    dx = x2 - x1;
+    adz = abs(dz);
+    adx = abs(dx);
+    if (adx < adz)
+        dist = adz - (adz >> 5) - (adz >> 7) + (adx >> 2) + (adx >> 3) + (adx >> 6) + (adx >> 7);
+    else
+        dist = adx - (adx >> 5) - (adx >> 7) + (adz >> 2) + (adz >> 3) + (adz >> 6) + (adz >> 7);
+    dword_1AA3AC = x1;
+    dword_1AA3B0 = z1;
+    if (dist < 0x100)
+        return 0;
+    n = dist >> 7;
+    sx = dx / n;
+    sz = dz / n;
+    x = x1;
+    z = z1;
+    while (1)
+    {
+        n--;
+        if (n == -1)
+            return 0x2A;
+        if (route_tile_blocked(x, z))
+            return 0;
+        if (route_tile_blocked(x + 2 * sz, z - 2 * sx))
+            return 0;
+        if (route_tile_blocked(x - 2 * sz, z + 2 * sx))
+            return 0;
+        dword_1AA3AC = x - sx;
+        x += sx;
+        dword_1AA3B0 = z - sz;
+        z += sz;
+    }
+}
+
+/** Gives the thing a one point path to (x8,z8). */
+static void route_single_point(struct Thing *p_thing, s32 x8, s32 z8)
+{
+    g_fat_data.PathLength = 1;
+    g_fat_data.WayPoints[0].x8 = x8;
+    g_fat_data.WayPoints[0].y8 = z8;
+    use_nav_data(p_thing);
+}
+
+#ifdef SW_FNCHK
+static int ariadne_initialise_route_asm(struct Thing *p_thing, int x, int z)
+{
+    int ret;
+    asm volatile ("call ASM_ariadne_initialise_route\n"
+        : "=a" (ret), "+d" (x), "+b" (z) : "0" (p_thing) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Route of a flying vehicle to map point (x,z): straight when in the same
+ * zip area or nothing high is in the way, else through the flight
+ * triangulation (2), else to the last free point of the straight line.
+ * Returns 1, or 0 for points out of the map.
+ * Remade from ariadne_initialise_route. */
+static int ariadne_initialise_route_c(struct Thing *p_thing, int x, int z)
+{
+    ubyte zip;
+    s32 lx, lz;
+
+    if (((p_thing->X >> 8) < 0) || ((p_thing->X >> 8) >= 0x8000) ||
+      ((p_thing->Z >> 8) < 0) || ((p_thing->Z >> 8) >= 0x8000) ||
+      (x < 0) || (x >= 0x8000) || (z < 0) || (z > 0x8000))
+        return 0;
+    zip = game_my_big_map[((p_thing->Z >> 16) << 7) + (p_thing->X >> 16)].Zip;
+    if (zip != 0)
+    {
+        gamep_unknval_14++;
+        if (game_my_big_map[((z >> 8) << 7) + (x >> 8)].Zip == zip)
+        {
+            route_single_point(p_thing, x << 8, z << 8);
+            return 1;
+        }
+    }
+    if (route_flight_line_free(p_thing->X >> 8, p_thing->Z >> 8, x, z) != 0)
+    {
+        route_single_point(p_thing, x << 8, z << 8);
+        return 1;
+    }
+    triangulation_select(2);
+    lx = dword_1AA3AC;
+    lz = dword_1AA3B0;
+    nav_stats__ThisTurn++;
+    path_init8_wide(&g_nav_data, p_thing->X, p_thing->Z, x << 8, z << 8);
+    if (g_nav_data.PathLength != 0)
+    {
+        fatter_than_nothing(&g_nav_data, &g_fat_data, 0x100);
+        use_nav_data(p_thing);
+        triangulation_select(1);
+        return 1;
+    }
+    count_fnavs(-1);
+    triangulation_select(1);
+    route_single_point(p_thing, lx << 8, lz << 8);
+    return 1;
+}
+
+int ariadne_initialise_route(struct Thing *p_thing, int x, int z)
+{
+    int ret;
+
+    FNCHK_RET("ariadne_initialise_route", ret, ariadne_initialise_route_asm(p_thing, x, z),
+      ariadne_initialise_route_c(p_thing, x, z));
+    return ret;
+}
+
 #ifdef SW_FNCHK
 static ushort build_navigate_path_asm(struct Thing *p_thing, int x, int z, int face)
 {

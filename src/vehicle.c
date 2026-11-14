@@ -913,14 +913,6 @@ extern s32 veh_ma_heap[258];
 
 int build_tank_path(struct Thing *p_thing, int x, int z);
 
-static int ariadne_initialise_route_asm(struct Thing *p_thing, int x, int z)
-{
-    int ret;
-    asm volatile ("call ASM_ariadne_initialise_route\n"
-        : "=a" (ret), "+d" (x), "+b" (z) : "0" (p_thing) : "cc", "memory");
-    return ret;
-}
-
 /* The asm keeps two shorts of a vehicle as one 32-bit value in places;
  * these give them in that (little endian) order. */
 static ulong veh_get_d88(struct TngUVehicle *p_veh)
@@ -2017,7 +2009,7 @@ static int start_goto_vehicle_c(struct Thing *p_vehicle, int x, int z)
         break;
     case SubTT_VEH_FLYING:
         remove_path(p_vehicle);
-        if (ariadne_initialise_route_asm(p_vehicle, x, z) <= 0)
+        if (ariadne_initialise_route(p_vehicle, x, z) <= 0)
             return 0;
         unkn_path_func_001(p_vehicle, 1);
         p_path = &my_paths[p_veh->PathIndex];
@@ -3605,7 +3597,7 @@ static int continue_flying_wander(struct Thing *p_vehicle)
         old_z = p_vehicle->Z;
         p_vehicle->X = new_x;
         p_vehicle->Z = new_z;
-        if (ariadne_initialise_route_asm(p_vehicle, d << 8, c << 8) <= 0)
+        if (ariadne_initialise_route(p_vehicle, d << 8, c << 8) <= 0)
         {
             p_vehicle->X = old_x;
             p_vehicle->Z = old_z;

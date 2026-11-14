@@ -1397,6 +1397,143 @@ int path_init8_thing(struct Path *p_path, int ax8, int ay8, int bx8, int by8, in
     return ret;
 }
 
+/** Best-first search of a route through triangles from triB to triA, like
+ * triangle_route_do_unkn5 but through the three side neighbours only, one
+ * triangle at a time. Triangles with solid flag 8 are not left (forward
+ * search) or not entered (`check_next`, the backward search).
+ * Remade from triangle_route_do_given and triangle_route_do_bak.
+ */
+static s32 triangle_route_do_wide(s32 triA, s32 triB, s32 *p_route, TbBool check_next)
+{
+    s32 cur;
+
+    tag_current++;
+    route_heap[1] = -1;
+    route_heap_end = 0;
+    if (tag_current == 0) {
+        memset(routeTags, 0, 8000);
+        tag_current = 1;
+    }
+    tree_val[triB] = 1;
+    tree_dad[triB] = triB;
+    routeTags[triB] = tag_current;
+    route_heap_push(triB);
+
+    while (1)
+    {
+        int k;
+
+        cur = route_heap[1];
+        if ((cur == triA) || (cur == -1))
+            break;
+        route_heap_pop();
+        for (k = 0; k < 3; k++)
+        {
+            struct TrTriangle *p_tri;
+            s32 n;
+
+            p_tri = &triangulation[0].Triangles[cur];
+            n = p_tri->tri[k];
+            if (n == -1)
+                continue;
+            if (routeTags[n] == tag_current)
+                continue;
+            if (check_next)
+                p_tri = &triangulation[0].Triangles[n];
+            if ((p_tri->solid & 0x08) != 0)
+                continue;
+            tree_val[n] = route_tri_dist_to_A(n);
+            routeTags[n] = tag_current;
+            tree_dad[n] = cur;
+            route_heap_push(n);
+        }
+    }
+
+    if (route_heap[1] == -1)
+        return -1;
+    {
+        s32 n, count;
+
+        n = triA;
+        count = 0;
+        while (1)
+        {
+            p_route[count] = n;
+            if (n == triB)
+                break;
+            count++;
+            n = tree_dad[n];
+        }
+        return count;
+    }
+}
+
+/** Route through triangles between A and B searched both ways, the one
+ * with the shorter path kept. Unlike ma_triangle_route_3, a failed search
+ * either way fails (with points A and B left swapped if the second one
+ * fails, as in the original).  Remade from ma_triangle_route. */
+static s32 ma_triangle_route(s32 triA, s32 triB, s32 *p_route)
+{
+    s32 t, len_fwd, len_bak;
+    int cost_fwd, cost_bak;
+
+    len_fwd = triangle_route_do_wide(triA, triB, p_route, false);
+    if (len_fwd == -1)
+        return -1;
+    if (route_to_path(tree_Ax8, tree_Ay8, tree_Bx8, tree_By8, p_route,
+      len_fwd, &route_fwd_path, &cost_fwd) == -1)
+        return -1;
+    t = tree_Ax8; tree_Ax8 = tree_Bx8; tree_Bx8 = t;
+    t = tree_Ay8; tree_Ay8 = tree_By8; tree_By8 = t;
+    len_bak = triangle_route_do_wide(triB, triA, route_bak, true);
+    if (len_bak == -1)
+        return -1;
+    if (route_to_path(tree_Ax8, tree_Ay8, tree_Bx8, tree_By8, route_bak,
+      len_bak, &route_fwd_path, &cost_bak) == -1)
+        return -1;
+    t = tree_Ax8; tree_Ax8 = tree_Bx8; tree_Bx8 = t;
+    t = tree_Ay8; tree_Ay8 = tree_By8; tree_By8 = t;
+    if (cost_fwd < cost_bak)
+        return len_fwd;
+    {
+        int k;
+        for (k = len_bak; k >= 0; k--)
+            p_route[len_bak - k] = route_bak[k];
+    }
+    return len_bak;
+}
+
+/** Path for a flyer through the triangulation selected by the caller,
+ * between two points; PathLength stays 0 when there is none.
+ * Remade from path_init8_wide. */
+void path_init8_wide(struct Path *p_path, s32 ax8, s32 ay8, s32 bx8, s32 by8)
+{
+    int len2;
+
+    navi_onscreen_debug(0);
+    tree_Ax8 = ax8;
+    p_path->PathLength = 0;
+    tree_Ay8 = ay8;
+    p_path->ax8 = ax8;
+    tree_Bx8 = bx8;
+    p_path->ay8 = ay8;
+    tree_By8 = by8;
+    p_path->bx8 = bx8;
+    p_path->by8 = by8;
+    tree_routelen = -1;
+    tree_triA = triangle_findSE8(ax8, ay8);
+    tree_triB = triangle_findSE8(bx8, by8);
+    if ((tree_triA < 0) || (tree_triB < 0))
+        return;
+    tree_altA = tri_solid_sx(tree_triA);
+    tree_altB = tri_solid_sx(tree_triB);
+    tree_routelen = ma_triangle_route(tree_triA, tree_triB, tree_route);
+    if (tree_routelen == -1)
+        return;
+    p_path->PathLength = route_to_path(ax8, ay8, bx8, by8, tree_route,
+      tree_routelen, p_path, &len2);
+}
+
 int tri_path_init8(int triA, int triB, struct Path *p_path, int ax8,
   int ay8, int bx8, int by8, int a8)
 {

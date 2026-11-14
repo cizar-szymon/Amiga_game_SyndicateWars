@@ -269,6 +269,9 @@ extern ushort word_1531DA;
 extern struct MyPath my_paths[1600];
 
 TbBool do_next_navigate_index(struct Thing *p_person);
+
+/** Route of a flying vehicle to map point (x,z). */
+int ariadne_initialise_route(struct Thing *p_thing, int x, int z);
 extern ushort path_count;
 extern ushort head_my_path;
 

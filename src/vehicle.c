@@ -2917,12 +2917,6 @@ void process_tank_turret(struct Thing *p_tank)
     p_turret->U.UMGun.AngleY = (p_turret->U.UMGun.AngleY + 2*LbFPMath_PI) & LbFPMath_AngleMask;
 }
 
-void process_mech_unknown1(struct Thing *p_vehicle)
-{
-    asm volatile ("call ASM_process_mech_unknown1\n"
-        : : "a" (p_vehicle));
-}
-
 #ifdef SW_FNCHK
 static int process_my_crashing_vehicle_asm(struct Thing *p_vehicle)
 {
@@ -5145,6 +5139,231 @@ static void process_ship_c(struct Thing *p_vehicle)
 void process_ship(struct Thing *p_vehicle)
 {
     FNCHK_VOID("process_ship", process_ship_asm(p_vehicle), process_ship_c(p_vehicle));
+}
+
+#ifdef SW_FNCHK
+static void process_mech_unknown1_asm(struct Thing *p_vehicle)
+{
+    asm volatile ("call ASM_process_mech_unknown1\n"
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+#endif
+
+/* The asm sees the end of unkn_mech_struc3 (from offset 0x54) as pairs,
+ * one per leg: s32 timer at 0x54, s32 animation at 0x5C, s32 frame
+ * (unkn_mech_struc1 index) at 0x64, s32 sequence (unkn_mech_struc2 index)
+ * at 0x6C and the "playing" byte at 0x74.  Read through memcpy, as the
+ * structures are packed. */
+static s32 mech_rd32(const void *p, int offs)
+{
+    s32 v;
+
+    memcpy(&v, (const ubyte *)p + offs, 4);
+    return v;
+}
+
+static void mech_wr32(void *p, int offs, s32 v)
+{
+    memcpy((ubyte *)p + offs, &v, 4);
+}
+
+/** Copies a matrix transposed.  Remade from matrix_transpose_cp. */
+static void matrix_transpose_cp(struct M33 *p_dst, struct M33 *p_src)
+{
+    p_dst->R[0][0] = p_src->R[0][0];
+    p_dst->R[0][1] = p_src->R[1][0];
+    p_dst->R[0][2] = p_src->R[2][0];
+    p_dst->R[1][0] = p_src->R[0][1];
+    p_dst->R[1][1] = p_src->R[1][1];
+    p_dst->R[1][2] = p_src->R[2][1];
+    p_dst->R[2][0] = p_src->R[0][2];
+    p_dst->R[2][1] = p_src->R[1][2];
+    p_dst->R[2][2] = p_src->R[2][2];
+}
+
+/** Three angles (0..0x7FF) one step of `steps` towards the target ones,
+ * each the short way round.  Remade from mech_unkn_func_20. */
+static void mech_unkn_func_20(const s32 *p_cur, const s32 *p_tgt, s32 steps, s32 *p_out)
+{
+    s32 d[3];
+    int a;
+
+    for (a = 0; a < 3; a++)
+    {
+        s32 dd, sign, other;
+
+        dd = p_tgt[a] - p_cur[a];
+        if (dd < 0)
+            sign = -1;
+        else
+            sign = (dd != 0);
+        other = -((0x800 - abs(dd)) * sign);
+        if (abs(other) < abs(dd))
+            dd = other;
+        d[a] = dd;
+    }
+    if (steps != 0) {
+        for (a = 0; a < 3; a++)
+            d[a] /= steps;
+    }
+    for (a = 0; a < 3; a++)
+        p_out[a] = (p_cur[a] + d[a]) & 0x7FF;
+}
+
+/** Moves every part of a mech one step towards the current frame of the
+ * animation of leg 0: angles (where the frame has the part) and position.
+ * Remade from mech_unkn_func_19. */
+static void mech_unkn_func_19(ushort mechno)
+{
+    struct unkn_mech_struc3 *p_m3;
+    s32 angles[17][3];
+    u32 k, nparts;
+
+    p_m3 = &unkn_mech_arr3[mechno];
+    nparts = p_m3->mech3_unkn_fld_8;
+    for (k = 0; k < nparts; k++)
+    {
+        struct unkn_mech_struc4 *p_m4;
+
+        p_m4 = &unkn_mech_arr4[p_m3->mech3_unkn_arr4_idx + k];
+        angles[k][0] = p_m4->angle_49;
+        angles[k][1] = p_m4->angle_4D;
+        angles[k][2] = p_m4->angle_51;
+    }
+    for (k = 0; k < nparts; k++)
+    {
+        struct unkn_mech_struc4 *p_m4;
+        ubyte *p_m5;
+        ushort part;
+        s32 steps, cur[3], tgt[3], d[3];
+        int a;
+
+        p_m4 = &unkn_mech_arr4[p_m3->mech3_unkn_arr4_idx + k];
+        p_m5 = (ubyte *)&unkn_mech_arr5[mech_rd32(p_m3, 0x5C)];
+        part = p_m4->field_23;
+        if (p_m5[0x198 + part] == 0)
+            continue;
+        steps = mech_rd32(p_m3, 0x54);
+        cur[0] = p_m4->angle_49;
+        cur[1] = p_m4->angle_4D;
+        cur[2] = p_m4->angle_51;
+        for (a = 0; a < 3; a++)
+            tgt[a] = mech_rd32(p_m5, 0xC + 24 * part + 4 * a);
+        mech_unkn_func_20(cur, tgt, steps, angles[k]);
+        for (a = 0; a < 3; a++)
+            d[a] = mech_rd32(p_m5, 24 * part + 4 * a) - p_m4->field_6D.R[a];
+        if (steps != 0) {
+            for (a = 0; a < 3; a++)
+                d[a] /= steps;
+        }
+        for (a = 0; a < 3; a++)
+            p_m4->field_6D.R[a] += d[a];
+    }
+    for (k = 0; k < nparts; k++)
+    {
+        struct unkn_mech_struc4 *p_m4;
+
+        p_m4 = &unkn_mech_arr4[p_m3->mech3_unkn_arr4_idx + k];
+        p_m4->angle_49 = angles[k][0];
+        p_m4->angle_4D = angles[k][1];
+        p_m4->angle_51 = angles[k][2];
+    }
+}
+
+/** Advances the animation of both legs of a mech: a leg waits its timer,
+ * then goes to the next frame (or stops at the end of its sequence), then
+ * the parts move.  Returns the event of the last new frame (leg 0 last),
+ * 0x7FFFFFFF when none.  Remade from mech_unkn_func_08. */
+static u32 mech_unkn_func_08(ushort mechno)
+{
+    struct unkn_mech_struc3 *p_m3;
+    s32 ret;
+    int leg;
+
+    ret = 0x7FFFFFFF;
+    p_m3 = &unkn_mech_arr3[mechno];
+    for (leg = 1; leg >= 0; leg--)
+    {
+        ubyte *p_leg;
+        s32 timer, frame;
+        struct unkn_mech_struc2 *p_m2;
+
+        p_leg = (ubyte *)p_m3 + 4 * leg;
+        if (*((ubyte *)p_m3 + 0x74 + leg) == 0)
+            continue;
+        timer = mech_rd32(p_leg, 0x54);
+        if (timer > 0) {
+            mech_wr32(p_leg, 0x54, timer - 1);
+            continue;
+        }
+        frame = unkn_mech_arr1[mech_rd32(p_leg, 0x64)].field_5;
+        p_m2 = &unkn_mech_arr2[mech_rd32(p_leg, 0x6C)];
+        if ((frame == p_m2->field_0) && (p_m2->field_88 == 0))
+        {
+            *((ubyte *)p_m3 + 0x74 + leg) = 0;
+            mech_wr32(p_leg, 0x54, 0);
+            continue;
+        }
+        mech_wr32(p_leg, 0x64, frame);
+        mech_wr32(p_leg, 0x54, unkn_mech_arr1[frame].field_D);
+        ret = unkn_mech_arr1[frame].field_9;
+        mech_wr32(p_leg, 0x5C, ret);
+    }
+    mech_unkn_func_19(mechno);
+    return (u32)ret;
+}
+
+/** Mech animation each turn: the mech's matrix (transposed) goes to its
+ * animation state, the legs move, and frame events set the step flags in
+ * TNode; a mech hit while walking to a point stops (state 0x33).
+ * Remade from process_mech_unknown1. */
+static void process_mech_unknown1_c(struct Thing *p_vehicle)
+{
+    struct TngUVehicle *p_veh;
+    ushort mechno;
+    u32 event;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    mech_last_cor_x = p_vehicle->X >> 8;
+    mech_last_cor_y = p_vehicle->Y >> 8;
+    mech_last_cor_z = mech_last_cor_x;
+    mech_unkn_tile_y2 = mech_last_cor_x;
+    mech_unkn_tile_x3 = mech_last_cor_y;
+    mech_unkn_tile_y3 = mech_unkn_tile_y2;
+    mechno = (ushort)p_vehicle->Owner;
+    matrix_transpose_cp(&unkn_mech_arr3[mechno].mech3_unkn_mat_C, &local_mats[p_veh->MatrixIndex]);
+    event = mech_unkn_func_08(mechno);
+    /* step flags in the low byte of TNode */
+    switch (event)
+    {
+    case 0:
+        p_veh->TNode |= 0x04;
+        break;
+    case 6:
+        p_veh->TNode = (p_veh->TNode | 0x02) & ~0x04;
+        break;
+    case 8:
+        p_veh->TNode = (p_veh->TNode | 0x01) & ~0x04;
+        break;
+    case 0xE:
+        p_veh->TNode = (p_veh->TNode | 0x08) & ~0x04;
+        break;
+    default:
+        break;
+    }
+    if (((ushort)p_vehicle->State == 0x32) && (p_veh->ZebraOldHealth != p_vehicle->Health))
+    {
+        remove_path(p_vehicle);
+        p_veh->PathIndex = 0;
+        p_vehicle->State = 0x33;
+    }
+    p_veh->ZebraOldHealth = p_vehicle->Health;
+}
+
+void process_mech_unknown1(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("process_mech_unknown1", process_mech_unknown1_asm(p_vehicle),
+      process_mech_unknown1_c(p_vehicle));
 }
 
 void init_mech_explode(struct Thing *p_vehicle)

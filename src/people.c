@@ -7158,10 +7158,66 @@ int person_goto_person_nav(struct Thing *p_person)
     return ret;
 }
 
-void person_goto_point_rel(struct Thing *p_person)
+#ifdef SW_FNCHK
+static void person_goto_point_rel_asm(struct Thing *p_person)
 {
     asm volatile ("call ASM_person_goto_point_rel\n"
-        : : "a" (p_person));
+        : "+a" (p_person) : : "cc", "memory");
+}
+#endif
+
+/** A person moving in a direction (state 35, keyboard / pad control):
+ * faces the direction (VX,VZ), moves and animates; then an agent waits
+ * for the next input (state 5), anybody else goes on with its commands.
+ * Remade from person_goto_point_rel. */
+static void person_goto_point_rel_c(struct Thing *p_person)
+{
+    ushort base;
+    ubyte dir;
+
+    if ((p_person->U.UPerson.AnimMode == 14) || (p_person->U.UPerson.AnimMode == 15))
+    {
+        p_person->U.UPerson.AnimMode = gun_out_anim(p_person, 0);
+        base = people_frames[p_person->SubType][p_person->U.UPerson.AnimMode];
+        p_person->StartFrame = base - 1;
+        p_person->Frame = nstart_ani[base + p_person->U.UPerson.Angle];
+    }
+    dir = ((((ushort)arctan(p_person->VX, -p_person->VZ)) + 0x80) & 0x7FF) >> 8;
+    if (dir != p_person->U.UPerson.Angle)
+    {
+        base = people_frames[p_person->SubType][p_person->U.UPerson.AnimMode];
+        p_person->Frame -= nstart_ani[base + p_person->U.UPerson.Angle];
+        p_person->U.UPerson.Angle = dir;
+        p_person->Frame += nstart_ani[base + dir];
+    }
+    base = people_frames[p_person->SubType][p_person->U.UPerson.AnimMode];
+    p_person->StartFrame = base - 1;
+    if ((p_person->Flag & TngF_InVehicle) != 0)
+        return;
+    person_move(p_person);
+    if ((p_person->Flag & TngF_Destroyed) != 0)
+        return;
+    p_person->Timer1 -= fifties_per_gameturn;
+    if (p_person->Timer1 < 0)
+    {
+        p_person->Timer1 = p_person->StartTimer1;
+        p_person->Frame = frame[(ushort)p_person->Frame].Next;
+    }
+    if ((p_person->Flag & TngF_PlayerAgent) == 0)
+    {
+        p_person->U.UPerson.ComCur = game_commands[p_person->U.UPerson.ComCur].Next;
+        person_init_command(p_person, 3);
+    }
+    else
+    {
+        p_person->State = 5;
+    }
+}
+
+void person_goto_point_rel(struct Thing *p_person)
+{
+    FNCHK_VOID("person_goto_point_rel", person_goto_point_rel_asm(p_person),
+      person_goto_point_rel_c(p_person));
 }
 
 void vehicle_passenger_list_add_first(struct Thing *p_vehicle, ThingIdx passngr)

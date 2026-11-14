@@ -36,6 +36,7 @@
 #include "enginsngtxtr.h"
 #include "engintrns.h"
 #include "game.h"
+#include "thing_fire.h"
 #include "bmcrater.h"
 #include "thing_expld.h"
 #include "febrief.h"
@@ -2976,11 +2977,122 @@ void process_mech_unknown1(struct Thing *p_vehicle)
         : : "a" (p_vehicle));
 }
 
-int process_my_crashing_vehicle(struct Thing *p_vehicle)
+#ifdef SW_FNCHK
+static int process_my_crashing_vehicle_asm(struct Thing *p_vehicle)
 {
     int ret;
     asm volatile ("call ASM_process_my_crashing_vehicle\n"
-        : "=r" (ret) : "a" (p_vehicle));
+        : "=a" (ret) : "0" (p_vehicle) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** A crashing vehicle tumbles, burns and falls; it blows up when it hits
+ * the ground, leaves the map or reaches a tile next to a building.
+ * Returns 0 when it blew up, 42 while it crashes on.
+ * Remade from process_my_crashing_vehicle. */
+static int process_my_crashing_vehicle_c(struct Thing *p_vehicle)
+{
+    struct TngUVehicle *p_veh;
+    struct MyMapElement *p_mapel;
+    TbBool hit;
+    s32 d;
+
+    p_veh = &p_vehicle->U.UVehicle;
+    if ((LbRandomAnyShort() & 0xF) == 0)
+    {
+        ushort r1, r2;
+
+        p_veh->AngleX = p_veh->AngleX - (LbRandomAnyShort() & 0x7F) + 0x3F;
+        if (p_vehicle->SubType != 0x28)
+        {
+            p_vehicle->VY += 0x400;
+            p_vehicle->Y += 0x2000;
+            p_veh->AngleY -= (LbRandomAnyShort() & 0x7F);
+            p_veh->AngleZ -= (LbRandomAnyShort() & 0x7F);
+            p_veh->AngleY += 0x3F;
+            p_veh->AngleZ += 0x3F;
+        }
+        else
+        {
+            p_veh->AngleY -= (LbRandomAnyShort() & 0x3F);
+            p_veh->AngleZ -= (LbRandomAnyShort() & 0x3F);
+            p_veh->AngleY += 0x1F;
+            p_veh->AngleZ += 0x1F;
+        }
+        r1 = LbRandomAnyShort();
+        r2 = LbRandomAnyShort();
+        bang_new4(p_vehicle->X + r2, p_vehicle->Y >> 3, p_vehicle->Z + r1, 100);
+    }
+    if ((gameturn & 1) != 0)
+        bang_new4(p_vehicle->X, p_vehicle->Y >> 3, p_vehicle->Z, 0x35);
+    p_veh->AngleX += 5;
+    if (p_vehicle->SubType != 0x28) {
+        p_vehicle->VY -= 0x110;
+        d = p_vehicle->VY >> 7;
+    } else {
+        p_vehicle->VY -= 0x80;
+        d = p_vehicle->VY >> 8;
+    }
+    p_veh->AngleZ = p_veh->AngleZ - d;
+    if (p_veh->AngleX < 0)
+        p_veh->AngleX = 0;
+    if (p_veh->AngleY < 0)
+        p_veh->AngleY = 0;
+    if (p_veh->AngleZ < 0)
+        p_veh->AngleZ = 0;
+    p_veh->AngleX &= 0x7FF;
+    p_veh->AngleZ &= 0x7FF;
+    p_mapel = &game_my_big_map[(p_vehicle->Z >> 16) * MAP_TILE_WIDTH + (p_vehicle->X >> 16)];
+    if ((p_vehicle->SubType == 0x28) && ((gameturn & 1) != 0))
+    {
+        s32 alt;
+
+        alt = alt_at_point((short)(p_vehicle->X >> 8), (short)(p_vehicle->Z >> 8));
+        FIRE_new(p_vehicle->X, alt >> 5, p_vehicle->Z, 5);
+    }
+    if (p_vehicle->SubType == SubTT_VEH_FLYING)
+    {
+        s32 alt;
+
+        alt = alt_at_point((short)(p_vehicle->X >> 8), (short)(p_vehicle->Z >> 8));
+        alt += (((ushort)p_vehicle->Radius * 193) * 2) >> 5;
+        hit = ((alt << 3) > p_vehicle->Y);
+    }
+    else
+    {
+        s32 alt;
+
+        alt = alt_at_point((short)(p_vehicle->X >> 8), (short)(p_vehicle->Z >> 8));
+        hit = ((alt << 3) + 800 > p_vehicle->Y);
+    }
+    if (!hit)
+    {
+        if ((p_vehicle->X < 0x10000) || (p_vehicle->Z < 0x10000)
+          || (p_vehicle->X > 0x7E0000) || (p_vehicle->Z > 0x7E0000))
+            hit = true;
+        else if (((p_mapel - 1)->ColumnHead & 0xFFF) != 0)
+            hit = true;
+        else if (((p_mapel + 1)->ColumnHead & 0xFFF) != 0)
+            hit = true;
+        else if (((p_mapel - MAP_TILE_WIDTH)->ColumnHead & 0xFFF) != 0)
+            hit = true;
+        else if (((p_mapel + MAP_TILE_WIDTH)->ColumnHead & 0xFFF) != 0)
+            hit = true;
+    }
+    if (!hit)
+        return 42;
+    p_vehicle->Y >>= 3;
+    init_vehicle_explode(p_vehicle);
+    p_vehicle->Y <<= 3;
+    return 0;
+}
+
+int process_my_crashing_vehicle(struct Thing *p_vehicle)
+{
+    int ret;
+    FNCHK_RET("process_my_crashing_vehicle", ret, process_my_crashing_vehicle_asm(p_vehicle),
+      process_my_crashing_vehicle_c(p_vehicle));
     return ret;
 }
 

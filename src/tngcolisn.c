@@ -72,6 +72,83 @@ void set_dome_col(struct Thing *p_building, ubyte flag)
     }
 }
 
+/** Unlinks every marker of collision vector `vect` from the tile list.
+ *
+ * Remade from del_col_vect_from_mapwho.  Like the original, after removing
+ * an entry it keeps that entry as the previous one in the walk.
+ */
+static void del_col_vect_from_mapwho(short x, short z, short vect)
+{
+    struct MyMapElement *p_mapel;
+    ushort prev, cur, next;
+    int tile_x, tile_z;
+
+    tile_x = x >> 8;
+    if (tile_x < 0 || tile_x >= 128)
+        return;
+    tile_z = z >> 8;
+    if (tile_z < 0 || tile_z >= 128)
+        return;
+    p_mapel = &game_my_big_map[tile_z * 128 + tile_x];
+    prev = 0;
+    cur = p_mapel->ColHead;
+    while (cur != 0)
+    {
+        struct ColVectList *p_cvlist;
+
+        p_cvlist = &game_col_vects_list[cur];
+        next = p_cvlist->NextColList;
+        if (p_cvlist->Vect == (int)vect)
+        {
+            if (prev != 0)
+                game_col_vects_list[prev].NextColList = next;
+            else
+                p_mapel->ColHead = next & 0x7FFF;
+            p_cvlist->NextColList = link__MapColListEmptyHead;
+            link__MapColListEmptyHead = cur;
+        }
+        prev = cur;
+        cur = next & 0x7FFF;
+    }
+}
+
+/** Remade from delete_vect. */
+void delete_vect(short x1, short y1, short z1, short x2,
+  short y2, short z2, short vect, ushort flags)
+{
+    s32 dx, dz, len, pos_x, pos_z, step_x, step_z;
+
+    if (vect == 0)
+        return;
+    if (x1 < 0 || x2 < 0 || z1 < 0 || z2 < 0)
+        return;
+    dx = x2 - x1;
+    dz = z2 - z1;
+    len = (u32)LbSqrL((u32)dx * (u32)dx + (u32)dz * (u32)dz) >> 8;
+    if (len == 0)
+        len = 1;
+    pos_x = x1 << 10;
+    pos_z = z1 << 10;
+    step_x = (dx << 10) / len;
+    step_z = (dz << 10) / len;
+    for (; len >= 0; len--)
+    {
+        s32 cx, cz, ix, iz;
+
+        cz = pos_z >> 10;
+        cx = pos_x >> 10;
+        for (ix = cx - 0x100; ix != cx + 0x200; ix += 0x100)
+        {
+            for (iz = cz - 0x100; iz != cz + 0x200; iz += 0x100)
+                del_col_vect_from_mapwho(ix, iz, vect);
+        }
+        pos_x += step_x;
+        pos_z += step_z;
+    }
+    game_col_vects[vect].Face = link__MapColVectEmptyHead;
+    link__MapColVectEmptyHead = vect;
+}
+
 void draw_mark_over_tile_with_number(short tl_x, short tl_z, sbyte ln, int num)
 {
     int x0, z0, x1, z1, xc, zc;

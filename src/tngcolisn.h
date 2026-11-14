@@ -78,6 +78,13 @@ ushort dynamic_insert_vect(s32 x1, s32 y1, s32 z1, s32 x2,
 
 void draw_mark_over_tile_with_number(short tl_x, short tl_z, sbyte ln, int num);
 
+/** Removes a dynamic collision vector: unlinks its markers from the tiles
+ * along it and returns the `ColVect` to the free list.
+ * The y coordinates and `flags` are not used.
+ */
+void delete_vect(short x1, short y1, short z1, short x2,
+  short y2, short z2, short vect, ushort flags);
+
 /******************************************************************************/
 #ifdef __cplusplus
 }

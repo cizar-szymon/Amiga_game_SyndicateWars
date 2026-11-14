@@ -320,11 +320,30 @@ LABEL_184:
 
 extern s32 dword_1E08BC;
 
-/** Breaks a razor wire hit by fire (still the original code). */
-static void snap_razor_wire(struct Thing *p_wire)
+#ifdef SW_FNCHK
+static void snap_razor_wire_asm(struct Thing *p_wire)
 {
     asm volatile ("call ASM_snap_razor_wire\n"
         : "+a" (p_wire) : : "cc", "memory");
+}
+#endif
+
+/** Breaks a razor wire hit by fire: removes its collision vector and the
+ * wire thing.  Remade from snap_razor_wire; the second point is built
+ * from the wire's VX/VY/VZ as in the original. */
+static void snap_razor_wire_c(struct Thing *p_wire)
+{
+    delete_vect((short)(p_wire->X >> 8), (short)((p_wire->Y >> 5) + 60),
+      (short)(p_wire->Z >> 8), (short)((short)p_wire->VX + 50),
+      (short)(((short)p_wire->VY << 3) + 60), (short)p_wire->VZ,
+      p_wire->Frame, 2);
+    remove_thing(p_wire->ThingOffset);
+    delete_node(p_wire);
+}
+
+static void snap_razor_wire(struct Thing *p_wire)
+{
+    FNCHK_VOID("snap_razor_wire", snap_razor_wire_asm(p_wire), snap_razor_wire_c(p_wire));
 }
 
 /** Takes a flame from the free list, fills it and puts it at the head of

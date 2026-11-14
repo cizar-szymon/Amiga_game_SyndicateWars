@@ -4407,10 +4407,40 @@ short get_new_thing(void)
     return ret;
 }
 
-void remove_thing(short tngno)
+#ifdef SW_FNCHK
+static void remove_thing_asm(short tngno)
 {
     asm volatile ("call ASM_remove_thing\n"
-        : : "a" (tngno));
+        : "+a" (tngno) : : "cc", "memory");
+}
+#endif
+
+/** Takes a thing from the used list and puts it at the head of the empty
+ * list.  Remade from remove_thing. */
+static void remove_thing_c(short tngno)
+{
+    struct Thing *p_thing;
+    short child, parent;
+
+    p_thing = &things[(ushort)tngno];
+    child = p_thing->LinkChild;
+    parent = p_thing->LinkParent;
+    if (child != 0)
+        things[(ushort)child].LinkParent = parent;
+    if (parent != 0)
+        things[(ushort)parent].LinkChild = child;
+    else
+        things_used_head = child;
+    p_thing->LinkChild = things_empty_head;
+    p_thing->LinkParent = 0;
+    things[(ushort)things_empty_head].LinkParent = tngno;
+    things_empty_head = tngno;
+    things_used--;
+}
+
+void remove_thing(short tngno)
+{
+    FNCHK_VOID("remove_thing", remove_thing_asm(tngno), remove_thing_c(tngno));
 }
 
 #ifdef SW_FNCHK
@@ -5214,7 +5244,8 @@ struct SimpleThing *create_scale_effect(int x, int y, int z, ushort frame, short
     return ret;
 }
 
-struct SimpleThing *create_sound_effect(int x, int y, int z, ushort sample, int vol, int loop)
+#ifdef SW_FNCHK
+static struct SimpleThing *create_sound_effect_asm(int x, int y, int z, ushort sample, int vol, int loop)
 {
     struct SimpleThing *ret;
     // Pushed through a register holding them: a "g" operand may be placed
@@ -5228,9 +5259,49 @@ struct SimpleThing *create_sound_effect(int x, int y, int z, ushort sample, int 
       "push 4(%5)\n"
       "push 0(%5)\n"
       "call ASM_create_sound_effect\n"
-        : "=r" (ret)
-        : "a" (x), "d" (y), "b" (z), "c" (sample), "S" (stkargs)
+        : "=a" (ret), "+d" (y), "+b" (z), "+c" (sample)
+        : "0" (x), "S" (stkargs)
         : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** A sound source (simple thing type 53) at map point (x,y,z) playing
+ * `sample` for 100 turns; `vol` is not used.  It is not put on the map.
+ * Remade from create_sound_effect. */
+static struct SimpleThing *create_sound_effect_c(int x, int y, int z, ushort sample, int vol, int loop)
+{
+    struct SimpleThing *p_sthing;
+    ThingIdx thing;
+
+    if ((x < 0) || (x >= 0x8000) || (z < 0) || (z >= 0x8000))
+        return NULL;
+    if (sthings_used > 0x5D7)
+        return NULL;
+    thing = get_new_sthing();
+    if (thing == 0)
+        return NULL;
+    if ((thing > -1) || (thing < -1500))
+        return NULL;
+    p_sthing = &sthings[thing];
+    p_sthing->Type = 0x35;
+    p_sthing->Timer1 = 100;
+    p_sthing->Flag = 0x04;
+    p_sthing->State = 0;
+    p_sthing->Z = z << 8;
+    p_sthing->Y = y << 8;
+    p_sthing->SubType = (ubyte)sample;
+    p_sthing->X = x << 8;
+    play_dist_ssample(p_sthing, sample, 0x7F, 0x40, 100, (short)loop, 1);
+    return p_sthing;
+}
+
+struct SimpleThing *create_sound_effect(int x, int y, int z, ushort sample, int vol, int loop)
+{
+    struct SimpleThing *ret;
+    FNCHK_RET("create_sound_effect", ret,
+      create_sound_effect_asm(x, y, z, sample, vol, loop),
+      create_sound_effect_c(x, y, z, sample, vol, loop));
     return ret;
 }
 

@@ -50,6 +50,7 @@
 #include "thing.h"
 #include "util.h"
 #include "swlog.h"
+#include "fncheck.h"
 
 /******************************************************************************/
 
@@ -203,10 +204,49 @@ void play_dist_ssample(struct SimpleThing *p_sthing, ushort smptbl_id, ushort vo
         : "cc", "memory");
 }
 
-void stop_looped_weapon_sample(struct Thing *p_person, short weapon)
+#ifdef SW_FNCHK
+static void stop_looped_weapon_sample_asm(struct Thing *p_person, short weapon)
 {
     asm volatile ("call ASM_stop_looped_weapon_sample\n"
-        : : "a" (p_person), "d" (weapon));
+        : "+a" (p_person), "+d" (weapon) : : "cc", "memory");
+}
+#endif
+
+/** Stops the looped sound of a weapon (1, 2 or 8) being fired; for weapon
+ * 2 it plays its end sound.  Agents use sounds by their player number.
+ * Remade from stop_looped_weapon_sample. */
+static void stop_looped_weapon_sample_c(struct Thing *p_person, short weapon)
+{
+    ushort plyr;
+
+    if ((p_person->Flag2 & TgF2_Unkn0200) == 0)
+        return;
+    if ((p_person->Flag & TngF_PlayerAgent) != 0)
+        plyr = p_person->U.UPerson.ComCur & 3;
+    else
+        plyr = 0;
+    switch ((ushort)weapon)
+    {
+    case 1:
+        ReleaseLoopedSample(p_person->ThingOffset, 0x50 + plyr);
+        break;
+    case 2:
+        ReleaseLoopedSample(p_person->ThingOffset, 0x54 + plyr);
+        play_dist_sample(p_person, 0x58 + (p_person->U.UPerson.ComCur & 3), 0x7F, 0x40, 100, 0, 1);
+        break;
+    case 8:
+        ReleaseLoopedSample(p_person->ThingOffset, 0x0E);
+        break;
+    default:
+        return;
+    }
+    p_person->Flag2 &= ~TgF2_Unkn0200;
+}
+
+void stop_looped_weapon_sample(struct Thing *p_person, short weapon)
+{
+    FNCHK_VOID("stop_looped_weapon_sample", stop_looped_weapon_sample_asm(p_person, weapon),
+      stop_looped_weapon_sample_c(p_person, weapon));
 }
 
 //TODO better name?

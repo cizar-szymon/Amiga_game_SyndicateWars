@@ -5197,16 +5197,81 @@ void move_camera(int x, int y, int z)
     FNCHK_VOID("move_camera", move_camera_asm(x, y, z), move_camera_c(x, y, z));
 }
 
-void track_player(int thing)
+#ifdef SW_FNCHK
+static void track_player_asm(int thing)
 {
     asm volatile ("call ASM_track_player\n"
-        : : "a" (thing));
+        : "+a" (thing) : : "cc", "memory");
+}
+#endif
+
+/** Camera follows the thing, or the vehicle it is in.  When recording
+ * packets (mode 2) the track point is reset first.  Remade from
+ * track_player. */
+static void track_player_c(int thing)
+{
+    struct Thing *p_thing;
+
+    if (pktrec_mode == 2) {
+        ingame.TrackX = engn_xc;
+        ingame.TrackZ = engn_zc;
+        ingame.TrackThing = 0;
+    }
+    p_thing = &things[(ushort)thing];
+    if ((p_thing->Flag & (TngF_Unkn4000|TngF_InVehicle)) != 0)
+    {
+        struct Thing *p_vehicle;
+
+        p_vehicle = &things[p_thing->U.UPerson.Vehicle];
+        ingame.TrackX = p_vehicle->X >> 8;
+        ingame.TrackZ = p_vehicle->Z >> 8;
+        move_camera(ingame.TrackX, p_vehicle->Y >> 11, ingame.TrackZ);
+        return;
+    }
+    ingame.TrackX = p_thing->X >> 8;
+    ingame.TrackZ = p_thing->Z >> 8;
+    move_camera(ingame.TrackX, p_thing->Y >> 8, ingame.TrackZ);
+}
+
+void track_player(int thing)
+{
+    FNCHK_VOID("track_player", track_player_asm(thing), track_player_c(thing));
+}
+
+#ifdef SW_FNCHK
+static void track_angle_asm(void)
+{
+    asm volatile ("call ASM_track_angle\n"
+        :  :  : "eax", "cc", "memory");
+}
+#endif
+
+/** Turns the camera yaw towards the wanted angle (fld_unkCA6) by steps of
+ * fld_unkCA8, the short way round; when closer than 1/16 of a step it
+ * snaps to it.  Remade from track_angle. */
+static void track_angle_c(void)
+{
+    s32 diff, step;
+
+    diff = (ushort)ingame.fld_unkCA6 - (engn_cam_yaw >> 5);
+    if (diff == 0)
+        return;
+    if (diff < -0x400)
+        step = 1;
+    else if (diff > 0x400)
+        step = -1;
+    else if (abs(diff) < ((ushort)ingame.fld_unkCA8 >> 4)) {
+        engn_cam_yaw = (ushort)ingame.fld_unkCA6 << 5;
+        return;
+    }
+    else
+        step = (diff > 0) ? 1 : -1;
+    engn_cam_yaw = (engn_cam_yaw + step * (ushort)ingame.fld_unkCA8) & 0xFFE0;
 }
 
 void track_angle(void)
 {
-    asm volatile ("call ASM_track_angle\n"
-        :  :  : "eax" );
+    FNCHK_VOID("track_angle", track_angle_asm(), track_angle_c());
 }
 
 void track_y(int y)

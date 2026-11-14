@@ -1313,7 +1313,8 @@ struct Thing *check_for_radius_hit_person(int prc_x, int prc_y, int prc_z,
 #endif
 }
 
-short find_nearest_person_min(int x, int y, int z,
+#ifdef SW_FNCHK
+static short find_nearest_person_min_asm(int x, int y, int z,
   int n_dist, int *a_dist, int angle1, u32 group_bits)
 {
     short ret;
@@ -1330,9 +1331,66 @@ short find_nearest_person_min(int x, int y, int z,
       "push 4(%5)\n"
       "push 0(%5)\n"
       "call ASM_find_nearest_person_min\n"
-        : "=r" (ret)
-        : "a" (x), "d" (y), "b" (z), "c" (n_dist), "S" (stkargs)
+        : "=a" (ret), "+d" (y), "+b" (z), "+c" (n_dist)
+        : "0" (x), "S" (stkargs)
         : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** The person of the groups in `group_bits` (not knocked out or dead)
+ * nearest to map point (x,z) but farther than `n_dist` (squared
+ * distances); with `angle1` not negative (as a short) only within 200
+ * of that angle.  The squared distance (0xFFFFFFFF when none) goes to
+ * `a_dist`.  `y` is not used.  Remade from find_nearest_person_min. */
+static short find_nearest_person_min_c(int x, int y, int z,
+  int n_dist, int *a_dist, int angle1, u32 group_bits)
+{
+    u32 best;
+    short thing, found;
+
+    best = 0xFFFFFFFF;
+    found = 0;
+    for (thing = same_type_head[1]; thing != 0; thing = things[thing].LinkSame)
+    {
+        struct Thing *p_thing;
+        s32 dx, dz;
+        u32 dist;
+
+        p_thing = &things[thing];
+        if ((group_bits & (1u << (p_thing->U.UPerson.EffectiveGroup & 0x1F))) == 0)
+            continue;
+        if ((p_thing->Flag2 & TgF2_Unkn0020) != 0)
+            continue;
+        if ((p_thing->Flag & TngF_Destroyed) != 0)
+            continue;
+        dx = (p_thing->X >> 8) - x;
+        dz = (p_thing->Z >> 8) - z;
+        if ((short)angle1 >= 0)
+        {
+            short da;
+
+            da = (short)(((angle1 - arctan(dx, -dz)) + 0x800) & 0x7FF);
+            if ((da > 200) && (da < 0x737))
+                continue;
+        }
+        dist = (u32)dx * (u32)dx + (u32)dz * (u32)dz;
+        if ((dist < best) && (dist > (u32)n_dist)) {
+            best = dist;
+            found = thing;
+        }
+    }
+    *a_dist = best;
+    return found;
+}
+
+short find_nearest_person_min(int x, int y, int z,
+  int n_dist, int *a_dist, int angle1, u32 group_bits)
+{
+    short ret;
+    FNCHK_RET("find_nearest_person_min", ret,
+      find_nearest_person_min_asm(x, y, z, n_dist, a_dist, angle1, group_bits),
+      find_nearest_person_min_c(x, y, z, n_dist, a_dist, angle1, group_bits));
     return ret;
 }
 

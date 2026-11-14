@@ -244,6 +244,7 @@ ubyte vector_in_way(struct Thing *p_thing, int dx, int dz);
 short do_move_colide(struct Thing *p_person, int dx, int dz, struct MyMapElement *p_mapel);
 ubyte check_person_within(struct Command *p_cmd, int x, int z);
 static u32 do_i_have_weapon(struct Thing *p_person, ushort wtype);
+static ushort person_weapons_count(struct Thing *p_person);
 static int weapon_fourpack_row(ushort wtype);
 void give_take_me_weapon(struct Thing *p_person, int item, int giveortake, short id);
 void path_init8_unkn3(struct Path *p_path, int ax8, int ay8, int bx8, int by8, int a6);
@@ -2004,10 +2005,59 @@ struct Thing *new_sim_person(int x, int y, int z, ubyte subtype)
     return p_person;
 }
 
-void should_i_get_item(struct Thing *p_person, struct SimpleThing *p_sthing)
+#ifdef SW_FNCHK
+static void should_i_get_item_asm(struct Thing *p_person, struct SimpleThing *p_sthing)
 {
     asm volatile ("call ASM_should_i_get_item\n"
-        : : "a" (p_person), "d" (p_sthing));
+        : "+a" (p_person), "+d" (p_sthing) : : "cc", "memory");
+}
+#endif
+
+/** A person passing a dropped weapon decides to pick it up: not when it
+ * carries 6 types, is subtype 10, for weapon types 9 and 31, and a
+ * persuaded one only takes weapons 1..4, 15 and 17 while it has none of
+ * the usual ones.  Remade from should_i_get_item. */
+static void should_i_get_item_c(struct Thing *p_person, struct SimpleThing *p_sthing)
+{
+    ushort wtype;
+
+    if ((p_person->Flag2 & TgF2_Unkn08000000) != 0)
+        return;
+    wtype = p_sthing->U.UWeapon.WeaponType;
+    if (wtype == 0)
+        return;
+    if (person_weapons_count(p_person) >= 6)
+        return;
+    if (p_person->SubType == 0x0A)
+        return;
+    if ((wtype == 9) || (wtype == 0x1F))
+        return;
+    if ((p_person->Flag & TngF_Persuaded) != 0)
+    {
+        if ((p_person->U.UPerson.WeaponsCarried & 0x0283CEFF) != 0)
+            return;
+        if ((wtype > 4) && (wtype != 15) && (wtype != 17))
+            return;
+    }
+    if (do_i_have_weapon(p_person, wtype) != 0)
+        return;
+    p_person->State = PerSt_GET_ITEM;
+    p_person->Flag2 |= TgF2_Unkn08000000;
+    p_person->U.UPerson.GotoX = p_sthing->X >> 8;
+    p_person->U.UPerson.GotoZ = p_sthing->Z >> 8;
+    p_person->U.UPerson.ComTimer = -1;
+    p_person->SubState = 0;
+    p_person->U.UPerson.ComRange = 0;
+    p_person->GotoThingIndex = p_sthing->ThingOffset;
+    p_person->U.UPerson.Vehicle = p_sthing->ThingOffset;
+    if (p_person->U.UPerson.PathIndex != 0)
+        remove_path(p_person);
+}
+
+void should_i_get_item(struct Thing *p_person, struct SimpleThing *p_sthing)
+{
+    FNCHK_VOID("should_i_get_item", should_i_get_item_asm(p_person, p_sthing),
+      should_i_get_item_c(p_person, p_sthing));
 }
 
 /** Checks the things on one tile for check_for_other_people(). `found` is the
@@ -7606,10 +7656,37 @@ ubyte person_attempt_to_leave_vehicle(struct Thing *p_person)
     return 0;
 }
 
-void make_peep_protect_peep(struct Thing *p_protector, struct Thing *p_leader)
+#ifdef SW_FNCHK
+static void make_peep_protect_peep_asm(struct Thing *p_protector, struct Thing *p_leader)
 {
     asm volatile ("call ASM_make_peep_protect_peep\n"
-        : : "a" (p_protector), "d" (p_leader));
+        : "+a" (p_protector), "+d" (p_leader) : : "cc", "memory");
+}
+#endif
+
+/** The protector follows and guards the leader (state 43), at a distance
+ * depending on both agents' numbers.  Remade from make_peep_protect_peep. */
+static void make_peep_protect_peep_c(struct Thing *p_protector, struct Thing *p_leader)
+{
+    p_protector->State = 0x2B;
+    p_protector->U.UPerson.ComTimer = -1;
+    p_protector->GotoThingIndex = p_leader->ThingOffset;
+    p_protector->Owner = p_leader->ThingOffset;
+    p_protector->U.UPerson.ComRange = follow_dist[p_leader->U.UPerson.ComCur & 3]
+      [p_protector->U.UPerson.ComCur & 3];
+    p_protector->U.UPerson.Timer2 = 50;
+    p_protector->U.UPerson.StartTimer2 = 50;
+    p_protector->Timer1 = 48;
+    p_protector->StartTimer1 = 48;
+    p_protector->SubState = 0;
+    p_protector->Flag2 &= ~TgF2_Unkn08000000;
+    remove_path(p_protector);
+}
+
+void make_peep_protect_peep(struct Thing *p_protector, struct Thing *p_leader)
+{
+    FNCHK_VOID("make_peep_protect_peep", make_peep_protect_peep_asm(p_protector, p_leader),
+      make_peep_protect_peep_c(p_protector, p_leader));
 }
 
 void player_change_person(short thing, ushort plyr)
@@ -8002,10 +8079,63 @@ void thing_shoot_at_point(struct Thing *p_thing, short x, short y, short z, uint
     }
 }
 
-void call_protect(struct Thing *p_thing, ushort plyr)
+#ifdef SW_FNCHK
+static void call_protect_asm(struct Thing *p_thing, ushort plyr)
 {
     asm volatile ("call ASM_call_protect\n"
-        : : "a" (p_thing), "d" (plyr));
+        : "+a" (p_thing), "+d" (plyr) : : "cc", "memory");
+}
+#endif
+
+/** The nearest free agent of the player (in the same vehicle, when the
+ * person is in one) starts protecting the person.  Remade from
+ * call_protect. */
+static void call_protect_c(struct Thing *p_thing, ushort plyr)
+{
+    s32 best;
+    ThingIdx found;
+    ushort vehicle, plagent;
+
+    best = 0x7FFFFFFF;
+    found = 0;
+    vehicle = 0;
+    if ((p_thing->Flag & TngF_InVehicle) != 0)
+        vehicle = p_thing->U.UPerson.Vehicle;
+    for (plagent = 0; plagent < playable_agents; plagent++)
+    {
+        struct Thing *p_agent;
+        ushort state;
+        s32 dx, dy, dz, dist;
+
+        p_agent = players[plyr].MyAgent[plagent];
+        if ((vehicle != 0) && ((p_agent->Flag & TngF_InVehicle) != 0) &&
+          ((ushort)p_agent->U.UPerson.Vehicle != vehicle))
+            continue;
+        if (p_agent == p_thing)
+            continue;
+        if ((p_agent->Flag2 & TgF2_Unkn10000000) != 0)
+            continue;
+        if ((p_agent->Flag & TngF_Destroyed) != 0)
+            continue;
+        state = (ushort)p_agent->State;
+        if ((state == 0x2B) || (state == 0x24) || (state == 0x0C))
+            continue;
+        dx = (p_agent->X - p_thing->X) >> 8;
+        dy = (p_agent->Y - p_thing->Y) >> 8;
+        dz = (p_agent->Z - p_thing->Z) >> 8;
+        dist = (s32)((u32)dx * (u32)dx + (u32)dy * (u32)dy + (u32)dz * (u32)dz);
+        if (dist < best) {
+            best = dist;
+            found = p_agent->ThingOffset;
+        }
+    }
+    if (found != 0)
+        make_peep_protect_peep(&things[found], p_thing);
+}
+
+void call_protect(struct Thing *p_thing, ushort plyr)
+{
+    FNCHK_VOID("call_protect", call_protect_asm(p_thing, plyr), call_protect_c(p_thing, plyr));
 }
 
 void call_protect_specific(struct Thing *p_person_client, struct Thing *p_protector)
@@ -8014,19 +8144,96 @@ void call_protect_specific(struct Thing *p_person_client, struct Thing *p_protec
         : : "a" (p_person_client), "d" (p_protector));
 }
 
+#ifdef SW_FNCHK
+static ushort count_protect_asm(struct Thing *p_thing, ushort plyr)
+{
+    int ret;
+    asm volatile (
+      "call ASM_count_protect\n"
+        : "=a" (ret), "+d" (plyr) : "0" (p_thing) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Number of the player's other agents protecting (alive, state 43).
+ * Remade from count_protect. */
+static ushort count_protect_c(struct Thing *p_thing, ushort plyr)
+{
+    ushort plagent, n;
+
+    n = 0;
+    for (plagent = 0; plagent < playable_agents; plagent++)
+    {
+        struct Thing *p_agent;
+
+        p_agent = players[plyr].MyAgent[plagent];
+        if (p_agent == p_thing)
+            continue;
+        if ((ushort)p_agent->State != 0x2B)
+            continue;
+        if ((p_agent->Flag & TngF_Destroyed) != 0)
+            continue;
+        n++;
+    }
+    return n;
+}
+
 ushort count_protect(struct Thing *p_thing, ushort plyr)
 {
     ushort ret;
-    asm volatile (
-      "call ASM_count_protect\n"
-        : "=r" (ret) : "a" (p_thing), "d" (plyr));
+    FNCHK_RET("count_protect", ret, count_protect_asm(p_thing, plyr),
+      count_protect_c(p_thing, plyr));
     return ret;
+}
+
+#ifdef SW_FNCHK
+static void call_unprotect_asm(struct Thing *p_thing, ushort plyr, ubyte flag)
+{
+    asm volatile ("call ASM_call_unprotect\n"
+        : "+a" (p_thing), "+d" (plyr), "+b" (flag) : : "cc", "memory");
+}
+#endif
+
+/** With `flag` 2 the person stops protecting.  Else all protecting agents
+ * of the player stop; when there were none (and `flag` is 0) three agents
+ * are called to protect the person.  Remade from call_unprotect. */
+static void call_unprotect_c(struct Thing *p_thing, ushort plyr, ubyte flag)
+{
+    ushort plagent;
+
+    if (flag == 2)
+    {
+        if ((ushort)p_thing->State == 0x2B)
+        {
+            p_thing->State = PerSt_NONE;
+            remove_path(p_thing);
+            p_thing->U.UPerson.ComTimer = -1;
+        }
+        return;
+    }
+    for (plagent = 0; plagent < playable_agents; plagent++)
+    {
+        struct Thing *p_agent;
+
+        p_agent = players[plyr].MyAgent[plagent];
+        if ((ushort)p_agent->State != 0x2B)
+            continue;
+        if ((p_agent->Flag & TngF_Destroyed) != 0)
+            continue;
+        flag = 1;
+        p_agent->State = PerSt_NONE;
+    }
+    if (flag != 0)
+        return;
+    call_protect(p_thing, plyr);
+    call_protect(p_thing, plyr);
+    call_protect(p_thing, plyr);
 }
 
 void call_unprotect(struct Thing *p_thing, ushort plyr, ubyte flag)
 {
-    asm volatile ("call ASM_call_unprotect\n"
-        : : "a" (p_thing), "d" (plyr), "b" (flag));
+    FNCHK_VOID("call_unprotect", call_unprotect_asm(p_thing, plyr, flag),
+      call_unprotect_c(p_thing, plyr, flag));
 }
 
 TbBool weapon_can_target_enemy_thing(WeaponType wtype)
@@ -8477,11 +8684,106 @@ TbBool person_update_thermal(ThingIdx person)
     return true;
 }
 
-void make_peeps_scatter(struct Thing *p_person, int x, int z)
+#ifdef SW_FNCHK
+static void make_peeps_scatter_asm(struct Thing *p_person, int x, int z)
 {
     asm volatile (
       "call ASM_make_peeps_scatter\n"
-        : : "a" (p_person), "d" (x), "b" (z));
+        : "+a" (p_person), "+d" (x), "+b" (z) : : "cc", "memory");
+}
+#endif
+
+void thing_goto_point_fast(struct Thing *p_thing, short x, short y, short z, int plyr);
+
+/** True when the agent takes part in a scatter around the person: it is
+ * selected, or protects (state 43) the person. */
+static TbBool scatter_agent_takes_part(struct Thing *p_agent, struct Thing *p_person)
+{
+    if (((ushort)p_agent->State == 0x2B) &&
+      (p_agent->GotoThingIndex == (ushort)p_person->ThingOffset))
+        return true;
+    return ((p_agent->Flag & TngF_SelectedAgent) != 0);
+}
+
+/** The player's agents around a person (selected ones and its protectors)
+ * run to four points 256 apart from map point (x,z), one agent to each
+ * point, the nearest free one first; they get an aggressive mood and a
+ * weapon if not holding a fitting one.  Remade from make_peeps_scatter. */
+static void make_peeps_scatter_c(struct Thing *p_person, int x, int z)
+{
+    s32 best[4];
+    ushort sel[4];
+    ushort plyr, plagent, i;
+    const s32 radius = 0x100;
+
+    if (((x >> 8) < 0) || ((x >> 8) >= 128) || ((z >> 8) < 0) || ((z >> 8) >= 128))
+        return;
+    plyr = p_person->U.UPerson.ComCur >> 2;
+    memset(best, 0x7F, sizeof(best));
+    memset(sel, 0, sizeof(sel));
+    for (plagent = 0; plagent < playable_agents; plagent++)
+    {
+        struct Thing *p_agent;
+
+        p_agent = players[plyr].MyAgent[plagent];
+        if (scatter_agent_takes_part(p_agent, p_person))
+            p_agent->U.UPerson.Flag3 &= ~0x04;
+    }
+    for (i = 0; i < 4; i++)
+    {
+        s32 tx, tz;
+
+        for (plagent = 0; plagent < playable_agents; plagent++)
+        {
+            struct Thing *p_agent;
+            s32 dx, dz, dist;
+
+            p_agent = players[plyr].MyAgent[plagent];
+            if ((p_agent->Flag & (TngF_Unkn40000000 | TngF_Destroyed)) != 0)
+                continue;
+            if (!scatter_agent_takes_part(p_agent, p_person))
+                continue;
+            if ((p_agent->U.UPerson.Flag3 & 0x04) != 0)
+                continue;
+            tx = ((lbSinTable[i * 512 + 512] * radius) >> 16) + x;
+            tz = ((lbSinTable[i * 512] * radius) >> 16) + z;
+            dx = abs((p_agent->X >> 8) - tx);
+            dz = abs((p_agent->Z >> 8) - tz);
+            if (dx > dz)
+                dist = dx + (dz >> 1);
+            else
+                dist = dz + (dx >> 1);
+            if (dist < best[i]) {
+                best[i] = dist;
+                sel[i] = plagent + 1;
+            }
+        }
+        if (sel[i] != 0)
+        {
+            struct Thing *p_agent;
+            s32 y;
+            ubyte wep;
+
+            p_agent = players[plyr].MyAgent[sel[i] - 1];
+            p_agent->State = 5;
+            p_agent->U.UPerson.ComRange = 0;
+            p_agent->U.UPerson.Flag3 |= 0x04;
+            p_agent->U.UPerson.Mood = limit_mood(p_agent, 0x50);
+            tz = ((lbSinTable[i * 512] * radius) >> 16) + z;
+            tx = ((lbSinTable[i * 512 + 512] * radius) >> 16) + x;
+            y = alt_at_point((short)tx, (short)tz) >> 8;
+            thing_goto_point_fast(p_agent, (short)tx, (short)y, (short)tz, plyr);
+            wep = p_agent->U.UPerson.CurrentWeapon;
+            if (!(((wep >= 2) && (wep <= 6)) || (wep == 15) || (wep == 17) || (wep == 20)))
+                choose_best_weapon_for_range(p_agent, 0x500);
+        }
+    }
+}
+
+void make_peeps_scatter(struct Thing *p_person, int x, int z)
+{
+    FNCHK_VOID("make_peeps_scatter", make_peeps_scatter_asm(p_person, x, z),
+      make_peeps_scatter_c(p_person, x, z));
 }
 
 #ifdef SW_FNCHK
@@ -11015,10 +11317,43 @@ void person_destroy_building(struct Thing *p_person)
     }
 }
 
-void person_catch_train(struct Thing *p_person)
+#ifdef SW_FNCHK
+static void person_catch_train_asm(struct Thing *p_person)
 {
     asm volatile ("call ASM_person_catch_train\n"
-        : : "a" (p_person));
+        : "+a" (p_person) : : "cc", "memory");
+}
+#endif
+
+/** A person going to catch a train walks to the point; when there, it
+ * waits (state 50) if it stands on the command's face, else it walks on
+ * to that face (state 49).  Remade from person_catch_train. */
+static void person_catch_train_c(struct Thing *p_person)
+{
+    struct Command *p_cmd;
+
+    person_goto_point(p_person);
+    if ((ushort)p_person->State != PerSt_NONE)
+        return;
+    p_cmd = &game_commands[p_person->U.UPerson.ComCur];
+    if (p_person->U.UPerson.OnFace == p_cmd->OtherThing)
+    {
+        p_person->SubState = 0;
+        p_person->State = 0x32;
+        return;
+    }
+    p_person->U.UPerson.ComTimer = -1;
+    if (p_person->U.UPerson.PathIndex != 0)
+        remove_path(p_person);
+    build_navigate_path_to_face(p_person, game_commands[p_person->U.UPerson.ComCur].OtherThing);
+    p_person->U.UPerson.ComRange = 0;
+    p_person->State = 0x31;
+}
+
+void person_catch_train(struct Thing *p_person)
+{
+    FNCHK_VOID("person_catch_train", person_catch_train_asm(p_person),
+      person_catch_train_c(p_person));
 }
 
 void set_angle_to_avoid_group(struct Thing *p_person)

@@ -35,6 +35,10 @@
 #include "thing.h"
 #include "weapon.h"
 #include "swlog.h"
+#include "fncheck.h"
+#include "research.h"
+#include "guiboxes.h"
+#include "bfutility.h"
 /******************************************************************************/
 ubyte default_agent_tiles_x[8] = {
     45, 64, 40, 60, 30, 70, 20, 80,
@@ -496,16 +500,118 @@ const char *get_cryo_agent_name(short cryo_no)
     return gui_strings[strid];
 }
 
-void remove_agent(ubyte cryo_no)
+extern struct ScreenTextBox cryo_agent_list_box;
+
+#ifdef SW_FNCHK
+static void remove_agent_asm(ubyte cryo_no)
 {
     asm volatile ("call ASM_remove_agent\n"
-        : : "a" (cryo_no));
+        : "+a" (cryo_no) : : "cc", "memory");
+}
+
+static void add_agent_asm(ulong weapons, ushort mods)
+{
+    asm volatile ("call ASM_add_agent\n"
+        : "+a" (weapons), "+d" (mods) : : "cc", "memory");
+}
+#endif
+
+/** Removes the agent from the cryo chamber: the agents after it move one
+ * place down and its name goes to the end of the list.  As the original,
+ * the sex bits are not moved: the bit of the place below is set to the bit
+ * of the moved agent's old place, so all of them end up equal to the last.
+ * Players' mission agents beyond the new number of agents are dropped.
+ * Remade from remove_agent. */
+static void remove_agent_c(ubyte cryo_no)
+{
+    ushort i, k;
+    char name;
+
+    for (i = cryo_no + 1; i < cryo_agents.NumAgents; i++)
+    {
+        u32 bit;
+
+        cryo_agents.Weapons[i - 1] = cryo_agents.Weapons[i];
+        cryo_agents.Mods[i - 1] = cryo_agents.Mods[i];
+        bit = cryo_agents.Sex & (1u << (i & 0x1F));
+        cryo_agents.Sex &= ~(1u << ((i - 1) & 0x1F));
+        cryo_agents.Sex |= bit;
+        for (k = 0; k < WFRPK_COUNT; k++)
+            cryo_agents.FourPacks[i - 1].Amount[k] = cryo_agents.FourPacks[i].Amount[k];
+    }
+    name = cryo_agents.RandomName[cryo_no];
+    for (i = cryo_no + 1; i < CRYO_PODS_MAX_COUNT; i++)
+        cryo_agents.RandomName[i - 1] = cryo_agents.RandomName[i];
+    cryo_agents.RandomName[CRYO_PODS_MAX_COUNT - 1] = name;
+    cryo_agents.NumAgents--;
+    cryo_agent_list_box.Lines = cryo_agents.NumAgents;
+    for (k = 0; k < 4; k++)
+    {
+        if (k >= cryo_agents.NumAgents)
+            players[local_player_no].MissionAgents &= ~(1 << k);
+    }
+}
+
+/** Adds an agent with (at most 6 of) the weapons and the mods to the cryo
+ * chamber; weapons not researched become allowed for research, the
+ * four-packs get one of each four-pack weapon, the sex is random.
+ * Remade from add_agent. */
+static void add_agent_c(ulong weapons, ushort mods)
+{
+    ushort n, k;
+    int b, count;
+    u32 wep;
+
+    n = cryo_agents.NumAgents;
+    if (n > 31)
+        return;
+    weapons &= 0xFFA75FFF;
+    cryo_agents.Weapons[n] = 0;
+    count = 0;
+    for (b = 0; b < 32; b++)
+    {
+        u32 bit;
+
+        bit = 1u << b;
+        if ((weapons & bit) == 0)
+            continue;
+        cryo_agents.Weapons[n] |= bit;
+        if ((research.WeaponsCompleted & bit) == 0)
+            research.WeaponsAllowed |= bit;
+        count++;
+        if (count == 6)
+            break;
+    }
+    for (k = 0; k < WFRPK_COUNT; k++)
+        cryo_agents.FourPacks[n].Amount[k] = 0;
+    wep = cryo_agents.Weapons[n];
+    if ((wep & 0x0020) != 0)
+        cryo_agents.FourPacks[n].Amount[2] = 1;
+    if ((wep & 0x0800) != 0)
+        cryo_agents.FourPacks[n].Amount[0] = 1;
+    if ((wep & 0x1000) != 0)
+        cryo_agents.FourPacks[n].Amount[1] = 1;
+    if ((wep & 0x0400) != 0)
+        cryo_agents.FourPacks[n].Amount[4] = 1;
+    if ((wep & 0x0200) != 0)
+        cryo_agents.FourPacks[n].Amount[3] = 1;
+    cryo_agents.Mods[n].Mods = mods;
+    if (((ushort)LbRandomAnyShort() % 17) > 8)
+        cryo_agents.Sex &= ~(1u << n);
+    else
+        cryo_agents.Sex |= (1u << n);
+    cryo_agents.NumAgents++;
+    cryo_agent_list_box.Lines = cryo_agents.NumAgents;
+}
+
+void remove_agent(ubyte cryo_no)
+{
+    FNCHK_VOID("remove_agent", remove_agent_asm(cryo_no), remove_agent_c(cryo_no));
 }
 
 void add_agent(ulong weapons, ushort mods)
 {
-    asm volatile ("call ASM_add_agent\n"
-        : : "a" (weapons), "d" (mods));
+    FNCHK_VOID("add_agent", add_agent_asm(weapons, mods), add_agent_c(weapons, mods));
 }
 
 ThingIdx direct_control_thing_for_player(PlayerIdx plyr)

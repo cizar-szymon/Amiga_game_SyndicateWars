@@ -35,6 +35,7 @@
 #include "player.h"
 #include "sound.h"
 #include "swlog.h"
+#include "fncheck.h"
 #include "thing.h"
 #include "vehicle.h"
 /******************************************************************************/
@@ -349,11 +350,48 @@ void update_agent_move_direction_deltas(struct SpecialUserInput *p_usrinp)
     }
 }
 
+#ifdef SW_FNCHK
+static short get_next_player_agent_asm(ushort player)
+{
+    int ret;
+    asm volatile ("call ASM_get_next_player_agent\n"
+        : "=a" (ret) : "0" (player) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** The player's next agent after the one under direct control, skipping
+ * dead and knocked out ones (the fourth one after it when all are).
+ * Remade from get_next_player_agent. */
+static short get_next_player_agent_c(ushort player)
+{
+    PlayerInfo *p_player;
+    ushort i, n;
+
+    p_player = &players[player];
+    for (i = 0; i < 4; i++)
+    {
+        if ((s32)(short)(p_player->MyAgent[i] - things) == (s32)p_player->DirectControl[0])
+            break;
+    }
+    i = (i + 1) % 4;
+    for (n = 0; n < 4; n++, i++)
+    {
+        struct Thing *p_agent;
+
+        p_agent = p_player->MyAgent[i % 4];
+        if (((p_agent->Flag & TngF_Destroyed) == 0) &&
+          ((p_agent->Flag2 & TgF2_KnockedOut) == 0))
+            return p_agent - things;
+    }
+    return p_player->MyAgent[i % 4] - things;
+}
+
 short get_next_player_agent(ushort player)
 {
     short ret;
-    asm volatile ("call ASM_get_next_player_agent\n"
-        : "=r" (ret) : "a" (player));
+    FNCHK_RET("get_next_player_agent", ret, get_next_player_agent_asm(player),
+      get_next_player_agent_c(player));
     return ret;
 }
 

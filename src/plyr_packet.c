@@ -149,6 +149,9 @@ static void thing_goto_point_asm(struct Thing *p_thing, short x, short y, short 
  * they have stamina to spare.
  * Remade from set_player_peeps_to_run.
  */
+short get_next_player_agent(ushort player);
+void should_i_get_item(struct Thing *p_person, struct SimpleThing *p_sthing);
+
 void set_player_peeps_to_run(struct Thing *p_leader, ushort plyr)
 {
     ushort plagent;
@@ -568,11 +571,54 @@ void thing_goto_point_on_face(struct Thing *p_thing, short x, short z, short fac
       thing_goto_point_on_face_c(p_thing, x, z, face));
 }
 
+#ifdef SW_FNCHK
+static ubyte select_new_weapon_asm(ushort index, short dir)
+{
+    int ret;
+    asm volatile ("call ASM_select_new_weapon\n"
+        : "=a" (ret), "+d" (dir) : "0" (index) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** The next weapon type the person carries, going from its current one in
+ * steps of `dir` (below 0 it wraps to 32); 0 when the steps leave 1..32,
+ * the current one when nothing is found in 32 steps.
+ * Remade from select_new_weapon. */
+static ubyte select_new_weapon_c(ushort index, short dir)
+{
+    struct Thing *p_person;
+    u32 weapons;
+    short wep;
+    ushort n;
+
+    p_person = &things[index];
+    if ((p_person->Flag2 & TgF2_Unkn0001) != 0)
+        finalise_razor_wire(p_person);
+    wep = (short)(p_person->U.UPerson.CurrentWeapon + dir);
+    if (wep < 0)
+        wep = 0x20;
+    if ((wep < 1) || (wep > 0x20))
+        return 0;
+    weapons = p_person->U.UPerson.WeaponsCarried & ~0x400000;
+    n = 0;
+    while (((weapons & (1u << ((wep - 1) & 0x1F))) == 0) && (n < 0x20))
+    {
+        wep = (short)(wep + dir);
+        if ((wep < 1) || (wep > 0x20))
+            return 0;
+        n++;
+    }
+    if (n >= 0x20)
+        return p_person->U.UPerson.CurrentWeapon;
+    return (ubyte)wep;
+}
+
 ubyte select_new_weapon(ushort index, short dir)
 {
     ubyte ret;
-    asm volatile ("call ASM_select_new_weapon\n"
-        : "=r" (ret) : "a" (index), "d" (dir));
+    FNCHK_RET("select_new_weapon", ret, select_new_weapon_asm(index, dir),
+      select_new_weapon_c(index, dir));
     return ret;
 }
 
@@ -1883,6 +1929,26 @@ static void test_cmds_process(void)
         return;
     switch (gameturn % 120)
     {
+    case 65:
+        get_next_player_agent(local_player_no);
+        break;
+    case 35:
+        call_protect(p_agent, local_player_no);
+        count_protect(p_agent, local_player_no);
+        break;
+    case 95:
+        call_unprotect(p_agent, local_player_no, ((gameturn % 480) < 240) ? 0 : 2);
+        count_protect(p_agent, local_player_no);
+        break;
+    case 15:
+    case 45:
+    case 75:
+        player_agent_weapon_switch(local_player_no, p_agent->ThingOffset,
+          ((gameturn % 240) < 120) ? 1 : -1);
+        break;
+    case 5:
+        make_peeps_scatter(p_agent, (p_agent->X >> 8) + 0x200, (p_agent->Z >> 8) - 0x100);
+        break;
     case 25:
     case 85:
     {
@@ -1919,8 +1985,12 @@ static void test_cmds_process(void)
                 best_thing = thing;
             }
         }
-        if (best_thing != 0)
+        if (best_thing == 0)
+            break;
+        if ((gameturn % 240) < 120)
             person_init_get_item_fast(p_agent, best_thing, local_player_no);
+        else
+            should_i_get_item(p_agent, &sthings[best_thing]);
         break;
     }
     case 10:

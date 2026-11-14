@@ -1281,18 +1281,177 @@ void process_laser_guided(struct Thing *p_laser)
         : : "a" (p_laser));
 }
 
+
+struct SimpleThing *init_nuclear_bomb(MapCoord x, MapCoord y, MapCoord z);
+struct SimpleThing *create_growing_e_strand(int x, int y, int z,
+  struct Thing *p_thing, int health, int owner);
+int mounted_los(int x1, int y1, int z1, int x2, int y2, int z2);
+ThingIdx aquire_target(struct Thing *p_gun);
+
+#ifdef SW_FNCHK
+static void process_c_iff_asm(struct Thing *p_mine)
+{
+    asm volatile ("call ASM_process_c_iff\n"
+        : : "a" (p_mine) : "cc", "memory");
+}
+
+static void process_mine_asm(struct SimpleThing *p_mine)
+{
+    asm volatile ("call ASM_process_mine\n"
+        : : "a" (p_mine) : "cc", "memory");
+}
+#endif
+
+/** A placed auto gun (c_iff): fires at its target while it is in range and
+ * in sight, else drops it, and looks for a new one every 8 turns.
+ * Remade from process_c_iff. */
+static void process_c_iff_c(struct Thing *p_gun)
+{
+    struct Thing *p_target;
+
+    if ((p_gun->Flag & 0x0002) != 0)
+        return;
+    if (p_gun->U.UPerson.WeaponTurn > 3)
+        p_gun->U.UPerson.WeaponTurn = 0;
+    process_weapon(p_gun);
+    p_target = p_gun->PTarget;
+    if (p_target != NULL)
+    {
+        s32 adx, adz, dist;
+
+        adx = abs((p_gun->X >> 8) - (p_target->X >> 8));
+        adz = abs((p_gun->Z >> 8) - (p_target->Z >> 8));
+        if (adx > adz)
+            dist = adx + (adz >> 1);
+        else
+            dist = adz + (adx >> 1);
+        if (dist >= get_weapon_range(p_gun))
+        {
+            p_gun->PTarget = NULL;
+            return;
+        }
+        p_target = p_gun->PTarget;
+        if (mounted_los(p_gun->X >> 8, (p_gun->Y >> 8) + 20, p_gun->Z >> 8,
+          p_target->X >> 8, (p_target->Y >> 8) + 20, p_target->Z >> 8))
+        {
+            p_gun->Flag |= 0x0800;
+            if ((p_gun->Flag & 0x10000000) != 0)
+                things[p_gun->U.UPerson.Vehicle].Flag |= 0x01000000;
+        }
+        return;
+    }
+    if ((((ushort)p_gun->ThingOffset + gameturn) & 7) == 0)
+        aquire_target(p_gun);
+}
+
 void process_c_iff(struct Thing *p_mine)
 {
-    asm volatile (
-      "call ASM_process_c_iff\n"
-        : : "a" (p_mine));
+    FNCHK_VOID("process_c_iff", process_c_iff_asm(p_mine), process_c_iff_c(p_mine));
+}
+
+/** An electric mine goes off: strands to the 4 nearest people (within
+ * 0x2FA000) and a shockwave.  Remade from init_electricity_bomb. */
+static void init_electricity_bomb(int x, int y, int z, ushort owner)
+{
+    int dist;
+    ushort i;
+
+    dist = 0;
+    for (i = 0; i < 4; i++)
+    {
+        short person;
+
+        person = find_nearest_person_min(x, y, z, dist, &dist, -1, (u32)-1);
+        if (dist >= 0x2FA000)
+            continue;
+        if (person == 0)
+            continue;
+        create_growing_e_strand(x, y, z, &things[(ushort)person], 4, owner);
+    }
+    do_shockwave(x, y, z, -700, 1, NULL);
+}
+
+/** Mines: the nuclear mine (subtype 0x0D) ticks down (faster when
+ * triggered) and becomes a nuclear blast; the electric mine (0x0C)
+ * triggers on people near and shocks three times; 0x30 is an auto gun.
+ * Remade from process_mine. */
+static void process_mine_c(struct SimpleThing *p_mine)
+{
+    struct STngUWeapon *p_wpn;
+
+    p_wpn = &p_mine->U.UWeapon;
+    if (p_mine->SubType == 0x0D)
+    {
+        struct SimpleThing *p_bomb;
+
+        if (p_wpn->Ammo != 0)
+            p_wpn->Ammo--;
+        if (p_mine->Timer1 == 999)
+            return;
+        if (p_mine->Timer1 == 60)
+            play_dist_ssample(p_mine, 0x26, 0x7F, 0x40, 100, -1, 1);
+        if (((p_mine->Flag & 0x00040000) != 0) && (p_mine->Timer1 > 7) && (p_wpn->Ammo == 0))
+            p_mine->Timer1 = 7;
+        p_mine->Timer1--;
+        if (p_mine->Timer1 > 0)
+            return;
+        stop_sample_using_heap(p_mine->ThingOffset, 0x26);
+        p_bomb = init_nuclear_bomb(p_mine->X >> 8, p_mine->Y >> 8, p_mine->Z >> 8);
+        if (p_bomb != NULL)
+        {
+            play_dist_ssample(p_bomb, 1, 0x7F, 0x40, 100, 0, 3);
+            p_bomb->Timer1 = 0x14;
+            p_bomb->Owner2 = p_mine->Owner2;
+            p_bomb->Radius = 0;
+            p_bomb->Flag &= ~0x10080000;
+        }
+        remove_sthing(p_mine->ThingOffset);
+        ingame.fld_unkCB7--;
+        delete_snode(p_mine);
+        return;
+    }
+    if (p_mine->SubType == 0x30)
+    {
+        process_c_iff((struct Thing *)p_mine);
+        return;
+    }
+    if (p_mine->SubType == 0x0C)
+    {
+        if (p_wpn->Ammo != 0)
+            p_wpn->Ammo--;
+        if (p_mine->Timer1 == 999)
+            return;
+        if (p_mine->Timer1 > 0)
+        {
+            if (check_for_radius_hit_person(p_mine->X, p_mine->Y, p_mine->Z, 0x200,
+              &things[(ushort)p_mine->Owner2], 1, 0) != NULL)
+                p_mine->Timer1 = 0;
+        }
+        if (p_mine->Timer1 == 60)
+            play_dist_ssample(p_mine, 0x26, 0x7F, 0x40, 100, -1, 1);
+        if (((p_mine->Flag & 0x00040000) != 0) && (p_mine->Timer1 > 7) && (p_wpn->Ammo == 0))
+            p_mine->Timer1 = 7;
+        if (p_mine->Timer1 > 0)
+            return;
+        p_mine->Timer1--;
+        stop_sample_using_heap(p_mine->ThingOffset, 0x26);
+        if ((p_mine->Timer1 == 0) || (p_mine->Timer1 == -6) || (p_mine->Timer1 == -11))
+            init_electricity_bomb(p_mine->X >> 8, p_mine->Y >> 8, p_mine->Z >> 8,
+              (ushort)p_mine->Owner2);
+        if (p_mine->Timer1 != -15)
+            return;
+        remove_sthing(p_mine->ThingOffset);
+        ingame.fld_unkCB7--;
+        delete_snode(p_mine);
+        return;
+    }
+    if (in_network_game)
+        p_wpn->Ammo++;
 }
 
 void process_mine(struct SimpleThing *p_mine)
 {
-    asm volatile (
-      "call ASM_process_mine\n"
-        : : "a" (p_mine));
+    FNCHK_VOID("process_mine", process_mine_asm(p_mine), process_mine_c(p_mine));
 }
 
 struct SimpleThing *init_nuclear_bomb(MapCoord x, MapCoord y, MapCoord z)

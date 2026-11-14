@@ -45,6 +45,8 @@
 #include "tngcolisn.h"
 #include "vehtraffic.h"
 #include "weapon.h"
+#include "people.h"
+#include "pepgroup.h"
 #include "swlog.h"
 #include "fncheck.h"
 /******************************************************************************/
@@ -1198,7 +1200,8 @@ void rotate_object(struct Thing *p_object)
         : : "a" (p_object));
 }
 
-int mounted_los(int x1, int y1, int z1, int x2, int y2, int z2)
+#ifdef SW_FNCHK
+static int mounted_los_asm(int x1, int y1, int z1, int x2, int y2, int z2)
 {
     int ret;
     // Pushed through a register holding them: a "g" operand may be placed
@@ -1218,12 +1221,154 @@ int mounted_los(int x1, int y1, int z1, int x2, int y2, int z2)
     return ret;
 }
 
-ThingIdx aquire_target(struct Thing *p_gun)
+static ThingIdx aquire_target_asm(struct Thing *p_gun)
 {
     ThingIdx ret;
     asm volatile (
       "call ASM_aquire_target\n"
-        : "=r" (ret) : "a" (p_gun));
+        : "=a" (ret) : "0" (p_gun) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Line of sight of a mounted gun from (x1,y1,z1) to (x2,y2,z2): free when
+ * no collision column is hit in steps of 128 along the line; never beyond
+ * 0xC00.  Remade from mounted_los. */
+static int mounted_los_c(int x1, int y1, int z1, int x2, int y2, int z2)
+{
+    s32 dx, dy, dz, adx, ady, adz, dist, n, sx, sy, sz, x, y, z, i;
+
+    dx = x2 - x1;
+    dy = y2 - y1;
+    dz = z2 - z1;
+    adx = abs(dx);
+    ady = abs(dy);
+    adz = abs(dz);
+    if ((adx > ady) && (adx > adz))
+        dist = adx - (adx >> 4) + ((ady + adz) >> 1) - ((ady + adz) >> 3);
+    else if ((adx <= ady) && (ady > adz))
+        dist = ady - (ady >> 4) + ((adx + adz) >> 1) - ((adx + adz) >> 3);
+    else
+        dist = adz - (adz >> 4) + ((ady + adx) >> 1) - ((ady + adx) >> 3);
+    if (dist > 0xC00)
+        return 0;
+    n = dist >> 7;
+    if (n == 0)
+        return 0;
+    sx = dx / n;
+    sy = dy / n;
+    sz = dz / n;
+    x = x1;
+    y = y1;
+    z = z1;
+    for (i = 0; i < n; i++)
+    {
+        if (check_col_collision(x, y, z))
+            return 0;
+        x += sx;
+        y += sy;
+        z += sz;
+    }
+    return 1;
+}
+
+int mounted_los(int x1, int y1, int z1, int x2, int y2, int z2)
+{
+    int ret;
+
+    FNCHK_RET("mounted_los", ret, mounted_los_asm(x1, y1, z1, x2, y2, z2),
+      mounted_los_c(x1, y1, z1, x2, y2, z2));
+    return ret;
+}
+
+/** True when `p_me` shoots `p_him` on sight by the war flags of their
+ * groups (a building uses its Group, others their EffectiveGroup); never
+ * people with Flag2 0x00400000.  Remade from kill_flags. */
+static TbBool kill_flags(struct Thing *p_me, struct Thing *p_him)
+{
+    ubyte my_grp, his_grp;
+
+    if ((p_him->Type == TT_PERSON) && ((p_him->Flag2 & 0x00400000) != 0))
+        return false;
+    if (p_me->Type == TT_BUILDING)
+        my_grp = p_me->U.UObject.Group;
+    else
+        my_grp = p_me->U.UPerson.EffectiveGroup;
+    if (p_him->Type == TT_BUILDING)
+        his_grp = p_him->U.UObject.Group;
+    else
+        his_grp = p_him->U.UPerson.EffectiveGroup;
+    return (war_flags[my_grp].KillOnSight & (1u << (his_grp & 0x1F))) != 0;
+}
+
+/** A gun picks the nearest person within 8 tiles it should shoot at
+ * (alive); PTarget becomes &things[that], &things[0] when none.  Returns
+ * the thing index.  Remade from aquire_target. */
+static ThingIdx aquire_target_c(struct Thing *p_gun)
+{
+    s32 best_dist;
+    ThingIdx best;
+    short tile_x, tile_z, i, k;
+
+    best_dist = 0x7FFFFFFF;
+    best = 0;
+    tile_x = p_gun->X >> 16;
+    tile_z = p_gun->Z >> 16;
+    for (i = -8; i < 8; i++)
+    {
+        for (k = -8; k < 8; k++)
+        {
+            int cx, cz;
+            ThingIdx thing;
+
+            cx = tile_x + k;
+            if ((cx <= 0) || (cx >= 128))
+                continue;
+            cz = tile_z + i;
+            if ((cz <= 0) || (cz >= 128))
+                continue;
+            thing = game_my_big_map[(cz << 7) + cx].Child;
+            while (thing != 0)
+            {
+                if (thing > 0)
+                {
+                    struct Thing *p_thing;
+
+                    p_thing = &things[thing];
+                    if (kill_flags(p_gun, p_thing) && (p_thing->Type == TT_PERSON)
+                      && ((p_thing->Flag & 0x0002) == 0))
+                    {
+                        s32 adx, adz, dist;
+
+                        adx = abs((p_gun->X - p_thing->X) >> 8);
+                        adz = abs((p_gun->Z - p_thing->Z) >> 8);
+                        if (adx <= adz)
+                            dist = adz + (adx >> 1);
+                        else
+                            dist = adx + (adz >> 1);
+                        if (dist < best_dist) {
+                            best_dist = dist;
+                            best = thing;
+                        }
+                    }
+                    thing = p_thing->Next;
+                }
+                else
+                {
+                    thing = sthings[thing].Next;
+                }
+            }
+        }
+    }
+    p_gun->PTarget = &things[best];
+    return best;
+}
+
+ThingIdx aquire_target(struct Thing *p_gun)
+{
+    ThingIdx ret;
+
+    FNCHK_RET("aquire_target", ret, aquire_target_asm(p_gun), aquire_target_c(p_gun));
     return ret;
 }
 

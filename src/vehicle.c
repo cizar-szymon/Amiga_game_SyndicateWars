@@ -3920,7 +3920,7 @@ static void process_tank_stationary_asm(struct Thing *p_vehicle)
 
 /** True for statics a tank crushes (and sets on fire) when running over them.
  * Remade from can_the_tank_run_over. */
-static TbBool can_the_tank_run_over(struct SimpleThing *p_sthing)
+TbBool can_the_tank_run_over(struct SimpleThing *p_sthing)
 {
     ushort frame;
 

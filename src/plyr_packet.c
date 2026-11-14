@@ -29,6 +29,7 @@
 #include "ssampply.h"
 
 #include "bigmap.h"
+#include "bmcrater.h"
 #include "display.h"
 #include "drawtext_wrp.h"
 #include "game_bstype.h"
@@ -1932,6 +1933,9 @@ static void test_cmds_process(void)
     {
     case 65:
         get_next_player_agent(local_player_no);
+        break;
+    case 20:
+        create_crater((p_agent->X >> 16) + 2, (p_agent->Z >> 16) + 1, 20 + (gameturn % 50));
         break;
     case 50:
     case 110:

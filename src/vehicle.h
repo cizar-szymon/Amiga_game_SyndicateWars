@@ -265,6 +265,8 @@ void process_vehicle(struct Thing *p_vehicle);
 
 void start_crashing(struct Thing *p_vehicle);
 int vehicle_object_radius(ushort object);
+struct SimpleThing;
+TbBool can_the_tank_run_over(struct SimpleThing *p_sthing);
 void start_landing(struct Thing *p_vehicle);
 
 int check_for_a_vehicle_here(int x, int z, struct Thing *p_vehicle);

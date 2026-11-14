@@ -17,6 +17,8 @@
  */
 /******************************************************************************/
 #include "bmcrater.h"
+
+#include <string.h>
 #include "lvdraw3d.h"
 
 #include "bfutility.h"
@@ -25,6 +27,10 @@
 #include "game.h"
 #include "swlog.h"
 #include "fncheck.h"
+#include "people.h"
+#include "thing.h"
+#include "thing_fire.h"
+#include "vehicle.h"
 /******************************************************************************/
 
 #define MAP_CRATERS_COUNT 128
@@ -316,12 +322,278 @@ void quick_crater(int tl_cent_x, int tl_cent_z, int size)
     }
 }
 
-/** Progress the crater with given index by one step (still in asm).
- */
-void process_map_crater(ubyte crater)
+#ifdef SW_FNCHK
+static void process_map_crater_asm(ubyte crater)
 {
     asm volatile ("call ASM_process_map_crater\n"
         : : "a" ((u32)crater) : "cc", "memory");
+}
+#endif
+
+/** True when the tile's texture (flags removed) is the crater texture. */
+static TbBool crater_tile_is_crater(struct MyMapElement *p_mapel)
+{
+    return ((p_mapel->Texture & 0x3FFF) == crater_unkn_texture_flags);
+}
+
+/** Puts the crater texture on the tile and clears its TearAround. */
+static void crater_tile_set(struct MyMapElement *p_mapel)
+{
+    p_mapel->Texture &= 0xC000;
+    p_mapel->Texture |= crater_unkn_texture_flags;
+    p_mapel->ColumnHead &= COL_COLUMN_MASK;
+}
+
+/** Tries to spread the crater from the current tile to the neighbour tile
+ * `next`: a random chance below `thr`; the neighbour gets level `lvl`. */
+static TbBool crater_spread_to(short *queue, ubyte *level, ushort *p_tail, short next,
+  ubyte lvl, short cur, short low, short thr)
+{
+    int r;
+
+    r = (int)(ushort)LbRandomAnyShort() % (int)(cur - low);
+    if (r >= thr)
+        return false;
+    queue[*p_tail] = next;
+    (*p_tail)++;
+    level[next] = lvl;
+    return true;
+}
+
+/** Progress the crater with given index by one step: for 5 turns it spreads
+ * at random from its centre over the tiles around (as far as its depth
+ * allows), lowering the ground and texturing it, hurting people and
+ * setting fire to statics there; then the borders are smoothed like in
+ * quick_crater() (without the sea test).  After 5 turns the crater is done.
+ * The scratch buffer holds the queue of tiles (words) and, at 0x8000,
+ * the spread level of each tile.  Remade from process_map_crater.
+ */
+static void process_map_crater_c(ubyte crater)
+{
+    struct MapCreater *p_crat;
+    short *queue;
+    ubyte *level;
+    ushort head, tail;
+    short cur, thr;
+    ubyte maxlvl;
+    int min_x, max_x, min_z, max_z;
+    int tl_x, tl_z;
+
+    p_crat = &map_craters[crater];
+    p_crat->Iterations++;
+    if (p_crat->Iterations > 5)
+    {
+        map_crater_first++;
+        if ((sbyte)map_crater_first < 0)
+            map_crater_first = 0;
+        map_craters[crater].Iterations = 0;
+        return;
+    }
+    cur = (short)((p_crat->Depth * p_crat->Iterations) / 5);
+    queue = (short *)scratch_buf1;
+    level = scratch_buf1 + 0x8000;
+    memset(level, 0, 0x4000);
+    thr = (short)((3 * cur) / 7);
+    maxlvl = (ubyte)(cur / 10);
+    if (maxlvl < 3)
+        maxlvl = 3;
+    min_x = p_crat->MapX - 1;
+    max_x = p_crat->MapX + 1;
+    min_z = p_crat->MapY - 1;
+    max_z = p_crat->MapY + 1;
+    if (min_x < 0) min_x = 0;
+    if (min_x >= 128) min_x = 127;
+    if (max_x < 0) max_x = 0;
+    if (max_x >= 128) max_x = 127;
+    if (min_z < 0) min_z = 0;
+    if (min_z >= 128) min_z = 127;
+    if (max_z < 0) max_z = 0;
+    if (max_z >= 128) max_z = 127;
+
+    head = 0;
+    tail = 0;
+    queue[tail] = (short)((p_crat->MapY << 7) + p_crat->MapX);
+    tail++;
+    level[queue[head]] = 1;
+    while (head != tail)
+    {
+        struct MyMapElement *p_mapel;
+        short tile, low;
+        ThingIdx thing;
+        ubyte lvl;
+        int drop;
+
+        tile = queue[head];
+        if ((tile < 0) || floor_texture_is_fluid(game_my_big_map[tile].Texture & 0x3FFF)) {
+            head++;
+            continue;
+        }
+        p_mapel = &game_my_big_map[tile];
+        crater_tile_set(p_mapel);
+        lvl = level[tile];
+        drop = (short)(map_craters[crater].Depth - (lvl * map_craters[crater].Depth) / maxlvl) / 5;
+        drop = ((drop + (ushort)LbRandomAnyShort()) & 0xF) >> 3;
+        p_mapel->Alt -= drop;
+
+        for (thing = p_mapel->Child; thing != 0; )
+        {
+            if (thing > 0)
+            {
+                struct Thing *p_thing;
+
+                p_thing = &things[thing];
+                if (p_thing->Type == TT_PERSON)
+                {
+                    s32 tx, tz;
+
+                    tx = ((queue[head] % 128) << 8) + 0x80;
+                    tz = ((queue[head] / 128) << 8) + 0x80;
+                    thing_hit_by_bullet(p_thing, 600, (short)((p_thing->X >> 8) - tx), 0,
+                      (short)((p_thing->Z >> 8) - tz), NULL, 9);
+                    things[thing].Flag2 &= ~TgF2_InsideBuilding;
+                    things[thing].Y = alt_at_point(things[thing].X >> 8, things[thing].Z >> 8);
+                }
+                thing = things[thing].Next;
+            }
+            else
+            {
+                struct SimpleThing *p_sthing;
+
+                p_sthing = &sthings[thing];
+                if (can_the_tank_run_over(p_sthing))
+                {
+                    p_sthing->Y = alt_at_point(p_sthing->X >> 8, p_sthing->Z >> 8);
+                    set_static_on_fire(p_sthing);
+                }
+                thing = sthings[thing].Next;
+            }
+        }
+
+        low = cur - (lvl * cur) / maxlvl;
+        if (low == cur)
+            low--;
+        if (lvl < maxlvl)
+        {
+            lvl++;
+            tile = queue[head];
+            if (((tile % 128) != 0) && (level[tile - 1] == 0) &&
+              crater_spread_to(queue, level, &tail, tile - 1, lvl, cur, low, thr))
+            {
+                if ((queue[(ushort)(tail - 1)] % 128) == min_x) {
+                    min_x--;
+                    if (min_x < 0) min_x = 0;
+                }
+            }
+            tile = queue[head];
+            if (((tile % 128) < 127) && (level[tile + 1] == 0) &&
+              crater_spread_to(queue, level, &tail, tile + 1, lvl, cur, low, thr))
+            {
+                if ((queue[(ushort)(tail - 1)] % 128) == max_x) {
+                    max_x++;
+                    if (max_x > 127) max_x = 127;
+                }
+            }
+            tile = queue[head];
+            if ((tile >= 128) && (level[tile - 128] == 0) &&
+              crater_spread_to(queue, level, &tail, tile - 128, lvl, cur, low, thr))
+            {
+                if ((queue[(ushort)(tail - 1)] / 128) == min_z) {
+                    min_z--;
+                    if (min_z < 0) min_z = 0;
+                }
+            }
+            tile = queue[head];
+            if ((tile < 0x3F80) && (level[tile + 128] == 0) &&
+              crater_spread_to(queue, level, &tail, tile + 128, lvl, cur, low, thr))
+            {
+                if ((queue[(ushort)(tail - 1)] / 128) == max_z) {
+                    max_z++;
+                    if (max_z > 127) max_z = 127;
+                }
+            }
+        }
+        head++;
+    }
+
+    // Absorb tiles with crater on at least 3 of the 4 sides
+    for (tl_z = min_z; tl_z <= max_z; tl_z++)
+    {
+        for (tl_x = min_x; tl_x <= max_x; tl_x++)
+        {
+            struct MyMapElement *p_mapel;
+            TbBool e, w, s, n;
+
+            if ((tl_x < 0) || (tl_x >= 128) || (tl_z < 0) || (tl_z >= 128))
+                continue;
+            p_mapel = &game_my_big_map[(tl_z << 7) + tl_x];
+            if (crater_tile_is_crater(p_mapel))
+                continue;
+            e = crater_tile_is_crater(p_mapel + 1);
+            w = crater_tile_is_crater(p_mapel - 1);
+            s = crater_tile_is_crater(p_mapel + 128);
+            n = crater_tile_is_crater(p_mapel - 128);
+            if ((e && w && s) || (e && w && n) || (w && s && n) || (e && s && n))
+                crater_tile_set(p_mapel);
+        }
+    }
+
+    // TearAround (edge blend) for the tiles around the crater
+    for (tl_z = min_z; tl_z <= max_z; tl_z++)
+    {
+        for (tl_x = min_x; tl_x <= max_x; tl_x++)
+        {
+            struct MyMapElement *p_mapel;
+            TbBool nw, n, ne, w, e, sw, s, se;
+            ushort tear;
+
+            if ((tl_x < 0) || (tl_x >= 128) || (tl_z < 0) || (tl_z >= 128))
+                continue;
+            p_mapel = &game_my_big_map[(tl_z << 7) + tl_x];
+            if (crater_tile_is_crater(p_mapel))
+                continue;
+            nw = crater_tile_is_crater(p_mapel - 129);
+            n  = crater_tile_is_crater(p_mapel - 128);
+            ne = crater_tile_is_crater(p_mapel - 127);
+            w  = crater_tile_is_crater(p_mapel - 1);
+            e  = crater_tile_is_crater(p_mapel + 1);
+            sw = crater_tile_is_crater(p_mapel + 127);
+            s  = crater_tile_is_crater(p_mapel + 128);
+            se = crater_tile_is_crater(p_mapel + 129);
+            if (e && s)
+                tear = 12;
+            else if (n && e)
+                tear = 9;
+            else if (w && n)
+                tear = 6;
+            else if (s && w)
+                tear = 3;
+            else if (s)
+                tear = 1;
+            else if (e)
+                tear = 10;
+            else if (n)
+                tear = 7;
+            else if (w)
+                tear = 4;
+            else if (se)
+                tear = 11;
+            else if (ne)
+                tear = 8;
+            else if (nw)
+                tear = 5;
+            else if (sw)
+                tear = 2;
+            else
+                continue;
+            p_mapel->ColumnHead = (p_mapel->ColumnHead & COL_COLUMN_MASK) | (tear << 12);
+        }
+    }
+}
+
+void process_map_crater(ubyte crater)
+{
+    FNCHK_VOID("process_map_crater", process_map_crater_asm(crater),
+      process_map_crater_c(crater));
 }
 
 #ifdef SW_FNCHK

@@ -619,7 +619,7 @@ extern s32 VNAV_nodedists[5];
 /** Size of a vehicle model: 170/256 of the largest |X| or |Z| of its
  * points.  Remade from func_4225c.
  */
-static int vehicle_object_radius(ushort object)
+int vehicle_object_radius(ushort object)
 {
     struct SingleObject *p_obj;
     ushort pt;

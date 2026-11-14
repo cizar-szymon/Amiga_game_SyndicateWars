@@ -669,10 +669,100 @@ void vehicle_workplace_states_finish(struct Thing *p_vehicle)
     }
 }
 
-void VNAV_process_bezier(struct Thing *p_road)
+#ifdef SW_FNCHK
+static void VNAV_process_bezier_asm(struct Thing *p_road)
 {
     asm volatile ("call ASM_VNAV_process_bezier\n"
-        : : "a" (p_road));
+        : "+a" (p_road) : : "cc", "memory");
+}
+#endif
+
+/** Distance estimate used along the road chains. */
+static s32 bezier_step_dist(s32 x1, s32 z1, s32 x2, s32 z2)
+{
+    s32 dx, dz;
+
+    dx = abs(x1 - x2);
+    dz = abs(z1 - z2);
+    if (dx > dz)
+        return dx + (dz >> 1);
+    else
+        return dz + (dx >> 1);
+}
+
+/** For a road piece (building subtype 21) at the end of a chain of road
+ * pieces starting at a traffic node, the length of the chain to the
+ * traffic node at its other end; both end pieces get the far node (TNode)
+ * and the length (Cost).  The points are the piece positions moved by
+ * 7*(OffX,OffZ), forward along NextThing or backward along PrevThing.
+ * Remade from VNAV_process_bezier. */
+static void VNAV_process_bezier_c(struct Thing *p_road)
+{
+    struct Thing *p_thing;
+    struct TrafficNode *p_node;
+    s32 px, pz, x, z, sum;
+    short next;
+
+    if ((p_road->Type != TT_BUILDING) || (p_road->SubType != 0x15))
+        return;
+    if (p_road->U.UObject.PrevThing < 0)
+    {
+        p_node = &game_traffic_nodes[-p_road->U.UObject.PrevThing];
+        px = p_node->X;
+        pz = p_node->Z;
+        sum = 0;
+        p_thing = p_road;
+        while (1)
+        {
+            x = (p_thing->X >> 8) + (sbyte)p_thing->U.UObject.OffX * 7;
+            z = (p_thing->Z >> 8) + (sbyte)p_thing->U.UObject.OffZ * 7;
+            sum += bezier_step_dist(x, z, px, pz);
+            px = x;
+            pz = z;
+            next = p_thing->U.UObject.NextThing;
+            if (next <= 0)
+                break;
+            p_thing = &things[next];
+        }
+        p_node = &game_traffic_nodes[-next];
+        sum += bezier_step_dist(p_node->X, p_node->Z, px, pz);
+        p_road->U.UObject.TNode = p_thing->U.UObject.NextThing;
+        p_road->U.UObject.Cost = sum;
+        p_thing->U.UObject.TNode = p_road->U.UObject.PrevThing;
+        p_thing->U.UObject.Cost = sum;
+    }
+    else if (p_road->U.UObject.NextThing < 0)
+    {
+        p_node = &game_traffic_nodes[-p_road->U.UObject.NextThing];
+        px = p_node->X;
+        pz = p_node->Z;
+        sum = 0;
+        p_thing = p_road;
+        while (1)
+        {
+            x = (p_thing->X >> 8) - (sbyte)p_thing->U.UObject.OffX * 7;
+            z = (p_thing->Z >> 8) - (sbyte)p_thing->U.UObject.OffZ * 7;
+            sum += bezier_step_dist(x, z, px, pz);
+            px = x;
+            pz = z;
+            next = p_thing->U.UObject.PrevThing;
+            if (next <= 0)
+                break;
+            p_thing = &things[next];
+        }
+        p_node = &game_traffic_nodes[-next];
+        sum += bezier_step_dist(p_node->X, p_node->Z, px, pz);
+        p_road->U.UObject.TNode = p_thing->U.UObject.PrevThing;
+        p_road->U.UObject.Cost = sum;
+        p_thing->U.UObject.TNode = p_road->U.UObject.NextThing;
+        p_thing->U.UObject.Cost = sum;
+    }
+}
+
+void VNAV_process_bezier(struct Thing *p_road)
+{
+    FNCHK_VOID("VNAV_process_bezier", VNAV_process_bezier_asm(p_road),
+      VNAV_process_bezier_c(p_road));
 }
 
 void VNAV_preprocess_bezier_turns(ulong nturns)

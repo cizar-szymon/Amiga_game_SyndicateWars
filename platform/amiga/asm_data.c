@@ -135,4 +135,6 @@ short word_1AA390; /* src\people.c, 2 bytes */
 short word_1AA392; /* src\people.c, 2 bytes */
 short word_1AA394; /* src\people.c, 16 bytes */
 ushort word_1AA678; /* src\people.c, 4 bytes */
+ushort word_1C83E2; /* src\game.c, 2 bytes */
+ushort word_1C83E8; /* src\game.c, 2 bytes */
 ushort word_1C8446; /* src\game.h, 2 bytes */

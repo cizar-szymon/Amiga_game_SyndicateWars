@@ -1001,11 +1001,49 @@ ThingIdx search_things_for_type_farthest_from_xz(short X, short Z, short ttype, 
     return thing;
 }
 
+#ifdef SW_FNCHK
+static ThingIdx search_things_for_uniqueid_asm(short uniqid, ubyte flag)
+{
+    int ret;
+    /* edi is the result when no simple thing matches; zero it as the C */
+    asm volatile ("xor %%edi,%%edi\n"
+      "call ASM_search_things_for_uniqueid\n"
+        : "=a" (ret), "+d" (flag) : "0" (uniqid) : "edi", "cc", "memory");
+    return ret;
+}
+#endif
+
+/** The thing (`flag` set; not a building) or simple thing with the unique
+ * id; for simple things the last one in the used list.  0 if none.
+ * Remade from search_things_for_uniqueid. */
+static ThingIdx search_things_for_uniqueid_c(short uniqid, ubyte flag)
+{
+    ThingIdx thing, found;
+
+    if (flag)
+    {
+        for (thing = things_used_head; thing > 0; thing = things[thing].LinkChild)
+        {
+            if ((things[thing].Type != TT_BUILDING) &&
+              (things[thing].U.UPerson.UniqueID == uniqid))
+                return thing;
+        }
+        return 0;
+    }
+    found = 0;
+    for (thing = sthings_used_head; thing < 0; thing = sthings[thing].LinkChild)
+    {
+        if (sthings[thing].UniqueID == uniqid)
+            found = thing;
+    }
+    return found;
+}
+
 ThingIdx search_things_for_uniqueid(short uniqid, ubyte flag)
 {
     ThingIdx ret;
-    asm volatile ("call ASM_search_things_for_uniqueid\n"
-        : "=r" (ret) : "a" (uniqid), "d" (flag));
+    FNCHK_RET("search_things_for_uniqueid", ret, search_things_for_uniqueid_asm(uniqid, flag),
+      search_things_for_uniqueid_c(uniqid, flag));
     return ret;
 }
 
@@ -1084,11 +1122,46 @@ ThingIdx find_nearest_object2(short mx, short mz, ushort sub_type)
     return ret;
 }
 
+#ifdef SW_FNCHK
+static short search_object_for_qface_asm(ushort object, ubyte gflag, ubyte flag, ushort after)
+{
+    int ret;
+    asm volatile ("call ASM_search_object_for_qface\n"
+        : "=a" (ret), "+d" (gflag), "+b" (flag), "+c" (after) : "0" (object) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** The first quad face of the object after `after` with all of `gflag` set
+ * in GFlags and Flags equal to `flag`; 0 if none.
+ * Remade from search_object_for_qface. */
+static short search_object_for_qface_c(ushort object, ubyte gflag, ubyte flag, ushort after)
+{
+    struct SingleObject *p_obj;
+    short face;
+
+    p_obj = &game_objects[object];
+    if (p_obj->NumbFaces4 == 0)
+        return 0;
+    for (face = p_obj->StartFace4; face < p_obj->StartFace4 + p_obj->NumbFaces4; face++)
+    {
+        struct SingleObjectFace4 *p_face;
+
+        if (face <= after)
+            continue;
+        p_face = &game_object_faces4[(ushort)face];
+        if (((p_face->GFlags & gflag) == gflag) && (p_face->Flags == flag))
+            return face;
+    }
+    return 0;
+}
+
 short search_object_for_qface(ushort object, ubyte gflag, ubyte flag, ushort after)
 {
     short ret;
-    asm volatile ("call ASM_search_object_for_qface\n"
-        : "=r" (ret) : "a" (object), "d" (gflag), "b" (flag), "c" (after));
+    FNCHK_RET("search_object_for_qface", ret,
+      search_object_for_qface_asm(object, gflag, flag, after),
+      search_object_for_qface_c(object, gflag, flag, after));
     return ret;
 }
 

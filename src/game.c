@@ -2181,12 +2181,104 @@ void find_the_tall_buildings(void)
       find_the_tall_buildings_c());
 }
 
+#ifdef SW_FNCHK
+static int create_train_carriage_asm(short cor_dx, short cor_dy, short cor_dz, short otype)
+{
+    int ret;
+    /* edi is the result when there is no free track; zero it as the C */
+    asm volatile ("xor %%edi,%%edi\n"
+      "call ASM_create_train_carriage\n"
+        : "=a" (ret), "+d" (cor_dy), "+b" (cor_dz), "+c" (otype) : "0" (cor_dx)
+        : "edi", "cc", "memory");
+    return ret;
+}
+#endif
+
+extern ushort word_1C83E2;
+extern ushort word_1C83E8;
+
+struct Thing *find_unused_train_track(void);
+
+/** A building thing (subtype 27) for the game object, at map point
+ * (x,y,z).  Remade from create_unkn_building_subtp27. */
+static ThingIdx create_unkn_building_subtp27(ushort x, ushort z, ushort object, short y)
+{
+    struct Thing *p_thing;
+    ThingIdx thing;
+
+    thing = get_new_thing();
+    p_thing = &things[thing];
+    p_thing->U.UObject.NumbObjects = 1;
+    p_thing->Y = y << 8;
+    p_thing->Type = TT_BUILDING;
+    p_thing->SubType = 0x1B;
+    p_thing->Z = z << 8;
+    p_thing->X = x << 8;
+    p_thing->U.UObject.Object = object;
+    game_objects[object].ThingNo = thing;
+    add_node_thing(thing);
+    return thing;
+}
+
+/** A train carriage (vehicle subtype 29) of prim object `otype` on a
+ * free piece of train track, moved by (cor_dx,cor_dz) (cor_dy is not
+ * used).  Returns the new thing, 0 when there is no free track.
+ * Remade from create_train_carriage. */
+static int create_train_carriage_c(short cor_dx, short cor_dy, short cor_dz, short otype)
+{
+    struct Thing *p_track, *p_car;
+    s32 x, y, z;
+    ushort thing;
+
+    p_track = find_unused_train_track();
+    if (p_track == NULL)
+        return 0;
+    x = (p_track->X >> 8) + cor_dx;
+    y = p_track->Y >> 8;
+    z = (p_track->Z >> 8) + cor_dz;
+    copy_prim_obj_to_game_object((ushort)x, (ushort)z, (short)(-prim_unknprop01 - otype), 0);
+    unkn_object_shift_03((ushort)(next_object - 1));
+    create_unkn_building_subtp27((ushort)x, (ushort)z, (ushort)(next_object - 1), 0);
+    thing = things_used_head;
+    p_car = &things[thing];
+    p_car->VX = 0;
+    p_car->VZ = 0;
+    p_car->VY = 0;
+    p_car->U.UVehicle.AngleX = 0;
+    p_car->U.UVehicle.AngleY = 0;
+    p_car->U.UVehicle.AngleZ = 0;
+    p_car->X = x << 8;
+    p_car->Type = TT_VEHICLE;
+    p_car->Z = z << 8;
+    p_car->SubType = 0x1D;
+    p_car->Y = y << 5;
+    word_1C83E2 = thing;
+    p_car->Radius = vehicle_object_radius(p_car->U.UVehicle.Object);
+    p_car->Health = 2000;
+    p_car->U.UVehicle.MaxHealth = 2000;
+    p_car->Parent = 0;
+    p_car->U.UVehicle.Object = next_object - 1;
+    p_car->U.UVehicle.TNode = p_track->ThingOffset;
+    p_car->U.UVehicle.ReqdSpeed = 0x400;
+    p_car->Speed = 0x400;
+    p_car->State = 0x12;
+    p_car->U.UVehicle.WorkPlace = 0;
+    p_car->U.UVehicle.MatrixIndex = next_local_mat;
+    p_car->Health = 30000;
+    p_car->U.UVehicle.SubThing = 0;
+    next_local_mat++;
+    matrix_identity_fill(&local_mats[p_car->U.UVehicle.MatrixIndex]);
+    word_1C83E8 = thing;
+    return thing;
+}
+
 //TODO change ret type to ThingIdx, when no longer used in ASM
 int create_train_carriage(short cor_dx, short cor_dy, short cor_dz, short otype)
 {
     int ret;
-    asm volatile ("call ASM_create_train_carriage\n"
-        : "=r" (ret) : "a" (cor_dx), "d" (cor_dy), "b" (cor_dz), "c" (otype));
+    FNCHK_RET("create_train_carriage", ret,
+      create_train_carriage_asm(cor_dx, cor_dy, cor_dz, otype),
+      create_train_carriage_c(cor_dx, cor_dy, cor_dz, otype));
     return ret;
 }
 

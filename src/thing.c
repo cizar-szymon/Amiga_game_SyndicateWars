@@ -1271,11 +1271,17 @@ void process_soul(struct SimpleThing *p_sthing)
         : : "a" (p_sthing));
 }
 
+#ifdef SW_FNCHK
+static void process_bang_asm(struct SimpleThing *p_sthing)
+{
+    asm volatile ("call ASM_process_bang\n"
+        : : "a" (p_sthing) : "cc", "memory");
+}
+#endif
+
 void process_bang(struct SimpleThing *p_sthing)
 {
-    asm volatile (
-      "call ASM_process_bang\n"
-        : : "a" (p_sthing));
+    FNCHK_VOID("process_bang", process_bang_asm(p_sthing), process_bang_c(p_sthing));
 }
 
 void finish_bang(struct SimpleThing *p_sthing, ThingIdx thing)

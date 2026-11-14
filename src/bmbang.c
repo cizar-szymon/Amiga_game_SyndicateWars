@@ -32,6 +32,7 @@
 #include "frame_sprani.h"
 #include "game.h"
 #include "game_options.h"
+#include "game_speed.h"
 #include "misstat.h"
 #include "people.h"
 #include "sound.h"
@@ -747,3 +748,408 @@ void do_shockwave_scale_effect(int dx, int dz, int dist, int intensity,
     p_sthing->U.UEffect.VZ += (dz * intensity) >> 3;
 }
 /******************************************************************************/
+
+/******************************************************************************/
+/* Bang processing - remade from process_bang (asm), with get_some_phwoar,
+ * give_some_phwoar and give_some_shrapnel. */
+
+extern s32 bangdetail[21];
+
+static ushort bang_phwoar_get(void)
+{
+    ushort ph;
+
+    ph = phwoar_free;
+    if (ph == 0)
+        return 0;
+    phwoar_free = phwoar[ph].child;
+    phwoar_num_used++;
+    phwoar_num_free--;
+    return ph;
+}
+
+static void bang_phwoar_give(ushort ph)
+{
+    phwoar[ph].child = phwoar_free;
+    phwoar_free = ph;
+    phwoar_num_used--;
+    phwoar_num_free++;
+}
+
+static void bang_shrapnel_give(ushort sh)
+{
+    shrapnel[sh].child = shrapnel_free;
+    shrapnel_free = sh;
+}
+
+static s32 bang_sin(s32 angle)
+{
+    return lbSinTable[angle & 0x7FF];
+}
+
+static s32 bang_cos(s32 angle)
+{
+    return lbSinTable[(angle & 0x7FF) + 512];
+}
+
+/** A new phwoar for a baby of p_parent, linked in front at *p_link. */
+static struct Phwoar *bang_phwoar_baby_new(ushort *p_link)
+{
+    struct Phwoar *p_baby;
+    ushort ph;
+
+    ph = bang_phwoar_get();
+    if (ph == 0)
+        return NULL;
+    p_baby = &phwoar[ph];
+    p_baby->child = *p_link;
+    *p_link = ph;
+    return p_baby;
+}
+
+/** The rest of a baby's birth: its type and type info, its place (the
+ * parent's or the bang's), its speed shifted down and the parent's added. */
+static void bang_phwoar_baby_finish(struct Phwoar *p_baby, struct Phwoar *p_parent,
+  struct SimpleThing *p_bang)
+{
+    int sh;
+
+    p_baby->type = p_parent->type - 1;
+    fillin_phwoar_type_info(p_baby);
+    if ((p_parent->rabbit & 0x80) != 0) {
+        p_baby->x = p_parent->x;
+        p_baby->y = p_parent->y;
+        p_baby->z = p_parent->z;
+    } else {
+        p_baby->x = p_bang->X;
+        p_baby->y = p_bang->Y;
+        p_baby->z = p_bang->Z;
+    }
+    sh = (p_parent->rabbit & 0x0C) >> 2;
+    p_baby->vx = (sbyte)(p_baby->vx >> sh);
+    p_baby->vy = (sbyte)(p_baby->vy >> sh);
+    p_baby->vz = (sbyte)(p_baby->vz >> sh);
+    if ((p_parent->rabbit & 0x40) != 0) {
+        p_baby->vx += p_parent->vx;
+        p_baby->vy += p_parent->vy;
+        p_baby->vz += p_parent->vz;
+    }
+}
+
+/** Babies on a flat circle round the parent. */
+static void bang_phwoar_spawn_circle(struct Phwoar *p_parent, ushort *p_link,
+  struct SimpleThing *p_bang)
+{
+    s32 dangle, number, angle, i;
+    int v;
+
+    v = p_parent->rabbit & 3;
+    dangle = bangdetail[2 * v + 0];
+    number = bangdetail[2 * v + 1];
+    angle = 0;
+    for (i = 0; i < number; i++)
+    {
+        struct Phwoar *p_baby;
+
+        p_baby = bang_phwoar_baby_new(p_link);
+        if (p_baby == NULL)
+            continue;
+        p_baby->vx = (sbyte)(bang_sin(angle) >> 10);
+        p_baby->vy = 0;
+        p_baby->vz = (sbyte)(bang_cos(angle) >> 10);
+        p_baby->vx += (LbRandomAnyShort() & 7) - 3;
+        p_baby->vz += (LbRandomAnyShort() & 7) - 3;
+        angle += dangle;
+        bang_phwoar_baby_finish(p_baby, p_parent, p_bang);
+    }
+}
+
+/** Babies on rings of a half sphere (upper only) or a sphere (both). */
+static void bang_phwoar_spawn_sphere(struct Phwoar *p_parent, ushort *p_link,
+  struct SimpleThing *p_bang, TbBool full)
+{
+    s32 dangley, rings, number, elev;
+    int v;
+
+    v = p_parent->rabbit & 3;
+    dangley = bangdetail[8 + 3 * v + 0];
+    rings = bangdetail[8 + 3 * v + 1];
+    number = bangdetail[8 + 3 * v + 2];
+    elev = 0;
+    for (; rings != 0; rings--, elev += dangley)
+    {
+        s32 n, dangle, angle, k;
+
+        n = ((number * bang_cos(elev)) >> 16) + 1;
+        dangle = 0x800 / n;
+        angle = 0;
+        for (k = 0; k < n; k++)
+        {
+            struct Phwoar *p_baby;
+
+            p_baby = bang_phwoar_baby_new(p_link);
+            if (p_baby != NULL)
+            {
+                p_baby->vx = (sbyte)(((bang_sin(angle) >> 10) * bang_cos(elev)) >> 16);
+                p_baby->vz = (sbyte)(((bang_cos(angle) >> 10) * bang_cos(elev)) >> 16);
+                p_baby->vy = (sbyte)(bang_sin(elev) >> 10);
+                p_baby->vx += (LbRandomAnyShort() & 0xF) - 7;
+                p_baby->vz += (LbRandomAnyShort() & 0xF) - 7;
+                if (!full) // the half sphere turns only for a baby born
+                    angle += dangle;
+                bang_phwoar_baby_finish(p_baby, p_parent, p_bang);
+            }
+            if (full && (elev != 0))
+            {
+                p_baby = bang_phwoar_baby_new(p_link);
+                if (p_baby != NULL)
+                {
+                    p_baby->vx = (sbyte)(((bang_sin(angle) >> 10) * bang_cos(elev)) >> 16);
+                    p_baby->vz = (sbyte)(((bang_cos(angle) >> 10) * bang_cos(elev)) >> 16);
+                    p_baby->vy = (sbyte)((-bang_sin(elev)) >> 10);
+                    p_baby->vx += (LbRandomAnyShort() & 0xF) - 7;
+                    p_baby->vz += (LbRandomAnyShort() & 0xF) - 7;
+                    bang_phwoar_baby_finish(p_baby, p_parent, p_bang);
+                }
+            }
+            if (full)
+                angle += dangle;
+        }
+    }
+}
+
+/** A few babies in random directions. */
+static void bang_phwoar_spawn_random(struct Phwoar *p_parent, ushort *p_link,
+  struct SimpleThing *p_bang)
+{
+    s32 count, i;
+
+    count = (p_parent->rabbit & 3) * 2 + 1;
+    for (i = 0; i < count; i++)
+    {
+        struct Phwoar *p_baby;
+        s32 yaw, pitch;
+
+        p_baby = bang_phwoar_baby_new(p_link);
+        if (p_baby == NULL)
+            continue;
+        yaw = LbRandomAnyShort() & 0x7FF;
+        pitch = LbRandomAnyShort() & 0x3F;
+        p_baby->vx = (sbyte)(((bang_sin(yaw) >> 10) * bang_cos(pitch)) >> 16);
+        p_baby->vz = (sbyte)(((bang_cos(yaw) >> 10) * bang_cos(pitch)) >> 16);
+        p_baby->vy = (sbyte)(bang_sin(pitch) >> 10);
+        bang_phwoar_baby_finish(p_baby, p_parent, p_bang);
+    }
+}
+
+/** A speed component slowed by 1/2^sh. */
+static sbyte bang_slow(sbyte v, int sh)
+{
+    return (sbyte)(v - (v >> sh));
+}
+
+static void process_bang_phwoars(struct SimpleThing *p_bang)
+{
+    ushort *p_link;
+    ushort ph;
+
+    p_link = (ushort *)&p_bang->U.UBang.phwoar;
+    ph = *p_link;
+    while (ph != 0)
+    {
+        struct Phwoar *p_phwoar;
+        ushort next;
+
+        p_phwoar = &phwoar[ph];
+        if ((p_phwoar->gestation & 0x3F) == 0)
+        {
+            switch ((p_phwoar->rabbit & 0x30) >> 4)
+            {
+            case 0:
+                bang_phwoar_spawn_circle(p_phwoar, p_link, p_bang);
+                break;
+            case 1:
+                bang_phwoar_spawn_sphere(p_phwoar, p_link, p_bang, true);
+                break;
+            case 2:
+                bang_phwoar_spawn_sphere(p_phwoar, p_link, p_bang, false);
+                break;
+            case 3:
+                bang_phwoar_spawn_random(p_phwoar, p_link, p_bang);
+                break;
+            }
+            p_phwoar->gestation = 0xFF;
+        }
+        next = p_phwoar->child;
+        if (p_phwoar->die <= 0)
+        {
+            *p_link = next;
+            bang_phwoar_give(ph);
+            ph = next;
+            continue;
+        }
+        p_phwoar->gestation--;
+        p_phwoar->fc += p_phwoar->vf & 0xF;
+        while (p_phwoar->fc >= 8)
+        {
+            p_phwoar->die--;
+            p_phwoar->fc -= 8;
+            if (p_phwoar->die > 0)
+                p_phwoar->f = frame[p_phwoar->f].Next;
+        }
+        p_phwoar->x += p_phwoar->vx << 10;
+        p_phwoar->y += p_phwoar->vy << 7;
+        p_phwoar->z += p_phwoar->vz << 10;
+        if ((p_phwoar->vf & 0x80) != 0)
+            p_phwoar->vy -= 3;
+        if ((p_phwoar->vf & 0x40) != 0) {
+            p_phwoar->vx = bang_slow(p_phwoar->vx, 1);
+            p_phwoar->vy = bang_slow(p_phwoar->vy, 1);
+            p_phwoar->vz = bang_slow(p_phwoar->vz, 1);
+        }
+        if ((p_phwoar->vf & 0x20) != 0) {
+            p_phwoar->vx = bang_slow(p_phwoar->vx, 2);
+            p_phwoar->vy = bang_slow(p_phwoar->vy, 2);
+            p_phwoar->vz = bang_slow(p_phwoar->vz, 2);
+        }
+        if ((p_phwoar->vf & 0x10) != 0) {
+            p_phwoar->vx = bang_slow(p_phwoar->vx, 3);
+            p_phwoar->vy = bang_slow(p_phwoar->vy, 3);
+            p_phwoar->vz = bang_slow(p_phwoar->vz, 3);
+        }
+        ph = next;
+        p_link = &p_phwoar->child;
+    }
+}
+
+static void process_bang_shrapnel(struct SimpleThing *p_bang)
+{
+    ushort *p_link;
+    ushort sh;
+    ushort sample;
+
+    sample = 0;
+    p_link = (ushort *)&p_bang->U.UBang.shrapnel;
+    sh = *p_link;
+    while (sh != 0)
+    {
+        struct Shrapnel *p_shrapnel;
+        ushort next;
+        s32 alt;
+        TbBool hit;
+
+        if (sh >= SHRAPNEL_COUNT)
+            return;
+        p_shrapnel = &shrapnel[sh];
+        next = p_shrapnel->child;
+        p_shrapnel->x += p_shrapnel->vx << 8;
+        p_shrapnel->y += p_shrapnel->vy << 5;
+        p_shrapnel->vy -= 3;
+        p_shrapnel->z += p_shrapnel->vz << 8;
+        p_shrapnel->yaw += p_shrapnel->vyaw;
+        p_shrapnel->pitch += p_shrapnel->vpitch;
+        switch (p_shrapnel->type)
+        {
+        case 2:
+            if ((gameturn & bangdetail[20]) == 0)
+                bang_new4(p_shrapnel->x, p_shrapnel->y, p_shrapnel->z, 0x28);
+            break;
+        case 4:
+            bang_new4(p_shrapnel->x, p_shrapnel->y, p_shrapnel->z, 0x28);
+            p_shrapnel->y += p_shrapnel->vy << 5;
+            p_shrapnel->vy = bang_slow(p_shrapnel->vy, 2);
+            break;
+        case 3:
+            if ((gameturn & bangdetail[20]) == 0)
+                bang_new4(p_shrapnel->x, p_shrapnel->y, p_shrapnel->z, 0x1E);
+            break;
+        default:
+            break;
+        }
+        alt = alt_at_point((short)(p_shrapnel->x >> 8), (short)(p_shrapnel->z >> 8));
+        if (((p_shrapnel->x >> 16) < 0) || ((p_shrapnel->x >> 16) >= 0x80)
+          || ((p_shrapnel->z >> 16) < 0) || ((p_shrapnel->z >> 16) >= 0x80))
+        {
+            *p_link = p_shrapnel->child;
+            bang_shrapnel_give(sh);
+            sh = next;
+            continue;
+        }
+        if (alt > p_shrapnel->y)
+            hit = true;
+        else if (p_shrapnel->type == 4)
+            hit = false;
+        else
+            hit = (check_col_collision(p_shrapnel->x >> 8, p_shrapnel->y >> 8, p_shrapnel->z >> 8) != 0);
+        if (hit)
+        {
+            TbBool splash;
+
+            splash = false;
+            if (alt > p_shrapnel->y)
+            {
+                struct MyMapElement *p_mapel;
+
+                p_mapel = &game_my_big_map[(p_shrapnel->z >> 16) * MAP_TILE_WIDTH + (p_shrapnel->x >> 16)];
+                if (sea_texture((short)(p_mapel->Texture & 0x3FFF)))
+                {
+                    struct SimpleThing *p_effect;
+
+                    splash = true;
+                    sample = 3;
+                    p_effect = create_scale_effect(p_shrapnel->x >> 8, alt >> 8, p_shrapnel->z >> 8, 0x43F, 8);
+                    if (p_effect != NULL) {
+                        p_effect->SubType = 0x3C;
+                        p_effect->Object = (LbRandomAnyShort() & 0x7F) + 0x3E;
+                    }
+                }
+            }
+            if (!splash)
+            {
+                bang_new4(p_shrapnel->x, p_shrapnel->y, p_shrapnel->z, 0x23);
+                if (p_shrapnel->type == 2)
+                    do_shockwave(p_shrapnel->x >> 8, 0, p_shrapnel->z >> 8, 0x200, 800, NULL);
+                switch (gameturn % 3)
+                {
+                case 0: sample = 0x3C; break;
+                case 1: sample = 0x3E; break;
+                case 2: sample = 0x3F; break;
+                }
+            }
+            create_sound_effect(p_shrapnel->x >> 8, 0, p_shrapnel->z >> 8, sample, 0, 0);
+            *p_link = p_shrapnel->child;
+            bang_shrapnel_give(sh);
+            sh = next;
+            continue;
+        }
+        if ((p_shrapnel->type == 4) && (p_shrapnel->vy <= 20))
+        {
+            *p_link = p_shrapnel->child;
+            bang_shrapnel_give(sh);
+            bang_new4(p_shrapnel->x, p_shrapnel->y, p_shrapnel->z, 0x14);
+            sh = next;
+            continue;
+        }
+        sh = next;
+        p_link = &p_shrapnel->child;
+    }
+}
+
+/** A bang's turn: its counter, its flame particles (phwoar) born, moving
+ * and dying, its shrapnel flying and hitting. */
+void process_bang_c(struct SimpleThing *p_sthing)
+{
+    ushort st;
+
+    st = (ushort)p_sthing->State;
+    if (st >= 100) {
+        st++;
+        p_sthing->State = st;
+        if (st >= 105)
+            p_sthing->State = 0;
+    } else if (st != 0) {
+        p_sthing->State = st - 1;
+    }
+    process_bang_phwoars(p_sthing);
+    process_bang_shrapnel(p_sthing);
+}

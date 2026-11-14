@@ -36,6 +36,8 @@ void bang_init(void);
 void new_bang(int x, int y, int z, int type, int owner, int c);
 void bang_new5(int x, int y, int z, int type, int owner);
 void bang_new4(int x, int y, int z, int type);
+struct SimpleThing;
+void process_bang_c(struct SimpleThing *p_sthing);
 
 void unused_func_025(short a1, short a2, short a3);
 ubyte unused_func_026(ubyte a1);

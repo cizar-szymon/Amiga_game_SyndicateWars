@@ -4251,10 +4251,133 @@ void person_init_get_item(struct Thing *p_person, short item, ushort plyr)
       person_init_get_item_c(p_person, item, plyr));
 }
 
-void person_init_get_item_fast(struct Thing *p_person, short item, ushort plyr)
+#ifdef SW_FNCHK
+static void person_init_get_item_fast_asm(struct Thing *p_person, short item, ushort plyr)
 {
     asm volatile ("call ASM_person_init_get_item_fast\n"
-        : : "a" (p_person), "d" (item), "b" (plyr));
+        : "+a" (p_person), "+d" (item), "+b" (plyr) : : "cc", "memory");
+}
+#endif
+
+void set_player_peeps_to_run(struct Thing *p_leader, ushort plyr);
+
+/** The nearest person of the person's group persuaded by somebody, not
+ * busy and able to take the item (a weapon), goes to fetch it.
+ * Remade from person_unkn_start_get_item. */
+static void person_unkn_start_get_item(struct Thing *p_person, short item)
+{
+    struct SimpleThing *p_item;
+    u32 best;
+    short thing, found;
+    ushort wtype;
+
+    p_item = &sthings[item];
+    wtype = p_item->U.UWeapon.WeaponType;
+    if (wtype == 0)
+        return;
+    best = 0xFFFFFFFF;
+    found = 0;
+    for (thing = same_type_head[256 + p_person->U.UPerson.Group]; thing != 0;
+      thing = things[thing].LinkSameGroup)
+    {
+        struct Thing *p_thing;
+        s32 dx, dz;
+        u32 dist;
+
+        p_thing = &things[thing];
+        if ((p_thing->Flag & TngF_Persuaded) == 0)
+            continue;
+        if ((p_thing->Flag & TngF_Destroyed) != 0)
+            continue;
+        dx = abs(p_item->X - p_thing->X) >> 8;
+        dz = abs(p_item->Z - p_thing->Z) >> 8;
+        if (dx > dz)
+            dist = dx + (dz >> 1);
+        else
+            dist = dz + (dx >> 1);
+        if (dist >= best)
+            continue;
+        if ((p_thing->Flag & (TngF_InVehicle | TngF_Unkn02000000 | TngF_Unkn4000)) != 0)
+            continue;
+        if (person_weapons_count(p_thing) >= 6)
+            continue;
+        if ((p_thing->U.UPerson.WeaponsCarried & (1u << ((wtype - 1) & 0x1F))) != 0)
+            continue;
+        best = dist;
+        found = thing;
+    }
+    if (found != 0)
+    {
+        struct Thing *p_thing;
+
+        p_thing = &things[(ushort)found];
+        p_thing->Flag2 |= TgF2_Unkn08000000;
+        p_thing->State = PerSt_GET_ITEM;
+        p_thing->U.UPerson.GotoX = p_item->X >> 8;
+        p_thing->U.UPerson.ComTimer = -1;
+        p_thing->SubState = 0;
+        p_thing->U.UPerson.ComRange = 0;
+        p_thing->U.UPerson.GotoZ = p_item->Z >> 8;
+        p_thing->GotoThingIndex = item;
+        p_thing->U.UPerson.Vehicle = item;
+        if (p_thing->U.UPerson.PathIndex != 0)
+            remove_path(p_thing);
+    }
+}
+
+/** As person_init_get_item, running; first a persuaded person of the group
+ * may be sent to fetch the item, and a weapon is not taken when 6 types
+ * are carried.  Remade from person_init_get_item_fast. */
+static void person_init_get_item_fast_c(struct Thing *p_person, short item, ushort plyr)
+{
+    struct SimpleThing *p_item;
+    ushort wtype;
+
+    p_item = &sthings[item];
+    person_unkn_start_get_item(p_person, item);
+    if (send_another_player_peep(p_person, item, plyr) != 0)
+        return;
+    if ((p_person->Flag & (TngF_StationrSht | TngF_Destroyed)) != 0)
+        return;
+    wtype = p_item->U.UWeapon.WeaponType;
+    if (wtype != 0)
+    {
+        TbBool can_take;
+        u32 bit;
+
+        bit = 1u << ((wtype - 1) & 0x1F);
+        can_take = (person_weapons_count(p_person) < 6) &&
+          ((p_person->U.UPerson.WeaponsCarried & bit) == 0);
+        if ((p_person->Flag & TngF_PlayerAgent) != 0)
+        {
+            int row;
+
+            row = weapon_fourpack_row(wtype);
+            if ((row >= 0) && !can_take)
+            {
+                ushort plagent;
+
+                plagent = p_person->U.UPerson.ComCur & 3;
+                if (((p_person->U.UPerson.WeaponsCarried & bit) != 0) &&
+                  (players[plyr].FourPacks[row][plagent] != 4))
+                    can_take = true;
+            }
+        }
+        if (!can_take)
+            return;
+    }
+    if (sthings[item].Type != SmTT_DROPPED_ITEM)
+        return;
+    set_get_item(p_person, item);
+    if ((p_person->Flag2 & TgF2_Unkn0040) != 0)
+        return;
+    set_person_animmode_run(p_person);
+}
+
+void person_init_get_item_fast(struct Thing *p_person, short item, ushort plyr)
+{
+    FNCHK_VOID("person_init_get_item_fast", person_init_get_item_fast_asm(p_person, item, plyr),
+      person_init_get_item_fast_c(p_person, item, plyr));
 }
 
 StateChRes person_init_cmd_get_item(struct Thing *p_person, short targetng)
@@ -8172,18 +8295,103 @@ ubyte thing_deselect_weapon(struct Thing *p_person)
     return WepSel_HIDE;
 }
 
-void person_go_enter_vehicle_fast(struct Thing *p_person, struct Thing *p_vehicle, ushort plyr)
+#ifdef SW_FNCHK
+static void person_go_enter_vehicle_fast_asm(struct Thing *p_person, struct Thing *p_vehicle, ushort plyr)
 {
     asm volatile (
       "call ASM_person_go_enter_vehicle_fast\n"
-        : : "a" (p_person), "d" (p_vehicle), "b" (plyr));
+        : "+a" (p_person), "+d" (p_vehicle), "+b" (plyr) : : "cc", "memory");
+}
+
+static void person_go_enter_vehicle_asm(struct Thing *p_person, struct Thing *p_vehicle)
+{
+    asm volatile (
+      "call ASM_person_go_enter_vehicle\n"
+        : "+a" (p_person), "+d" (p_vehicle) : : "cc", "memory");
+}
+#endif
+
+/** A person is told to get into a vehicle: one already in it gets out, a
+ * standing vehicle of subtype 54 with a leisure place is entered at once,
+ * a train carriage only marks the person (when on a face), else the person
+ * walks to the vehicle (state 45).  Remade from person_go_enter_vehicle. */
+static void person_go_enter_vehicle_c(struct Thing *p_person, struct Thing *p_vehicle)
+{
+    if ((p_person->Flag & TngF_Unkn0001) != 0)
+        return;
+    if ((p_person->Flag & (TngF_StationrSht | TngF_Destroyed)) != 0)
+        return;
+    if ((p_person->Flag2 & TgF2_Unkn0001) != 0)
+        finalise_razor_wire(p_person);
+    if ((p_person->Flag & TngF_InVehicle) != 0)
+    {
+        if (p_person->U.UPerson.Vehicle == (ushort)p_vehicle->ThingOffset)
+            person_attempt_to_leave_vehicle(p_person);
+        return;
+    }
+    if ((p_vehicle->SubType == 0x36) && (p_vehicle->U.UVehicle.LeisurePlace != 0) &&
+      (p_vehicle->Speed == 0))
+    {
+        s32 dx, dz, dist;
+
+        dx = abs((p_person->X - p_vehicle->X) >> 8);
+        dz = abs((p_person->Z - p_vehicle->Z) >> 8);
+        if (dx > dz)
+            dist = dx + (dz >> 1);
+        else
+            dist = dz + (dx >> 1);
+        if (dist < 0x190000)
+        {
+            person_enter_vehicle(p_person, p_vehicle);
+            p_person->State = PerSt_NONE;
+            p_person->U.UPerson.Vehicle = p_vehicle->ThingOffset;
+            return;
+        }
+    }
+    if (p_vehicle->SubType == 0x1D)
+    {
+        if (p_person->U.UPerson.OnFace != 0)
+            p_person->U.UPerson.Flag3 |= 0x20;
+        return;
+    }
+    p_person->State = 0x2D;
+    p_person->U.UPerson.ComTimer = -1;
+    p_person->U.UPerson.ComRange = 1;
+    p_person->SubState = 0;
+    p_person->GotoThingIndex = p_vehicle->ThingOffset;
+    p_person->U.UPerson.GotoX = p_vehicle->X >> 8;
+    p_person->Timer1 = 48;
+    p_person->StartTimer1 = 48;
+    p_person->U.UPerson.GotoZ = p_vehicle->Z >> 8;
+    if (p_person->U.UPerson.PathIndex != 0)
+        remove_path(p_person);
+}
+
+/** As person_go_enter_vehicle, running; the protectors of a player's agent
+ * run with it.  Remade from person_go_enter_vehicle_fast. */
+static void person_go_enter_vehicle_fast_c(struct Thing *p_person, struct Thing *p_vehicle, ushort plyr)
+{
+    if ((p_person->Flag & TngF_Unkn0001) != 0)
+        return;
+    p_person->Flag2 &= ~(TgF2_Unkn00020000 | TgF2_Unkn0040);
+    person_go_enter_vehicle(p_person, p_vehicle);
+    if ((p_person->Flag2 & TgF2_Unkn0040) != 0)
+        return;
+    set_person_animmode_run(p_person);
+    set_player_peeps_to_run(p_person, plyr);
+}
+
+void person_go_enter_vehicle_fast(struct Thing *p_person, struct Thing *p_vehicle, ushort plyr)
+{
+    FNCHK_VOID("person_go_enter_vehicle_fast",
+      person_go_enter_vehicle_fast_asm(p_person, p_vehicle, plyr),
+      person_go_enter_vehicle_fast_c(p_person, p_vehicle, plyr));
 }
 
 void person_go_enter_vehicle(struct Thing *p_person, struct Thing *p_vehicle)
 {
-    asm volatile (
-      "call ASM_person_go_enter_vehicle\n"
-        : : "a" (p_person), "d" (p_vehicle));
+    FNCHK_VOID("person_go_enter_vehicle", person_go_enter_vehicle_asm(p_person, p_vehicle),
+      person_go_enter_vehicle_c(p_person, p_vehicle));
 }
 
 TbBool person_has_supershield_active(ThingIdx person)

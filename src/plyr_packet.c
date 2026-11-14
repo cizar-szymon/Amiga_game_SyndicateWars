@@ -149,7 +149,7 @@ static void thing_goto_point_asm(struct Thing *p_thing, short x, short y, short 
  * they have stamina to spare.
  * Remade from set_player_peeps_to_run.
  */
-static void set_player_peeps_to_run(struct Thing *p_leader, ushort plyr)
+void set_player_peeps_to_run(struct Thing *p_leader, ushort plyr)
 {
     ushort plagent;
 
@@ -1883,6 +1883,46 @@ static void test_cmds_process(void)
         return;
     switch (gameturn % 120)
     {
+    case 25:
+    case 85:
+    {
+        struct Thing *p_veh;
+
+        p_veh = test_cmds_nearest_thing(p_agent, TT_VEHICLE, false);
+        if (p_veh == NULL)
+            break;
+        if ((gameturn % 240) < 120)
+            person_go_enter_vehicle(p_agent, p_veh);
+        else
+            person_go_enter_vehicle_fast(p_agent, p_veh, local_player_no);
+        break;
+    }
+    case 55:
+    case 115:
+    {
+        ThingIdx thing, best_thing;
+        s32 best;
+
+        best = 0x7FFFFFFF;
+        best_thing = 0;
+        for (thing = sthings_used_head; thing < 0; thing = sthings[thing].LinkChild)
+        {
+            struct SimpleThing *p_sthing;
+            s32 d;
+
+            p_sthing = &sthings[thing];
+            if (p_sthing->Type != SmTT_DROPPED_ITEM)
+                continue;
+            d = abs((p_sthing->X - p_agent->X) >> 8) + abs((p_sthing->Z - p_agent->Z) >> 8);
+            if (d < best) {
+                best = d;
+                best_thing = thing;
+            }
+        }
+        if (best_thing != 0)
+            person_init_get_item_fast(p_agent, best_thing, local_player_no);
+        break;
+    }
     case 10:
     case 70:
     {

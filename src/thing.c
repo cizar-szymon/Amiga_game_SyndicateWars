@@ -30,6 +30,7 @@
 #include "bigmap.h"
 #include "engincam.h"
 #include "building.h"
+#include "bmcrater.h"
 #include "bmbang.h"
 #include "command.h"
 #include "display.h"
@@ -1833,18 +1834,198 @@ void process_scale_effect(struct SimpleThing *p_sthing, ThingIdx thing_item)
     }
 }
 
+extern s32 engn_nuclear_shade_timer;
+extern TbBool nuclear_overexposure;
+
+/** Puffs a ring of rising smoke around the nuclear blast.
+ *
+ * Remade from test_stuff; the owner argument is not used.
+ */
 void test_stuff(int x, int y, int z, ushort owner)
 {
+    ushort angle;
+    int n;
+
+    angle = (gameturn & 1) ? 0x80 : 0;
+    for (n = 0; angle < 0x800; n++, angle += 0x100)
+    {
+        struct SimpleThing *p_smoke;
+        int dx, dz, rnd;
+
+        dx = (lbSinTable[angle + 512] >> 8) + ((ushort)LbRandomAnyShort() % 55) - 27;
+        dz = (lbSinTable[angle] >> 8) + ((ushort)LbRandomAnyShort() % 55) - 27;
+        if (n & 1)
+            rnd = 0;
+        else
+            rnd = (ushort)LbRandomAnyShort() % 10;
+        p_smoke = create_scale_effect(x + dx, y, z + dz, 0x38B, (short)(rnd + 40));
+        if (p_smoke == NULL)
+            continue;
+        p_smoke->SubType = 0x1F;
+        p_smoke->Object = 0x80;
+        p_smoke->StartFrame = 4;
+        p_smoke->U.UEffect.VY = 4000;
+        p_smoke->U.UEffect.VX = dx;
+        p_smoke->U.UEffect.VZ = dz;
+        p_smoke->U.UEffect.OX = x;
+        p_smoke->U.UEffect.OY = y;
+        p_smoke->U.UEffect.OZ = z;
+    }
+}
+
+/** Collapses buildings and explodes objects within 4 tiles of the blast.
+ *
+ * On map 11 it only starts the delayed map effect instead.
+ * Remade from do_explode.
+ */
+static void do_explode(short x, short y, short z)
+{
+    short tile_x, tile_z, dx, dz;
+
+    if (current_map == 11)
+    {
+        unkn01_pos_x = engn_xc >> 8;
+        unkn01_downcount = 50;
+        unkn01_pos_y = engn_zc >> 8;
+        return;
+    }
+    tile_x = x >> 8;
+    tile_z = z >> 8;
+    for (dx = -4; dx < 4; dx++)
+    {
+        for (dz = -4; dz < 4; dz++)
+        {
+            int cx, cz;
+            ThingIdx thing;
+
+            cx = tile_x + dx;
+            if (cx <= 0 || cx >= 128)
+                continue;
+            cz = tile_z + dz;
+            if (cz <= 0 || cz >= 128)
+                continue;
+            thing = game_my_big_map[cz * 128 + cx].Child;
+            while (thing != 0)
+            {
+                if (thing > 0)
+                {
+                    struct Thing *p_thing;
+
+                    p_thing = &things[thing];
+                    if ((p_thing->Type == TT_BUILDING) && !(p_thing->Flag & 0x0002)
+                      && (p_thing->SubType != 0x20))
+                    {
+                        /* The asm does not step to the next thing here;
+                         * collapsing marks the building, so the next pass skips it. */
+                        collapse_building(x, y, z, p_thing);
+                        continue;
+                    }
+                    thing = p_thing->Next;
+                }
+                else
+                {
+                    struct SimpleThing *p_sthing;
+
+                    p_sthing = &sthings[thing];
+                    if (p_sthing->Type == TT_BUILDING)
+                        explode_thing_object(thing);
+                    thing = p_sthing->Next;
+                }
+            }
+        }
+    }
+}
+
+#ifdef SW_FNCHK
+static void process_nuclear_bomb_asm(struct SimpleThing *p_sthing, ThingIdx thing_item)
+{
     asm volatile (
-      "call ASM_test_stuff\n"
-        : : "a" (x), "d" (y), "b" (z), "c" ((int)owner));
+      "call ASM_process_nuclear_bomb\n"
+        : : "a" (p_sthing), "d" (thing_item) : "cc", "memory");
+}
+#endif
+
+/** Nuclear bomb blast: light flash, then at step 20 buildings collapse,
+ * a crater, shockwave and a ring of flames; smoke rises afterwards.
+ *
+ * Remade from process_nuclear_bomb.
+ */
+static void process_nuclear_bomb_c(struct SimpleThing *p_sthing, ThingIdx thing_item)
+{
+    int x, y, z, turn;
+    short timer;
+
+    turn = gameturn;
+    x = p_sthing->X >> 8;
+    y = p_sthing->Y >> 8;
+    z = p_sthing->Z >> 8;
+    timer = p_sthing->Timer1;
+    engn_nuclear_shade_timer = timer;
+    if (timer < 12)
+        p_sthing->Radius = (ushort)p_sthing->Radius + ((ushort)p_sthing->Radius >> 3) + 4;
+    else if (timer < 25)
+        p_sthing->Radius = (ushort)p_sthing->Radius - (((ushort)p_sthing->Radius >> 2) + 4);
+    else
+        p_sthing->Radius = 0;
+
+    if (timer == 20)
+    {
+        struct Thing *p_owner;
+        ushort angle;
+
+        do_explode(x, y, z);
+        quick_crater(x >> 8, z >> 8, 2);
+        p_owner = &things[(ushort)p_sthing->Owner2];
+        do_shockwave(x, y, z, 0x400, (p_sthing->Flag & 0x80000) ? 10000 : 5000, p_owner);
+        stop_sample_using_heap(p_sthing->ThingOffset, 1);
+        play_dist_sample(&things[(ushort)p_sthing->Owner2], 0x16, 0x7F, 0x40, 100, 0, 3);
+        bang_new4(x << 8, y << 8, z << 8, 0x2D);
+
+        for (angle = 0; angle < 0x800; angle += 20, turn++)
+        {
+            struct SimpleThing *p_flame;
+            int cs, sn, odd;
+
+            cs = lbSinTable[angle + 512] >> 8;
+            sn = lbSinTable[angle] >> 8;
+            cs += (LbRandomAnyShort() & 0x1F) - 15;
+            sn += (LbRandomAnyShort() & 0x1F) - 15;
+            p_flame = create_scale_effect(x + cs, y, z + sn, 0x384, 20);
+            if (p_flame == NULL)
+                continue;
+            odd = turn & 1;
+            p_flame->SubType = 0x2D;
+            p_flame->Object = 0x100;
+            p_flame->StartFrame = 0;
+            p_flame->U.UEffect.VY = 0;
+            p_flame->U.UEffect.OY = 0;
+            p_flame->U.UEffect.VX = (cs << 4) - odd * cs;
+            p_flame->U.UEffect.VZ = (sn << 4) - odd * sn;
+            p_flame->U.UEffect.OZ = (-sn) >> 4;
+            p_flame->U.UEffect.OX = (-cs) >> 4;
+            p_flame->Owner2 = p_sthing->Owner2;
+        }
+    }
+    else if (timer > 20)
+    {
+        if (p_sthing->Flag & 0x80000)
+            test_stuff(x, y, z, 0);
+    }
+
+    timer = p_sthing->Timer1;
+    p_sthing->Timer1 = timer + 1;
+    if (timer > 28)
+    {
+        remove_sthing(thing_item);
+        delete_snode(p_sthing);
+        nuclear_overexposure = false;
+    }
 }
 
 void process_nuclear_bomb(struct SimpleThing *p_sthing, ThingIdx thing_item)
 {
-    asm volatile (
-      "call ASM_process_nuclear_bomb\n"
-        : : "a" (p_sthing), "d" (thing_item));
+    FNCHK_VOID("process_nuclear_bomb", process_nuclear_bomb_asm(p_sthing, thing_item),
+      process_nuclear_bomb_c(p_sthing, thing_item));
 }
 
 #ifdef SW_FNCHK

@@ -82,12 +82,369 @@ void bang_init(void)
     phwoar_init();
 }
 
-/** Fill in the type-specific fields of a freshly allocated Phwoar entry.
- */
-void fillin_phwoar_type_info(struct Phwoar *p_phwoar)
+#ifdef SW_FNCHK
+static void fillin_phwoar_type_info_asm(struct Phwoar *p_phwoar)
 {
     asm volatile ("call ASM_fillin_phwoar_type_info\n"
         : : "a" (p_phwoar) : "cc", "memory");
+}
+#endif
+
+/** Fill in the type-specific fields of a freshly allocated Phwoar entry:
+ * the first animation frame, the time to birth (gestation), the pattern
+ * of babies (rabbit), the life (die) and the frame speed and slowing (vf).
+ * Remade from fillin_phwoar_type_info; the switch was generated from the
+ * asm by a symbolic run over all 256 types (tools/amiga/gen_fillin_phwoar.py).
+ */
+static void fillin_phwoar_type_info_c(struct Phwoar *p_phwoar)
+{
+    ushort rnd;
+
+/* generated from ASM_fillin_phwoar_type_info by a symbolic run */
+    switch (p_phwoar->type)
+    {
+    case 0x31:
+    case 0x3B:
+    case 0x45:
+    case 0x95:
+    case 0xBD:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0xff;
+        p_phwoar->rabbit = 0x0;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x75);
+        break;
+    case 0x32:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x35);
+        rnd = LbRandomAnyShort();
+        p_phwoar->rabbit = 0xd6;
+        p_phwoar->die = 0xe;
+        p_phwoar->gestation = (ubyte)((rnd & 0x7) + 0x3);
+        break;
+    case 0x33:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0x0;
+        p_phwoar->rabbit = 0x35;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x7);
+        break;
+    case 0x34:
+    case 0x77:
+    case 0x8B:
+    case 0x9F:
+    case 0xB3:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0xff;
+        p_phwoar->rabbit = 0x0;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x65);
+        break;
+    case 0x35:
+    case 0x78:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0x0;
+        p_phwoar->rabbit = 0x23;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x7);
+        break;
+    case 0x3C:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x25);
+        rnd = LbRandomAnyShort();
+        p_phwoar->rabbit = 0xd9;
+        p_phwoar->die = 0xe;
+        p_phwoar->gestation = (ubyte)((rnd & 0x3) + 0x3);
+        break;
+    case 0x3D:
+    case 0x47:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0x0;
+        p_phwoar->rabbit = 0x39;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x7);
+        break;
+    case 0x3F:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0xff;
+        p_phwoar->rabbit = 0x0;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x57);
+        break;
+    case 0x40:
+    case 0x82:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0x0;
+        p_phwoar->rabbit = 0x26;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x7);
+        break;
+    case 0x46:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x25);
+        rnd = LbRandomAnyShort();
+        p_phwoar->rabbit = 0xd8;
+        p_phwoar->die = 0xe;
+        p_phwoar->gestation = (ubyte)((rnd & 0x3) + 0x3);
+        break;
+    case 0x48:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0xff;
+        p_phwoar->rabbit = 0x0;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x55);
+        break;
+    case 0x49:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0x0;
+        p_phwoar->rabbit = 0x24;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x5);
+        break;
+    case 0x52:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0xff;
+        p_phwoar->rabbit = 0x0;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x47);
+        break;
+    case 0x53:
+    case 0x55:
+    case 0x57:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0xff;
+        p_phwoar->rabbit = 0x0;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x25);
+        break;
+    case 0x54:
+    case 0x5A:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0x0;
+        p_phwoar->rabbit = 0x3;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0xb);
+        break;
+    case 0x56:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0x1;
+        p_phwoar->rabbit = 0x3;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0xb);
+        break;
+    case 0x58:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0x2;
+        p_phwoar->rabbit = 0x3;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0xb);
+        break;
+    case 0x59:
+    case 0x60:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0xff;
+        p_phwoar->rabbit = 0x0;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x77);
+        break;
+    case 0x5E:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0xff;
+        p_phwoar->rabbit = 0x0;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x17);
+        break;
+    case 0x5F:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0xc;
+        p_phwoar->rabbit = 0x7;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x3);
+        break;
+    case 0x61:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0xc;
+        p_phwoar->rabbit = 0x23;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x3);
+        break;
+    case 0x62:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0xff;
+        p_phwoar->rabbit = 0x0;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x73);
+        break;
+    case 0x63:
+    case 0x8C:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0x0;
+        p_phwoar->rabbit = 0x25;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x7);
+        break;
+    case 0x64:
+        p_phwoar->f = nstart_ani[905];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0xff;
+        p_phwoar->rabbit = 0x0;
+        p_phwoar->die = 0x4;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x45);
+        break;
+    case 0x65:
+        p_phwoar->f = nstart_ani[908];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0xff;
+        p_phwoar->rabbit = 0x0;
+        p_phwoar->die = 0x7;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x75);
+        break;
+    case 0x67:
+        p_phwoar->f = nstart_ani[908];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0xff;
+        p_phwoar->rabbit = 0x0;
+        p_phwoar->die = 0x7;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x25);
+        break;
+    case 0x68:
+        p_phwoar->f = nstart_ani[908];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0x0;
+        p_phwoar->rabbit = 0x4;
+        p_phwoar->die = 0x7;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0xb);
+        break;
+    case 0x69:
+        p_phwoar->f = nstart_ani[908];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0xff;
+        p_phwoar->rabbit = 0x0;
+        p_phwoar->die = 0x7;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x15);
+        break;
+    case 0x6A:
+        p_phwoar->f = nstart_ani[908];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0x0;
+        p_phwoar->rabbit = 0x9;
+        p_phwoar->die = 0x7;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0xb);
+        break;
+    case 0x6E:
+        p_phwoar->f = nstart_ani[908];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0xff;
+        p_phwoar->rabbit = 0x0;
+        p_phwoar->die = 0x7;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x35);
+        break;
+    case 0x6F:
+        p_phwoar->f = nstart_ani[908];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0x0;
+        p_phwoar->rabbit = 0x23;
+        p_phwoar->die = 0x7;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x7);
+        break;
+    case 0x71:
+        p_phwoar->f = nstart_ani[925];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0xff;
+        p_phwoar->rabbit = 0x0;
+        p_phwoar->die = 0x1;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x11);
+        break;
+    case 0x72:
+        p_phwoar->f = nstart_ani[925];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0x0;
+        p_phwoar->rabbit = 0x5;
+        p_phwoar->die = 0x1;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 1);
+        break;
+    case 0x81:
+    case 0xA9:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0xff;
+        p_phwoar->rabbit = 0x0;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x45);
+        break;
+    case 0x96:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0x0;
+        p_phwoar->rabbit = 0x28;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x7);
+        break;
+    case 0xA0:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0x0;
+        p_phwoar->rabbit = 0x13;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x7);
+        break;
+    case 0xAA:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0x0;
+        p_phwoar->rabbit = 0x16;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x7);
+        break;
+    case 0xB4:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0x0;
+        p_phwoar->rabbit = 0x15;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x7);
+        break;
+    case 0xBE:
+        p_phwoar->f = nstart_ani[900];
+        rnd = LbRandomAnyShort();
+        p_phwoar->gestation = 0x0;
+        p_phwoar->rabbit = 0x18;
+        p_phwoar->die = 0xe;
+        p_phwoar->vf = (ubyte)((rnd & 0x3) + 0x7);
+        break;
+    default:
+        LOGERR("Bad phwoar type %d", (int)p_phwoar->type);
+        break;
+    }
+}
+
+void fillin_phwoar_type_info(struct Phwoar *p_phwoar)
+{
+    FNCHK_VOID("fillin_phwoar_type_info", fillin_phwoar_type_info_asm(p_phwoar),
+      fillin_phwoar_type_info_c(p_phwoar));
 }
 
 void new_bang(int x, int y, int z, int type, int owner, int c)

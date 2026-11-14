@@ -72,6 +72,7 @@ s32 dword_152E38[5] = {-1, -1, -1, -1, -1};
 s32 dword_1AA3AC; /* src\people.c, 4 bytes */
 s32 dword_1AA3B0; /* src\people.c, 4 bytes */
 s32 dword_1AA67C; /* src\people.c, 4 bytes */
+s32 dword_1AA680; /* src\people.c, 4 bytes */
 ubyte * dword_1C6DE4; /* src\game_sprts.h, 4 bytes */
 ubyte * dword_1C6DE8; /* src\game_sprts.h, 4 bytes */
 uint dword_1C8470; /* src\vehtraffic.c, 4 bytes */

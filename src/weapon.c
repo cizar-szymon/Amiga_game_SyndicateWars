@@ -47,6 +47,8 @@
 #include "packet.h"
 #include "game_data.h"
 #include "game_speed.h"
+#include "game_options.h"
+#include "frame_sprani.h"
 #include "guitext.h"
 #include "matrix.h"
 #include "network.h"
@@ -3351,11 +3353,85 @@ void init_minigun(struct Thing *p_owner)
         alert_peeps(cor_fin_x, cor_fin_y, cor_fin_z, p_owner);
 }
 
+#ifdef SW_FNCHK
+static void init_flamer_asm(struct Thing *p_owner)
+{
+    asm volatile ("call ASM_init_flamer\n"
+        : : "a" (p_owner) : "cc", "memory");
+}
+#endif
+
+/** A flamer shot: the person turns to its target, the flame direction
+ * (WeaponDir) swings towards the facing, and three flames go out along it
+ * with some spread.  Remade from init_flamer. */
+static void init_flamer_c(struct Thing *p_owner)
+{
+    s32 x, y, z, step_x, step_y, step_z, sn, cs, dy;
+    short d;
+    sbyte adj;
+    ushort i;
+
+    x = p_owner->X + (angle_direction[p_owner->U.UPerson.Angle].DiX << 6);
+    z = p_owner->Z + (angle_direction[p_owner->U.UPerson.Angle].DiY << 6);
+    y = p_owner->Y + 0xF00;
+    if (p_owner->PTarget != NULL)
+    {
+        struct Thing *p_target;
+        short angle;
+
+        p_target = p_owner->PTarget;
+        angle = arctan((p_target->X >> 8) - (p_owner->X >> 8),
+          -((p_target->Z >> 8) - (p_owner->Z >> 8)));
+        change_person_angle(p_owner, ((((s32)angle + 0x80) >> 8) + 8) & 7);
+    }
+    d = (short)((p_owner->U.UPerson.Angle << 5) - p_owner->U.UPerson.WeaponDir);
+    if (d < -0x80)
+        adj = 0x20;
+    else if (d > 0x80)
+        adj = -0x20;
+    else if (d < -9)
+        adj = -8;
+    else if (d > 9)
+        adj = 8;
+    else
+        adj = 0;
+    p_owner->U.UPerson.WeaponDir += adj;
+    cs = lbSinTable[p_owner->U.UPerson.WeaponDir * 8 + 512] >> 8;
+    sn = lbSinTable[p_owner->U.UPerson.WeaponDir * 8] >> 8;
+    sn += (LbRandomAnyShort() & 0xF) - 8;
+    dy = (LbRandomAnyShort() & 0xF) - 8;
+    cs += (LbRandomAnyShort() & 0xF) - 8;
+    step_x = sn << 5;
+    step_y = dy * 2;
+    step_z = cs << 5;
+    for (i = 0; i < 3; i++, x += step_x, y += step_y, z += step_z)
+    {
+        struct SimpleThing *p_flame;
+        int k;
+
+        p_flame = create_scale_effect(x >> 8, y >> 8, z >> 8, 0x384, 15);
+        if (p_flame == NULL)
+            continue;
+        ingame.FlameCount++;
+        p_flame->SubType = 0x2E;
+        p_flame->Object = 0x28;
+        p_flame->StartFrame = 9;
+        p_flame->Timer1 += (LbRandomAnyShort() & 7) - 4;
+        for (k = 0; k < 5; k++)
+            p_flame->Frame = frame[p_flame->Frame].Next;
+        p_flame->U.UEffect.VX = (((LbRandomAnyShort() & 0xF) + sn) - 8) << 4;
+        p_flame->U.UEffect.VY = ((LbRandomAnyShort() & 0xF) + dy) - 8;
+        p_flame->U.UEffect.VZ = (((LbRandomAnyShort() & 0xF) + cs) - 8) << 4;
+        p_flame->U.UEffect.OX = (-sn) >> 1;
+        p_flame->U.UEffect.OZ = (-cs) >> 1;
+        p_flame->U.UEffect.OY = 0;
+        p_flame->Owner2 = p_owner->ThingOffset;
+    }
+}
+
 void init_flamer(struct Thing *p_owner)
 {
-    //TODO add alerting people
-    asm volatile ("call ASM_init_flamer\n"
-        : : "a" (p_owner));
+    FNCHK_VOID("init_flamer", init_flamer_asm(p_owner), init_flamer_c(p_owner));
 }
 
 void init_long_range(struct Thing *p_owner)

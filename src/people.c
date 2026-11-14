@@ -5479,12 +5479,136 @@ void set_person_dead(struct Thing *p_person, ushort anim_mode)
       set_person_dead_c(p_person, anim_mode));
 }
 
-uint find_and_alert_guardian(struct Thing *p_person, struct Thing *p_attacker)
+#ifdef SW_FNCHK
+static uint find_and_alert_guardian_asm(struct Thing *p_person, struct Thing *p_attacker)
 {
     uint ret;
     asm volatile (
       "call ASM_find_and_alert_guardian\n"
-        : "=r" (ret) : "a" (p_person), "d" (p_attacker));
+        : "=a" (ret), "+d" (p_attacker) : "0" (p_person) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** Distance to the best guardian found by the last find_best_guardian
+ * (asm data). */
+extern s32 dword_1AA680;
+
+/** True for a person free to answer a call for help: not busy shooting,
+ * not in special states (flag mask 0x12097402 or 0x08), no second target,
+ * not inside anything, and idle or wandering (states 0, 1, 3, 5, 6).
+ * Remade from available_for_guard_duty. */
+static TbBool available_for_guard_duty(struct Thing *p_person)
+{
+    ushort state;
+
+    if (p_person->U.UPerson.WeaponTurn > 0)
+        return false;
+    if ((p_person->Flag & 0x12097402) != 0)
+        return false;
+    if (p_person->U.UPerson.Target2 != 0)
+        return false;
+    if (p_person->U.UPerson.Within != 0)
+        return false;
+    if ((p_person->Flag & 0x08) != 0)
+        return false;
+    state = (ushort)p_person->State & 0x7FFF;
+    return (state == 0) || (state == 1) || (state == 3) || (state == 5) || (state == 6);
+}
+
+/** The nearest available member of group `group` (not the person itself
+ * nor its goto thing), or NULL; its distance goes to dword_1AA680.
+ * Remade from find_best_guardian. */
+static struct Thing *find_best_guardian(struct Thing *p_person, ushort group)
+{
+    ThingIdx thing, best;
+    u32 best_dist;
+    int n;
+
+    best = 0;
+    best_dist = 16000;
+    n = 0;
+    for (thing = same_type_head[256 + group]; (thing != 0) && (n < 1000); )
+    {
+        struct Thing *p_thing;
+
+        if ((ushort)thing > 1000)
+            return NULL;
+        p_thing = &things[(ushort)thing];
+        n++;
+        if ((thing != p_person->ThingOffset) &&
+          ((ushort)thing != p_person->GotoThingIndex) &&
+          available_for_guard_duty(p_thing))
+        {
+            s32 dx, dz;
+            u32 dist;
+
+            dx = abs((p_thing->X - p_person->X) >> 8);
+            dz = abs((p_thing->Z - p_person->Z) >> 8);
+            if (dx > dz)
+                dz >>= 1;
+            else
+                dx >>= 1;
+            dist = dx + dz;
+            if (dist < best_dist) {
+                best_dist = dist;
+                best = thing;
+            }
+        }
+        thing = p_thing->LinkSameGroup;
+    }
+    dword_1AA680 = best_dist;
+    if (best == 0)
+        return NULL;
+    return &things[(ushort)best];
+}
+
+/** A person under attack calls the guardian groups of its group: the
+ * nearest free members come to fight the attacker (state 0x0E), up to 11
+ * of them, or until the nearest one is far (4096).  Returns 1 when it
+ * stopped for that, 0 otherwise.  Remade from find_and_alert_guardian. */
+static uint find_and_alert_guardian_c(struct Thing *p_person, struct Thing *p_attacker)
+{
+    ushort i, count;
+
+    count = 0;
+    for (i = 0; i < 8; i++)
+    {
+        ubyte group;
+
+        group = war_flags[p_person->U.UPerson.EffectiveGroup].Guardians[i];
+        if (group == 0)
+            return 0;
+        while (1)
+        {
+            struct Thing *p_guard;
+
+            p_guard = find_best_guardian(p_person, group);
+            if (p_guard == NULL)
+                break;
+            p_guard->State = 0x0E;
+            p_guard->U.UPerson.ComRange = 0x14;
+            p_guard->GotoThingIndex = p_attacker->ThingOffset;
+            p_guard->Flag |= 0x00800000;
+            p_guard->PTarget = p_attacker;
+            p_guard->Owner = p_person->ThingOffset;
+            p_person->Flag |= 0x00400000;
+            if (dword_1AA680 >= 0x1000)
+                return 1;
+            if (count >= 10)
+                return 1;
+            count++;
+        }
+    }
+    return 0;
+}
+
+uint find_and_alert_guardian(struct Thing *p_person, struct Thing *p_attacker)
+{
+    uint ret;
+
+    FNCHK_RET("find_and_alert_guardian", ret, find_and_alert_guardian_asm(p_person, p_attacker),
+      find_and_alert_guardian_c(p_person, p_attacker));
     return ret;
 }
 
@@ -9416,10 +9540,113 @@ void plant_mine(struct Thing *p_person)
 #endif
 }
 
-void person_drop_item(struct Thing *p_person)
+#ifdef SW_FNCHK
+static void person_drop_item_asm(struct Thing *p_person)
 {
     asm volatile ("call ASM_person_drop_item\n"
-        : : "a" (p_person));
+        : : "a" (p_person) : "cc", "memory");
+}
+#endif
+
+/** A person dropping an item: plays the animation; when Timer2 runs out
+ * the item goes down (a held thing is put back, a mine is planted, else a
+ * weapon item is created and taken away from the person), and at the end
+ * of the animation the person goes back to what it did.
+ * Remade from person_drop_item. */
+static void person_drop_item_c(struct Thing *p_person)
+{
+    struct TngUPerson *p_pers;
+    ushort anim;
+
+    p_pers = &p_person->U.UPerson;
+    if ((p_person->Flag & 0x0202) != 0)
+        return;
+    p_person->Timer1 -= fifties_per_gameturn;
+    if (p_person->Timer1 >= 0)
+        return;
+    p_person->Timer1 = p_person->StartTimer1;
+    p_person->Frame = frame[p_person->Frame].Next;
+    p_pers->Timer2--;
+    if (p_pers->Timer2 < 0)
+    {
+        play_dist_sample(p_person, 0x40, 0x7F, 0x40, 100, 0, 1);
+        if ((p_person->Flag2 & 0x00010000) != 0)
+        {
+            struct SimpleThing *p_sthing;
+
+            p_person->Flag2 &= ~0x00010000;
+            p_sthing = &sthings[p_pers->TempWeapon];
+            if (p_sthing->Type != 0x19)
+            {
+                p_sthing->Type = 0x19;
+                add_node_sthing(p_sthing->ThingOffset);
+                p_sthing->U.UWeapon.OnFace = p_pers->OnFace;
+                p_pers->Timer2 = 0x32;
+            }
+        }
+        else
+        {
+            if (p_pers->TempWeapon == 0)
+                p_pers->TempWeapon = p_pers->CurrentWeapon;
+            if ((p_person->Flag2 & 0x00800000) != 0)
+            {
+                if ((p_pers->TempWeapon == 0x0C) || (p_pers->TempWeapon == 0x0D))
+                {
+                    plant_mine(p_person);
+                    p_pers->Timer2 = 0x32;
+                }
+                p_person->Flag2 &= ~0x00800000;
+            }
+            else
+            {
+                struct SimpleThing *p_item;
+
+                p_item = create_item(p_person->X >> 8, p_person->Y >> 8, p_person->Z >> 8,
+                  0x3EC, (ubyte)p_pers->TempWeapon);
+                p_pers->Timer2 = 0x32;
+                if (p_item != NULL)
+                {
+                    p_item->U.UWeapon.OnFace = p_pers->OnFace;
+                    if ((p_pers->TempWeapon == 0x0C) || (p_pers->TempWeapon == 0x0D))
+                    {
+                        p_item->Radius = 0x32;
+                        p_item->Timer1 = 0x3E7;
+                        p_item->StartTimer1 = 0x3E7;
+                    }
+                    give_take_me_weapon(p_person, p_pers->TempWeapon, -1, p_item->ThingOffset);
+                    if ((p_pers->WeaponsCarried & (1u << ((p_pers->CurrentWeapon - 1) & 0x1F))) == 0)
+                        p_pers->CurrentWeapon = 0;
+                }
+            }
+        }
+    }
+    if ((frame[p_person->Frame].Flags & 0x01) == 0)
+        return;
+    if ((p_person->Flag2 & 0x10000000) != 0)
+    {
+        struct Thing *p_owner;
+
+        p_person->GotoThingIndex = p_person->Owner;
+        p_owner = &things[(ushort)p_person->Owner];
+        p_person->State = 0x2B;
+        p_pers->ComRange = follow_dist[p_owner->U.UPerson.ComCur & 3][p_pers->ComCur & 3];
+        p_person->Flag2 &= ~0x10000000;
+    }
+    else
+    {
+        p_person->State = 0;
+    }
+    p_person->Flag &= ~0x0001;
+    p_pers->AnimMode = p_pers->OldAnimMode;
+    anim = people_frames[p_person->SubType][p_pers->AnimMode];
+    p_person->Frame = nstart_ani[anim + p_pers->Angle];
+    p_person->StartFrame = people_frames[p_person->SubType][p_pers->AnimMode] - 1;
+    p_person->Speed = calc_person_speed(p_person);
+}
+
+void person_drop_item(struct Thing *p_person)
+{
+    FNCHK_VOID("person_drop_item", person_drop_item_asm(p_person), person_drop_item_c(p_person));
 }
 
 #ifdef SW_FNCHK
@@ -9537,10 +9764,80 @@ void person_save_victim(struct Thing *p_person)
 }
 
 
-void person_run_away(struct Thing *p_person)
+#ifdef SW_FNCHK
+static void person_run_away_asm(struct Thing *p_person)
 {
     asm volatile ("call ASM_person_run_away\n"
-        : : "a" (p_person));
+        : : "a" (p_person) : "cc", "memory");
+}
+#endif
+
+/** A fleeing person runs in its flee direction (turning when blocked),
+ * screams now and then, and when its panic counter (RecoilTimer) runs
+ * out it walks again and looks for danger.  Remade from person_run_away. */
+static void person_run_away_c(struct Thing *p_person)
+{
+    s32 old_vx, old_vz;
+    ubyte dir;
+
+    old_vx = p_person->VX;
+    old_vz = p_person->VZ;
+    dir = p_person->U.UPerson.RecoilDir;
+    p_person->VX = lbSinTable[dir * 8] >> 8;
+    p_person->VZ = lbSinTable[dir * 8 + 512] >> 8;
+    if (person_move(p_person) != 0)
+    {
+        p_person->U.UPerson.Angle = (p_person->U.UPerson.Angle + 1) & 7;
+        p_person->U.UPerson.RecoilDir += 0x20;
+        p_person->Frame = nstart_ani[p_person->U.UPerson.Angle + (ushort)p_person->StartFrame + 1];
+    }
+    if ((p_person->Flag & 0x0002) != 0)
+        return;
+    p_person->VX = old_vx;
+    p_person->VZ = old_vz;
+    if (((p_person->U.UPerson.RecoilTimer & 0x20) == 0) && ((gameturn & 0x7F) == 0))
+    {
+        ushort rnd;
+
+        rnd = LbRandomAnyShort();
+        if (p_person->SubType == 0x0A)
+        {
+            play_dist_speech(p_person, (ushort)(rnd % 2 + 0x3E), 0x7F, 0x40, 100, 0, 3);
+        }
+        else
+        {
+            ushort samp;
+
+            samp = (((ushort)p_person->ThingOffset + (gameturn >> 7)) & 1);
+            if ((female_peep & (1u << (p_person->SubType & 0x1F))) != 0)
+                samp += 0x29;
+            else
+                samp += 0x28;
+            play_dist_speech(p_person, samp, 0x7F, 0x40, 100, 0, 2);
+        }
+    }
+    p_person->U.UPerson.RecoilTimer--;
+    if (p_person->U.UPerson.RecoilTimer == 0)
+    {
+        p_person->Flag &= ~0x00040000;
+        if ((p_person->Flag2 & 0x00080000) != 0)
+            set_person_animmode_walk(p_person);
+        p_person->U.UPerson.Mood = 0;
+        search_for_danger(p_person);
+        remove_path(p_person);
+        p_person->U.UPerson.ComTimer = -1;
+    }
+    p_person->Timer1 -= fifties_per_gameturn;
+    if (p_person->Timer1 < 0)
+    {
+        p_person->Timer1 = p_person->StartTimer1;
+        p_person->Frame = frame[p_person->Frame].Next;
+    }
+}
+
+void person_run_away(struct Thing *p_person)
+{
+    FNCHK_VOID("person_run_away", person_run_away_asm(p_person), person_run_away_c(p_person));
 }
 
 void person_becomes_persuaded(struct Thing *p_person, ushort energy)
@@ -10029,12 +10326,178 @@ short do_move_colide(struct Thing *p_person, int dx, int dz, struct MyMapElement
     return ret;
 }
 
+#ifdef SW_FNCHK
+static short person_hit_razor_wire_asm(struct Thing *p_person, ThingIdx thing)
+{
+    int ret;
+    asm volatile (
+      "call ASM_person_hit_razor_wire\n"
+        : "=a" (ret), "+d" (thing) : "0" (p_person) : "cc", "memory");
+    return ret;
+}
+#endif
+
+struct SimpleThing *init_spark(int x, int y, int z);
+
+/** Removes a razor wire: its collision vector and the wire thing. */
+static void razor_wire_remove(struct Thing *p_wire)
+{
+    delete_vect((short)(p_wire->X >> 8), (short)((p_wire->Y >> 5) + 60),
+      (short)(p_wire->Z >> 8), (short)((short)p_wire->VX + 50),
+      (short)(((short)p_wire->VY << 3) + 60), (short)p_wire->VZ,
+      p_wire->Frame, 2);
+    remove_thing(p_wire->ThingOffset);
+    delete_node(p_wire);
+}
+
+/** Counts a person killed by a razor wire in the mission statistics. */
+static void razor_wire_count_kill(struct Thing *p_person, struct Thing *p_wire)
+{
+    if (in_network_game)
+    {
+        int plyr;
+
+        if ((p_person->Flag & 0x2000) == 0)
+            return;
+        for (plyr = 0; plyr < 8; plyr++)
+        {
+            struct Thing *p_agent;
+
+            if ((ingame.InNetGame_UNSURE & (1 << plyr)) == 0)
+                continue;
+            p_agent = players[plyr].MyAgent[0];
+            if (p_wire->U.UObject.Group != p_agent->U.UPerson.Group)
+                continue;
+            mission_status[p_agent->U.UPerson.ComCur >> 2].MP.AgentsKilled[p_person->U.UPerson.ComCur >> 2]++;
+        }
+        return;
+    }
+    if (p_wire->U.UObject.Group != ingame.MyGroup)
+        return;
+    switch (p_person->SubType)
+    {
+    case 1: case 2: case 3: case 9: case 12:
+        mission_status[open_brief].SP.EnemiesKilled++;
+        break;
+    case 4: case 5: case 10: case 11: case 13: case 14:
+        mission_status[open_brief].SP.CivsKilled++;
+        break;
+    case 6: case 7: case 8:
+        mission_status[open_brief].SP.SecurityKilled++;
+        break;
+    default:
+        break;
+    }
+}
+
+/** A person walking into a wire of another group (without a truce):
+ * if the person is at the height of the wire, an explosive wire blows up
+ * (and goes, unless it was already used up), a razor wire cuts (sparks,
+ * cries, damage) and may kill.  The wire loses health each touch and
+ * goes when used up.  Returns 1 when the person died (or an explosive
+ * wire hit a dying person).  Remade from person_hit_razor_wire. */
+static short person_hit_razor_wire_c(struct Thing *p_person, ThingIdx thing)
+{
+    struct Thing *p_wire;
+    TbBool removed;
+    short health;
+    s32 dy, adx, adz, len, pdx, pdz, d, h;
+
+    removed = false;
+    p_wire = &things[thing];
+    if (p_person->U.UPerson.EffectiveGroup == p_wire->U.UObject.Group)
+        return 0;
+    if ((war_flags[p_wire->U.UObject.Group].Truce &
+      (1u << (p_person->U.UPerson.EffectiveGroup & 0x1F))) != 0)
+        return 0;
+    health = p_wire->Health;
+    p_wire->Health = health - 1;
+    if (health < 0)
+    {
+        razor_wire_remove(p_wire);
+        removed = true;
+    }
+    /* height of the wire where the person stands */
+    dy = p_wire->VY - (p_wire->Y >> 8);
+    adx = abs(p_wire->VX - (p_wire->X >> 8));
+    adz = abs(p_wire->VZ - (p_wire->Z >> 8));
+    if (adx > adz)
+        len = adx + (adz >> 1);
+    else
+        len = adz + (adx >> 1);
+    if (len == 0)
+        len = 1;
+    pdx = abs(p_person->X - p_wire->X);
+    pdz = abs(p_person->Z - p_wire->Z);
+    if ((pdx >> 8) > (pdz >> 8))
+        d = (pdz >> 9) + (pdx >> 8);
+    else
+        d = (pdx >> 9) + (pdz >> 8);
+    h = (p_wire->Y >> 8) + (dy * d) / len - (p_person->Y >> 8);
+    if ((h < 0) || (h > 0x1A00))
+        return 0;
+
+    if (p_wire->SubType != 0)
+    {
+        struct Thing *p_owner;
+
+        bang_new4(p_person->X, p_person->Y, p_person->Z, 15);
+        p_owner = (p_wire->Owner != 0) ? &things[(ushort)p_wire->Owner] : NULL;
+        do_shockwave(p_person->X >> 8, p_person->Y >> 8, p_person->Z >> 8, 0x400, 1000, p_owner);
+        if (((gameturn & 7) != 0) && !removed)
+            razor_wire_remove(p_wire);
+        create_sound_effect(p_person->X >> 8, p_person->Y >> 8, p_person->Z >> 8, 0x25, 0x7F, 0);
+        return ((p_person->Flag & 0x0002) != 0) ? 1 : 0;
+    }
+
+    if (p_person->SubType == 7)
+    {
+        razor_wire_remove(p_wire);
+        return 0;
+    }
+    {
+        struct SimpleThing *p_spark;
+
+        p_spark = init_spark(p_person->X >> 8, (p_person->Y >> 8) + 0x14, p_person->Z >> 8);
+        if (p_spark != NULL)
+        {
+            p_spark->Timer1 = 0x0D;
+            p_spark->U.UEffect.VX >>= 1;
+            p_spark->U.UEffect.VY >>= 1;
+            p_spark->U.UEffect.VZ >>= 1;
+        }
+    }
+    if (((gameturn & 7) == 0) && ((LbRandomAnyShort() & 1) == 0))
+    {
+        ushort smpl;
+
+        if ((female_peep & (1u << (p_person->SubType & 0x1F))) != 0)
+            smpl = sfx_woman_shot[((ushort)p_person->ThingOffset + gameturn) & 1];
+        else
+            smpl = sfx_man_shot[((ushort)p_person->ThingOffset + gameturn) & 7];
+        play_dist_sample(p_person, smpl, 0x7F, 0x40, 100, 0, 2);
+    }
+    {
+        ushort dmg;
+
+        dmg = weapon_defs[18].HitDamage;
+        if ((p_person->U.UPerson.UMod.Mods >> 12) == 1)
+            dmg >>= 1;
+        p_person->Health -= dmg;
+    }
+    if (p_person->Health > 0)
+        return 0;
+    set_person_dead(p_person, 0x0B);
+    razor_wire_count_kill(p_person, p_wire);
+    return 1;
+}
+
 short person_hit_razor_wire(struct Thing *p_person, ThingIdx thing)
 {
     short ret;
-    asm volatile (
-      "call ASM_person_hit_razor_wire\n"
-        : "=r" (ret) : "a" (p_person), "d" (thing));
+
+    FNCHK_RET("person_hit_razor_wire", ret, person_hit_razor_wire_asm(p_person, thing),
+      person_hit_razor_wire_c(p_person, thing));
     return ret;
 }
 

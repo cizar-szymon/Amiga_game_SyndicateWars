@@ -606,12 +606,44 @@ void update_map_flags(void)
     }
 }
 
-uint sea_texture(int tex)
+#ifdef SW_FNCHK
+static uint sea_texture_asm(int tex)
 {
     uint ret;
     asm volatile (
       "call ASM_sea_texture\n"
-        : "=r" (ret) : "a" (tex));
+        : "=a" (ret) : "0" (tex) : "cc", "memory");
+    return ret;
+}
+#endif
+
+extern ubyte textwalk_data[];
+
+/** Water flag (2) of a floor texture: taken from the walk data of the
+ * 32x32 cell of its texture page at the smallest texture coordinates.
+ * Remade from sea_texture. */
+static uint sea_texture_c(int tex)
+{
+    struct SingleFloorTexture *p_tex;
+    int min_x, min_y;
+
+    p_tex = &game_textures[tex];
+    min_x = p_tex->TMapX1;
+    if (p_tex->TMapX2 < min_x) min_x = p_tex->TMapX2;
+    if (p_tex->TMapX3 < min_x) min_x = p_tex->TMapX3;
+    if (p_tex->TMapX4 < min_x) min_x = p_tex->TMapX4;
+    min_y = p_tex->TMapY1;
+    if (p_tex->TMapY2 < min_y) min_y = p_tex->TMapY2;
+    if (p_tex->TMapY3 < min_y) min_y = p_tex->TMapY3;
+    if (p_tex->TMapY4 < min_y) min_y = p_tex->TMapY4;
+    return textwalk_data[64 * p_tex->Page + 8 * (min_y >> 5) + (min_x >> 5)] & 0x02;
+}
+
+uint sea_texture(int tex)
+{
+    uint ret;
+
+    FNCHK_RET("sea_texture", ret, sea_texture_asm(tex), sea_texture_c(tex));
     return ret;
 }
 

@@ -3386,11 +3386,117 @@ void generate_thin_paths(void)
     LbMemoryFree(faces4_added);
 }
 
-void triangulation_unkn_func_002(int x1, int z1, int x2, int z2)
+#ifdef SW_FNCHK
+static void triangulation_unkn_func_002_asm(int x1, int z1, int x2, int z2)
 {
     asm volatile (
       "call ASM_triangulation_unkn_func_002\n"
-        : : "a" (x1), "d" (z1), "b" (x2), "c" (z2));
+        : "+a" (x1), "+d" (z1), "+b" (x2), "+c" (z2) : : "cc", "memory");
+}
+#endif
+
+/** True unless the tile of (x1,z1) has a collision vector between (x1,z1)
+ * and (x2,z2), either way, within 32 (at most 200 entries are looked at).
+ * Remade from func_5fcf4. */
+static TbBool tri_edge_has_no_col_vect(s32 x1, s32 z1, s32 x2, s32 z2)
+{
+    ushort cl;
+    int n;
+
+    if (((x1 >> 8) < 0) || ((x1 >> 8) >= 128) || ((z1 >> 8) < 0) || ((z1 >> 8) >= 128))
+        return false;
+    n = 0;
+    for (cl = game_my_big_map[((z1 >> 8) << 7) + (x1 >> 8)].ColHead; cl != 0;
+      cl = game_col_vects_list[cl].NextColList & 0x7FFF)
+    {
+        struct ColVect *p_cvect;
+
+        if (n++ >= 200)
+            break;
+        p_cvect = &game_col_vects[game_col_vects_list[cl].Vect];
+        if ((abs(p_cvect->X1 - x1) < 32) && (abs(p_cvect->X2 - x2) < 32) &&
+          (abs(p_cvect->Z2 - z2) < 32) && (abs(p_cvect->Z1 - z1) < 32))
+            return false;
+        if ((abs(p_cvect->X1 - x2) < 32) && (abs(p_cvect->X2 - x1) < 32) &&
+          (abs(p_cvect->Z2 - z1) < 32) && (abs(p_cvect->Z1 - z2) < 32))
+            return false;
+    }
+    return true;
+}
+
+/** Opens edge `edge` of triangle `tri` (and the matching edge of its
+ * neighbour) when the neighbour is walkable. */
+static void tri_open_edge(int tri, int edge)
+{
+    struct TrTriangle *p_tri, *p_nbr;
+    int nbr, k;
+
+    p_tri = &triangulation[0].Triangles[tri];
+    nbr = p_tri->tri[edge];
+    p_nbr = &triangulation[0].Triangles[nbr];
+    if ((p_nbr->solid & 0x06) != 0)
+        return;
+    p_tri->enter |= (1 << edge);
+    for (k = 0; k < 3; k++)
+    {
+        if (p_nbr->tri[k] == tri) {
+            p_nbr->enter |= (1 << k);
+            break;
+        }
+    }
+}
+
+/** After something in the tile rectangle (x1,z1)-(x2,z2) went away (a
+ * building blown up), opens the edges of walkable triangles there which
+ * have no collision vector any more.  A triangle is looked at only when
+ * its point 0 or 1 is inside.  Remade from triangulation_unkn_func_002. */
+static void triangulation_unkn_func_002_c(int x1, int z1, int x2, int z2)
+{
+    s32 bx1, bz1, bx2, bz2;
+    int tri;
+
+    bx1 = x1 << 8;
+    bz1 = z1 << 8;
+    bx2 = (x2 + 1) << 8;
+    bz2 = (z2 + 1) << 8;
+    for (tri = 0; tri < triangulation[0].ix_Triangles; tri++)
+    {
+        struct TrTriangle *p_tri;
+        struct TrPoint *p_pt[3];
+        ubyte in;
+        int k;
+
+        p_tri = &triangulation[0].Triangles[tri];
+        if ((p_tri->solid & 0x06) != 0)
+            continue;
+        in = 0;
+        for (k = 0; k < 3; k++)
+        {
+            p_pt[k] = &triangulation[0].Points[(ushort)p_tri->point[k]];
+            if ((p_pt[k]->x >= bx1) && (p_pt[k]->x <= bx2) &&
+              (p_pt[k]->y >= bz1) && (p_pt[k]->y <= bz2))
+                in |= (1 << k);
+            if ((k == 1) && (in == 0))
+                break;
+        }
+        if (in == 0)
+            continue;
+        if (((in & 0x03) == 0x03) && ((p_tri->enter & 0x01) == 0) &&
+          tri_edge_has_no_col_vect(p_pt[0]->x, p_pt[0]->y, p_pt[1]->x, p_pt[1]->y))
+            tri_open_edge(tri, 0);
+        if (((in & 0x06) == 0x06) && ((p_tri->enter & 0x02) == 0) &&
+          tri_edge_has_no_col_vect(p_pt[1]->x, p_pt[1]->y, p_pt[2]->x, p_pt[2]->y))
+            tri_open_edge(tri, 1);
+        if (((in & 0x05) == 0x05) && ((p_tri->enter & 0x04) == 0) &&
+          tri_edge_has_no_col_vect(p_pt[2]->x, p_pt[2]->y, p_pt[0]->x, p_pt[0]->y))
+            tri_open_edge(tri, 2);
+    }
+}
+
+void triangulation_unkn_func_002(int x1, int z1, int x2, int z2)
+{
+    FNCHK_VOID("triangulation_unkn_func_002", triangulation_unkn_func_002_asm(x1, z1, x2, z2),
+      triangulation_unkn_func_002_c(x1, z1, x2, z2));
 }
 
 int fringe_at_tile(short tile_x, short tile_z)

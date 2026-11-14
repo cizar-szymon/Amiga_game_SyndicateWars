@@ -25,6 +25,7 @@
 #pragma pack(1)
 
 struct SimpleThing;
+void FIRE_process_flame_c(struct SimpleThing *p_fire);
 
 #pragma pack()
 

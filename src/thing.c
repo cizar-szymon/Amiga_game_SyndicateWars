@@ -42,6 +42,10 @@
 #include "game_data.h"
 #include "game_options.h"
 #include "game_speed.h"
+#include "febrief.h"
+#include "misstat.h"
+#include "people.h"
+#include "weapon.h"
 #include "matrix.h"
 #include "packet.h"
 #include "pepgroup.h"
@@ -1290,11 +1294,18 @@ void finish_bang(struct SimpleThing *p_sthing, ThingIdx thing)
     delete_snode(p_sthing);
 }
 
+#ifdef SW_FNCHK
+static void FIRE_process_flame_asm(struct SimpleThing *p_sthing)
+{
+    asm volatile ("call ASM_FIRE_process_flame\n"
+        : : "a" (p_sthing) : "cc", "memory");
+}
+#endif
+
 void FIRE_process_flame(struct SimpleThing *p_sthing)
 {
-    asm volatile (
-      "call ASM_FIRE_process_flame\n"
-        : : "a" (p_sthing));
+    FNCHK_VOID("FIRE_process_flame", FIRE_process_flame_asm(p_sthing),
+      FIRE_process_flame_c(p_sthing));
 }
 
 void FIRE_finish_flame(struct SimpleThing *p_sthing, ThingIdx thing)
@@ -1498,11 +1509,195 @@ ubyte napalm_person(struct Thing *p_person, ushort multi)
     return ret;
 }
 
+#ifdef SW_FNCHK
+static void process_drift_smoke_asm(struct SimpleThing *p_sthing, ThingIdx thing_item)
+{
+    asm volatile ("call ASM_process_drift_smoke\n"
+        : : "a" (p_sthing), "d" (thing_item) : "cc", "memory");
+}
+#endif
+
+void person_go_sleep(struct Thing *p_person);
+
+/** A person hit by a gas cloud goes mad: changes group to a hostile one
+ * and picks a close range weapon.  Remade from person_go_insane.
+ */
+static void person_go_insane(struct Thing *p_person)
+{
+    if ((p_person->Flag & TngF_Destroyed) != 0)
+        return;
+    if ((p_person->Flag2 & TgF2_Unkn0008) != 0)
+        return;
+    p_person->Flag2 |= TgF2_Unkn0008;
+    p_person->U.UPerson.EffectiveGroup += 0x80;
+    choose_best_weapon_for_range(p_person, 3);
+    p_person->Speed = 0x400;
+    p_person->U.UPerson.Timer2 = 5;
+    p_person->U.UPerson.Target2 = 0;
+    p_person->U.UPerson.StartTimer2 = 5;
+    p_person->U.UPerson.BumpCount = 150;
+}
+
+/** Count a person killed by the burning cloud in the mission statistics
+ * (the owner of the cloud is the killer). */
+static void drift_smoke_count_kill(struct Thing *p_person, struct Thing *p_owner)
+{
+    if (!in_network_game)
+    {
+        if (p_owner->U.UPerson.EffectiveGroup != ingame.MyGroup)
+            return;
+        switch (p_person->SubType)
+        {
+        case 1: case 2: case 3: case 9: case 12:
+            mission_status[open_brief].SP.EnemiesKilled++;
+            break;
+        case 4: case 5: case 10: case 11: case 13: case 14:
+            mission_status[open_brief].SP.CivsKilled++;
+            break;
+        case 6: case 7: case 8:
+            mission_status[open_brief].SP.SecurityKilled++;
+            break;
+        default:
+            break;
+        }
+    }
+    else if ((p_person->Flag & TngF_PlayerAgent) != 0)
+    {
+        struct Thing *p_killer;
+
+        p_killer = NULL;
+        if ((p_owner->Flag & TngF_PlayerAgent) != 0) {
+            p_killer = p_owner;
+        } else if ((p_owner->Flag & TngF_Persuaded) != 0) {
+            if ((things[(ushort)p_owner->Owner].Flag & TngF_PlayerAgent) != 0)
+                p_killer = &things[(ushort)p_owner->Owner];
+        }
+        if ((p_killer != NULL) && ((p_killer->Flag & TngF_PlayerAgent) != 0))
+            mission_status[p_killer->U.UPerson.ComCur >> 2].MP.AgentsKilled[p_person->U.UPerson.ComCur >> 2]++;
+    }
+}
+
+/** A drifting cloud of smoke or gas: it moves (sliding over the ground,
+ * stopping at walls), grows, puts to sleep or drives mad the people
+ * inside it, and the burning kind (subtype 0x2D) sets them on fire.
+ * Remade from process_drift_smoke.
+ */
+static void process_drift_smoke_c(struct SimpleThing *p_sthing, ThingIdx thing_item)
+{
+    struct STngUEffect *p_eff;
+
+    p_eff = &p_sthing->U.UEffect;
+    if ((p_sthing->Timer1 < 12) && ((gameturn & 1) != 0))
+        p_sthing->Frame = frame[(ushort)p_sthing->Frame].Next;
+    if ((p_sthing->Flag & 0x0008) == 0)
+    {
+        int x, y, z;
+
+        x = p_sthing->X + (p_eff->VX << 2);
+        y = p_sthing->Y + (p_eff->VY << 2);
+        z = p_sthing->Z + (p_eff->VZ << 2);
+        if (p_sthing->SubType != 0x1E)
+        {
+            int alt;
+
+            alt = alt_at_point((short)(x >> 8), (short)(z >> 8));
+            if ((y < alt) && (alt - y < 0x800))
+                y = alt + 0x40;
+        }
+        if (((x >> 16) < 0) || ((x >> 16) >= 0x80) || ((z >> 16) < 0) || ((z >> 16) >= 0x80))
+        {
+            p_sthing->Timer1 = -1;
+        }
+        else
+        {
+            if (check_col_collision(x >> 8, y >> 8, z >> 8) != 0) {
+                p_sthing->Flag |= 0x0008;
+                if (p_sthing->Timer1 > 5)
+                    p_sthing->Timer1 = 5;
+            } else {
+                move_smapwho_c(p_sthing, &x, y, &z);
+            }
+            p_eff->VX += p_eff->OX;
+            p_eff->VY += p_eff->OY;
+            p_eff->VZ += p_eff->OZ;
+        }
+    }
+    p_sthing->Object += p_sthing->StartFrame;
+    p_sthing->Timer1--;
+    if (p_sthing->Timer1 <= 0)
+    {
+        remove_sthing(thing_item);
+        delete_snode(p_sthing);
+        return;
+    }
+    if (((p_sthing->Flag & 0x0030) != 0) && ((gameturn & 3) == 0)
+      && ((ushort)p_sthing->Object > 0x3C))
+    {
+        struct Thing *p_person;
+        short skip;
+
+        skip = 0;
+        do
+        {
+            p_person = check_for_radius_hit_person(p_sthing->X, p_sthing->Y, p_sthing->Z,
+              (ushort)p_sthing->Object, NULL, 0, skip);
+            skip++;
+            if (p_person == NULL)
+                break;
+            if ((p_person->Type == TT_VEHICLE) || (p_person->Type == 5))
+                continue;
+            if (p_person->ThingOffset == p_sthing->Owner2)
+                continue;
+            if (((p_person->U.UPerson.UMod.Mods >> 6) & 7) >= 3)
+                continue;
+            if (p_person->U.UPerson.Group == things[(ushort)p_sthing->Owner2].U.UPerson.Group)
+                continue;
+            if ((p_person->Flag2 & TgF2_Unkn0001) != 0)
+                finalise_razor_wire(p_person);
+            if ((p_sthing->Flag & 0x0010) != 0)
+                person_go_insane(p_person);
+            else
+                person_go_sleep(p_person);
+        }
+        while (1);
+    }
+    if (p_sthing->SubType == 0x2D)
+    {
+        struct Thing *p_person;
+
+        p_person = check_for_radius_hit_person(p_sthing->X, p_sthing->Y, p_sthing->Z,
+          (ushort)p_sthing->Object, NULL, 0, 0);
+        if (p_person == NULL)
+            return;
+        if (p_person->Type == TT_VEHICLE)
+            return;
+        if (p_person->Type != 5)
+        {
+            if ((p_person->State == 0x24) || (p_person->State == 0x0C))
+                return;
+            if ((p_person->Flag & TngF_Destroyed) != 0)
+                return;
+            if ((p_person->Flag2 & TgF2_KnockedOut) == 0)
+            {
+                ubyte dir;
+
+                dir = (arctan((p_sthing->X >> 8) - (p_person->X >> 8),
+                  -((p_sthing->Z >> 8) - (p_person->Z >> 8))) + 0x80) >> 8;
+                dir = (dir + 8) & 7;
+                p_person->U.UPerson.RecoilDir = dir;
+                change_person_angle(p_person, (dir + 4) & 7);
+            }
+        }
+        if (napalm_person(p_person, 2) == 0)
+            return;
+        drift_smoke_count_kill(p_person, &things[(ushort)p_sthing->Owner2]);
+    }
+}
+
 void process_drift_smoke(struct SimpleThing *p_sthing, ThingIdx thing_item)
 {
-    asm volatile (
-      "call ASM_process_drift_smoke\n"
-        : : "a" (p_sthing), "d" (thing_item));
+    FNCHK_VOID("process_drift_smoke", process_drift_smoke_asm(p_sthing, thing_item),
+      process_drift_smoke_c(p_sthing, thing_item));
 }
 
 void process_mushroom(struct SimpleThing *p_sthing, ThingIdx thing_item)

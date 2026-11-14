@@ -449,10 +449,19 @@ TbBool vehicle_is_destroyed(ThingIdx thing)
     return thing_is_destroyed(thing) || (p_thing->Type != TT_VEHICLE);
 }
 
-void mech_unkn_func_09(ThingIdx thing)
+/* defined below, with the other mech code */
+static void mech_unkn_func_09_c(ThingIdx thing);
+#ifdef SW_FNCHK
+static void mech_unkn_func_09_asm(ThingIdx thing)
 {
     asm volatile ("call ASM_mech_unkn_func_09\n"
-        : : "a" (thing));
+        : : "a" (thing) : "cc", "memory");
+}
+#endif
+
+void mech_unkn_func_09(ThingIdx thing)
+{
+    FNCHK_VOID("mech_unkn_func_09", mech_unkn_func_09_asm(thing), mech_unkn_func_09_c(thing));
 }
 
 void veh_add(struct Thing *p_vehicle, short frame)
@@ -5366,10 +5375,199 @@ void process_mech_unknown1(struct Thing *p_vehicle)
       process_mech_unknown1_c(p_vehicle));
 }
 
-void init_mech_explode(struct Thing *p_vehicle)
+#ifdef SW_FNCHK
+static void init_mech_explode_asm(struct Thing *p_vehicle)
 {
     asm volatile ("call ASM_init_mech_explode\n"
-        : : "a" (p_vehicle));
+        : : "a" (p_vehicle) : "cc", "memory");
+}
+#endif
+
+/** A mech blows up: its crew is thrown out dead, bangs and a crater, the
+ * mech is removed, and all mech parts (things of type 35) fly apart from
+ * where it stood.  Remade from init_mech_explode. */
+static void init_mech_explode_c(struct Thing *p_vehicle)
+{
+    s32 ox, oz;
+    ThingIdx thing;
+
+    ox = p_vehicle->X;
+    oz = p_vehicle->Z;
+    if ((p_vehicle->Type != TT_VEHICLE) || (p_vehicle->SubType != 0x3B))
+        return;
+    while (p_vehicle->U.UVehicle.PassengerHead != 0)
+    {
+        struct Thing *p_person;
+
+        p_person = &things[(ushort)p_vehicle->U.UVehicle.PassengerHead];
+        p_vehicle->U.UVehicle.PassengerHead = p_person->U.UPerson.LinkPassenger;
+        p_person->Flag &= ~0x12000000;
+        add_node_thing((ushort)p_person->ThingOffset);
+        set_person_dead(p_person, 0xC);
+    }
+    bang_new4(p_vehicle->X, p_vehicle->Y, p_vehicle->Z, 10);
+    bang_new4(p_vehicle->X, p_vehicle->Y, p_vehicle->Z, 0x73);
+    bang_new4(p_vehicle->X, p_vehicle->Y, p_vehicle->Z, 0x2D);
+    quick_crater(p_vehicle->X >> 16, p_vehicle->Z >> 16, 2);
+    p_vehicle->Flag = 0x0002;
+    p_vehicle->State = 0x0D;
+    remove_thing((ushort)p_vehicle->ThingOffset);
+    delete_node(p_vehicle);
+    for (thing = things_used_head; thing > 0; )
+    {
+        struct Thing *p_part;
+
+        p_part = &things[thing];
+        thing = p_part->LinkChild;
+        if (p_part->Type != TT_UNKN35)
+            continue;
+        p_part->State = 0x0D;
+        p_part->Flag |= 0x0002;
+        p_part->X <<= 8;
+        p_part->VY = 1000;
+        p_part->Z <<= 8;
+        p_part->VX = (p_part->X - ox) >> 4;
+        p_part->Y <<= 8;
+        p_part->VZ = (p_part->Z - oz) >> 4;
+        add_node_thing((ushort)p_part->ThingOffset);
+    }
+}
+
+extern ushort game_level_unique_id;
+
+/** Creates one mech part: a thing of type 35 with its own model (prim
+ * object `prim`) and a copy of the matrix.  Returns the thing index.
+ * Remade from init_unkn1thing. */
+static ThingIdx init_unkn1thing(struct M33 *p_mat, s32 x, s32 y, s32 z,
+  ushort upx, ushort upy, ushort upz, short prim)
+{
+    struct Thing *p_part;
+    ThingIdx thing;
+
+    thing = get_new_thing();
+    p_part = &things[(ushort)thing];
+    p_part->VX = 0;
+    p_part->VZ = 0;
+    p_part->VY = 0;
+    p_part->U.UVehicle.AngleX = 0;
+    p_part->U.UVehicle.AngleY = 0;
+    p_part->U.UVehicle.AngleZ = 0;
+    p_part->Type = TT_UNKN35;
+    p_part->Radius = 150;
+    p_part->Parent = 0;
+    p_part->Speed = 0;
+    p_part->StartFrame = 0;
+    p_part->State = 0;
+    p_part->Flag = 0;
+    p_part->X = x;
+    p_part->U.UVehicle.Object = next_object;
+    p_part->U.UVehicle.MatrixIndex = next_local_mat;
+    p_part->Z = z;
+    p_part->Y = y;
+    next_local_mat++;
+    matrix_identity_fill(&local_mats[p_part->U.UVehicle.MatrixIndex]);
+    local_mats[p_part->U.UVehicle.MatrixIndex] = *p_mat;
+    p_part->Flag |= 0x04000000;
+    p_part->U.UVehicle.UniqueID = game_level_unique_id;
+    unkn2_pos_x = upx;
+    unkn2_pos_y = upy;
+    game_level_unique_id++;
+    unkn2_pos_z = upz;
+    copy_prim_obj_to_game_object((ushort)(x >> 8), (ushort)(z >> 8),
+      (short)(-prim_unknprop01 - prim), (ushort)(y >> 8));
+    unkn_object_shift_03(next_object - 1);
+    game_objects[next_object - 1].ThingNo = thing;
+    return thing;
+}
+
+/** Offsets of the 12 mech parts from their parent, *4 (z negated); the asm
+ * data tables data_1554f8, data_155528 and data_155558. */
+static const s32 mech_part_ofs_x[12] = {0, 0, -70, -10, 70, 10, 0, -40, 40, 40, -40, 0};
+static const s32 mech_part_ofs_z[12] = {0, -10, 0, 75, 0, 75, 70, 20, 20, 20, 20, 65};
+static const s32 mech_part_ofs_y[12] = {0, 0, 0, 10, 0, 10, -10, -40, -40, 40, 40, -10};
+
+/** The 12 parts: prim object, part id, field_79, children (part numbers). */
+static const struct {
+    short prim;
+    short id;
+    ubyte flag;
+    ubyte nchild;
+    ubyte child[4];
+} mech_parts[12] = {
+    {0x1A, 0, 1, 3, {1, 6, 11, 0}},
+    {0x00, 1, 0, 2, {2, 4, 0, 0}},
+    {0x24, 3, 1, 1, {3, 0, 0, 0}},
+    {0x26, 5, 1, 0, {0, 0, 0, 0}},
+    {0x25, 4, 1, 1, {5, 0, 0, 0}},
+    {0x27, 6, 1, 0, {0, 0, 0, 0}},
+    {0x00, 2, 0, 4, {7, 8, 9, 10}},
+    {0x22, 7, 1, 0, {0, 0, 0, 0}},
+    {0x23, 8, 1, 0, {0, 0, 0, 0}},
+    {0x21, 9, 1, 0, {0, 0, 0, 0}},
+    {0x20, 10, 1, 0, {0, 0, 0, 0}},
+    {0x1B, 11, 1, 0, {0, 0, 0, 0}},
+};
+
+/** Builds a mech from the vehicle thing: a new animation state (the next
+ * unkn_mech_arr3 entry, the mech's Owner) and its 12 parts as type 35
+ * things linked in unkn_mech_arr4 as a tree.  Remade from mech_unkn_func_09. */
+static void mech_unkn_func_09_c(ThingIdx thing)
+{
+    struct Thing *p_mech;
+    struct unkn_mech_struc3 *p_m3;
+    struct M33 *p_mat;
+    s32 base;
+    int k;
+
+    p_mech = &things[thing];
+    base = unkn_mech_var10;
+    p_mat = &local_mats[p_mech->U.UVehicle.MatrixIndex];
+    p_m3 = &unkn_mech_arr3[unkn_mech_var11];
+    p_m3->mech3_arr4_ptr = &unkn_mech_arr4[unkn_mech_var10];
+    p_m3->mech3_unkn_arr4_idx = unkn_mech_var10;
+    p_m3->mech3_unkn_mat_C = unkn_mech_mat8;
+    memset((ubyte *)p_m3 + 0x3C, 0, 24);
+    p_m3->mech3_unkn_X = p_mech->X;
+    p_m3->mech3_unkn_Y = p_mech->Y;
+    p_m3->mech3_unkn_Z = p_mech->Z;
+    matrix_identity_fill(&local_mats[p_mech->U.UVehicle.MatrixIndex]);
+    p_mech->Flag = 0x04000000;
+    p_mech->U.UVehicle.TNode = 4;
+    p_mech->Owner = unkn_mech_var11;
+    VNAV_unkn_func_207(p_mech);
+
+    for (k = 0; k < 12; k++)
+    {
+        struct unkn_mech_struc4 *p_m4;
+        ThingIdx part;
+        int c;
+
+        part = init_unkn1thing(p_mat, 0, 0, 0, 0x40, 0x40, 0x40, mech_parts[k].prim);
+        p_m4 = &unkn_mech_arr4[unkn_mech_var10];
+        p_m4->thing = part;
+        p_m4->field_23 = mech_parts[k].id;
+        p_m4->field_79 = mech_parts[k].flag;
+        p_m4->field_61.R[0] = mech_part_ofs_x[k] * 4;
+        p_m4->field_61.R[1] = mech_part_ofs_z[k] * -4;
+        p_m4->field_61.R[2] = mech_part_ofs_y[k] * 4;
+        p_m4->field_2[0] = mech_parts[k].nchild;
+        for (c = 0; c < mech_parts[k].nchild; c++)
+        {
+            struct unkn_mech_struc4 *p_child;
+
+            p_child = &unkn_mech_arr4[base + mech_parts[k].child[c]];
+            memcpy(&p_m4->field_2[1 + 4 * c], &p_child, sizeof(p_child));
+        }
+        unkn_mech_var10++;
+    }
+    unkn_mech_arr3[unkn_mech_var11].mech3_unkn_fld_8 = 12;
+    unkn_mech_var11++;
+}
+
+void init_mech_explode(struct Thing *p_vehicle)
+{
+    FNCHK_VOID("init_mech_explode", init_mech_explode_asm(p_vehicle),
+      init_mech_explode_c(p_vehicle));
 }
 
 void process_train(struct Thing *p_vehicle)

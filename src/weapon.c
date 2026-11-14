@@ -5942,10 +5942,12 @@ s32 laser_hit_at(s32 cor1_x, s32 cor1_y, s32 cor1_z,
     laser_hit_at_end[0] = *p_cor2_x;
     laser_hit_at_end[1] = *p_cor2_y;
     laser_hit_at_end[2] = *p_cor2_z;
-#endif
     FNCHK_RET("laser_hit_at", ret,
       laser_hit_at_asm(cor1_x, cor1_y, cor1_z, p_cor2_x, p_cor2_y, p_cor2_z, p_shot),
       laser_hit_at_c_again(cor1_x, cor1_y, cor1_z, p_cor2_x, p_cor2_y, p_cor2_z, p_shot));
+#else
+    ret = laser_hit_at_c(cor1_x, cor1_y, cor1_z, p_cor2_x, p_cor2_y, p_cor2_z, p_shot);
+#endif
     return ret;
 }
 

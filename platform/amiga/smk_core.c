@@ -21,16 +21,19 @@
 #include "smk_core.h"
 #include "../../third_party/libsmacker/smacker.h"
 
-/* frames decoded ahead (2.9 MB at 600x300) */
-#define FQ_N 16
+/* frames decoded ahead (5.8 MB at 600x300): the heavy parts of the
+ * elections (from 8 s on) drained 16; filled to FQ_START before the start */
+#define FQ_N 32
+#define FQ_START 16
 
 /* the queue of the video's sound: 8-bit signed, left and right */
-#define AQ_SIZE 65536
+#define AQ_SIZE 131072
 #define AQ_MASK (AQ_SIZE - 1)
 #define AQ_BLOCK 2048
 static signed char aq_l[AQ_SIZE], aq_r[AQ_SIZE];
 static unsigned long aq_w, aq_r_pos;
 static unsigned long aq_under;
+static unsigned long aq_fills, aq_gaps, aq_first_gap;
 /* all the sound of the video is in the queue: an empty queue is its end */
 static int aq_done;
 
@@ -69,6 +72,8 @@ static void aq_fill(UBYTE *dst, ULONG block, void *ctx)
 {
     unsigned long i, r = aq_r_pos;
 
+    unsigned long short_before = aq_under;
+
     (void)ctx;
     for (i = 0; i < block; i++) {
         if (r != aq_w) {
@@ -83,6 +88,13 @@ static void aq_fill(UBYTE *dst, ULONG block, void *ctx)
         }
     }
     aq_r_pos = r;
+    /* where the gaps are: how many blocks, the time of the first */
+    aq_fills++;
+    if (aq_under != short_before) {
+        if (aq_gaps == 0)
+            aq_first_gap = se_ms();
+        aq_gaps++;
+    }
 }
 
 /** Microseconds a frame, from the header's frame rate (as libsmacker reads
@@ -174,6 +186,7 @@ int smk_core_play(const char *fname, struct SmkOut *o)
     fq_first = fq_cnt = 0;
     aq_w = aq_r_pos = 0;
     aq_under = 0;
+    aq_fills = aq_gaps = aq_first_gap = 0;
     aq_done = 0;
     for (;;) {
         /* into the queue: the picture and the palette of the frame decoded */
@@ -192,7 +205,7 @@ int smk_core_play(const char *fname, struct SmkOut *o)
             decode_max = now - t0;
         /* the whole queue before the start (and its sound: more than the
          * first blocks the voices take) */
-        if ((fq_cnt >= fq_n) || (decoded >= frames))
+        if ((fq_cnt >= fq_n) || (fq_cnt >= FQ_START) || (decoded >= frames))
             break;
         t0 = now;
         if (smk_next(s) < 0)
@@ -282,7 +295,9 @@ int smk_core_play(const char *fname, struct SmkOut *o)
         se_music_close();
         se_music_resume(&mstate);
         sprintf(line, "smk: sound %lu Hz, %u ch, %u bit; %lu samples in the video, "
-          "%lu short\n", arate[0], (unsigned)ach[0], (unsigned)abits[0], aq_w, aq_under);
+          "%lu short in %lu of %lu blocks, the first %ld ms after the start\n",
+          arate[0], (unsigned)ach[0], (unsigned)abits[0], aq_w, aq_under, aq_gaps,
+          aq_fills, aq_gaps ? (long)(aq_first_gap - start) : 0L);
         o->log(line);
     }
     now = o->clock_ms();

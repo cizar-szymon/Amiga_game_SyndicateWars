@@ -3,10 +3,11 @@
  * changed decoder (third_party/libsmacker) with the original, frame by frame.
  *
  *   gcc -O2 -o smk_check tools/amiga/smk_check.c third_party/libsmacker/smacker.c
- *   smk_check FILE.smk... > sums.txt        (and time it: -t)
+ *   smk_check [-t] [-n FRAMES] FILE.smk... > sums.txt   (-t: time it)
  */
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <time.h>
 #include "../../third_party/libsmacker/smacker.h"
 
@@ -23,6 +24,7 @@ static unsigned long adler(const unsigned char *p, unsigned long n, unsigned lon
 int main(int argc, char **argv)
 {
     int i, timing = 0;
+    unsigned long limit = 0;
 
     for (i = 1; i < argc; i++) {
         smk s;
@@ -35,12 +37,18 @@ int main(int argc, char **argv)
             timing = 1;
             continue;
         }
+        if ((strcmp(argv[i], "-n") == 0) && (i + 1 < argc)) {
+            limit = strtoul(argv[++i], NULL, 10);
+            continue;
+        }
         s = smk_open_file(argv[i], SMK_MODE_MEMORY);
         if (s == NULL) {
             printf("%s: cannot open\n", argv[i]);
             continue;
         }
         smk_info_all(s, NULL, &frames, NULL);
+        if ((limit > 0) && (limit < frames))
+            frames = limit;
         smk_info_video(s, &w, &h, &ys);
         smk_info_audio(s, &mask, ch, bd, rate);
         smk_enable_all(s, SMK_VIDEO_TRACK | mask);

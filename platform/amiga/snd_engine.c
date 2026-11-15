@@ -17,6 +17,7 @@
  * Panning follows the PC (OpenAL) build of the game.
  */
 #include <string.h>
+#include <stdlib.h>
 
 #include <exec/exec.h>
 #include <exec/memory.h>
@@ -576,12 +577,32 @@ int se_backend_from_env(void)
     return SE_PAULA;
 }
 
+/** At the exit of the program, however it ends (Ctrl-C in the menu did not
+ * free the sound): the channels, the AHI audio and the heap go back to the
+ * system.  Otherwise Paula stays allocated until a reset. */
+static void se_atexit(void)
+{
+    if (heap_mem != NULL) {
+        ahi_heap_unload();
+        FreeVec(heap_mem);
+        heap_mem = NULL;
+        heap_size = 0;
+    }
+    if (backend != SE_NONE)
+        se_close();
+}
+
 int se_open(int want)
 {
+    static BOOL atexit_done = FALSE;
     int ch;
 
     if (backend != SE_NONE)
         return backend;
+    if (!atexit_done) {
+        atexit(se_atexit);
+        atexit_done = TRUE;
+    }
     for (ch = 0; ch < MAX_VOICES; ch++) {
         memset(&voices[ch], 0, sizeof(voices[ch]));
         voices[ch].owner = OWNER_NONE;

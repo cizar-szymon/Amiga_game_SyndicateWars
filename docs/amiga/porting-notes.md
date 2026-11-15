@@ -287,3 +287,41 @@ Wydajność, Amiga 1 (A1200, Warp 1260, 68060), misja 1, 320×200, `PROF=1`: kla
 podłoga 4,8, radar 3,6, `swap` 3,5. Profil próbkujący: rasteryzator asm (`gpoly_init_state`
 i dalej) ok. 28% próbek, `engine_draw_things` 5%, `process_things` 3,9%, `draw_drawlist_2` 3,5%,
 podłoga 3,3%, `draw_object_faces` 3%.
+
+## 15.11.2026 — dźwięk na Amidze: Paula
+
+Decyzje użytkownika: Paula domyślnie, AHI jako opcja; muzyka z płyty przekonwertowana na PC
+(bez dekodowania Vorbis na Amidze); muzyka MIDI („danger music”) pominięta; najpierw 68060, potem ARM.
+
+- **bfsoundlib kompilowany dla Amigi** bez `drv_oal.c` (OpenAL) i `oggvorbis.c`; zamiast nich
+  `platform/amiga/snd_paula.c` z tymi samymi funkcjami `OPENAL_*` i `ogg_vorbis_stream_*`.
+  Wymagało czytania nagłówków WAV i banku jako little endian (`b1b594c8`).
+- **Efekty:** 4 kanały `audio.device` (przydział wszystkich na starcie, priorytet 127, bez czekania).
+  Kanał wg strony (0 i 3 lewe, 1 i 2 prawe), strona wg `pan` jak w wersji PC (OpenAL): `pan > 64`
+  lewo, `pan < 64` (poza 0) prawo – odwrotnie niż opis w `mssal.h`, zachowane jak w buildzie
+  wzorcowym. Gdy brak wolnego kanału, przejmuje najcichszy (nie głośniejszy od nowego). Próbka bez
+  kanału „gra” po cichu i kończy się w swoim czasie (zapętlona czeka na wolny kanał). Próbki do
+  64 KB jednym zapisem (powtórzenia robi Paula: `ioa_Cycles`), dłuższe kawałkami po 64 KB
+  (2 w kolejce). Głośność i okres zmieniane `ADCMD_PERVOL`. Licznik pętli `n > 1` grany n razy
+  (OpenAL w PC gra raz – tam błąd sterownika, tu zachowanie MSS).
+- **Bank efektów:** `tools/amiga/make_sound_bank.py` – WAV 16 bit → 8 bit **ze znakiem** (wbrew
+  standardowi WAV; sterownik Pauli tego oczekuje), ten sam układ pliku, 10 → 5 MB. Także
+  `syncreds.dat` (napisy końcowe).
+- **Sterta dźwięków w Chip RAM** (Paula czyta tylko stamtąd), maks. 800 KB, z zapasem 200 KB
+  Chip RAM dla systemu; sterta trzyma ostatnio używane próbki (8 bit – mieści dwa razy więcej
+  niż 16 bit na PC).
+- **Muzyka:** `tools/amiga/make_music.py` (ffmpeg) – ścieżki OGG → `track_N.smu`: nagłówek
+  `SWMU`, 22 050 Hz, 8 bit ze znakiem, bloki po 8 KB: lewy kanał, potem prawy (czytane jednym
+  `Read` wprost do bufora w Chip RAM). 3 bloki w kolejce (1,1 s). Muzyka zajmuje kanały 0 i 1,
+  efekty mają wtedy 2 i 3; przy głośności 0 muzyka zwalnia kanały. ~78 MB na 3 ścieżki.
+- **Katalog danych Amigi:** `tools/amiga/make_amiga_data.sh` robi `Syndicate Wars/amiga_data`
+  z danych PC (twarde dowiązania, przekonwertowany dźwięk i muzyka, kopie `qdata` i konfiguracji).
+  WinUAE (`SyndWars_A1200_OS32_net*.uae`, wolumin `SWARS:`) wskazuje teraz ten katalog (kopie
+  starych konfiguracji: `*.uae.bak-pcdata`).
+- Opcje: `ENV:SyndWarsSound` = `NONE` wyłącza dźwięk; `ENV:SyndWarsSoundLog` – liczniki co 5 s
+  do `RAM:SyndWars-sound.txt`.
+- ARM: na razie zaślepki dźwięku (`sound_stubs.c` pod `SW_WARP`).
+
+Otwarte: odsłuch na prawdziwej Amidze, koszt CPU (pomiar na Amidze 1), `AIL_ms_count` przez
+`gettimeofday` (sprawdzić rozdzielczość/koszt w libnix), wstrzymanie muzyki gubi zakolejkowane
+~1 s, AHI.

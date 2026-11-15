@@ -385,3 +385,20 @@ Otwarte: odsłuch na prawdziwej Amidze, koszt CPU (pomiar na Amidze 1), `AIL_ms_
 - `swhost` jest uruchamiany przez `SystemTags` z wejściem/wyjściem `NIL:` (bez okna konsoli przy
   starcie z ikony), pełną ścieżką z `GetProgramDir()` i z katalogiem programu jako bieżącym
   (`PROGDIR:` nie istnieje w nowym procesie Shella). `SyndWars` czeka na jego koniec.
+
+### Raport błędu (Help) i okno Esc (15.11.2026)
+
+- Decyzje użytkownika: raport pod klawiszem **Help** (na Amidze to `KC_F12` gry – w menu oryginalny
+  zrzut ekranu F12 zastąpiony raportem), F10 / Ctrl+F10 jak w oryginale; Esc w misji pyta o
+  przerwanie misji, w menu głównym (Esc i QUIT) o wyjście z gry; okna w stylu gry (jak menu pauzy,
+  `src/fepause.c`: `ingame_ask_yes_no()`, `ingame_bug_report()`).
+- Raport: `src/amiga_bugreport.c` (zrzut `RAM:SyndWars-screen.iff` przed narysowaniem okna, stan
+  `RAM:SyndWars-state.txt`, `error.log`, `qdata/savegame/default.ini`; e-mail zapamiętany w
+  `qdata/savegame/report_email.txt`), wysyłanie osobnym procesem `platform/amiga/amiga_report.c`
+  (z portu Settlers). Serwer: ten sam co Settlers i OpenDUNE (repo Settlers `server/`, Pi400,
+  port 6810, adres publiczny `83.12.152.135`; `ENV:SyndWarsReportServer=host[:port]` zmienia),
+  gra rozpoznawana po wersji `SyndWars-…`, podstrona `/swars` (tylko sieć domowa).
+- Pobranie zgłoszeń: `sh tools/amiga/server_reports.sh` → `private/reports/<data>-<nr>/`
+  (poza gitem – e-maile graczy); zrzut: `python tools/amiga/iff2png.py …/SyndWars-screen.iff`.
+- Pełnego stanu misji raport nie zawiera (zapis w misji – decyzja użytkownika: nie robimy).
+- Do zrobienia: raport w wersji ARM (wysyłanie przez `swhost`).

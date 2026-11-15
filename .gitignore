@@ -21,3 +21,4 @@ test-driver
 autom4te.cache/
 /build/
 /DEMO/
+/private/

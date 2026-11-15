@@ -703,7 +703,7 @@ TbBool ingame_ask_yes_no(const char *question)
 {
     struct ScreenBox box;
     struct ScreenButton yes_btn, no_btn;
-    struct TbSprite *old_font;
+    const struct TbSprite *old_font;
     TbBool answer, done;
     short scale, text_w, line_h;
     int x, y;
@@ -793,3 +793,209 @@ TbBool ingame_ask_yes_no(const char *question)
     lbFontPtr = old_font;
     return answer;
 }
+
+#if defined(SW_AMIGA) && !defined(SW_WARP)
+#include "amiga_bugreport.h"
+#include "game_speed.h"
+
+/** A text field of the bug report box: background, text (wrapped by the
+ * text window) and a cursor when it has the focus. */
+static void bug_report_draw_field(short x, short y, short w, short h,
+  const char *text, TbBool focus)
+{
+    char buf[520];
+
+    lbDisplay.DrawFlags = 0;
+    LbDrawBox(x - 1, y - 1, w + 2, h + 2, ingame_boxes_colr2);
+    LbDrawBox(x, y, w, h, colour_lookup[ColLU_BLACK]);
+    snprintf(buf, sizeof(buf), "%s%s", text, (focus && ((gameturn >> 2) & 1)) ? "_" : "");
+    lbFontPtr = small_font;
+    my_set_text_window(x + 2, y + 2, w - 4, h - 4);
+    my_draw_text(0, 0, buf, 0);
+    my_set_text_window(0, 0, lbDisplay.PhysicalScreenWidth,
+      lbDisplay.PhysicalScreenHeight);
+}
+
+/** Adds the key's character to buf (or takes one away with Backspace).
+ * Returns the key. */
+static ulong bug_report_type_key(char *buf, int size, TbBool multiline)
+{
+    ulong key;
+    int len;
+    char c;
+
+    key = next_buffered_key();
+    if ((key == 0) || (key >= 0x80))
+        return key;
+    len = strlen(buf);
+    if (key == KC_BACK) {
+        if (len > 0)
+            buf[len - 1] = '\0';
+        return key;
+    }
+    if (key == KC_RETURN) {
+        if (multiline && (len + 1 < size)) {
+            buf[len] = '\n';
+            buf[len + 1] = '\0';
+        }
+        return key;
+    }
+    if ((lbShift & KMod_SHIFT) != 0)
+        c = lbInkeyToAsciiShift[key];
+    else
+        c = lbInkeyToAscii[key];
+    if (((ubyte)c >= 0x20) && ((ubyte)c <= 0x7E) && (len + 1 < size)) {
+        buf[len] = c;
+        buf[len + 1] = '\0';
+    }
+    return key;
+}
+
+/** The bug report box (Help key, the Amiga port): the screen and the state
+ * of the game are saved first, then the player writes an e-mail address
+ * (to hear when it is fixed) and what happened, and SEND gives it all to
+ * the game server of the Amiga ports. */
+void ingame_bug_report(void)
+{
+    static char email[80];
+    static char text[500];
+    struct ScreenBox box;
+    struct ScreenButton send_btn, cancel_btn;
+    const struct TbSprite *old_font;
+    char status[80];
+    short scale, fx, fw, ey, ty, th;
+    int focus, state, ok;
+    TbBool done;
+
+    // the screen before the box is drawn
+    bug_report_capture();
+    if (email[0] == '\0')
+        bug_report_load_email(email, sizeof(email));
+
+    old_font = lbFontPtr;
+    if ((ingame.PanelPermutation != 2) && (ingame.PanelPermutation != -3)) {
+        ingame_boxes_colr1 = 20;
+        ingame_boxes_colr2 = 15;
+    } else {
+        ingame_boxes_colr1 = 40;
+        ingame_boxes_colr2 = 35;
+    }
+    scale = lbDisplay.GraphicsScreenWidth / 320;
+    if (scale < pop1_sprites_scale)
+        scale = pop1_sprites_scale;
+    if (scale < 1)
+        scale = 1;
+
+    box.Width = 290 * scale;
+    box.Height = 160 * scale;
+    box.X = (lbDisplay.GraphicsScreenWidth - box.Width) / 2;
+    box.Y = (lbDisplay.GraphicsScreenHeight - box.Height) / 2;
+    box.Flags = 0;
+    fx = box.X + 12 * scale;
+    fw = box.Width - 24 * scale;
+    ey = box.Y + 30 * scale;
+    ty = box.Y + 56 * scale;
+    th = 62 * scale;
+
+    lbFontPtr = small_font;
+    init_ingame_screen_button(&send_btn, box.X + box.Width * 3 / 10,
+      box.Y + 140 * scale, "SEND", small_font, 0);
+    init_ingame_screen_button(&cancel_btn, box.X + box.Width * 7 / 10,
+      box.Y + 140 * scale, "CANCEL", small_font, 0);
+
+    clear_key_pressed(KC_F12);
+    reset_buffered_keys();
+    lbDisplay.LeftButton = 0;
+    lbDisplay.RightButton = 0;
+
+    draw_box_cutedge(&box, ingame_boxes_colr1);
+    lbFontPtr = small_font;
+    my_set_text_window(0, 0, lbDisplay.PhysicalScreenWidth,
+      lbDisplay.PhysicalScreenHeight);
+    my_draw_text(fx, box.Y + 6 * scale, "BUG REPORT", 0);
+    my_draw_text(fx, box.Y + 20 * scale, "E-MAIL (TO HEAR WHEN IT IS FIXED):", 0);
+    my_draw_text(fx, box.Y + 46 * scale, "WHAT HAPPENED:", 0);
+    my_draw_text(fx + fw / 2, box.Y + 6 * scale, "HELP: SEND  ESC: CANCEL", 0);
+
+    focus = (email[0] == '\0') ? 0 : 1;
+    state = 0;          // 0 writing, 1 sending, 2 done
+    status[0] = '\0';
+    done = false;
+    while (!done)
+    {
+        JoyUpdateInputs(&joy);
+
+        if (state == 0) {
+            ulong key;
+            if (focus == 0)
+                key = bug_report_type_key(email, sizeof(email), false);
+            else
+                key = bug_report_type_key(text, sizeof(text), true);
+            if ((key == KC_TAB) || ((key == KC_RETURN) && (focus == 0)))
+                focus ^= 1;
+            if (lbDisplay.LeftButton) {
+                if ((lbDisplay.MouseY >= ey) && (lbDisplay.MouseY < ey + 10 * scale))
+                    focus = 0;
+                else if ((lbDisplay.MouseY >= ty) && (lbDisplay.MouseY < ty + th))
+                    focus = 1;
+            }
+        } else {
+            reset_buffered_keys();
+        }
+
+        bug_report_draw_field(fx, ey, fw, 10 * scale, email, (state == 0) && (focus == 0));
+        bug_report_draw_field(fx, ty, fw, th, text, (state == 0) && (focus == 1));
+        lbDisplay.DrawFlags = 0;
+        LbDrawBox(fx, box.Y + 122 * scale, fw, 9 * scale, colour_lookup[ColLU_BLACK]);
+        lbFontPtr = small_font;
+        my_draw_text(fx + 2, box.Y + 123 * scale, status, 0);
+
+        draw_ingame_button(&send_btn, 0);
+        draw_ingame_button(&cancel_btn, 0);
+        lbDisplay.DrawFlags = 0;
+
+        if (state == 1) {
+            char msg[64];
+            if (bug_report_poll(msg, sizeof(msg), &ok)) {
+                if (ok)
+                    snprintf(status, sizeof(status), "SENT, REPORT NUMBER %s. THANK YOU!", msg);
+                else
+                    snprintf(status, sizeof(status), "NOT SENT: %s", msg);
+                state = 2;
+                if (ok)
+                    text[0] = '\0';
+                init_ingame_screen_button(&cancel_btn, box.X + box.Width * 7 / 10,
+                  box.Y + 140 * scale, "OK", small_font, 0);
+            }
+        }
+        else if ((state == 0) && (input_ingame_button(&send_btn, 0)
+          || is_key_pressed(KC_F12, KMod_DONTCARE))) {
+            clear_key_pressed(KC_F12);
+            if (bug_report_start(email, text, status, sizeof(status))) {
+                strcpy(status, "SENDING...");
+                state = 1;
+            }
+        }
+        if (((state != 1) && input_ingame_button(&cancel_btn, 0))
+          || is_key_pressed(KC_ESCAPE, KMod_DONTCARE)) {
+            clear_key_pressed(KC_ESCAPE);
+            // a report on its way goes on without the box
+            done = true;
+        }
+        if (exit_game)
+            done = true;
+
+        process_sound_heap();
+        PlayCDTrack(ingame.CDTrack);
+        swap_wscreen();
+        game_update();
+    }
+    clear_key_pressed(KC_ESCAPE);
+    clear_key_pressed(KC_RETURN);
+    clear_key_pressed(KC_TAB);
+    reset_buffered_keys();
+    lbDisplay.LeftButton = 0;
+    lbDisplay.RightButton = 0;
+    lbFontPtr = old_font;
+}
+#endif

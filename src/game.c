@@ -6159,6 +6159,14 @@ ubyte do_user_interface(void)
         }
     }
 
+#if defined(SW_AMIGA) && !defined(SW_WARP)
+    // Help (KC_F12 on the Amiga): the bug report box
+    if (is_key_pressed(KC_F12, KMod_DONTCARE))
+    {
+        clear_key_pressed(KC_F12);
+        ingame_bug_report();
+    }
+#endif
 #if defined(SW_AMIGA)
     // Esc in a mission: asked whether to abort it (the Amiga port; the
     // original aborts only from the pause screen)
@@ -7002,7 +7010,12 @@ void show_menu_screen(void)
 
     if (is_key_pressed(KC_F12, KMod_DONTCARE)) {
         clear_key_pressed(KC_F12);
+#if defined(SW_AMIGA) && !defined(SW_WARP)
+        // Help on the Amiga: the bug report box (it has the screen too)
+        ingame_bug_report();
+#else
         post_render_action = PRend_SaveScreenshot;
+#endif
     }
 
     input_processing_end();

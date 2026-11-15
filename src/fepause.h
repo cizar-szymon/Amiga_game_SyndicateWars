@@ -33,6 +33,7 @@ extern "C" {
 
 TbBool pause_screen_handle(void);
 TbBool ingame_ask_yes_no(const char *question);
+void ingame_bug_report(void);
 
 /******************************************************************************/
 #ifdef __cplusplus

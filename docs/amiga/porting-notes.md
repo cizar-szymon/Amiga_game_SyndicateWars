@@ -264,3 +264,26 @@ pętla jest ograniczona łańcuchem dodawań z przeniesieniem, nie pamięcią (o
 zapis −1,2 ms, wszystkie piksele 8,4 ms przy 59 tys. pikseli na klatkę).
 
 Do zrobienia: radar co 2. klatkę (opcja), wszystkie opcje szybkości w menu gry, opcje dla ARM.
+
+## 15.11.2026 — asm gry jednoosobowej w C, stan wydajności
+
+Cały asm używany w grze jednoosobowej jest w C (lista commitów od `0a89a2c3` do `9d3308ed`);
+na Amidze 1 w misjach 1 i 109 nie jest wywoływana żadna zaślepka asm. Zostało 35 wywołań asm
+z C: minigra BAT (7), sieć IPX/Radica (10), budowa siatki dróg z pliku `.dat` (6, gra wczytuje
+gotową siatkę z `.mad`), nieużywane (4), grupy graczy i czat sieciowy (3), `process_things_*`
+(gra sieciowa, 3), kamera przelotu w napisach (`traffic_unkn_func_01`).
+
+Test rozkazów: `SW_TEST_CMDS` (wersja z fncheck) co kilkadziesiąt tur wydaje agentom rozkazy
+i wywołuje rzadkie funkcje (pojazdy, przedmioty, kratery, kanistry, kapsuły, dusze, działka…).
+
+Znalezione przy porównaniach błędy oryginału (zachowane albo opisane w commitach):
+`set_angle_to_avoid_group` (kąt z niezainicjowanego stosu, C bierze kąt po obrocie),
+`my_preprocess_text` (nazwa gracza czytana zza `net_host_player_no`, C używa `login_name`),
+`map_things_unkn_func_04` (stary wrapper obcinał wynik do bajtu). Poprawiony błąd wcześniejszej
+konwersji: `set_xz_for_quad_unkn03` (brak testu trójkąta).
+
+Wydajność, Amiga 1 (A1200, Warp 1260, 68060), misja 1, 320×200, `PROF=1`: klatka 63,1 ms
+(ok. 16 kl./s): `draw_screen` 27,9 ms, `draw_things` 6,6, `hud_panel` 6,1, symulacja 5,5,
+podłoga 4,8, radar 3,6, `swap` 3,5. Profil próbkujący: rasteryzator asm (`gpoly_init_state`
+i dalej) ok. 28% próbek, `engine_draw_things` 5%, `process_things` 3,9%, `draw_drawlist_2` 3,5%,
+podłoga 3,3%, `draw_object_faces` 3%.

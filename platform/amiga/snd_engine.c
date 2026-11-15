@@ -1,48 +1,37 @@
-/* Amiga sound driver for bfsoundlib: Paula (audio.device) or AHI.
+/* snd_engine.c - the Amiga sound engine: Paula (audio.device) or AHI.
+ * See snd_engine.h.
  *
- * Takes the place of bfsoundlib/src/drv_oal.c (OpenAL) and oggvorbis.c:
- * the same OPENAL_* and ogg_vorbis_stream_* functions.
- *
- * - Effects: each playing SNDSAMPLE gets a voice, a free one or the
- *   quietest one, if that is not louder.  A sample without a voice goes on
- *   silently and ends when its time is up, as if it played (a looped one
- *   takes a voice when one gets free).  Samples are 8-bit signed mono
- *   (tools/amiga/make_sound_bank.py); others are silent.
- *   Paula: the 4 channels; a channel of the sample's side (0 and 3 left,
- *   1 and 2 right); the data must be in Chip RAM (the sound heap is there).
- *   AHI: 8 voices mixed by AHI with real panning; the sound heap (Fast RAM)
- *   is one AHI sound, samples are parts of it.
- * - Music: the CD tracks pre-converted to 8-bit signed stereo PCM
- *   (tools/amiga/make_music.py), streamed from disk to voices 0 (left) and
- *   1 (right); effects then have the other voices.
- * - MIDI sequences are not played.
- *
- * Panning follows the PC (OpenAL) build: pan above 64 is left, below 64
- * (but not 0) right, else the middle.
- * ENV:SyndWarsSound = PAULA (default), AHI or NONE; ENV:SyndWarsMusic = OFF
- * turns the music off; with
- * ENV:SyndWarsSoundLog counters go to RAM:SyndWars-sound.txt every 5 s.
+ * - Effects: each playing slot gets a voice, a free one or the quietest
+ *   one, if that is not louder.  A slot without a voice goes on silently
+ *   and ends when its time is up, as if it played (one played forever takes
+ *   a voice when one gets free).
+ *   Paula: the 4 channels; a channel of the sound's side (0 and 3 left,
+ *   1 and 2 right); the data must be in Chip RAM.
+ *   AHI: 8 voices mixed by AHI with real panning; the sound heap is one AHI
+ *   sound, effects are parts of it.
+ * - Music: 8-bit signed stereo PCM tracks streamed from disk to voices 0
+ *   (left) and 1 (right); the effects then have the other voices.
+ *   Paula: NREQ slots of a block (left, then right), each one write on each
+ *   channel.  AHI: a ring of 2 halves of 2 blocks for each side, one AHI
+ *   sound per side; while one half plays the other is filled.
+ * Panning follows the PC (OpenAL) build of the game.
  */
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
-#include <stdint.h>
 
 #include <exec/exec.h>
 #include <exec/memory.h>
 #include <devices/audio.h>
 #include <devices/ahi.h>
 #include <utility/hooks.h>
+#include <dos/dos.h>
 #include <proto/exec.h>
 #include <proto/dos.h>
 #include <proto/ahi.h>
+#ifdef __VBCC__
+#include <clib/alib_protos.h>
+#endif
 
-#include "drv_oal.h"
-#include "oggvorbis.h"
-#include "aildebug.h"
-#include "bffile.h"
-#include "bfmemory.h"
+#include "snd_engine.h"
 
 #define MAX_VOICES 8
 #define PAULA_VOICES 4
@@ -50,50 +39,49 @@
 #define NREQ 3
 /* Longest Paula write: the length register counts 16-bit words */
 #define CHUNK_MAX 65536
-#define MAX_SAMPLES 64
-#define OWNER_MUSIC ((SNDSAMPLE *)1)
+#define OWNER_NONE (-1)
+#define OWNER_MUSIC (-2)
 
 /* AHI sounds */
 #define AHI_SND_HEAP 0
 #define AHI_SND_MUSIC_L 1
 #define AHI_SND_MUSIC_R 2
 
-enum SndBackend { SND_NONE = 0, SND_PAULA, SND_AHI };
-
 struct Voice {
     struct IOAudio *req[NREQ];  /**< Paula: writes, issued and done in order */
     struct IOAudio *pv;         /**< Paula: period/volume changes */
     UBYTE head;                 /**< Paula: oldest busy write */
     UBYTE nbusy;
-    SNDSAMPLE *owner;           /**< effect playing, OWNER_MUSIC or NULL */
+    WORD owner;                 /**< slot playing, OWNER_MUSIC or OWNER_NONE */
     UWORD vol;                  /**< 0..64 */
     UWORD per;                  /**< Paula period */
     LONG rate;                  /**< AHI frequency */
     LONG pan;                   /**< AHI pan, 0 left .. 0x10000 right */
 };
 
-struct SmpState {
-    const UBYTE *beg;           /**< whole sample data */
+struct Slot {
+    const UBYTE *beg;           /**< whole sound data */
     ULONG len;
     const UBYTE *data;          /**< Paula: data not yet sent */
     ULONG left;
     LONG loops;                 /**< repeats after this pass, -1 forever */
-    ULONG end_ms;               /**< end (when not looped forever) */
-    ULONG pos_mark;             /**< pos[] as set by us; else restarted */
-    LONG rate;                  /**< rate of per_cache */
-    UWORD per_cache;
+    ULONG end_ms;               /**< end (when not played forever) */
+    ULONG pass_ms;              /**< length of one pass */
+    LONG rate;
+    UWORD per;
+    UWORD vol;
+    WORD pan;
     BYTE ch;                    /**< voice, -1 none */
     UBYTE active;
-    UBYTE sent_whole;           /**< Paula, short sample: its write is sent */
-    UBYTE playable;             /**< 8-bit mono data the backend can reach */
-    ULONG pass_ms;              /**< length of one pass */
+    UBYTE sent_whole;           /**< Paula, short sound: its write is sent */
+    UBYTE playable;             /**< data the backend can play */
 };
 
-static enum SndBackend backend;
+static int backend;
 static int n_voices;
 static struct Voice voices[MAX_VOICES];
-static struct SmpState smp_state[MAX_SAMPLES];
-static bool music_owns;         /**< voices 0 and 1 are the music's */
+static struct Slot slots[SE_SLOTS];
+static BOOL music_owns;         /**< voices 0 and 1 are the music's */
 
 /* Paula */
 static struct MsgPort *snd_port;
@@ -110,8 +98,44 @@ static const UBYTE *ahi_heap;   /**< the sound heap, AHI sound 0 */
 static ULONG ahi_heap_len;
 volatile ULONG ahi_music_starts; /**< sounds started on voice 0 */
 
+/* the sound heap */
+static void *heap_mem;
+static ULONG heap_size;
+
+/* diagnostics */
+static struct {
+    ULONG started, on_chan, stolen, no_chan, not_reach, music_blocks, released;
+} snd_cnt;
+static int snd_log = -1;
+static ULONG snd_log_ms;
+
+/******************************************************************************/
+/* Compiler specific: the AHI sound function, BeginIO() and the AHI calls */
+
+#ifdef __VBCC__
+
+static ULONG ahi_hook_entry(__reg("a0") struct Hook *hook,
+    __reg("a2") struct AHIAudioCtrl *actrl,
+    __reg("a1") struct AHISoundMessage *msg)
+{
+    (void)hook;
+    (void)actrl;
+    if (msg->ahism_Channel == 0)
+        ahi_music_starts++;
+    return 0;
+}
+
+#define begin_io(r) BeginIO(r)
+#define ahi_LoadSound(s, t, i, a) AHI_LoadSound((s), (t), (i), (a))
+#define ahi_UnloadSound(s, a) AHI_UnloadSound((s), (a))
+#define ahi_SetVol(c, v, p, a, f) AHI_SetVol((c), (v), (p), (a), (f))
+#define ahi_SetFreq(c, fr, a, f) AHI_SetFreq((c), (fr), (a), (f))
+#define ahi_SetSound(c, s, o, l, a, f) AHI_SetSound((c), (s), (o), (l), (a), (f))
+
+#else /* gcc */
+
 /* The sound function of AHI: counts the sounds started on voice 0.  It may
- * be called from the ahi_SetSound() of the game or from AHI's mixing. */
+ * be called from ahi_SetSound() or from AHI's mixing. */
 static ULONG ahi_hook_entry(struct Hook *hook __asm("a0"),
     struct AHIAudioCtrl *actrl __asm("a2"),
     struct AHISoundMessage *msg __asm("a1"))
@@ -121,6 +145,15 @@ static ULONG ahi_hook_entry(struct Hook *hook __asm("a0"),
     if (msg->ahism_Channel == 0)
         ahi_music_starts++;
     return 0;
+}
+
+/* BeginIO() keeps io_Flags (SendIO() clears ADIOF_PERVOL). */
+static void begin_io(struct IORequest *r)
+{
+    register struct IORequest *a1 __asm("a1") = r;
+    register struct Device *a6 __asm("a6") = r->io_Device;
+    __asm volatile ("jsr -30(%%a6)"
+        : "+r" (a1), "+r" (a6) : : "d0", "d1", "a0", "cc", "memory");
 }
 
 /* AHI calls with the UWORD arguments passed as whole 32-bit registers (the
@@ -187,18 +220,11 @@ static void ahi_SetSound(ULONG ch, ULONG sound, ULONG offs, LONG len,
         : "a0", "a1", "cc", "memory");
 }
 
-/* the sound heap */
-static void *heap_mem;
-static ULONG heap_size;
+#endif
 
-/* diagnostics */
-static struct {
-    ULONG started, on_chan, stolen, no_chan, not_reach, not_8bit, music_blocks, released;
-} snd_cnt;
-static int snd_log = -1;
-static ULONG snd_log_ms;
+/******************************************************************************/
 
-static void snd_log_write(void)
+void se_log(const char *path)
 {
     char buf[16];
     BPTR fh;
@@ -208,30 +234,24 @@ static void snd_log_write(void)
         snd_log = (GetVar((STRPTR)"SyndWarsSoundLog", (STRPTR)buf, sizeof(buf), 0) >= 0);
     if (!snd_log)
         return;
-    now = AIL_ms_count();
+    now = se_ms();
     if ((LONG)(now - snd_log_ms) < 5000)
         return;
     snd_log_ms = now;
-    fh = Open((STRPTR)"RAM:SyndWars-sound.txt", MODE_NEWFILE);
+    fh = Open((STRPTR)path, MODE_NEWFILE);
     if (fh == 0)
         return;
     FPrintf(fh, (STRPTR)"backend %ld voices %ld clock %lu ms %lu heap %lu\n",
         (LONG)backend, (LONG)n_voices, paula_clock, now, heap_size);
     FPrintf(fh, (STRPTR)"started %lu on_voice %lu stolen %lu no_voice %lu released %lu\n",
         snd_cnt.started, snd_cnt.on_chan, snd_cnt.stolen, snd_cnt.no_chan, snd_cnt.released);
-    FPrintf(fh, (STRPTR)"not_reachable %lu not_8bit %lu music_blocks %lu music_owns %ld ahi_starts %lu\n",
-        snd_cnt.not_reach, snd_cnt.not_8bit, snd_cnt.music_blocks, (LONG)music_owns,
-        ahi_music_starts);
+    FPrintf(fh, (STRPTR)"not_reachable %lu music_blocks %lu music_owns %ld ahi_starts %lu\n",
+        snd_cnt.not_reach, snd_cnt.music_blocks, (LONG)music_owns, ahi_music_starts);
     Close(fh);
 }
 
-static ULONG snd_ms(void)
-{
-    return AIL_ms_count();
-}
-
 /******************************************************************************/
-/* The sound heap: in Chip RAM for Paula, anywhere for AHI */
+/* The sound heap */
 
 static void ahi_heap_load(void)
 {
@@ -248,6 +268,8 @@ static void ahi_heap_load(void)
     }
 }
 
+static void voice_stop(int ch);
+
 static void ahi_heap_unload(void)
 {
     int ch;
@@ -255,24 +277,24 @@ static void ahi_heap_unload(void)
     if ((ahi_ctrl == NULL) || (ahi_heap == NULL))
         return;
     for (ch = 0; ch < n_voices; ch++) {
-        if ((voices[ch].owner != NULL) && (voices[ch].owner != OWNER_MUSIC))
-            ahi_SetSound(ch, AHI_NOSOUND, 0, 0, ahi_ctrl, AHISF_IMM);
+        if (voices[ch].owner >= 0)
+            voice_stop(ch);
     }
     ahi_UnloadSound(AHI_SND_HEAP, ahi_ctrl);
     ahi_heap = NULL;
     ahi_heap_len = 0;
 }
 
-ulong amiga_sound_heap_max(void)
+ULONG se_heap_max(void)
 {
-    return (backend == SND_AHI) ? 1500000 : 800000;
+    return (backend == SE_AHI) ? 1500000 : 800000;
 }
 
-void *amiga_sound_heap_alloc(ulong size)
+void *se_heap_alloc(ULONG size)
 {
     void *p;
 
-    if (backend == SND_AHI) {
+    if (backend == SE_AHI) {
         p = AllocVec(size, MEMF_ANY);
     } else {
         /* leave some Chip RAM for the system */
@@ -288,7 +310,7 @@ void *amiga_sound_heap_alloc(ulong size)
     return p;
 }
 
-void amiga_sound_heap_free(void *ptr)
+void se_heap_free(void *ptr)
 {
     if (ptr == NULL)
         return;
@@ -301,16 +323,7 @@ void amiga_sound_heap_free(void *ptr)
 }
 
 /******************************************************************************/
-/* Paula voices */
-
-/* BeginIO() keeps io_Flags (SendIO() clears ADIOF_PERVOL). */
-static void begin_io(struct IORequest *r)
-{
-    register struct IORequest *a1 __asm("a1") = r;
-    register struct Device *a6 __asm("a6") = r->io_Device;
-    __asm volatile ("jsr -30(%%a6)"
-        : "+r" (a1), "+r" (a6) : : "d0", "d1", "a0", "cc", "memory");
-}
+/* Voices */
 
 static void paula_reap(struct Voice *c)
 {
@@ -351,16 +364,16 @@ static UWORD rate_to_period(LONG rate)
         per = 124;
     if (per > 65535)
         per = 65535;
-    return per;
+    return (UWORD)per;
 }
 
-/** Stops the voice at once; its owner (if an effect) goes on silently. */
+/** Stops the voice at once; its slot (if an effect) goes on silently. */
 static void voice_stop(int ch)
 {
     struct Voice *c = &voices[ch];
     int k;
 
-    if (backend == SND_PAULA) {
+    if (backend == SE_PAULA) {
         for (k = c->nbusy - 1; k >= 0; k--) {
             struct IOAudio *r = c->req[(c->head + k) % NREQ];
             AbortIO((struct IORequest *)r);
@@ -368,16 +381,12 @@ static void voice_stop(int ch)
         }
         c->nbusy = 0;
         c->head = 0;
-    } else if (backend == SND_AHI) {
+    } else if (backend == SE_AHI) {
         ahi_SetSound(ch, AHI_NOSOUND, 0, 0, ahi_ctrl, AHISF_IMM);
     }
-    if ((c->owner != NULL) && (c->owner != OWNER_MUSIC)) {
-        SNDSAMPLE *s = c->owner;
-        int n = s - s->driver->samples;
-        if ((n >= 0) && (n < MAX_SAMPLES))
-            smp_state[n].ch = -1;
-    }
-    c->owner = NULL;
+    if (c->owner >= 0)
+        slots[c->owner].ch = -1;
+    c->owner = OWNER_NONE;
 }
 
 /** Sets the voice's rate, volume (0..64) and pan (AHI only). */
@@ -385,7 +394,7 @@ static void voice_set(int ch, LONG rate, UWORD per, UWORD vol, LONG pan)
 {
     struct Voice *c = &voices[ch];
 
-    if (backend == SND_PAULA) {
+    if (backend == SE_PAULA) {
         if ((c->per == per) && (c->vol == vol))
             return;
         c->per = per;
@@ -397,7 +406,7 @@ static void voice_set(int ch, LONG rate, UWORD per, UWORD vol, LONG pan)
         c->pv->ioa_Period = per;
         c->pv->ioa_Volume = vol;
         DoIO((struct IORequest *)c->pv);
-    } else if (backend == SND_AHI) {
+    } else if (backend == SE_AHI) {
         if (c->rate != rate) {
             c->rate = rate;
             ahi_SetFreq(ch, rate, ahi_ctrl, AHISF_IMM);
@@ -412,7 +421,7 @@ static void voice_set(int ch, LONG rate, UWORD per, UWORD vol, LONG pan)
 
 /******************************************************************************/
 
-static bool paula_startup(void)
+static BOOL paula_startup(void)
 {
     static UBYTE all_chans = 0x0F;
     int ch, k;
@@ -421,10 +430,10 @@ static bool paula_startup(void)
         paula_clock = SysBase->ex_EClockFrequency * 5;
     snd_port = CreateMsgPort();
     if (snd_port == NULL)
-        return false;
+        return FALSE;
     alloc_req = (struct IOAudio *)CreateIORequest(snd_port, sizeof(struct IOAudio));
     if (alloc_req == NULL)
-        return false;
+        return FALSE;
     alloc_req->ioa_Request.io_Message.mn_Node.ln_Pri = 127;
     alloc_req->ioa_Request.io_Flags = ADIOF_NOWAIT;
     alloc_req->ioa_Data = &all_chans;
@@ -432,7 +441,7 @@ static bool paula_startup(void)
     if (OpenDevice((STRPTR)AUDIONAME, 0, (struct IORequest *)alloc_req, 0) != 0) {
         DeleteIORequest((struct IORequest *)alloc_req);
         alloc_req = NULL;
-        return false;
+        return FALSE;
     }
     for (ch = 0; ch < PAULA_VOICES; ch++) {
         struct Voice *c = &voices[ch];
@@ -440,7 +449,7 @@ static bool paula_startup(void)
             struct IOAudio *r;
             r = (struct IOAudio *)CreateIORequest(snd_port, sizeof(struct IOAudio));
             if (r == NULL)
-                return false;
+                return FALSE;
             r->ioa_Request.io_Device = alloc_req->ioa_Request.io_Device;
             r->ioa_Request.io_Unit = (struct Unit *)(1UL << ch);
             r->ioa_AllocKey = alloc_req->ioa_AllocKey;
@@ -451,7 +460,7 @@ static bool paula_startup(void)
         }
     }
     n_voices = PAULA_VOICES;
-    return true;
+    return TRUE;
 }
 
 static void paula_shutdown(void)
@@ -479,25 +488,25 @@ static void paula_shutdown(void)
     snd_port = NULL;
 }
 
-static bool music_ahi_setup(void);
+static BOOL music_ahi_setup(void);
 static void music_ahi_free(void);
 
-static bool ahi_startup(void)
+static BOOL ahi_startup(void)
 {
     ahi_port = CreateMsgPort();
     if (ahi_port == NULL)
-        return false;
+        return FALSE;
     ahi_io = (struct AHIRequest *)CreateIORequest(ahi_port, sizeof(struct AHIRequest));
     if (ahi_io == NULL)
-        return false;
+        return FALSE;
     ahi_io->ahir_Version = 4;
     if (OpenDevice((STRPTR)AHINAME, AHI_NO_UNIT, (struct IORequest *)ahi_io, 0) != 0) {
         DeleteIORequest((struct IORequest *)ahi_io);
         ahi_io = NULL;
-        return false;
+        return FALSE;
     }
     AHIBase = (struct Library *)ahi_io->ahir_Std.io_Device;
-    ahi_hook.h_Entry = (HOOKFUNC)ahi_hook_entry;
+    ahi_hook.h_Entry = (HOOKFUNC)(APTR)ahi_hook_entry;
     ahi_ctrl = AHI_AllocAudio(
         AHIA_AudioID, AHI_DEFAULT_ID,
         AHIA_MixFreq, AHI_DEFAULT_FREQ,
@@ -506,14 +515,14 @@ static bool ahi_startup(void)
         AHIA_SoundFunc, (ULONG)&ahi_hook,
         TAG_DONE);
     if (ahi_ctrl == NULL)
-        return false;
+        return FALSE;
     /* sounds loaded before playing starts */
     if (!music_ahi_setup())
-        return false;
+        return FALSE;
     if (AHI_ControlAudio(ahi_ctrl, AHIC_Play, TRUE, TAG_DONE) != AHIE_OK)
-        return false;
+        return FALSE;
     n_voices = AHI_VOICES;
-    return true;
+    return TRUE;
 }
 
 static void ahi_shutdown(void)
@@ -537,160 +546,111 @@ static void ahi_shutdown(void)
     ahi_port = NULL;
 }
 
-static enum SndBackend backend_wanted(void)
+/** Compares an ENV: value with an upper case word, ignoring the case. */
+static BOOL env_is(const char *val, const char *word)
+{
+    for (; *word != '\0'; val++, word++) {
+        char c = *val;
+        if ((c >= 'a') && (c <= 'z'))
+            c -= 'a' - 'A';
+        if (c != *word)
+            return FALSE;
+    }
+    return (*val == '\0') || (*val == '\n') || (*val == ' ');
+}
+
+int se_backend_from_env(void)
 {
     char buf[16];
 
     if (GetVar((STRPTR)"SyndWarsSound", (STRPTR)buf, sizeof(buf), 0) < 0)
-        return SND_PAULA;
-    if (strcasecmp(buf, "NONE") == 0)
-        return SND_NONE;
-    if (strcasecmp(buf, "AHI") == 0)
-        return SND_AHI;
-    return SND_PAULA;
+        return SE_PAULA;
+    if (env_is(buf, "NONE"))
+        return SE_NONE;
+    if (env_is(buf, "AHI"))
+        return SE_AHI;
+    return SE_PAULA;
 }
 
-int32_t OPENAL_startup(void)
+int se_open(int want)
 {
-    enum SndBackend want;
     int ch;
 
-    if (backend != SND_NONE)
-        return 1;
-    for (ch = 0; ch < MAX_VOICES; ch++)
+    if (backend != SE_NONE)
+        return backend;
+    for (ch = 0; ch < MAX_VOICES; ch++) {
         memset(&voices[ch], 0, sizeof(voices[ch]));
-    want = backend_wanted();
-    if (want == SND_AHI) {
+        voices[ch].owner = OWNER_NONE;
+    }
+    for (ch = 0; ch < SE_SLOTS; ch++) {
+        memset(&slots[ch], 0, sizeof(slots[ch]));
+        slots[ch].ch = -1;
+    }
+    if (want == SE_AHI) {
         if (ahi_startup()) {
-            backend = SND_AHI;
+            backend = SE_AHI;
             ahi_heap_load();
-            return 1;
+            return backend;
         }
         ahi_shutdown();
-        want = SND_PAULA;  /* no AHI: Paula */
+        want = SE_PAULA;  /* no AHI: Paula */
     }
-    if (want == SND_PAULA) {
+    if (want == SE_PAULA) {
         if (paula_startup()) {
-            backend = SND_PAULA;
-            return 1;
+            backend = SE_PAULA;
+            return backend;
         }
         paula_shutdown();
     }
     n_voices = 0;
-    return 0;
+    return SE_NONE;
 }
 
-int32_t OPENAL_shutdown(void)
+void se_close(void)
 {
     int ch;
 
+    se_music_close();
     for (ch = 0; ch < n_voices; ch++)
         voice_stop(ch);
-    music_owns = false;
-    if (backend == SND_PAULA)
+    music_owns = FALSE;
+    if (backend == SE_PAULA)
         paula_shutdown();
-    else if (backend == SND_AHI)
+    else if (backend == SE_AHI)
         ahi_shutdown();
-    backend = SND_NONE;
+    backend = SE_NONE;
     n_voices = 0;
-    return 1;
 }
 
-int32_t OPENAL_create_buffers(uint32_t n_sources)
+BOOL se_env_is(const char *val, const char *word)
 {
-    (void)n_sources;
-    return 1;
+    return env_is(val, word);
 }
 
-int32_t OPENAL_free_buffers(uint32_t n_sources)
+int se_backend(void)
 {
-    (void)n_sources;
-    return 1;
-}
-
-int32_t OPENAL_create_sources_for_samples(DIG_DRIVER *digdrv)
-{
-    int32_t i;
-
-    if (digdrv->n_samples > MAX_SAMPLES)
-        digdrv->n_samples = MAX_SAMPLES;
-    for (i = 0; i < digdrv->n_samples; i++) {
-        memset(&smp_state[i], 0, sizeof(smp_state[i]));
-        smp_state[i].ch = -1;
-    }
-    return (digdrv->n_samples > 0);
-}
-
-int32_t OPENAL_free_sources_for_samples(DIG_DRIVER *digdrv)
-{
-    int32_t i;
-
-    for (i = 0; i < digdrv->n_samples; i++)
-        OPENAL_stop_sample(&digdrv->samples[i]);
-    return 1;
-}
-
-int32_t OPENAL_create_sources_for_sequences(MDI_DRIVER *mdidrv)
-{
-    return (mdidrv->n_sequences > 0);
-}
-
-int32_t OPENAL_free_sources_for_sequences(MDI_DRIVER *mdidrv)
-{
-    (void)mdidrv;
-    return 1;
-}
-
-void OPENAL_stop_sequence(SNDSEQUENCE *seq)
-{
-    (void)seq;
-}
-
-void OPENAL_unqueue_finished_mdi_sequences(MDI_DRIVER *mdidrv)
-{
-    (void)mdidrv;
-}
-
-int32_t OPENAL_update_mdi_sequence(SNDSEQUENCE *seq)
-{
-    return (seq->status == SNDSEQ_DONE) ? 1 : 0;
+    return backend;
 }
 
 /******************************************************************************/
 /* Effects */
 
-static struct SmpState *smp_st(SNDSAMPLE *s)
+/** Side of a pan: 0 left, 1 right, 2 middle (as the PC build). */
+static int pan_side(int pan)
 {
-    int n = s - s->driver->samples;
-    if ((n < 0) || (n >= MAX_SAMPLES))
-        return NULL;
-    return &smp_state[n];
-}
-
-static UWORD smp_volume(SNDSAMPLE *s)
-{
-    LONG v = s->volume * s->driver->master_volume;
-    if (v < 0)
-        v = 0;
-    return (UWORD)((v * 64 + 8064) / 16129);
-}
-
-/** Side of the sample: 0 left, 1 right, 2 middle (as the PC build). */
-static int smp_side(SNDSAMPLE *s)
-{
-    if ((s->pan == 0) || (s->pan == 64))
+    if ((pan == 0) || (pan == 64))
         return 2;
-    return (s->pan > 64) ? 0 : 1;
+    return (pan > 64) ? 0 : 1;
 }
 
 /** AHI pan as the OpenAL position of the PC build. */
-static LONG smp_ahi_pan(SNDSAMPLE *s)
+static LONG pan_ahi(int pan)
 {
     LONG p;
 
-    if (s->pan == 0)
+    if (pan == 0)
         return 0x8000;
-    p = 0x8000 + (63 - s->pan) * 0x200;
+    p = 0x8000 + (63 - pan) * 0x200;
     if (p < 0)
         p = 0;
     if (p > 0x10000)
@@ -698,13 +658,13 @@ static LONG smp_ahi_pan(SNDSAMPLE *s)
     return p;
 }
 
-static bool voice_usable(int ch)
+static BOOL voice_usable(int ch)
 {
     return !(music_owns && (ch < 2));
 }
 
-/** A voice for the sample, or -1. */
-static int pick_voice(SNDSAMPLE *s, UWORD vol)
+/** A voice for a sound, or -1. */
+static int pick_voice(int pan, UWORD vol)
 {
     static const BYTE order[3][PAULA_VOICES] = {
         {3, 0, 2, 1},   /* left */
@@ -716,15 +676,15 @@ static int pick_voice(SNDSAMPLE *s, UWORD vol)
     int k, best = -1;
     UWORD best_vol = 0xFFFF;
 
-    if (backend == SND_PAULA)
-        ord = order[smp_side(s)];
-    else if (backend == SND_AHI)
+    if (backend == SE_PAULA)
+        ord = order[pan_side(pan)];
+    else if (backend == SE_AHI)
         ord = ahi_order;
     else
         return -1;
     for (k = 0; k < n_voices; k++) {
         int ch = ord[k];
-        if (voice_usable(ch) && (voices[ch].owner == NULL))
+        if (voice_usable(ch) && (voices[ch].owner == OWNER_NONE))
             return ch;
     }
     /* none free: the quietest, the own side first */
@@ -745,8 +705,8 @@ static int pick_voice(SNDSAMPLE *s, UWORD vol)
     return -1;
 }
 
-/** Paula: sends the sample's data to its channel, keeping 2 writes queued. */
-static void paula_feed(struct SmpState *st)
+/** Paula: sends the sound's data to its channel, keeping 2 writes queued. */
+static void paula_feed(struct Slot *st)
 {
     struct Voice *c = &voices[(int)st->ch];
 
@@ -763,14 +723,14 @@ static void paula_feed(struct SmpState *st)
             st->left = st->len;
         }
         if (st->len <= CHUNK_MAX) {
-            /* whole sample in one write, the repeats done by Paula */
+            /* whole sound in one write, the repeats done by Paula */
             UWORD cycles = 1;
             if (st->sent_whole)
                 break;
             if (st->loops < 0)
                 cycles = 0;
             else if (st->loops < 65535)
-                cycles = st->loops + 1;
+                cycles = (UWORD)(st->loops + 1);
             paula_write(c, st->beg, st->len, cycles);
             st->sent_whole = 1;
             break;
@@ -784,21 +744,22 @@ static void paula_feed(struct SmpState *st)
     }
 }
 
-static void smp_to_voice(SNDSAMPLE *s, struct SmpState *st, int ch)
+static void slot_to_voice(int slot, int ch)
 {
+    struct Slot *st = &slots[slot];
     struct Voice *c = &voices[ch];
 
-    c->owner = s;
-    st->ch = ch;
-    if (backend == SND_PAULA) {
-        c->per = st->per_cache;
-        c->vol = smp_volume(s);
+    c->owner = (WORD)slot;
+    st->ch = (BYTE)ch;
+    if (backend == SE_PAULA) {
+        c->per = st->per;
+        c->vol = st->vol;
         st->sent_whole = 0;
         paula_feed(st);
     } else {
         c->rate = st->rate;
-        c->vol = smp_volume(s);
-        c->pan = smp_ahi_pan(s);
+        c->vol = st->vol;
+        c->pan = pan_ahi(st->pan);
         ahi_SetFreq(ch, c->rate, ahi_ctrl, AHISF_IMM);
         ahi_SetVol(ch, (Fixed)c->vol << 10, c->pan, ahi_ctrl, AHISF_IMM);
         ahi_SetSound(ch, AHI_SND_HEAP, st->beg - ahi_heap, st->len, ahi_ctrl, AHISF_IMM);
@@ -807,92 +768,109 @@ static void smp_to_voice(SNDSAMPLE *s, struct SmpState *st, int ch)
     }
 }
 
-/** Starts the sample from the data in its current buffer. */
-static void smp_begin(SNDSAMPLE *s, struct SmpState *st)
+void se_stop(int slot)
 {
-    int cur = s->current_buffer;
-    const UBYTE *data = s->start[cur];
-    ULONG len = s->len[cur] - s->pos[cur];
-    ULONG dur, bps;
-    int ch;
+    struct Slot *st;
 
-    data += s->pos[cur];
-    s->pos[cur] = s->len[cur];
-    st->pos_mark = s->len[cur];
-    st->playable = (s->format == DIG_F_MONO_8);
-    bps = 1;
-    if (s->format & DIG_F_16BITS_MASK)
-        bps *= 2;
-    if (s->format & DIG_F_STEREO_MASK)
-        bps *= 2;
-    if (s->format != DIG_F_MONO_8)
-        snd_cnt.not_8bit++;
-    if (backend == SND_PAULA) {
-        /* Paula: even address and length */
-        if ((ULONG)data & 1) {
-            data++;
-            len = (len > 0) ? len - 1 : 0;
-        }
-        len &= ~1UL;
-        if (st->playable && !(TypeOfMem((APTR)data) & MEMF_CHIP)) {
-            st->playable = false;
-            snd_cnt.not_reach++;
-        }
-    } else if (backend == SND_AHI) {
-        if (st->playable && ((ahi_heap == NULL) || (data < ahi_heap) ||
-          (data + len > ahi_heap + ahi_heap_len))) {
-            st->playable = false;
-            snd_cnt.not_reach++;
-        }
-    }
-    if (len < 2)
-        st->playable = false;
-    snd_cnt.started++;
-    st->beg = st->data = data;
-    st->len = st->left = len;
-    st->loops = (s->loop_count == 0) ? -1 : s->loop_count - 1;
-    if (st->rate != s->playback_rate || st->per_cache == 0) {
-        st->rate = (s->playback_rate > 100) ? s->playback_rate : 22050;
-        st->per_cache = rate_to_period(st->rate);
-    }
-    dur = len / bps;
-    dur = (dur * 10) / (st->rate / 100);
-    st->pass_ms = dur;
-    if (st->loops > 0)
-        dur *= st->loops + 1;
-    st->end_ms = snd_ms() + dur;
-    st->active = 1;
-    st->ch = -1;
-    if (st->playable) {
-        ch = pick_voice(s, smp_volume(s));
-        if (ch >= 0) {
-            snd_cnt.on_chan++;
-            smp_to_voice(s, st, ch);
-        } else
-            snd_cnt.no_chan++;
-    }
-}
-
-static void smp_end(struct SmpState *st)
-{
+    if ((slot < 0) || (slot >= SE_SLOTS))
+        return;
+    st = &slots[slot];
     if (st->ch >= 0)
         voice_stop(st->ch);
     st->active = 0;
 }
 
-/** A sound looped forever is released (ReleaseLoopedSample() sets its
- * loop count to 1): it ends after the pass which plays now, as on the PC,
- * where the loop count is read before each buffer is queued. */
-static void smp_release_loop(SNDSAMPLE *s, struct SmpState *st)
+void se_play(int slot, const void *data, ULONG len, LONG rate, UWORD vol,
+    int pan, LONG passes, ULONG pass_ms)
 {
-    (void)s;
+    struct Slot *st;
+    const UBYTE *p = (const UBYTE *)data;
+    int ch;
+
+    if ((slot < 0) || (slot >= SE_SLOTS))
+        return;
+    se_stop(slot);
+    st = &slots[slot];
+    st->playable = (p != NULL);
+    if (backend == SE_PAULA) {
+        /* Paula: even address and length */
+        if ((ULONG)p & 1) {
+            p++;
+            len = (len > 0) ? len - 1 : 0;
+        }
+        len &= ~1UL;
+        if (st->playable && !(TypeOfMem((APTR)p) & MEMF_CHIP)) {
+            st->playable = 0;
+            snd_cnt.not_reach++;
+        }
+    } else if (backend == SE_AHI) {
+        if (st->playable && ((ahi_heap == NULL) || (p < ahi_heap) ||
+          (p + len > ahi_heap + ahi_heap_len))) {
+            st->playable = 0;
+            snd_cnt.not_reach++;
+        }
+    } else {
+        st->playable = 0;
+    }
+    if (len < 2)
+        st->playable = 0;
+    snd_cnt.started++;
+    st->beg = st->data = p;
+    st->len = st->left = len;
+    st->loops = (passes <= 0) ? -1 : passes - 1;
+    st->rate = (rate > 100) ? rate : 22050;
+    st->per = rate_to_period(st->rate);
+    st->vol = vol;
+    st->pan = (WORD)pan;
+    st->pass_ms = pass_ms;
+    st->end_ms = se_ms() + pass_ms * ((st->loops > 0) ? st->loops + 1 : 1);
+    st->active = 1;
+    st->ch = -1;
+    if (st->playable) {
+        ch = pick_voice(pan, vol);
+        if (ch >= 0) {
+            snd_cnt.on_chan++;
+            slot_to_voice(slot, ch);
+        } else
+            snd_cnt.no_chan++;
+    }
+}
+
+void se_set(int slot, LONG rate, UWORD vol, int pan)
+{
+    struct Slot *st;
+
+    if ((slot < 0) || (slot >= SE_SLOTS))
+        return;
+    st = &slots[slot];
+    if (rate < 100)
+        rate = 22050;
+    if (st->rate != rate) {
+        st->rate = rate;
+        st->per = rate_to_period(rate);
+    }
+    st->vol = vol;
+    st->pan = (WORD)pan;
+    if (st->active && (st->ch >= 0))
+        voice_set(st->ch, st->rate, st->per, vol, pan_ahi(pan));
+}
+
+void se_release(int slot)
+{
+    struct Slot *st;
+
+    if ((slot < 0) || (slot >= SE_SLOTS))
+        return;
+    st = &slots[slot];
+    if (!st->active || (st->loops >= 0))
+        return;
     snd_cnt.released++;
     st->loops = 0;
     st->left = 0;
-    st->end_ms = snd_ms() + st->pass_ms;
+    st->end_ms = se_ms() + st->pass_ms;
     if (st->ch < 0)
         return;
-    if (backend == SND_PAULA) {
+    if (backend == SE_PAULA) {
         struct Voice *c = &voices[(int)st->ch];
         paula_reap(c);
         /* a long sound (in chunks) just gets no more chunks */
@@ -902,138 +880,64 @@ static void smp_release_loop(SNDSAMPLE *s, struct SmpState *st)
             c->pv->ioa_Request.io_Flags = ADIOF_SYNCCYCLE;
             DoIO((struct IORequest *)c->pv);
         }
-    } else if (backend == SND_AHI) {
+    } else if (backend == SE_AHI) {
         ahi_SetSound(st->ch, AHI_NOSOUND, 0, 0, ahi_ctrl, AHISF_NONE);
     }
 }
 
-void OPENAL_stop_sample(SNDSAMPLE *s)
+BOOL se_done(int slot)
 {
-    struct SmpState *st = smp_st(s);
-    if (st != NULL)
-        smp_end(st);
-}
+    struct Slot *st;
+    BOOL finished;
 
-void OPENAL_pause_sample(SNDSAMPLE *s)
-{
-    OPENAL_stop_sample(s);
-}
-
-void OPENAL_resume_sample(SNDSAMPLE *s)
-{
-    (void)s;
-}
-
-void OPENAL_unqueue_finished_dig_samples(DIG_DRIVER *digdrv)
-{
-    int32_t i;
-
-    snd_log_write();
-    for (i = 0; i < digdrv->n_samples; i++) {
-        SNDSAMPLE *s = &digdrv->samples[i];
-        struct SmpState *st = &smp_state[i];
-
-        if (!st->active)
-            continue;
-        if (s->status != SNDSMP_PLAYING) {
-            smp_end(st);
-            continue;
-        }
-        if (s->pos[s->current_buffer] != st->pos_mark) {
-            /* started again */
-            smp_end(st);
-        }
-    }
-}
-
-int32_t OPENAL_update_dig_sample(SNDSAMPLE *s)
-{
-    struct SmpState *st = smp_st(s);
-    bool finished;
-
-    if (st == NULL)
-        return 0;
-    if (!st->active) {
-        int cur = s->current_buffer;
-        if (s->pos[cur] >= s->len[cur]) {
-            /* go to the other buffer, if the application gave one */
-            if ((s->done[cur ^ 1] == 0) && (s->len[cur ^ 1] > s->pos[cur ^ 1]))
-                s->current_buffer = cur ^= 1;
-            else {
-                if (s->done[0] || s->done[1])
-                    s->status = SNDSMP_DONE;
-                return (s->status == SNDSMP_DONE) ? 1 : 0;
-            }
-        }
-        smp_begin(s, st);
-        return 0;
-    }
-
-    if (st->rate != s->playback_rate) {
-        st->rate = (s->playback_rate > 100) ? s->playback_rate : 22050;
-        st->per_cache = rate_to_period(st->rate);
-    }
-    if ((st->loops < 0) && (s->loop_count != 0))
-        smp_release_loop(s, st);
-    if ((st->ch >= 0) && (backend == SND_PAULA)) {
+    if ((slot < 0) || (slot >= SE_SLOTS))
+        return TRUE;
+    st = &slots[slot];
+    if (!st->active)
+        return TRUE;
+    if ((st->ch >= 0) && (backend == SE_PAULA)) {
         struct Voice *c = &voices[(int)st->ch];
-        voice_set(st->ch, st->rate, st->per_cache, smp_volume(s), 0);
         paula_feed(st);
         if (st->len <= CHUNK_MAX)
             finished = (c->nbusy == 0) && st->sent_whole;
         else
             finished = (c->nbusy == 0) && (st->left == 0) && (st->loops == 0);
         if (finished) {
-            c->owner = NULL;
+            c->owner = OWNER_NONE;
             st->ch = -1;
         }
-    } else {
-        if (st->ch >= 0)
-            voice_set(st->ch, st->rate, 0, smp_volume(s), smp_ahi_pan(s));
-        if (st->loops < 0) {
-            finished = false;
-            if ((st->ch < 0) && st->playable) {
-                /* a looped sound takes a voice when one gets free */
-                int ch;
-                for (ch = 0; ch < n_voices; ch++) {
-                    if (voice_usable(ch) && (voices[ch].owner == NULL)) {
-                        st->data = st->beg;
-                        st->left = st->len;
-                        smp_to_voice(s, st, ch);
-                        break;
-                    }
+    } else if (st->loops < 0) {
+        finished = FALSE;
+        if ((st->ch < 0) && st->playable) {
+            /* a sound played forever takes a voice when one gets free */
+            int ch;
+            for (ch = 0; ch < n_voices; ch++) {
+                if (voice_usable(ch) && (voices[ch].owner == OWNER_NONE)) {
+                    st->data = st->beg;
+                    st->left = st->len;
+                    slot_to_voice(slot, ch);
+                    break;
                 }
             }
-        } else {
-            finished = ((LONG)(snd_ms() - st->end_ms) >= 0);
-            if (finished && (st->ch >= 0))
-                voice_stop(st->ch);
         }
+    } else {
+        finished = ((LONG)(se_ms() - st->end_ms) >= 0);
+        if (finished && (st->ch >= 0))
+            voice_stop(st->ch);
     }
-    if (finished) {
+    if (finished)
         st->active = 0;
-        /* the next buffer, if any, starts at the next update */
-        if (!s->done[0] && !s->done[1])
-            return 0;
-        if ((s->done[s->current_buffer ^ 1] == 0) &&
-          (s->len[s->current_buffer ^ 1] > s->pos[s->current_buffer ^ 1]))
-            return 0;
-        s->status = SNDSMP_DONE;
-    }
-    return (s->status == SNDSMP_DONE) ? 1 : 0;
+    return finished;
 }
 
 /******************************************************************************/
-/* Music: tracks of 8-bit signed stereo PCM, "SWMU" files.
- * Paula: NREQ slots of a block (left, then right), each slot one write
- * on each channel.  AHI: a ring of 2 halves of 2 blocks for each side,
- * one AHI sound per side; while one half plays the other is filled. */
+/* Music: tracks of 8-bit signed stereo PCM, "SWMU" files */
 
 #define MUSIC_HALF_BLOCKS 2
 #define MUSIC_BLOCK_MAX 16384
 
-struct MusicPriv {
-    TbFileHandle fh;
+struct Music {
+    BPTR fh;
     ULONG rate;
     ULONG block;                /**< bytes per channel in a block */
     ULONG nblocks;
@@ -1045,90 +949,51 @@ struct MusicPriv {
     ULONG starts_base;          /**< AHI: ahi_music_starts of the first half */
     ULONG halves_done;          /**< AHI: halves known to have started */
     UWORD per;
-    bool ahi_loaded;
+    UWORD vol;
+    BOOL playing;
+    BOOL ahi_loaded;
 };
 
-static struct MusicPriv music = { INVALID_FILE };
+static struct Music music;
 
 static void music_release(void)
 {
     if (!music_owns)
         return;
+    voices[0].owner = voices[1].owner = OWNER_NONE;
     voice_stop(0);
     voice_stop(1);
-    music_owns = false;
+    music_owns = FALSE;
 }
 
-static UWORD music_volume(OggVorbisStream *stream)
+static ULONG rd_be32(const UBYTE *p)
 {
-    LONG v = (LONG)(stream->gain * 64.f + 0.5f);
-    if (v < 0)
-        v = 0;
-    if (v > 64)
-        v = 64;
-    return v;
-}
-
-static void music_free_bufs(void)
-{
-    if (music.buf != NULL)
-        FreeVec(music.buf);
-    music.buf = NULL;
-}
-
-static void music_close(void)
-{
-    music_release();
-    if ((music.fh != INVALID_FILE) && (music.fh != 0))
-        LbFileClose(music.fh);
-    music.fh = INVALID_FILE;
-    music_free_bufs();
-}
-
-static u32 rd_be32(const UBYTE *p)
-{
-    return ((u32)p[0] << 24) | ((u32)p[1] << 16) | ((u32)p[2] << 8) | p[3];
+    return ((ULONG)p[0] << 24) | ((ULONG)p[1] << 16) | ((ULONG)p[2] << 8) | p[3];
 }
 
 /** Reads the next block (left, then right) to dst; at the end the track
  * starts again. */
-static bool music_read_block(UBYTE *dst)
+static BOOL music_read_block(UBYTE *dst)
 {
-    long n = 2 * music.block;
+    LONG n = 2 * music.block;
 
     if (music.next_block >= music.nblocks) {
         music.next_block = 0;
-        LbFileSeek(music.fh, 16, Lb_FILE_SEEK_BEGINNING);
+        Seek(music.fh, 16, OFFSET_BEGINNING);
     }
-    if (LbFileRead(music.fh, dst, n) != n) {
+    if (Read(music.fh, dst, n) != n) {
         music.next_block = 0;
-        LbFileSeek(music.fh, 16, Lb_FILE_SEEK_BEGINNING);
-        if (LbFileRead(music.fh, dst, n) != n)
-            return false;
+        Seek(music.fh, 16, OFFSET_BEGINNING);
+        if (Read(music.fh, dst, n) != n)
+            return FALSE;
     }
     music.next_block++;
     snd_cnt.music_blocks++;
-    return true;
-}
-
-static bool music_alloc_bufs(void)
-{
-    if (backend == SND_PAULA) {
-        music.buf = AllocVec(NREQ * 2 * music.block, MEMF_CHIP | MEMF_PUBLIC);
-        return (music.buf != NULL);
-    }
-    if (backend == SND_AHI) {
-        /* the rings and their AHI sounds are made with the AHI audio */
-        if (!music.ahi_loaded || (music.block > MUSIC_BLOCK_MAX))
-            return false;
-        music.half = MUSIC_HALF_BLOCKS * music.block;
-        return true;
-    }
-    return false;
+    return TRUE;
 }
 
 /** AHI: the music rings, loaded as AHI sounds once, before playing. */
-static bool music_ahi_setup(void)
+static BOOL music_ahi_setup(void)
 {
     struct AHISampleInfo si;
     ULONG ring = 2 * MUSIC_HALF_BLOCKS * MUSIC_BLOCK_MAX;
@@ -1138,16 +1003,16 @@ static bool music_ahi_setup(void)
     for (i = 0; i < 2; i++)
         music.ring[i] = AllocVec(ring, MEMF_ANY | MEMF_CLEAR);
     if ((music.ahi_buf == NULL) || (music.ring[0] == NULL) || (music.ring[1] == NULL))
-        return false;
+        return FALSE;
     for (i = 0; i < 2; i++) {
         si.ahisi_Type = AHIST_M8S;
         si.ahisi_Address = music.ring[i];
         si.ahisi_Length = ring;
         if (ahi_LoadSound(AHI_SND_MUSIC_L + i, AHIST_SAMPLE, &si, ahi_ctrl) != AHIE_OK)
-            return false;
+            return FALSE;
     }
-    music.ahi_loaded = true;
-    return true;
+    music.ahi_loaded = TRUE;
+    return TRUE;
 }
 
 static void music_ahi_free(void)
@@ -1158,7 +1023,7 @@ static void music_ahi_free(void)
         ahi_UnloadSound(AHI_SND_MUSIC_L, ahi_ctrl);
         ahi_UnloadSound(AHI_SND_MUSIC_R, ahi_ctrl);
     }
-    music.ahi_loaded = false;
+    music.ahi_loaded = FALSE;
     if (music.ahi_buf != NULL)
         FreeVec(music.ahi_buf);
     music.ahi_buf = NULL;
@@ -1170,18 +1035,18 @@ static void music_ahi_free(void)
 }
 
 /** AHI: fills half h of the rings from the file. */
-static bool music_ahi_fill(int h)
+static BOOL music_ahi_fill(int h)
 {
     ULONG k;
 
     for (k = 0; k < MUSIC_HALF_BLOCKS; k++) {
         ULONG offs = h * music.half + k * music.block;
         if (!music_read_block(music.ahi_buf))
-            return false;
+            return FALSE;
         CopyMem(music.ahi_buf, music.ring[0] + offs, music.block);
         CopyMem(music.ahi_buf + music.block, music.ring[1] + offs, music.block);
     }
-    return true;
+    return TRUE;
 }
 
 static void music_ahi_queue(int h, ULONG flags)
@@ -1190,34 +1055,33 @@ static void music_ahi_queue(int h, ULONG flags)
     ahi_SetSound(1, AHI_SND_MUSIC_R, h * music.half, music.half, ahi_ctrl, flags);
 }
 
-static bool music_take(OggVorbisStream *stream)
+static BOOL music_take(void)
 {
     int ch;
 
     if (music_owns)
-        return true;
-    if (backend == SND_NONE)
-        return false;
+        return TRUE;
+    if (backend == SE_NONE)
+        return FALSE;
     for (ch = 0; ch < 2; ch++) {
-        if (voices[ch].owner != NULL)
+        if (voices[ch].owner != OWNER_NONE)
             voice_stop(ch);
         voices[ch].owner = OWNER_MUSIC;
     }
-    music_owns = true;
-    if (backend == SND_AHI) {
-        UWORD vol = music_volume(stream);
+    music_owns = TRUE;
+    if (backend == SE_AHI) {
         ULONG s0;
 
         if (!music_ahi_fill(0) || !music_ahi_fill(1))
-            return false;
+            return FALSE;
         voices[0].rate = voices[1].rate = music.rate;
-        voices[0].vol = voices[1].vol = vol;
+        voices[0].vol = voices[1].vol = music.vol;
         voices[0].pan = 0;
         voices[1].pan = 0x10000;
         ahi_SetFreq(0, music.rate, ahi_ctrl, AHISF_IMM);
         ahi_SetFreq(1, music.rate, ahi_ctrl, AHISF_IMM);
-        ahi_SetVol(0, (Fixed)vol << 10, 0, ahi_ctrl, AHISF_IMM);
-        ahi_SetVol(1, (Fixed)vol << 10, 0x10000, ahi_ctrl, AHISF_IMM);
+        ahi_SetVol(0, (Fixed)music.vol << 10, 0, ahi_ctrl, AHISF_IMM);
+        ahi_SetVol(1, (Fixed)music.vol << 10, 0x10000, ahi_ctrl, AHISF_IMM);
         s0 = ahi_music_starts;
         music_ahi_queue(0, AHISF_IMM);
         music_ahi_queue(1, AHISF_NONE);
@@ -1227,138 +1091,101 @@ static bool music_take(OggVorbisStream *stream)
         music.starts_base = (ahi_music_starts != s0) ? s0 + 1 : s0;
         music.halves_done = 0;
     }
-    return true;
+    return TRUE;
 }
 
-bool ogg_vorbis_stream_init(OggVorbisStream *stream)
+void se_music_close(void)
 {
-    char buf[16];
-
-    memset(stream, 0, sizeof(*stream));
-    stream->gain = 1.0f;
-    music.fh = INVALID_FILE;
-    /* ENV:SyndWarsMusic=OFF: no music, all voices for the effects */
-    if ((GetVar((STRPTR)"SyndWarsMusic", (STRPTR)buf, sizeof(buf), 0) >= 0) &&
-      (strcasecmp(buf, "OFF") == 0))
-        return false;
-    return (backend != SND_NONE);
-}
-
-void ogg_vorbis_stream_free(OggVorbisStream *stream)
-{
-    ogg_vorbis_stream_clear(stream);
-    memset(stream, 0, sizeof(*stream));
-}
-
-void ogg_vorbis_stream_pause(OggVorbisStream *stream)
-{
-    stream->playing = false;
     music_release();
+    music.playing = FALSE;
+    if (music.fh != 0)
+        Close(music.fh);
+    music.fh = 0;
+    if (music.buf != NULL)
+        FreeVec(music.buf);
+    music.buf = NULL;
 }
 
-void ogg_vorbis_stream_play(OggVorbisStream *stream)
-{
-    stream->playing = true;
-}
-
-void ogg_vorbis_stream_stop(OggVorbisStream *stream)
-{
-    if (!stream->playing)
-        return;
-    stream->playing = false;
-    music_release();
-    ogg_vorbis_stream_restart(stream);
-}
-
-void ogg_vorbis_stream_clear(OggVorbisStream *stream)
-{
-    if (stream->file_name == NULL)
-        return;
-    ogg_vorbis_stream_stop(stream);
-    music_close();
-    LbMemoryFree(stream->file_name);
-    stream->file_name = NULL;
-}
-
-bool ogg_vorbis_stream_open(OggVorbisStream *stream, const char *fname)
+BOOL se_music_open(const char *path)
 {
     UBYTE head[16];
-    uint32_t sz;
 
-    ogg_vorbis_stream_clear(stream);
-    if (backend == SND_NONE)
-        return false;
-    music.fh = LbFileOpen(fname, Lb_FILE_MODE_READ_ONLY);
-    if (music.fh == INVALID_FILE)
-        return false;
-    if ((LbFileRead(music.fh, head, 16) != 16) || (memcmp(head, "SWMU", 4) != 0))
+    se_music_close();
+    if (backend == SE_NONE)
+        return FALSE;
+    music.fh = Open((STRPTR)path, MODE_OLDFILE);
+    if (music.fh == 0)
+        return FALSE;
+    if ((Read(music.fh, head, 16) != 16) || (memcmp(head, "SWMU", 4) != 0))
         goto err;
     music.rate = rd_be32(head + 4);
     music.block = rd_be32(head + 8);
     music.nblocks = rd_be32(head + 12);
-    if ((music.block < 256) || (music.block > CHUNK_MAX) || (music.block & 1) ||
+    if ((music.block < 256) || (music.block > MUSIC_BLOCK_MAX) || (music.block & 1) ||
       (music.nblocks == 0) || (music.rate < 1000))
         goto err;
-    if (!music_alloc_bufs())
-        goto err;
+    if (backend == SE_PAULA) {
+        music.buf = AllocVec(NREQ * 2 * music.block, MEMF_CHIP | MEMF_PUBLIC);
+        if (music.buf == NULL)
+            goto err;
+    } else {
+        if (!music.ahi_loaded)
+            goto err;
+        music.half = MUSIC_HALF_BLOCKS * music.block;
+    }
     music.next_block = 0;
     music.per = rate_to_period(music.rate);
-    sz = strlen(fname) + 1;
-    stream->file_name = LbMemoryAlloc(sz);
-    if (stream->file_name != NULL)
-        LbMemoryCopy(stream->file_name, fname, sz);
-    return true;
+    return TRUE;
 err:
-    music_close();
-    return false;
+    se_music_close();
+    return FALSE;
 }
 
-bool ogg_vorbis_stream_restart(OggVorbisStream *stream)
+void se_music_rewind(void)
 {
-    if ((stream->file_name == NULL) || (music.fh == INVALID_FILE))
-        return false;
+    if (music.fh == 0)
+        return;
     music.next_block = 0;
-    LbFileSeek(music.fh, 16, Lb_FILE_SEEK_BEGINNING);
-    return true;
+    Seek(music.fh, 16, OFFSET_BEGINNING);
 }
 
-void ogg_vorbis_stream_set_gain(OggVorbisStream *stream, float gain)
+void se_music_pause(void)
 {
-    stream->gain = gain;
+    music.playing = FALSE;
+    music_release();
+}
+
+void se_music_play(UWORD vol)
+{
+    if (vol > 64)
+        vol = 64;
+    music.vol = vol;
+    music.playing = TRUE;
     if (music_owns) {
-        UWORD vol = music_volume(stream);
         voice_set(0, music.rate, music.per, vol, 0);
         voice_set(1, music.rate, music.per, vol, 0x10000);
     }
 }
 
-float ogg_vorbis_stream_get_gain(OggVorbisStream *stream)
-{
-    return stream->gain;
-}
-
-static bool music_update_paula(OggVorbisStream *stream, UWORD vol)
+static BOOL music_update_paula(void)
 {
     struct Voice *cl = &voices[0], *cr = &voices[1];
 
     paula_reap(cl);
     paula_reap(cr);
     cl->per = cr->per = music.per;
-    cl->vol = cr->vol = vol;
+    cl->vol = cr->vol = music.vol;
     while ((cl->nbusy < NREQ) && (cr->nbusy < NREQ)) {
         UBYTE *slot = music.buf + ((cl->head + cl->nbusy) % NREQ) * 2 * music.block;
-        if (!music_read_block(slot)) {
-            stream->playing = false;
-            music_release();
-            return false;
-        }
+        if (!music_read_block(slot))
+            return FALSE;
         paula_write(cl, slot, music.block, 1);
         paula_write(cr, slot + music.block, music.block, 1);
     }
-    return true;
+    return TRUE;
 }
 
-static bool music_update_ahi(OggVorbisStream *stream)
+static BOOL music_update_ahi(void)
 {
     ULONG started = ahi_music_starts - music.starts_base;
 
@@ -1367,37 +1194,31 @@ static bool music_update_ahi(OggVorbisStream *stream)
         int h;
         music.halves_done++;
         h = (music.halves_done + 1) & 1;
-        if (!music_ahi_fill(h)) {
-            stream->playing = false;
-            music_release();
-            return false;
-        }
+        if (!music_ahi_fill(h))
+            return FALSE;
         music_ahi_queue(h, AHISF_NONE);
     }
-    return true;
+    return TRUE;
 }
 
-bool ogg_vorbis_stream_update(OggVorbisStream *stream)
+void se_music_update(void)
 {
-    UWORD vol;
+    BOOL ok = TRUE;
 
-    if ((stream->file_name == NULL) || !stream->playing)
-        return true;
-    if ((backend == SND_PAULA) && (music.buf == NULL))
-        return true;
-    vol = music_volume(stream);
-    if (vol == 0) {
+    if ((music.fh == 0) || !music.playing)
+        return;
+    if (music.vol == 0) {
         music_release();
-        return true;
+        return;
     }
-    if (!music_take(stream)) {
-        stream->playing = false;
+    if (!music_take())
+        ok = FALSE;
+    else if (backend == SE_PAULA)
+        ok = music_update_paula();
+    else if (backend == SE_AHI)
+        ok = music_update_ahi();
+    if (!ok) {
+        music.playing = FALSE;
         music_release();
-        return false;
     }
-    if (backend == SND_PAULA)
-        return music_update_paula(stream, vol);
-    if (backend == SND_AHI)
-        return music_update_ahi(stream);
-    return true;
 }

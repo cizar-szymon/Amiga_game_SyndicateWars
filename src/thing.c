@@ -5063,10 +5063,44 @@ short get_thing_same_type_head(short ttype, short subtype)
     return thing;
 }
 
-void new_thing_traffic_clone(struct SimpleThing *p_clsthing)
+#ifdef SW_FNCHK
+static void new_thing_traffic_clone_asm(struct SimpleThing *p_clsthing)
 {
     asm volatile ("call ASM_new_thing_traffic_clone\n"
-        : : "a" (p_clsthing));
+        : "+a" (p_clsthing) : : "cc", "memory");
+}
+#endif
+
+/** A traffic simple thing (type 10) copied from the level file: position,
+ * subtype, index and the four links with their flags.  As the original,
+ * a full simple things list is not checked.
+ * Remade from new_thing_traffic_clone. */
+static void new_thing_traffic_clone_c(struct SimpleThing *p_clsthing)
+{
+    struct SimpleThing *p_sthing;
+    ThingIdx thing;
+    int k;
+
+    thing = get_new_sthing();
+    p_sthing = &sthings[thing];
+    p_sthing->X = p_clsthing->X;
+    p_sthing->Z = p_clsthing->Z;
+    p_sthing->Type = 0x0A;
+    p_sthing->Y = p_clsthing->Y;
+    p_sthing->SubType = p_clsthing->SubType;
+    p_sthing->ThingOffset = p_clsthing->ThingOffset;
+    for (k = 0; k < 4; k++)
+    {
+        memcpy((ubyte *)p_sthing + 0x2C + 2 * k, (ubyte *)p_clsthing + 0x2C + 2 * k, 2);
+        ((ubyte *)p_sthing)[0x34 + k] = ((ubyte *)p_clsthing)[0x34 + k];
+    }
+    add_node_sthing(thing);
+}
+
+void new_thing_traffic_clone(struct SimpleThing *p_clsthing)
+{
+    FNCHK_VOID("new_thing_traffic_clone", new_thing_traffic_clone_asm(p_clsthing),
+      new_thing_traffic_clone_c(p_clsthing));
 }
 
 short new_thing_smoke_gen_clone(struct SimpleThing *p_clsthing)

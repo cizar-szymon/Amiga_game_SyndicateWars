@@ -172,6 +172,7 @@ void process_tasered_person(struct Thing *p_person);
 void set_angle_to_avoid_group(struct Thing *p_person);
 void init_c_iff(struct Thing *p_owner);
 short create_a_pod(struct Thing *p_thing, struct Thing *p_loader, ushort pod_id);
+void new_thing_traffic_clone(struct SimpleThing *p_clsthing);
 
 void set_player_peeps_to_run(struct Thing *p_leader, ushort plyr)
 {
@@ -2035,6 +2036,21 @@ static void test_cmds_process(void)
     case 72:
         map_things_unkn_func_04(0);
         break;
+    case 88:
+    {
+        static struct SimpleThing test_sthing;
+        int k;
+
+        // a traffic simple thing as read from a level
+        for (k = 0; k < (int)sizeof(test_sthing); k++)
+            ((ubyte *)&test_sthing)[k] = (ubyte)(gameturn * 7 + k * 13);
+        test_sthing.Type = SmTT_TRAFFIC;
+        test_sthing.X = p_agent->X + 0x2000;
+        test_sthing.Y = p_agent->Y;
+        test_sthing.Z = p_agent->Z;
+        new_thing_traffic_clone(&test_sthing);
+        break;
+    }
     case 86:
         init_c_iff(p_agent);
         break;

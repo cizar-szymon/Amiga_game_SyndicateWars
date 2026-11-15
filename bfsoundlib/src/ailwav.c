@@ -80,58 +80,67 @@ void AIL_WAV_terminate(SNDSAMPLE *s)
     s->system_data[SmpSD_RELEASE] = -1;
 }
 
+/** Little endian reads from the image: the WAV headers are little endian,
+ * and the chunks need not be aligned. */
+static uint32_t wav_rd32(const uint8_t *p)
+{
+    return (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
+}
+
+static uint16_t wav_rd16(const uint8_t *p)
+{
+    return (uint16_t)(p[0] | (p[1] << 8));
+}
+
+/** Finds the chunk with the given name after the RIFF header. */
+static const uint8_t *wav_find_chunk(const uint8_t *image, const char *name)
+{
+    const uint8_t *c;
+
+    c = image + 12; // after "RIFF", size, "WAVE"
+    while (strncasecmp((const char *)c, name, 4) != 0)
+    {
+        uint32_t size = wav_rd32(c + 4);
+        c += size + 8 + (size & 1);
+    }
+    return c;
+}
+
 void AIL_process_WAV_image(const uint8_t *image, SNDSAMPLE *s)
 {
-#if 0
-    asm volatile (
-      "push %1\n"
-      "push %0\n"
-      "call ASM_AIL_process_WAV_image\n"
-      "add $0x8, %%esp\n"
-        :  : "g" (info), "g" (s) : "eax" );
-#endif
-    WAVE_FMT *f;
-    WAVE_DATA *d;
+    const uint8_t *f, *d;
+    uint16_t channels, bits;
 
-    // Find mandatory <fmt-ck>
-    f = (WAVE_FMT*)(((RIFF*)image)->data);
-
-    while (strncasecmp(f->FMT_string, "fmt ", 4) != 0)
-    {
-        f = (WAVE_FMT*)((int8_t*)f + f->chunk_size + 8 + (f->chunk_size & 1));
-    }
-
-    assert(f->format_tag == WAVE_FORMAT_PCM);
+    // Find mandatory <fmt-ck>; fields: tag +8, channels +10, rate +12, bits +22
+    f = wav_find_chunk(image, "fmt ");
+    assert(wav_rd16(f + 8) == WAVE_FORMAT_PCM);
+    channels = wav_rd16(f + 10);
+    bits = wav_rd16(f + 22);
 
     // Configure sample type and rate based on FMT chunk
     // 8-bit PCM is always unsigned, 16-bit is always signed
-    if ((f->channels == 1) && (f->bits_per_sample == 8))
+    if ((channels == 1) && (bits == 8))
     {
         AIL_set_sample_type(s, DIG_F_MONO_8, 0);
     }
-    else if ((f->channels == 2) && (f->bits_per_sample == 8))
+    else if ((channels == 2) && (bits == 8))
     {
         AIL_set_sample_type(s, DIG_F_STEREO_8, 0);
     }
-    else if ((f->channels == 1) && (f->bits_per_sample == 16))
+    else if ((channels == 1) && (bits == 16))
     {
         AIL_set_sample_type(s, DIG_F_MONO_16, DIG_PCM_SIGN);
     }
-    else if ((f->channels == 2) && (f->bits_per_sample == 16))
+    else if ((channels == 2) && (bits == 16))
     {
         AIL_set_sample_type(s, DIG_F_STEREO_16, DIG_PCM_SIGN);
     }
-    AIL_set_sample_playback_rate(s, f->sample_rate);
+
+    AIL_set_sample_playback_rate(s, wav_rd32(f + 12));
 
     // Find mandatory <data-ck>
-    d = (WAVE_DATA*)(((RIFF*)image)->data);
-
-    while (strncasecmp(d->DATA_string, "data", 4))
-    {
-        d = (WAVE_DATA*)((int8_t*)d + d->chunk_size + 8 + (d->chunk_size & 1));
-    }
-
-    AIL_set_sample_address(s, d->data, d->chunk_size);
+    d = wav_find_chunk(image, "data");
+    AIL_set_sample_address(s, (void *)(d + 8), wav_rd32(d + 4));
 }
 
 /******************************************************************************/

@@ -51,6 +51,7 @@
 #include "util.h"
 #include "swlog.h"
 #include "fncheck.h"
+#include "bfendian.h"
 #include "engincam.h"
 #include "engintrns.h"
 #include "bfsvaribl.h"
@@ -654,9 +655,16 @@ int setup_heap_manager(struct SampleTable *smptable, size_t smptb_len,
     totlen = LbFileLengthHandle(fh);
     LbFileSeek(fh, totlen - 4, Lb_FILE_SEEK_BEGINNING);
     LbFileRead(fh, &pos, 4);
+    pos = (long)lb_le32(pos); // the bank file is little endian
     LbFileSeek(fh, pos, Lb_FILE_SEEK_BEGINNING);
     LbFileRead(fh, &unkhead1, 18);
     LbFileRead(fh, &sbharr, sizeof(struct BfSoundBankHead) * 9);
+    for (i = 0; i < 9; i++) {
+        sbharr[i].TabPos = (long)lb_le32(sbharr[i].TabPos);
+        sbharr[i].DatPos = (long)lb_le32(sbharr[i].DatPos);
+        sbharr[i].TabSize = (long)lb_le32(sbharr[i].TabSize);
+        sbharr[i].DatSize = (long)lb_le32(sbharr[i].DatSize);
+    }
     sbh = &sbharr[tpno];
     if ((sbh->TabPos == 0) || (sbh->TabSize == 0)) {
         reset_heaps();
@@ -673,9 +681,9 @@ int setup_heap_manager(struct SampleTable *smptable, size_t smptb_len,
     for (i = 0; i < samples_in_bank; i++)
     {
         LbFileRead(fh, &sfxi, sizeof(struct BfSfxInfo));
-        smptb->field_0 = sbh->DatPos + (long)sfxi.DataBeg;
+        smptb->field_0 = sbh->DatPos + (long)lb_le32((u32)(uintptr_t)sfxi.DataBeg);
         smptb->hmhandle = 0;
-        smptb->field_4 = (long)sfxi.DataEnd;
+        smptb->field_4 = (long)lb_le32((u32)(uintptr_t)sfxi.DataEnd);
         smptb++;
     }
     if (samples_in_bank <= 0) {

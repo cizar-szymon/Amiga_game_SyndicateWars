@@ -86,6 +86,7 @@ struct SmpState {
     UBYTE active;
     UBYTE sent_whole;           /**< Paula, short sample: its write is sent */
     UBYTE playable;             /**< 8-bit mono data the backend can reach */
+    ULONG pass_ms;              /**< length of one pass */
 };
 
 static enum SndBackend backend;
@@ -192,7 +193,7 @@ static ULONG heap_size;
 
 /* diagnostics */
 static struct {
-    ULONG started, on_chan, stolen, no_chan, not_reach, not_8bit, music_blocks;
+    ULONG started, on_chan, stolen, no_chan, not_reach, not_8bit, music_blocks, released;
 } snd_cnt;
 static int snd_log = -1;
 static ULONG snd_log_ms;
@@ -216,8 +217,8 @@ static void snd_log_write(void)
         return;
     FPrintf(fh, (STRPTR)"backend %ld voices %ld clock %lu ms %lu heap %lu\n",
         (LONG)backend, (LONG)n_voices, paula_clock, now, heap_size);
-    FPrintf(fh, (STRPTR)"started %lu on_voice %lu stolen %lu no_voice %lu\n",
-        snd_cnt.started, snd_cnt.on_chan, snd_cnt.stolen, snd_cnt.no_chan);
+    FPrintf(fh, (STRPTR)"started %lu on_voice %lu stolen %lu no_voice %lu released %lu\n",
+        snd_cnt.started, snd_cnt.on_chan, snd_cnt.stolen, snd_cnt.no_chan, snd_cnt.released);
     FPrintf(fh, (STRPTR)"not_reachable %lu not_8bit %lu music_blocks %lu music_owns %ld ahi_starts %lu\n",
         snd_cnt.not_reach, snd_cnt.not_8bit, snd_cnt.music_blocks, (LONG)music_owns,
         ahi_music_starts);
@@ -856,6 +857,7 @@ static void smp_begin(SNDSAMPLE *s, struct SmpState *st)
     }
     dur = len / bps;
     dur = (dur * 10) / (st->rate / 100);
+    st->pass_ms = dur;
     if (st->loops > 0)
         dur *= st->loops + 1;
     st->end_ms = snd_ms() + dur;
@@ -876,6 +878,33 @@ static void smp_end(struct SmpState *st)
     if (st->ch >= 0)
         voice_stop(st->ch);
     st->active = 0;
+}
+
+/** A sound looped forever is released (ReleaseLoopedSample() sets its
+ * loop count to 1): it ends after the pass which plays now, as on the PC,
+ * where the loop count is read before each buffer is queued. */
+static void smp_release_loop(SNDSAMPLE *s, struct SmpState *st)
+{
+    (void)s;
+    snd_cnt.released++;
+    st->loops = 0;
+    st->left = 0;
+    st->end_ms = snd_ms() + st->pass_ms;
+    if (st->ch < 0)
+        return;
+    if (backend == SND_PAULA) {
+        struct Voice *c = &voices[(int)st->ch];
+        paula_reap(c);
+        /* a long sound (in chunks) just gets no more chunks */
+        if ((c->nbusy > 0) && (st->len <= CHUNK_MAX)) {
+            /* the write playing now ends at the end of its cycle */
+            c->pv->ioa_Request.io_Command = ADCMD_FINISH;
+            c->pv->ioa_Request.io_Flags = ADIOF_SYNCCYCLE;
+            DoIO((struct IORequest *)c->pv);
+        }
+    } else if (backend == SND_AHI) {
+        ahi_SetSound(st->ch, AHI_NOSOUND, 0, 0, ahi_ctrl, AHISF_NONE);
+    }
 }
 
 void OPENAL_stop_sample(SNDSAMPLE *s)
@@ -944,6 +973,8 @@ int32_t OPENAL_update_dig_sample(SNDSAMPLE *s)
         st->rate = (s->playback_rate > 100) ? s->playback_rate : 22050;
         st->per_cache = rate_to_period(st->rate);
     }
+    if ((st->loops < 0) && (s->loop_count != 0))
+        smp_release_loop(s, st);
     if ((st->ch >= 0) && (backend == SND_PAULA)) {
         struct Voice *c = &voices[(int)st->ch];
         voice_set(st->ch, st->rate, st->per_cache, smp_volume(s), 0);

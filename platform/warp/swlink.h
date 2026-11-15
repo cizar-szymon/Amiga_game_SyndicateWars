@@ -70,6 +70,8 @@
 #define SWL_SND_HEADERS  42       /* -> the first SWL_SND_HDR_BYTES of each sample in
                                      SWL_BUF_XFER, RESULT samples */
 #define SWL_SND_HDR_BYTES 64
+#define SWL_SMK_PLAY     43       /* u16 flags (SMK_*), u16 volume 0..64, name: the 68k
+                                     plays the Smacker video -> RESULT 0 / -1 */
 
 /* 68k -> ARM */
 #define SWL_RESULT       100      /* i32 value, i32 extra */

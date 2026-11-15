@@ -64,7 +64,7 @@ for f in bflibrary/src/general/*.c bflibrary/src/general/*.cpp; do
   esac
 done
 SRCS="$SRCS $(for f in sdir sdrive sffind sfile slog smemory; do echo bflibrary/src/x86-win-sdl2/$f.c; done)"
-SRCS="$SRCS third_party/libsmacker/smacker.c"
+SRCS="$SRCS third_party/libsmacker/smacker.c"  # with platform/amiga/smk_core.c
 SRCS="$SRCS $(ls platform/amiga/*.c bflibrary/src/m68k-amigaos/*.c bflibrary/src/m68k-amigaos/*.cpp 2>/dev/null || true)"
 
 compile() {

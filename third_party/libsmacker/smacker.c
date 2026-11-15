@@ -235,7 +235,9 @@ static int smk_huff8_build(struct smk_huff8_t * const t, struct smk_bit_t * cons
 			}
 			t->fast[i] = (unsigned short)((d << 12) | index);
 		}
+#ifndef SMK_NO_FAST
 		t->has_fast = 1;
+#endif
 	}
 
 	return 1;
@@ -489,7 +491,9 @@ static int smk_huff16_build(struct smk_huff16_t * const t, struct smk_bit_t * co
 
 	/* Amiga port: the lookup table */
 	t->fast = NULL;
+#ifndef SMK_NO_FAST
 	smk_huff16_make_fast(t);
+#endif
 
 	return 1;
 }

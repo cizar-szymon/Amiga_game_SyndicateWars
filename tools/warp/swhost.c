@@ -55,6 +55,7 @@ static CSWarpExtReq xreq;    /* fetches and feeds: their own, so that the main
                                 loop's view of the extension state stays */
 static struct Screen *scr;
 static struct Window *win;
+static void do_smk_play(const UBYTE *p, UWORD len);
 static UWORD *blank_pointer;
 static int scr_w, scr_h;
 
@@ -425,6 +426,9 @@ static void handle(UWORD type, const UBYTE *p, UWORD len)
     case SWL_FRAME:
         do_frame(p, len);
         break;
+    case SWL_SMK_PLAY:
+        do_smk_play(p, len);
+        break;
     case SWL_FOPEN: do_fopen(p, len); break;
     case SWL_FREAD: do_fread(p); break;
     case SWL_FWRITE: do_fwrite(p, len); break;
@@ -452,6 +456,131 @@ static void handle(UWORD type, const UBYTE *p, UWORD len)
         break;
     }
     }
+}
+
+/******************************************************************************/
+/* Smacker videos of the ARM game, played here by the 68060 (SWL_SMK_PLAY):
+ * the player of the 68k game (platform/amiga/smk_core.c) on this screen */
+
+#include "smk_core.h"
+#include "snd_engine.h"
+
+static UWORD smk_flags;
+
+static void hsmk_show(const unsigned char *pix, unsigned long w, unsigned long h,
+  unsigned char yscale, const unsigned char *pal6, void *ctx)
+{
+    APTR lock;
+    UBYTE *base = NULL;
+    ULONG bpr = 0;
+    long out_h = (yscale != 0) ? (long)h * 2 : (long)h;
+    long cw, ch, x, y, sy;
+
+    (void)ctx;
+    if (!scr)
+        return;
+    lock = LockBitMapTags(scr->RastPort.BitMap, LBMI_BASEADDRESS, (ULONG)&base,
+      LBMI_BYTESPERROW, (ULONG)&bpr, TAG_DONE);
+    if (lock) {
+        cw = ((long)w < (long)scr_w) ? (long)w : (long)scr_w;
+        ch = (out_h < (long)scr_h) ? out_h : (long)scr_h;
+        x = ((long)scr_w - cw) / 2;
+        y = ((long)scr_h - ch) / 2;
+        for (sy = 0; sy < ch; sy++) {
+            UBYTE *d = base + (y + sy) * bpr + x;
+            long src_line = (yscale != 0) ? (sy >> 1) : sy;
+            if ((yscale == 1) && (sy & 1))
+                memset(d, 0, cw);
+            else
+                memcpy(d, pix + src_line * w, cw);
+        }
+        UnLockBitMap(lock);
+    }
+    set_palette(pal6);
+}
+
+static void hsmk_clear(void *ctx)
+{
+    APTR lock;
+    UBYTE *base = NULL;
+    ULONG bpr = 0, y;
+
+    (void)ctx;
+    if (!scr)
+        return;
+    lock = LockBitMapTags(scr->RastPort.BitMap, LBMI_BASEADDRESS, (ULONG)&base,
+      LBMI_BYTESPERROW, (ULONG)&bpr, TAG_DONE);
+    if (lock) {
+        for (y = 0; y < scr_h; y++)
+            memset(base + y * bpr, 0, scr_w);
+        UnLockBitMap(lock);
+    }
+}
+
+static unsigned long hsmk_clock(void)
+{
+    return se_ms();
+}
+
+/** The window's input during a video: Esc, Return, Space or the left
+ * button end it (unless SMK_NoStopOnUserInput); not passed to the game. */
+static int hsmk_idle(void *ctx)
+{
+    struct IntuiMessage *msg;
+    int stop = 0;
+
+    (void)ctx;
+    if (SetSignal(0, 0) & SIGBREAKF_CTRL_C)
+        stop = 1;
+    if (win) {
+        while ((msg = (struct IntuiMessage *)GetMsg(win->UserPort)) != NULL) {
+            ULONG cls = msg->Class;
+            UWORD code = msg->Code;
+            ReplyMsg((struct Message *)msg);
+            if ((cls == IDCMP_RAWKEY) && ((code == 0x45) || (code == 0x44) || (code == 0x40)))
+                stop = 1;
+            if ((cls == IDCMP_MOUSEBUTTONS) && (code == SELECTDOWN))
+                stop = 1;
+        }
+    }
+    if (smk_flags & 0x0002)     /* SMK_NoStopOnUserInput */
+        stop = (SetSignal(0, 0) & SIGBREAKF_CTRL_C) != 0;
+    return stop;
+}
+
+static void hsmk_log(const char *text)
+{
+    hlog("%s", text);
+}
+
+static void do_smk_play(const UBYTE *p, UWORD len)
+{
+    struct SmkOut out;
+    char name[128];
+    static char t[64];
+    int r;
+
+    smk_flags = rd16(p);
+    if (len <= 4) {
+        result(-1, 0);
+        return;
+    }
+    strncpy(name, (const char *)p + 4, sizeof(name) - 1);
+    name[sizeof(name) - 1] = 0;
+    /* test: ENV:SyndWarsSmkTest=file plays that file instead */
+    if (GetVar((STRPTR)"SyndWarsSmkTest", (STRPTR)t, sizeof(t), 0) > 0)
+        strcpy(name, t);
+    out.show = hsmk_show;
+    out.clear = hsmk_clear;
+    out.clock_ms = hsmk_clock;
+    out.idle = hsmk_idle;
+    out.log = hsmk_log;
+    out.ctx = NULL;
+    out.sound = (se_backend() != SE_NONE);
+    out.volume = rd16(p + 2);
+    hlog("swhost: video %s\n", name);
+    r = smk_core_play(name, &out);
+    result(r, 0);
 }
 
 static void parse_rx(void)
@@ -644,6 +773,16 @@ int main(int argc, char **argv)
     Delay(100);
     zreq();
     rc = extLoad(wxt, size, args, 512, &req);
+    if (rc == CSWEXT_ERR_BUSY) {
+        /* the game of a host that did not end it (stopped too early, a
+         * crash) still runs on the ARM: ended, and loaded again */
+        hlog("swhost: an extension still runs on the ARM, stopping it\n");
+        zreq();
+        extStop(2000, &req);
+        Delay(25);
+        zreq();
+        rc = extLoad(wxt, size, args, 512, &req);
+    }
     hlog("swhost: %s (%ld bytes) -> extLoad %ld, state %lu, exit %ld; args \"%s\"\n", wxt_path, size,
       rc, req.state, req.exitCode, args);
     if (rc != CSWEXT_OK)

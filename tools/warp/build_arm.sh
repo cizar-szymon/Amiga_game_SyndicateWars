@@ -64,7 +64,7 @@ for f in bflibrary/src/general/*.c bflibrary/src/general/*.cpp; do
 done
 SRCS="$SRCS $(for f in sdir sdrive sffind sfile slog smemory; do echo bflibrary/src/x86-win-sdl2/$f.c; done)"
 SRCS="$SRCS platform/amiga/asm_data.c platform/amiga/asm_data_manual.c platform/amiga/asm_stubs.c
-  platform/amiga/sound_stubs.c platform/amiga/smk_play.c third_party/libsmacker/smacker.c
+  platform/amiga/sound_stubs.c platform/amiga/smk_play.c
   platform/amiga/osamiga.c platform/amiga/phase_trace.c
   bflibrary/src/m68k-amigaos/smouse.cpp bflibrary/src/m68k-amigaos/ssemphr.cpp"
 SRCS="$SRCS $(ls platform/warp/*.c bflibrary/src/arm-warp/*.c)"

@@ -317,13 +317,14 @@ void *se_heap_alloc(ULONG size)
 
 void se_heap_free(void *ptr)
 {
-    if (ptr == NULL)
+    /* Only the heap the engine has now: the exit handler (se_atexit) may
+     * have freed it already, and the game frees it again through its own
+     * pointer at its exit ("freeing memory that is already free"). */
+    if ((ptr == NULL) || (ptr != heap_mem))
         return;
-    if (ptr == heap_mem) {
-        ahi_heap_unload();
-        heap_mem = NULL;
-        heap_size = 0;
-    }
+    ahi_heap_unload();
+    heap_mem = NULL;
+    heap_size = 0;
     FreeVec(ptr);
 }
 

@@ -72,6 +72,8 @@ void render_clock_set_turn(ulong turn);
 ubyte get_speed_control_inputs(void);
 
 void wait_next_gameturn(void);
+/** The game is slower than its full speed (see wait_next_gameturn()). */
+extern TbBool game_turn_overloaded;
 
 TbBool display_needs_redraw_this_turn(void);
 void update_tick_time(void);

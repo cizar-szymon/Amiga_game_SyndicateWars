@@ -112,43 +112,52 @@ ubyte get_speed_control_inputs(void)
     return did_inp;
 }
 
-/** AUTO DETAIL: the work time of the game turns (from the end of one
- * turn's wait to the start of the next one's) is averaged over about 8
- * turns; above the turn time plus 4 ms the explosions get the low detail,
- * below 85% of the turn time the user's DETAIL setting comes back.  The
- * detail changes the look of explosions made from then on, but also how
- * often craters are made and how buildings break up (the terrain), so as
- * the original keeps one detail for all in a network game, it is not done
- * there, nor while a packet record is made or played. */
-static void auto_detail_turn(long work_ms)
+/** The game is slower than its full speed: the work time of the game
+ * turns (from the end of one turn's wait to the start of the next one's),
+ * averaged over about 8 turns, is above the turn time plus 4 ms; it ends
+ * when the average falls below 85% of the turn time.  Used by the speed
+ * options which only act while the game is too slow (AUTO DETAIL, the
+ * pedestrians seen on the radar only). */
+TbBool game_turn_overloaded = false;
+
+static void overload_turn(long work_ms)
 {
     static long avg8 = 0;
-    static TbBool lowered = false;
     long turn_ms, avg;
 
-    if (!game_auto_detail || (ingame.DetailLevel == 0) || in_network_game ||
-      PacketRecord_IsPlayback() || PacketRecord_IsRecord()) {
-        // off, or the user chose the low detail anyway
-        if (lowered) {
-            bang_set_detail(1 - ingame.DetailLevel);
-            lowered = false;
-        }
-        avg8 = 0;
-        return;
-    }
     if ((work_ms < 0) || (work_ms > 1000))
         return;
     avg8 += work_ms - avg8 / 8;
     avg = avg8 / 8;
     turn_ms = 1000 / game_num_fps;
-    if (!lowered && (avg > turn_ms + 4)) {
+    if (!game_turn_overloaded && (avg > turn_ms + 4)) {
+        game_turn_overloaded = true;
+        LOGWARN("too slow: work %ld ms per turn", avg);
+    } else if (game_turn_overloaded && (avg < turn_ms * 85 / 100)) {
+        game_turn_overloaded = false;
+        LOGWARN("full speed again: work %ld ms per turn", avg);
+    }
+}
+
+/** AUTO DETAIL: while the game is too slow the explosions made get the low
+ * detail; the user's DETAIL setting comes back with the speed.  The detail
+ * changes the look of explosions made from then on, but also how often
+ * craters are made and how buildings break up (the terrain), so as the
+ * original keeps one detail for all in a network game, it is not done
+ * there, nor while a packet record is made or played. */
+static void auto_detail_turn(void)
+{
+    static TbBool lowered = false;
+    TbBool want;
+
+    want = game_auto_detail && (ingame.DetailLevel != 0) && !in_network_game &&
+      !PacketRecord_IsPlayback() && !PacketRecord_IsRecord() && game_turn_overloaded;
+    if (want && !lowered) {
         bang_set_detail(1);
         lowered = true;
-        LOGWARN("auto detail: low, work %ld ms per turn", avg);
-    } else if (lowered && (avg < turn_ms * 85 / 100)) {
+    } else if (!want && lowered) {
         bang_set_detail(1 - ingame.DetailLevel);
         lowered = false;
-        LOGWARN("auto detail: back, work %ld ms per turn", avg);
     }
 }
 
@@ -159,7 +168,8 @@ void wait_next_gameturn(void)
     TbClockMSec sleep_end;
 
     if (last_loop_time != 0)
-        auto_detail_turn((long)(curr_time - last_loop_time));
+        overload_turn((long)(curr_time - last_loop_time));
+    auto_detail_turn();
 
     if (frameskip == 0)
         sleep_end = last_loop_time + 1000/game_num_fps;

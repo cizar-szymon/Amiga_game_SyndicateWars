@@ -575,6 +575,20 @@ int
 main (int argc, char **argv)
 {
 #if defined(SW_AMIGA)
+    {
+        extern void *_WBenchMsg;
+        static char *no_args[] = {"SyndWars", NULL};
+
+        // Started from its icon: nothing to the console (libnix would open
+        // a console window on the Workbench while the game's screen is up;
+        // the game hung at its first frame), and no Shell arguments
+        if (_WBenchMsg != NULL) {
+            freopen("NIL:", "w", stdout);
+            freopen("NIL:", "w", stderr);
+            argc = 1;
+            argv = no_args;
+        }
+    }
     // Diagnostics of the port: lines must not be lost in a buffer on a crash
     setvbuf(stdout, NULL, _IONBF, 0);
 #endif

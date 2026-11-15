@@ -860,7 +860,9 @@ void ingame_bug_report(void)
     static char email[80];
     static char text[500];
     struct ScreenBox box;
-    struct ScreenButton send_btn, cancel_btn;
+    struct ScreenButton send_btn, cancel_btn, ok_btn;
+    ubyte *row_bkgnd;
+    short row_y, row_h;
     const struct TbSprite *old_font;
     char status[80];
     short scale, fx, fw, ey, ty, th;
@@ -917,6 +919,25 @@ void ingame_bug_report(void)
     my_draw_text(fx, box.Y + 46 * scale, "WHAT HAPPENED:", 0);
     my_draw_text(fx + fw / 2, box.Y + 6 * scale, "HELP: SEND  ESC: CANCEL", 0);
 
+    // OK in the middle once it is sent (SEND and CANCEL go)
+    init_ingame_screen_button(&ok_btn, box.X + box.Width / 2,
+      box.Y + 140 * scale, "OK", small_font, 0);
+    // the box under the buttons, to put back before they are drawn: no old
+    // button stays, and their see-through backgrounds do not darken
+    row_y = send_btn.Y - send_btn.Border - 2;
+    row_h = send_btn.Height + 2 * send_btn.Border + 4;
+    if (row_y < 0)
+        row_y = 0;
+    if (row_y + row_h > lbDisplay.GraphicsScreenHeight)
+        row_h = lbDisplay.GraphicsScreenHeight - row_y;
+    row_bkgnd = LbMemoryAlloc((ulong)box.Width * row_h);
+    if (row_bkgnd != NULL) {
+        short r;
+        for (r = 0; r < row_h; r++)
+            memcpy(row_bkgnd + r * box.Width, lbDisplay.WScreen
+              + (row_y + r) * lbDisplay.GraphicsScreenWidth + box.X, box.Width);
+    }
+
     focus = (email[0] == '\0') ? 0 : 1;
     state = 0;          // 0 writing, 1 sending, 2 done
     status[0] = '\0';
@@ -950,8 +971,18 @@ void ingame_bug_report(void)
         lbFontPtr = small_font;
         my_draw_text(fx + 2, box.Y + 123 * scale, status, 0);
 
-        draw_ingame_button(&send_btn, 0);
-        draw_ingame_button(&cancel_btn, 0);
+        if (row_bkgnd != NULL) {
+            short r;
+            for (r = 0; r < row_h; r++)
+                memcpy(lbDisplay.WScreen + (row_y + r) * lbDisplay.GraphicsScreenWidth
+                  + box.X, row_bkgnd + r * box.Width, box.Width);
+        }
+        if (state == 2) {
+            draw_ingame_button(&ok_btn, 0);
+        } else {
+            draw_ingame_button(&send_btn, 0);
+            draw_ingame_button(&cancel_btn, 0);
+        }
         lbDisplay.DrawFlags = 0;
 
         if (state == 1) {
@@ -964,8 +995,6 @@ void ingame_bug_report(void)
                 state = 2;
                 if (ok)
                     text[0] = '\0';
-                init_ingame_screen_button(&cancel_btn, box.X + box.Width * 7 / 10,
-                  box.Y + 140 * scale, "OK", small_font, 0);
             }
         }
         else if ((state == 0) && (input_ingame_button(&send_btn, 0)
@@ -976,7 +1005,9 @@ void ingame_bug_report(void)
                 state = 1;
             }
         }
-        if (((state != 1) && input_ingame_button(&cancel_btn, 0))
+        if (((state == 0) && input_ingame_button(&cancel_btn, 0))
+          || ((state == 2) && (input_ingame_button(&ok_btn, 0)
+          || is_key_pressed(KC_RETURN, KMod_DONTCARE)))
           || is_key_pressed(KC_ESCAPE, KMod_DONTCARE)) {
             clear_key_pressed(KC_ESCAPE);
             // a report on its way goes on without the box
@@ -997,5 +1028,7 @@ void ingame_bug_report(void)
     lbDisplay.LeftButton = 0;
     lbDisplay.RightButton = 0;
     lbFontPtr = old_font;
+    if (row_bkgnd != NULL)
+        LbMemoryFree(row_bkgnd);
 }
 #endif

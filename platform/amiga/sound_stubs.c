@@ -1,4 +1,4 @@
-/* Amiga build: no joystick or Smacker video yet; these stand in for
+/* Amiga build: no joystick yet; these stand in for
  * bfsmacklib and the joystick driver.  Sound is bfsoundlib with the Paula
  * driver (snd_bfs.c, snd_engine.c; on the Warp ARM snd_proxy.c). */
 #include "bftypes.h"
@@ -13,9 +13,7 @@
 #include "bfsmack.h"
 
 
-/* Smacker video */
-TbResult play_smk(char *fname, u32 smkflags, ushort plyflags)
-{ (void)fname; (void)smkflags; (void)plyflags; return Lb_FAIL; }
+/* Smacker video: play_smk() in smk_play.c (libsmacker) */
 void set_smack_malloc(void *(*cb)(uint32_t)) { (void)cb; }
 void set_smack_free(void (*cb)(void *ptr)) { (void)cb; }
 

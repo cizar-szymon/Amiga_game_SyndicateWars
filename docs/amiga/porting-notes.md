@@ -402,3 +402,16 @@ Otwarte: odsłuch na prawdziwej Amidze, koszt CPU (pomiar na Amidze 1), `AIL_ms_
   (poza gitem – e-maile graczy); zrzut: `python tools/amiga/iff2png.py …/SyndWars-screen.iff`.
 - Pełnego stanu misji raport nie zawiera (zapis w misji – decyzja użytkownika: nie robimy).
 - Do zrobienia: raport w wersji ARM (wysyłanie przez `swhost`).
+
+### Filmy Smacker (15.11.2026)
+
+- Pięć filmów: `intro/intro.smk` (320×200, 16 kl./s, 131 s), `data/chu_ele.smk` / `syn_ele.smk`
+  (600×300, 15 kl./s), `data/outro-s.smk` / `outro-z.smk` (300×152). Dekoder RAD w PC to
+  zdezasemblowany kod x86 (zamknięty) – zamiast niego `third_party/libsmacker` (LGPL 2.1,
+  Greg Kennedy), odtwarzacz `platform/amiga/smk_play.c` (68k i ARM) jak `play_smk_direct()`.
+- Przyspieszenie dekodera (zmiany oznaczone „Amiga port”): tablica 4096 wpisów dla każdego drzewa
+  obrazu (12 pierwszych bitów naraz), bez `assert` na Amidze. Sprawdzenie:
+  `gcc -O2 -o build/smk_check.exe tools/amiga/smk_check.c third_party/libsmacker/smacker.c`,
+  sumy wszystkich klatek przed i po zmianie identyczne.
+- Tempo filmu z nagłówka liczbą całkowitą (wartość `double` z `libsmacker` nie przechodziła
+  w buildzie 68k – do wyjaśnienia).

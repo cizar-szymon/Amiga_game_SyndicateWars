@@ -565,11 +565,37 @@ static BOOL env_is(const char *val, const char *word)
     return (*val == '\0') || (*val == '\n') || (*val == ' ');
 }
 
+/* SOUND= and MUSIC= of the icon's Tool Types or the command line, over
+ * ENV:SyndWarsSound and ENV:SyndWarsMusic (NULL: from ENV:) */
+static const char *opt_sound, *opt_music;
+
+void se_set_options(const char *sound, const char *music)
+{
+    opt_sound = sound;
+    opt_music = music;
+}
+
+/** Music wanted: not MUSIC=OFF / ENV:SyndWarsMusic=OFF. */
+BOOL se_music_on(void)
+{
+    char buf[16];
+
+    if (opt_music != NULL)
+        return !env_is(opt_music, "OFF");
+    if ((GetVar((STRPTR)"SyndWarsMusic", (STRPTR)buf, sizeof(buf), 0) >= 0) &&
+      env_is(buf, "OFF"))
+        return FALSE;
+    return TRUE;
+}
+
 int se_backend_from_env(void)
 {
     char buf[16];
 
-    if (GetVar((STRPTR)"SyndWarsSound", (STRPTR)buf, sizeof(buf), 0) < 0)
+    if (opt_sound != NULL) {
+        strncpy(buf, opt_sound, sizeof(buf) - 1);
+        buf[sizeof(buf) - 1] = 0;
+    } else if (GetVar((STRPTR)"SyndWarsSound", (STRPTR)buf, sizeof(buf), 0) < 0)
         return SE_PAULA;
     if (env_is(buf, "NONE"))
         return SE_NONE;

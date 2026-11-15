@@ -527,6 +527,7 @@ static void read_input(void)
 int main(int argc, char **argv)
 {
     const char *wxt_path = "PROGDIR:swcore.wxt";
+    const char *snd_opt_sound = NULL, *snd_opt_music = NULL;
     static char args[CSWEXT_ARGS_MAX];
     char prof[4] = "0";
     BPTR f;
@@ -593,12 +594,24 @@ int main(int argc, char **argv)
             wxt_path = argv[i] + 4;
             continue;
         }
+        /* the Tool Types SOUND= / MUSIC= of SyndWars's icon */
+        if (strncmp(argv[i], "SOUND=", 6) == 0) {
+            snd_opt_sound = argv[i] + 6;
+            continue;
+        }
+        if (strncmp(argv[i], "MUSIC=", 6) == 0) {
+            snd_opt_music = argv[i] + 6;
+            continue;
+        }
         if (strlen(args) + strlen(argv[i]) + 2 < sizeof(args)) {
             strcat(args, " ");
             strcat(args, argv[i]);
         }
     }
 
+    se_set_options(snd_opt_sound, snd_opt_music);
+    hlog("swhost: sound backend %d (1 Paula, 2 AHI), music %s%c", se_backend_from_env(),
+      se_music_on() ? "on" : "off", 10);
     if (!(f = Open((STRPTR)wxt_path, MODE_OLDFILE))) {
         hlog("swhost: cannot open %s\n", wxt_path);
         goto out;

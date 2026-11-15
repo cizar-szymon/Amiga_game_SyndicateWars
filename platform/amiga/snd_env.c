@@ -9,13 +9,9 @@ int amiga_sound_backend_wanted(void)
     return se_backend_from_env();
 }
 
-/** ENV:SyndWarsMusic=OFF: no music, all voices for the effects. */
+/** MUSIC=OFF / ENV:SyndWarsMusic=OFF: no music, all voices for the
+ * effects. */
 int amiga_music_wanted(void)
 {
-    char buf[16];
-
-    if ((GetVar((STRPTR)"SyndWarsMusic", (STRPTR)buf, sizeof(buf), 0) >= 0) &&
-      se_env_is(buf, "OFF"))
-        return 0;
-    return 1;
+    return se_music_on() ? 1 : 0;
 }

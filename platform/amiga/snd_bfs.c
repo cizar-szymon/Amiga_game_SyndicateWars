@@ -22,6 +22,7 @@
 #include "aildebug.h"
 #include "bffile.h"
 #include "bfmemory.h"
+#include "bflog.h"
 #include "snd_engine.h"
 
 /** How the sound backend and the music options are got: ENV: on the 68k,
@@ -59,9 +60,18 @@ void amiga_sound_heap_free(void *ptr)
 
 int32_t OPENAL_startup(void)
 {
+    int want, got;
+
     if (se_backend() != SE_NONE)
         return 1;
-    return (se_open(amiga_sound_backend_wanted()) != SE_NONE) ? 1 : 0;
+    want = amiga_sound_backend_wanted();
+    got = se_open(want);
+    // in error.log, for the bug reports
+    LbWarnLog("sound: wanted %s, opened %s, music %s\n",
+      (want == SE_AHI) ? "AHI" : (want == SE_PAULA) ? "Paula" : "none",
+      (got == SE_AHI) ? "AHI" : (got == SE_PAULA) ? "Paula" : "none",
+      amiga_music_wanted() ? "on" : "off");
+    return (got != SE_NONE) ? 1 : 0;
 }
 
 int32_t OPENAL_shutdown(void)

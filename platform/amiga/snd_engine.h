@@ -44,6 +44,10 @@ void se_close(void);
 int se_backend(void);
 /** SE_* from ENV:SyndWarsSound (PAULA default, AHI, NONE). */
 int se_backend_from_env(void);
+/** SOUND= / MUSIC= (Tool Types, command line) over the ENV: variables;
+ * the strings are kept, not copied. */
+void se_set_options(const char *sound, const char *music);
+BOOL se_music_on(void);
 /** TRUE when an ENV: value is the upper case word, in any case. */
 BOOL se_env_is(const char *val, const char *word);
 

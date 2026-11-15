@@ -155,12 +155,7 @@ ULONG hsnd_wait_mask(void)
 
 static BOOL music_on_env(void)
 {
-    char buf[16];
-
-    if ((GetVar((STRPTR)"SyndWarsMusic", (STRPTR)buf, sizeof(buf), 0) >= 0) &&
-      se_env_is(buf, "OFF"))
-        return FALSE;
-    return TRUE;
+    return se_music_on();
 }
 
 /******************************************************************************/

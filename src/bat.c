@@ -27,6 +27,7 @@
 #include <string.h>
 
 #include "engincolour.h"
+#include "engintxtrmap.h"
 
 #include "bigmap.h"
 #include "game.h"
@@ -36,6 +37,7 @@
 #include "sound.h"
 #include "swlog.h"
 #include "thing.h"
+#include "fncheck.h"
 /******************************************************************************/
 
 #pragma pack(1)
@@ -633,12 +635,52 @@ void BAT_play(void)
 #endif
 }
 
+#ifdef SW_FNCHK
+static void BAT_unknsub_20_asm(int a1, int a2, int a3, int a4, ubyte *p_screen)
+{
+    int stkargs[1];
+
+    stkargs[0] = (int)(intptr_t)p_screen;
+    asm volatile (
+      "push 0(%4)\n"
+      "call ASM_BAT_unknsub_20\n"
+        : "+a" (a1), "+d" (a2), "+b" (a3), "+c" (a4) : "S" (stkargs) : "cc", "memory");
+}
+#endif
+
+/** Brick colours of the BAT game (9 bytes, in the asm data). */
+extern ubyte data_1e2710[9];
+
+/** Sets the BAT game up: the map area, the brick colours, a full wall of
+ * bricks, empty ball and bonus lists and the screen (as the original,
+ * always vec_tmap[4] + 0xA040, `p_screen` is not used).
+ * Remade from BAT_unknsub_20. */
+static void BAT_unknsub_20_c(int a1, int a2, int a3, int a4, ubyte *p_screen)
+{
+    static const ubyte colour_no[9] = {2, 3, 4, 1, 9, 5, 8, 7, 10};
+    int i;
+
+    bat_unknvalA_min = a1;
+    bat_unknvalB_min = a2;
+    bat_unknvalA_max = a3;
+    bat_unknvalB_max = a4;
+    for (i = 0; i < 9; i++)
+        data_1e2710[i] = colour_lookup[colour_no[i]];
+    for (i = 0; i < 8; i++)
+        data_1e2710[i] = pixmap.fade_table[0x2000 + data_1e2710[i]];
+    data_1e2710[8] = pixmap.fade_table[0x3000 + data_1e2710[8]];
+    *(ubyte *)&BAT_lives_colour = colour_lookup[1];
+    memset(BAT_bricks, 0x80, 10 * 12);
+    BAT_reset_free_balls();
+    BAT_reset_free_bonuses();
+    BAT_screen = vec_tmap[4] + 0xA040;
+    BAT_state = 0;
+}
+
 void BAT_unknsub_20(int a1, int a2, int a3, int a4, ubyte *p_screen)
 {
-    asm volatile (
-      "push %4\n"
-      "call ASM_BAT_unknsub_20\n"
-        : : "a" (a1), "d" (a2), "b" (a3), "c" (a4), "g" (p_screen));
+    FNCHK_VOID("BAT_unknsub_20", BAT_unknsub_20_asm(a1, a2, a3, a4, p_screen),
+      BAT_unknsub_20_c(a1, a2, a3, a4, p_screen));
 }
 
 /******************************************************************************/

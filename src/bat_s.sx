@@ -3522,7 +3522,7 @@ GLOBAL (BAT_bricks_remain)	/* 0x1e270c */
 		.ascii  "\x00\x00\x00"
 data_1e270f:
 		.byte	0x0
-data_1e2710:
+GLOBAL (data_1e2710)
 		.byte	0x0
 data_1e2711:
 		.byte	0x0

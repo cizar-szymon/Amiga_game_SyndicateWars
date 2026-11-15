@@ -69,6 +69,7 @@ ushort data_1c8468; /* src\game.c, 2 bytes */
 s32 data_1c84f4[17]; /* src\vehicle.c, 4 bytes */
 s32 data_1dd91c; /* src\vehtraffic.h, 4 bytes */
 ubyte data_1dded8[400]; /* src\sound.c, 400 bytes */
+ubyte data_1e2710[9]; /* src\bat.c, 1 bytes */
 short datagram_backup[2200]; /* struct IPXDatagramBackup datagram_backup[8], src\network.c */
 s32 dword_152E38[5] = {-1, -1, -1, -1, -1};
 s32 dword_176D6C; /* src\thing.c, 4 bytes */

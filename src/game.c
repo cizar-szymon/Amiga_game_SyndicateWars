@@ -7465,6 +7465,42 @@ void joy_input(void)
 
 /** Orbital station explosion code.
  */
+#if defined(SW_AMIGA)
+int amiga_getenv_int(const char *name, int dflt);
+
+/** Test scene for measuring explosions (ENV:SyndWarsBangTest=N): every N
+ * game turns a visual explosion (no damage) somewhere within 8 tiles of
+ * the first agent.  Off by default; its own random numbers, so that the
+ * game's are not changed. */
+static void amiga_bang_test(void)
+{
+    static int every = -1;
+    static u32 seed = 12345;
+    struct Thing *p_agent;
+    s32 dx, dz;
+
+    if (every < 0) {
+        every = amiga_getenv_int("SyndWarsBangTest", 0);
+        // ENV:SyndWarsBangLo=1: low explosion detail (as DETAIL LO in the
+        // pause menu), to measure it
+        if (amiga_getenv_int("SyndWarsBangLo", 0) == 1)
+            bang_set_detail(1);
+    }
+    if ((every <= 0) || ((gameturn % every) != 0))
+        return;
+    if (ingame.DisplayMode != DpM_ENGINEPLY)
+        return;
+    p_agent = players[local_player_no].MyAgent[0];
+    if ((p_agent == NULL) || ((p_agent->Flag & TngF_Destroyed) != 0))
+        return;
+    seed = seed * 1103515245u + 12345u;
+    dx = (s32)((seed >> 8) % 4096) - 2048;
+    seed = seed * 1103515245u + 12345u;
+    dz = (s32)((seed >> 8) % 4096) - 2048;
+    bang_new4(p_agent->X + (dx << 8), p_agent->Y, p_agent->Z + (dz << 8), 0x0F);
+}
+#endif
+
 void game_process_orbital_station_explode(void)
 {
     if (unkn01_downcount > 0)
@@ -7591,6 +7627,9 @@ void game_process(void)
 
         update_unkn_changing_colors();
         game_process_orbital_station_explode();
+#if defined(SW_AMIGA)
+        amiga_bang_test();
+#endif
         gameturn++;
         scene_post_effect_prepare();
     }

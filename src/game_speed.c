@@ -23,7 +23,9 @@
 #include "bftime.h"
 #include "enginprops.h"
 #include "game.h"
+#include "game_options.h"
 #include "keyboard.h"
+#include "packet.h"
 #include "swlog.h"
 
 /******************************************************************************/
@@ -110,11 +112,54 @@ ubyte get_speed_control_inputs(void)
     return did_inp;
 }
 
+/** AUTO DETAIL: the work time of the game turns (from the end of one
+ * turn's wait to the start of the next one's) is averaged over about 8
+ * turns; above the turn time plus 4 ms the explosions get the low detail,
+ * below 85% of the turn time the user's DETAIL setting comes back.  The
+ * detail changes the look of explosions made from then on, but also how
+ * often craters are made and how buildings break up (the terrain), so as
+ * the original keeps one detail for all in a network game, it is not done
+ * there, nor while a packet record is made or played. */
+static void auto_detail_turn(long work_ms)
+{
+    static long avg8 = 0;
+    static TbBool lowered = false;
+    long turn_ms, avg;
+
+    if (!game_auto_detail || (ingame.DetailLevel == 0) || in_network_game ||
+      PacketRecord_IsPlayback() || PacketRecord_IsRecord()) {
+        // off, or the user chose the low detail anyway
+        if (lowered) {
+            bang_set_detail(1 - ingame.DetailLevel);
+            lowered = false;
+        }
+        avg8 = 0;
+        return;
+    }
+    if ((work_ms < 0) || (work_ms > 1000))
+        return;
+    avg8 += work_ms - avg8 / 8;
+    avg = avg8 / 8;
+    turn_ms = 1000 / game_num_fps;
+    if (!lowered && (avg > turn_ms + 4)) {
+        bang_set_detail(1);
+        lowered = true;
+        LOGWARN("auto detail: low, work %ld ms per turn", avg);
+    } else if (lowered && (avg < turn_ms * 85 / 100)) {
+        bang_set_detail(1 - ingame.DetailLevel);
+        lowered = false;
+        LOGWARN("auto detail: back, work %ld ms per turn", avg);
+    }
+}
+
 void wait_next_gameturn(void)
 {
     static TbClockMSec last_loop_time = 0;
     TbClockMSec curr_time = LbTimerClock();
     TbClockMSec sleep_end;
+
+    if (last_loop_time != 0)
+        auto_detail_turn((long)(curr_time - last_loop_time));
 
     if (frameskip == 0)
         sleep_end = last_loop_time + 1000/game_num_fps;

@@ -209,6 +209,10 @@ extern ubyte game_gfx_deep_radar;
  * the scanner drawn every 2nd frame (see src/hud_panel.c). */
 extern ubyte game_far_pedestrians;
 extern ubyte game_scanner_half_rate;
+/** Lower explosion detail while the game is slower than its full speed
+ * (see wait_next_gameturn() in src/game_speed.c); the user's DETAIL
+ * setting comes back when the speed does. */
+extern ubyte game_auto_detail;
 
 void set_default_speed_options(void);
 

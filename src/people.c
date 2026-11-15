@@ -2725,12 +2725,50 @@ void person_init_drop_special(struct Thing *p_person, ThingIdx item)
 }
 
 
+#ifdef SW_FNCHK
+static short find_peep_in_area_asm(struct Thing *p_me, struct Command *p_cmd)
+{
+    int ret;
+    asm volatile (
+      "call ASM_find_peep_in_area\n"
+        : "=a" (ret), "+d" (p_cmd) : "0" (p_me) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** The first living person of another group (without a truce with the
+ * person's group) within the command's area; 0 if none (at most 1000 are
+ * looked at).  Remade from find_peep_in_area. */
+static short find_peep_in_area_c(struct Thing *p_me, struct Command *p_cmd)
+{
+    ushort thing, n;
+
+    n = 0;
+    for (thing = same_type_head[1]; (thing != 0) && (n < 1000);
+      thing = things[thing].LinkSame, n++)
+    {
+        struct Thing *p_thing;
+        ubyte group;
+
+        p_thing = &things[thing];
+        if ((p_thing->Flag & TngF_Destroyed) != 0)
+            continue;
+        group = p_thing->U.UPerson.Group;
+        if (group == p_me->U.UPerson.Group)
+            continue;
+        if ((war_flags[p_me->U.UPerson.Group].Truce & (1u << (group & 0x1F))) != 0)
+            continue;
+        if (check_person_within(p_cmd, p_thing->X >> 8, p_thing->Z >> 8))
+            return thing;
+    }
+    return 0;
+}
+
 short find_peep_in_area(struct Thing *p_me, struct Command *p_cmd)
 {
     short ret;
-    asm volatile (
-      "call ASM_find_peep_in_area\n"
-        : "=r" (ret) : "a" (p_me), "d" (p_cmd));
+    FNCHK_RET("find_peep_in_area", ret, find_peep_in_area_asm(p_me, p_cmd),
+      find_peep_in_area_c(p_me, p_cmd));
     return ret;
 }
 

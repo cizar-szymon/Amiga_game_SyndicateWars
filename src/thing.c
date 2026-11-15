@@ -1522,11 +1522,65 @@ void process_rocket(struct Thing *p_rocket)
     FNCHK_VOID("process_rocket", process_rocket_asm(p_rocket), process_rocket_c(p_rocket));
 }
 
-void process_laser_guided(struct Thing *p_laser)
+#ifdef SW_FNCHK
+static void process_laser_guided_asm(struct Thing *p_laser)
 {
     asm volatile (
       "call ASM_process_laser_guided\n"
-        : : "a" (p_laser));
+        : "+a" (p_laser) : : "cc", "memory");
+}
+#endif
+
+short calc_angle_rate(short target_angle, short cur_angle, short *p_glow_size);
+
+/** A guided laser beam turns towards its target (at a limited rate) and
+ * flies on; near the target it hits it and goes, and it goes when its
+ * timer runs out or the target is gone.  Its angle is in AngleY.
+ * Remade from process_laser_guided. */
+static void process_laser_guided_c(struct Thing *p_laser)
+{
+    struct Thing *p_target;
+    s32 dx, dz, dist, nx, nz;
+    short speed, angle;
+
+    speed = 0x40;
+    p_target = p_laser->PTarget;
+    if (p_target == NULL)
+    {
+        remove_thing((ushort)(p_laser - things));
+        delete_node(p_laser);
+        return;
+    }
+    dx = (p_laser->X - p_target->X) >> 8;
+    dz = (p_laser->Z - p_target->Z) >> 8;
+    dist = (s32)((u32)dx * (u32)dx + (u32)dz * (u32)dz);
+    if (dist < 0x4000)
+    {
+        angle = p_laser->U.UEffect.AngleY;
+        thing_hit_by_bullet(p_target, 1000, (short)(lbSinTable[angle] >> 5), 0,
+          (short)(lbSinTable[angle + 512] >> 5), &things[(ushort)p_laser->Owner], 3);
+    }
+    p_laser->Timer1--;
+    if ((p_laser->Timer1 == 0) || (dist < 0x4000))
+    {
+        remove_thing((ushort)(p_laser - things));
+        delete_node(p_laser);
+        return;
+    }
+    p_target = p_laser->PTarget;
+    angle = arctan((p_target->X >> 8) - (p_laser->X >> 8), -((p_target->Z >> 8) - (p_laser->Z >> 8)));
+    angle = calc_angle_rate(angle, p_laser->U.UEffect.AngleY, &speed);
+    p_laser->U.UEffect.AngleY = (angle + p_laser->U.UEffect.AngleY + 0x800) & 0x7FF;
+    angle = p_laser->U.UEffect.AngleY;
+    nx = p_laser->X + ((lbSinTable[angle] * speed) >> 8);
+    nz = p_laser->Z + ((lbSinTable[angle + 512] * speed) >> 8);
+    move_mapwho(p_laser, nx, p_laser->Y, nz);
+}
+
+void process_laser_guided(struct Thing *p_laser)
+{
+    FNCHK_VOID("process_laser_guided", process_laser_guided_asm(p_laser),
+      process_laser_guided_c(p_laser));
 }
 
 

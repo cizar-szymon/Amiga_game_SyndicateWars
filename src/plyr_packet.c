@@ -29,6 +29,7 @@
 #include "ssampply.h"
 
 #include "bigmap.h"
+#include "command.h"
 #include "bmcrater.h"
 #include "display.h"
 #include "drawtext_wrp.h"
@@ -157,6 +158,8 @@ int can_i_see_building(struct Thing *p_i, struct Thing *p_thing, int max_dist, u
 void get_soul(struct Thing *p_dead, struct Thing *p_person);
 int map_things_unkn_func_04(short subtype);
 struct SimpleThing *init_nuclear_bomb(MapCoord x, MapCoord y, MapCoord z);
+short find_peep_in_area(struct Thing *p_me, struct Command *p_cmd);
+void init_laser_guided(struct Thing *p_owner, ushort count);
 
 void set_player_peeps_to_run(struct Thing *p_leader, ushort plyr)
 {
@@ -1970,6 +1973,21 @@ static void test_cmds_process(void)
     case 72:
         map_things_unkn_func_04(0);
         break;
+    case 79:
+        init_laser_guided(p_agent, 32);
+        break;
+    case 77:
+    case 78:
+    {
+        static struct Command test_cmd;
+
+        test_cmd.X = p_agent->X >> 8;
+        test_cmd.Z = p_agent->Z >> 8;
+        test_cmd.Arg1 = 1 + (gameturn / 120) % 12;
+        test_cmd.Flags = (gameturn & 1) ? 0x08 : 0;
+        find_peep_in_area(p_agent, &test_cmd);
+        break;
+    }
     case 76:
         if ((gameturn % 240) < 120)
         {

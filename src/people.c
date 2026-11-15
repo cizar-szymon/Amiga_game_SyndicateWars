@@ -9378,10 +9378,20 @@ void process_tasered_person(struct Thing *p_person)
         : : "a" (p_person));
 }
 
-void person_intel(struct Thing *p_person)
+#ifdef SW_FNCHK
+static void person_intel_asm(struct Thing *p_person)
 {
     asm volatile ("call ASM_person_intel\n"
-        : : "a" (p_person));
+        : "+a" (p_person) : : "cc", "memory");
+}
+#endif
+
+static void people_intel_person(struct Thing *p_person);
+
+/** Remade from person_intel; the same as one step of people_intel(). */
+void person_intel(struct Thing *p_person)
+{
+    FNCHK_VOID("person_intel", person_intel_asm(p_person), people_intel_person(p_person));
 }
 
 #ifdef SW_FNCHK

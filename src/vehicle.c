@@ -5176,6 +5176,24 @@ static void mech_wr32(void *p, int offs, s32 v)
     memcpy((ubyte *)p + offs, &v, 4);
 }
 
+/** Starts animation `anim` (an unkn_mech_arr2 entry) in slot `slot` (0 or 1)
+ * of the mech of thing `owntng`: the animation, its first step (from
+ * unkn_mech_arr1) and the "playing" flag.  Remade from mech_unkn_func_05. */
+void mech_unkn_func_05_c(int owntng, int slot, int anim)
+{
+    ubyte *p_m3, *p_m1;
+    s32 step;
+
+    p_m3 = (ubyte *)&unkn_mech_arr3[owntng];
+    step = unkn_mech_arr2[anim].field_0;
+    p_m1 = (ubyte *)&unkn_mech_arr1[step];
+    mech_wr32(p_m3, 0x6C + slot * 4, anim);
+    mech_wr32(p_m3, 0x54 + slot * 4, mech_rd32(p_m1, 0xD));
+    mech_wr32(p_m3, 0x5C + slot * 4, mech_rd32(p_m1, 0x9));
+    mech_wr32(p_m3, 0x64 + slot * 4, step);
+    p_m3[0x74 + slot] = 1;
+}
+
 /** Copies a matrix transposed.  Remade from matrix_transpose_cp. */
 static void matrix_transpose_cp(struct M33 *p_dst, struct M33 *p_src)
 {

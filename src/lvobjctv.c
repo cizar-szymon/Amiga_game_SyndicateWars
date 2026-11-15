@@ -26,6 +26,7 @@
 #include "bfmemut.h"
 #include "bfini.h"
 
+#include "engincam.h"
 #include "engincolour.h"
 #include "huddrwlstm.h"
 
@@ -785,12 +786,45 @@ TbBool item_is_carried_by_player(ThingIdx thing, WeaponType wtype, ushort plyr)
     return false;
 }
 
+#ifdef SW_FNCHK
+static ubyte group_not_seen_asm(ushort group)
+{
+    int ret;
+    asm volatile (
+      "call ASM_group_not_seen\n"
+        : "=a" (ret) : "0" (group) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** True when no living member of the group is within the view distance of
+ * the camera (depending on the zoom).  Remade from group_not_seen. */
+static ubyte group_not_seen_c(ushort group)
+{
+    s32 d;
+    short thing;
+
+    d = 0x90000 / (short)overall_scale;
+    d = d * d;
+    for (thing = same_type_head[256 + group]; thing > 0; )
+    {
+        struct Thing *p_thing;
+
+        p_thing = &things[thing];
+        if ((p_thing->Flag & TngF_Destroyed) == 0)
+        {
+            if (thing_arrived_at_obj_radius(thing, engn_xc, 0, engn_zc, d))
+                return 0;
+        }
+        thing = things[thing].LinkSameGroup;
+    }
+    return (thing == 0);
+}
+
 ubyte group_not_seen(ushort group)
 {
     ubyte ret;
-    asm volatile (
-      "call ASM_group_not_seen\n"
-        : "=r" (ret) : "a" (group));
+    FNCHK_RET("group_not_seen", ret, group_not_seen_asm(group), group_not_seen_c(group));
     return ret;
 }
 
@@ -839,13 +873,55 @@ TbBool thing_arrived_at_obj_square2(ThingIdx thing, int x1, int z1, int x2, int 
     return false;
 }
 
+#ifdef SW_FNCHK
+static ubyte all_group_arrived_square_asm(ushort group, short x, short z, short x2, int z2)
+{
+    int ret;
+    int stkargs[1];
+
+    stkargs[0] = z2;
+    asm volatile (
+      "push 0(%5)\n"
+      "call ASM_all_group_arrived_square\n"
+        : "=a" (ret), "+d" (x), "+b" (z), "+c" (x2) : "0" (group), "S" (stkargs)
+        : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** True when all living members of the group (at least one) are inside the
+ * tile rectangle (x,z)-(x2,z2).  Remade from all_group_arrived_square. */
+static ubyte all_group_arrived_square_c(ushort group, short x, short z, short x2, int z2)
+{
+    short thing;
+    TbBool any;
+
+    any = false;
+    for (thing = same_type_head[256 + group]; thing > 0; )
+    {
+        struct Thing *p_thing;
+        short tx, tz;
+
+        p_thing = &things[thing];
+        tx = p_thing->X >> 8;
+        tz = p_thing->Z >> 8;
+        if ((p_thing->Flag & TngF_Destroyed) == 0)
+        {
+            any = true;
+            if ((tx < x) || (tx > x2) || (tz < z) || (tz > (short)z2))
+                return 0;
+        }
+        thing = p_thing->LinkSameGroup;
+    }
+    return (thing == 0) && any;
+}
+
 ubyte all_group_arrived_square(ushort group, short x, short z, short x2, int z2)
 {
     ubyte ret;
-    asm volatile (
-      "push %5\n"
-      "call ASM_all_group_arrived_square\n"
-        : "=r" (ret) : "a" (group), "d" (x), "b" (z), "c" (x2), "g" (z2));
+    FNCHK_RET("all_group_arrived_square", ret,
+      all_group_arrived_square_asm(group, x, z, x2, z2),
+      all_group_arrived_square_c(group, x, z, x2, z2));
     return ret;
 }
 

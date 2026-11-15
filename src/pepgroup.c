@@ -25,6 +25,8 @@
 #include "command.h"
 #include "player.h"
 #include "swlog.h"
+#include "fncheck.h"
+#include "lvobjctv.h"
 #include "thing.h"
 #include "game.h"
 #include "game_options.h"
@@ -429,13 +431,54 @@ TbBool all_group_persuaded(ushort group)
     return true;
 }
 
+#ifdef SW_FNCHK
+static ubyte all_group_arrived_asm(ushort group, short x, short y, short z, int radius)
+{
+    int ret;
+    int stkargs[1];
+
+    stkargs[0] = radius;
+    asm volatile (
+      "push 0(%5)\n"
+      "call ASM_all_group_arrived\n"
+        : "=a" (ret), "+d" (x), "+b" (y), "+c" (z) : "0" (group), "S" (stkargs)
+        : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** True when all living members of the group (at least one) are within
+ * the radius (in tiles of 64) of the point.  Remade from all_group_arrived. */
+static ubyte all_group_arrived_c(ushort group, short x, short y, short z, int radius)
+{
+    s32 r2;
+    short thing;
+    TbBool any;
+
+    r2 = (radius * radius) << 12;
+    any = false;
+    for (thing = same_type_head[256 + group]; thing > 0; )
+    {
+        struct Thing *p_thing;
+
+        p_thing = &things[thing];
+        if ((p_thing->Flag & TngF_Destroyed) != 0) {
+            thing = p_thing->LinkSameGroup;
+            continue;
+        }
+        any = true;
+        if (!thing_arrived_at_obj_radius(thing, x, y, z, r2))
+            return 0;
+        thing = things[thing].LinkSameGroup;
+    }
+    return (thing == 0) && any;
+}
+
 ubyte all_group_arrived(ushort group, short x, short y, short z, int radius)
 {
     ubyte ret;
-    asm volatile (
-      "push %5\n"
-      "call ASM_all_group_arrived\n"
-        : "=r" (ret) : "a" (group), "d" (x), "b" (y), "c" (z), "g" (radius));
+    FNCHK_RET("all_group_arrived", ret, all_group_arrived_asm(group, x, y, z, radius),
+      all_group_arrived_c(group, x, y, z, radius));
     return ret;
 }
 

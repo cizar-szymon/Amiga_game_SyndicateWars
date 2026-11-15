@@ -4804,10 +4804,20 @@ void process_vehicle_weapon(struct Thing *p_vehicle, struct Thing *p_person)
 #endif
 }
 
-void mech_unkn_func_05(int owntng, int a2, int a3)
+#ifdef SW_FNCHK
+static void mech_unkn_func_05_asm(int owntng, int a2, int a3)
 {
     asm volatile ("call ASM_mech_unkn_func_05\n"
-        : : "a" (owntng), "d" (a2), "b" (a3));
+        : "+a" (owntng), "+d" (a2), "+b" (a3) : : "cc", "memory");
+}
+#endif
+
+void mech_unkn_func_05_c(int owntng, int a2, int a3);
+
+void mech_unkn_func_05(int owntng, int a2, int a3)
+{
+    FNCHK_VOID("mech_unkn_func_05", mech_unkn_func_05_asm(owntng, a2, a3),
+      mech_unkn_func_05_c(owntng, a2, a3));
 }
 
 void process_mech_weapon(struct Thing *p_vehicle, struct Thing *p_person)

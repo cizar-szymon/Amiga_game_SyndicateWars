@@ -160,6 +160,11 @@ int map_things_unkn_func_04(short subtype);
 struct SimpleThing *init_nuclear_bomb(MapCoord x, MapCoord y, MapCoord z);
 short find_peep_in_area(struct Thing *p_me, struct Command *p_cmd);
 void init_laser_guided(struct Thing *p_owner, ushort count);
+ubyte all_group_arrived(ushort group, short x, short y, short z, int radius);
+ubyte all_group_arrived_square(ushort group, short x, short z, short x2, int z2);
+ubyte group_not_seen(ushort group);
+void person_intel(struct Thing *p_person);
+void mech_unkn_func_05(int owntng, int a2, int a3);
 
 void set_player_peeps_to_run(struct Thing *p_leader, ushort plyr)
 {
@@ -1973,6 +1978,27 @@ static void test_cmds_process(void)
     case 72:
         map_things_unkn_func_04(0);
         break;
+    case 80:
+    case 81:
+    case 82:
+    {
+        struct Thing *p_pers;
+        ushort grp;
+        short ax, az;
+
+        p_pers = test_cmds_nearest_thing(p_agent, TT_PERSON, false);
+        grp = (p_pers != NULL) ? p_pers->U.UPerson.Group : p_agent->U.UPerson.Group;
+        ax = p_agent->X >> 8;
+        az = p_agent->Z >> 8;
+        all_group_arrived(grp, ax, p_agent->Y >> 8, az, 1 + (gameturn / 120) % 16);
+        all_group_arrived_square(grp, ax - 0x400, az - 0x400, ax + 0x400, az + 0x400);
+        group_not_seen(grp);
+        if ((p_pers != NULL) && ((p_pers->Flag & TngF_PlayerAgent) == 0))
+            person_intel(p_pers);
+        if (unkn_mech_arr3 != NULL)
+            mech_unkn_func_05(0, gameturn & 1, (gameturn / 120) % 4);
+        break;
+    }
     case 79:
         init_laser_guided(p_agent, 32);
         break;

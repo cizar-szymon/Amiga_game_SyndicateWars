@@ -41,6 +41,7 @@ ubyte game_gfx_deep_radar;
 ubyte game_far_pedestrians;
 ubyte game_scanner_half_rate;
 ubyte game_auto_detail;
+ubyte game_show_speed;
 
 short user_sel_brightness = 0;
 
@@ -560,7 +561,7 @@ int amiga_getenv_int(const char *name, int dflt);
 
 void set_default_speed_options(void)
 {
-    int far_peds, scan_half, auto_det;
+    int far_peds, scan_half, auto_det, show_speed;
 
 #if defined(SW_AMIGA)
     /* on by default on the Amiga and the Warp ARM - the user found no
@@ -572,6 +573,8 @@ void set_default_speed_options(void)
     /* lower explosion detail while too slow: on by default (user's idea,
      * 15.11.2026: the speed fell to 12 turns/s in big explosions) */
     auto_det = amiga_getenv_int("SyndWarsAutoDetail", 1);
+    /* game speed in % in the corner: off by default (user's choice) */
+    show_speed = amiga_getenv_int("SyndWarsShowSpeed", 0);
 #else
     /* the PC build stays the reference */
     {
@@ -582,6 +585,8 @@ void set_default_speed_options(void)
         scan_half = (s != NULL) ? atoi(s) : 0;
         s = getenv("SW_AUTODETAIL");
         auto_det = (s != NULL) ? atoi(s) : 0;
+        s = getenv("SW_SHOWSPEED");
+        show_speed = (s != NULL) ? atoi(s) : 0;
     }
 #endif
     if ((far_peds < 0) || (far_peds > 3))
@@ -589,6 +594,7 @@ void set_default_speed_options(void)
     game_far_pedestrians = far_peds;
     game_scanner_half_rate = (scan_half == 1);
     game_auto_detail = (auto_det == 1);
+    game_show_speed = (show_speed == 1);
 }
 
 void set_default_visual_prefernces(void)

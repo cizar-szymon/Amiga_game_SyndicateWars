@@ -619,6 +619,8 @@ void read_user_settings(void)
                 game_scanner_half_rate = opt;
             if (file_read_le(fh, &opt, sizeof(opt)) == sizeof(opt) && (opt <= 1))
                 game_auto_detail = opt;
+            if (file_read_le(fh, &opt, sizeof(opt)) == sizeof(opt) && (opt <= 1))
+                game_show_speed = opt;
         }
         LbFileClose(fh);
 
@@ -685,6 +687,7 @@ TbBool save_user_settings(void)
     file_write_le(fh, &game_far_pedestrians, sizeof(game_far_pedestrians));
     file_write_le(fh, &game_scanner_half_rate, sizeof(game_scanner_half_rate));
     file_write_le(fh, &game_auto_detail, sizeof(game_auto_detail));
+    file_write_le(fh, &game_show_speed, sizeof(game_show_speed));
     LbFileClose(fh);
     return 0;
 }

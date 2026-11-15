@@ -213,6 +213,10 @@ extern ubyte game_scanner_half_rate;
  * (see wait_next_gameturn() in src/game_speed.c); the user's DETAIL
  * setting comes back when the speed does. */
 extern ubyte game_auto_detail;
+/** Game speed in % of its full speed (16 turns/s) in the screen's corner
+ * during a mission (see wait_next_gameturn() in src/game_speed.c); drawn
+ * by the Amiga and Warp screen code. */
+extern ubyte game_show_speed;
 
 void set_default_speed_options(void);
 

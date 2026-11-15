@@ -145,6 +145,46 @@ static void overload_turn(long work_ms)
  * craters are made and how buildings break up (the terrain), so as the
  * original keeps one detail for all in a network game, it is not done
  * there, nor while a packet record is made or played. */
+#if defined(SW_AMIGA)
+/** Shown by the screen code (bflibrary m68k-amigaos / arm-warp), -1 hides. */
+extern long lbSpeedMeter;
+#endif
+
+/** Game speed in % of the full speed (game_num_fps turns a second), over
+ * windows of about a second; shown during a mission when SHOW SPEED is on. */
+static void speed_meter_turn(TbClockMSec now)
+{
+    static TbClockMSec win_start;
+    static ulong win_turns;
+    static long pct = 100;
+    ulong ms;
+
+    if ((game_show_speed == 0) || (ingame.DisplayMode != DpM_ENGINEPLY)) {
+        win_start = 0;
+        pct = 100;
+#if defined(SW_AMIGA)
+        lbSpeedMeter = -1;
+#endif
+        return;
+    }
+    if (win_start == 0) {
+        win_start = now;
+        win_turns = 0;
+    }
+    win_turns++;
+    ms = (ulong)(now - win_start);
+    if (ms >= 1000) {
+        pct = (long)((win_turns * 100000UL / game_num_fps + ms / 2) / ms);
+        if (pct > 100)
+            pct = 100;
+        win_start = now;
+        win_turns = 0;
+    }
+#if defined(SW_AMIGA)
+    lbSpeedMeter = pct;
+#endif
+}
+
 static void auto_detail_turn(void)
 {
     static TbBool lowered = false;
@@ -170,6 +210,7 @@ void wait_next_gameturn(void)
     if (last_loop_time != 0)
         overload_turn((long)(curr_time - last_loop_time));
     auto_detail_turn();
+    speed_meter_turn(curr_time);
 
     if (frameskip == 0)
         sleep_end = last_loop_time + 1000/game_num_fps;

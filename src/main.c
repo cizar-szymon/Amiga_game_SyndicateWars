@@ -574,7 +574,7 @@ void read_conf_file(void)
 int
 main (int argc, char **argv)
 {
-#if defined(SW_AMIGA)
+#if defined(SW_AMIGA) && !defined(SW_WARP)
     {
         extern void *_WBenchMsg;
         static char *no_args[] = {"SyndWars", NULL};
@@ -589,6 +589,8 @@ main (int argc, char **argv)
             argv = no_args;
         }
     }
+#endif
+#if defined(SW_AMIGA)
     // Diagnostics of the port: lines must not be lost in a buffer on a crash
     setvbuf(stdout, NULL, _IONBF, 0);
 #endif

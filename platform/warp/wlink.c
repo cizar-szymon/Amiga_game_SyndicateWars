@@ -161,14 +161,15 @@ int wl_request(unsigned type, const void *a, unsigned alen, const void *b, unsig
     return result_val;
 }
 
-void wl_frame_send(uint32_t buf, unsigned w, unsigned h, uint32_t pitch)
+void wl_frame_send(uint32_t buf, unsigned w, unsigned h, uint32_t pitch, long meter)
 {
-    struct { uint16_t w, h; uint32_t pitch, buf; } fr;
+    struct { uint16_t w, h; uint32_t pitch, buf; int32_t meter; } fr;
 
     fr.w = (uint16_t)w;
     fr.h = (uint16_t)h;
     fr.pitch = pitch;
     fr.buf = buf;
+    fr.meter = (int32_t)meter;
     frames_sent++;
     wl_send(SWL_FRAME, &fr, sizeof(fr));
 }

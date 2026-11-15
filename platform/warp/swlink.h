@@ -40,7 +40,8 @@
 #define SWL_HELLO        2        /* u32 version, u32 cpuHz, u32 window, u32 render */
 #define SWL_SCREEN       3        /* u16 width, u16 height: open / change the screen */
 #define SWL_PAL          4        /* 768 bytes, 6-bit RGB */
-#define SWL_FRAME        5        /* u16 width, u16 height, u32 pitch, u32 buffer */
+#define SWL_FRAME        5        /* u16 width, u16 height, u32 pitch, u32 buffer,
+                                     s32 game speed % in the corner (-1: none) */
 #define SWL_STATS        6        /* text: profiler lines for the 68k's console */
 #define SWL_FOPEN        10       /* u32 flags (O_*), name -> RESULT handle, size */
 #define SWL_FREAD        11       /* u32 handle, u32 offset, u32 len -> RESULT bytes */

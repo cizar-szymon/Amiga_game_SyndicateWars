@@ -38,6 +38,9 @@ static long warp_screen_w, warp_screen_h;
 
 volatile TbBool lbScreenDirectAccessActive = false;
 long lbMinScreenSurfaceDimension = 1;
+/** Game speed in % for the corner of the screen (src/game_speed.c), sent
+ * with each frame to swhost; -1 hides it. */
+long lbSpeedMeter = -1;
 TbSurfaceDimensions lbScreenSurfaceDimensions = { 320, 200 };
 TbBool lbHasSecondSurface = false;
 TbBool lbDoubleBufferingRequested = false;
@@ -370,7 +373,7 @@ static TbResult warp_present(int wait)
         registered = lbDisplay.WScreen;
         registered_bytes = bytes;
     }
-    wl_frame_send(SWL_BUF_SCREEN, w, h, pitch);
+    wl_frame_send(SWL_BUF_SCREEN, w, h, pitch, lbSpeedMeter);
     if (wait)
         warp_fetch_us_sum += wl_frames_wait(0);
     warp_fetch_frames++;

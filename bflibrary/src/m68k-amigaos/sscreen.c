@@ -395,31 +395,39 @@ ulong LbScreenSetWScreenInVideo(ulong flag)
 }
 
 /******************************************************************************/
-// Frame rate display: 3x5 digits, drawn into the card's bitmap after the copy
+// Game speed display (SHOW SPEED in the options): "75%" in 3x5 digits on a
+// black box, drawn into the card's bitmap after the copy
 
-static const UBYTE fps_font[10][5] = {
+/** Set by the game every turn (src/game_speed.c): % of its full speed, or
+ * -1 when not shown. */
+long lbSpeedMeter = -1;
+
+static const UBYTE fps_font[11][5] = {
     {7,5,5,5,7}, {2,6,2,2,7}, {7,1,7,4,7}, {7,1,7,1,7}, {5,5,7,1,1},
     {7,4,7,1,7}, {7,4,7,5,7}, {7,1,1,1,1}, {7,5,7,5,7}, {7,5,7,1,7},
+    {5,1,2,4,5}, /* % */
 };
 
-static void fps_draw(UBYTE *base, ULONG bpr, unsigned long value)
+static void meter_draw(UBYTE *base, ULONG bpr, ULONG w, ULONG h, long value)
 {
     char txt[8];
     int i, n, y, x;
 
-    n = snprintf(txt, sizeof(txt), "%lu", value);
+    n = snprintf(txt, sizeof(txt), "%ld%%", value);
+    // bottom right corner
+    base += (h - 8) * bpr + (w - (n * 4 + 3));
+    for (y = 0; y < 7; y++)
+        for (x = 0; x < n * 4 + 1; x++)
+            base[(1 + y) * bpr + 1 + x] = 0;
     for (i = 0; i < n; i++)
     {
-        const UBYTE *g = fps_font[txt[i] - '0'];
+        const UBYTE *g = fps_font[(txt[i] == '%') ? 10 : (txt[i] - '0')];
         for (y = 0; y < 5; y++)
         {
-            UBYTE *row = base + (2 + y * 2) * bpr + 2 + i * 8;
+            UBYTE *row = base + (2 + y) * bpr + 2 + i * 4;
             for (x = 0; x < 3; x++)
-            {
-                UBYTE c = (g[y] & (4 >> x)) ? 255 : 0;
-                row[x * 2] = c; row[x * 2 + 1] = c;
-                row[bpr + x * 2] = c; row[bpr + x * 2 + 1] = c;
-            }
+                if (g[y] & (4 >> x))
+                    row[x] = 255;
         }
     }
 }
@@ -517,7 +525,9 @@ static TbResult amiga_present(void)
             *d++ = *s++;
         src += lbDisplay.GraphicsScreenWidth;
     }
-    fps_draw(base, bpr, amiga_fps_last);
+    // (h is 0 here after the one block copy)
+    if ((lbSpeedMeter >= 0) && (w >= 32) && (lbDisplay.GraphicsScreenHeight >= 8))
+        meter_draw(base, bpr, w, lbDisplay.GraphicsScreenHeight, lbSpeedMeter);
     UnLockBitMap(lock);
     // logged only after the bitmap is unlocked: no DOS I/O under the lock
     {

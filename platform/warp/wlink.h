@@ -29,7 +29,7 @@ void wl_poll(void);
 int wl_request(unsigned type, const void *a, unsigned alen, const void *b, unsigned blen,
   int32_t *extra);
 /** Sends FRAME: the 68k fetches w x h bytes, pitch apart, of buffer buf. */
-void wl_frame_send(uint32_t buf, unsigned w, unsigned h, uint32_t pitch);
+void wl_frame_send(uint32_t buf, unsigned w, unsigned h, uint32_t pitch, long meter);
 /** Waits until at most max_pending frames are not fetched yet; returns
  * the board's time of the last fetch in us. */
 uint32_t wl_frames_wait(unsigned max_pending);

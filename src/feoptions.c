@@ -45,7 +45,7 @@
 /** How many pixels the slider is spill outside of its active rect area.
  */
 #define HORIZ_PROSLIDER_MAIN_SPILL_W 6
-#define GFX_TOGGLE_OPTIONS_COUNT 10
+#define GFX_TOGGLE_OPTIONS_COUNT 11
 #define GFX_MULTIVAL_OPTIONS_COUNT 2
 
 struct ScreenBox audio_tracks_box = {0};
@@ -1051,11 +1051,21 @@ void init_options_gfx_screen_boxes(void)
     n++;
     start_y += 18;
 
+    assert(n == 10);
+    init_screen_label(&options_gfx_labels[n],  213 + 20,  start_y,
+      "SHOW SPEED", 6, med_font, 1, 0);
+    init_screen_button(&options_gfx_buttons[20], 213 + 243, start_y,
+      gui_strings[478], 6, med2_font, 1, 0);
+    init_screen_button(&options_gfx_buttons[21], 213 + 331, start_y,
+      gui_strings[479], 6, med2_font, 1, 0);
+    n++;
+    start_y += 18;
+
     assert(n == GFX_TOGGLE_OPTIONS_COUNT + 0);
     val = abs(ingame.PanelPermutation);
     init_screen_label(&options_gfx_labels[n],  213 + 20,  start_y,
       game_option_desc(GOpt_PanelPermutation), 6, med_font, 1, 0);
-    init_screen_button(&options_gfx_buttons[GFX_TOGGLE_OPTIONS_COUNT * 2 + 0], 320u, 274u + 54,
+    init_screen_button(&options_gfx_buttons[GFX_TOGGLE_OPTIONS_COUNT * 2 + 0], 320u, 274u + 72,
         gui_strings[579 + val], 6, med2_font, 1, 0);
     options_gfx_buttons[GFX_TOGGLE_OPTIONS_COUNT * 2 + 0].CallBackFn = change_panel_permutation;
     options_gfx_buttons[GFX_TOGGLE_OPTIONS_COUNT * 2 + 0].Width += 60;
@@ -1066,7 +1076,7 @@ void init_options_gfx_screen_boxes(void)
     val = ingame.TrenchcoatPreference;
     init_screen_label(&options_gfx_labels[n],  213 + 20,  start_y,
       game_option_desc(GOpt_TrenchcoatPreference), 6, med_font, 1, 0);
-    init_screen_button(&options_gfx_buttons[GFX_TOGGLE_OPTIONS_COUNT * 2 + 1], 320u, 310u + 54,
+    init_screen_button(&options_gfx_buttons[GFX_TOGGLE_OPTIONS_COUNT * 2 + 1], 320u, 310u + 72,
         gui_strings[583 + val], 6, med2_font, 1, 0);
     options_gfx_buttons[GFX_TOGGLE_OPTIONS_COUNT * 2 + 1].CallBackFn = change_trenchcoat_preference;
     options_gfx_buttons[GFX_TOGGLE_OPTIONS_COUNT * 2 + 1].Width = options_gfx_buttons[GFX_TOGGLE_OPTIONS_COUNT * 2 + 0].Width;
@@ -1162,6 +1172,16 @@ void init_options_gfx_screen_boxes(void)
     for (i = 18; i < 20; i++)
     {
         options_gfx_buttons[i].Radio = &game_auto_detail;
+        options_gfx_buttons[i].RadioValue = val;
+        options_gfx_buttons[i].Flags |= GBxFlg_RadioBtn;
+        val++;
+    }
+
+    // game speed in % in the corner during a mission
+    val = 0;
+    for (i = 20; i < 22; i++)
+    {
+        options_gfx_buttons[i].Radio = &game_show_speed;
         options_gfx_buttons[i].RadioValue = val;
         options_gfx_buttons[i].Flags |= GBxFlg_RadioBtn;
         val++;

@@ -5,8 +5,8 @@
 TbPixel BAT_ball_colour; /* src\bat.c, 4 bytes */
 int BAT_ball_lost_timer; /* src\bat.c, 4 bytes */
 short BAT_balls_head[2]; /* struct BATBall * BAT_balls_head, src\bat.c */
-short BAT_balls_store[16]; /* struct BATBall BAT_balls_store[BAT_BALLS_LIMIT], src\bat.c */
-short BAT_bonus_store[8]; /* struct BATBonus BAT_bonus_store[BAT_BONUSES_LIMIT], src\bat.c */
+short BAT_balls_store[640]; /* struct BATBall BAT_balls_store[BAT_BALLS_LIMIT], src\bat.c */
+short BAT_bonus_store[192]; /* struct BATBonus BAT_bonus_store[BAT_BONUSES_LIMIT], src\bat.c */
 short BAT_bonuses_head[2]; /* struct BATBonus * BAT_bonuses_head, src\bat.c */
 ubyte BAT_bricks[BAT_BRICK_COLUMNS * BAT_BRICK_ROWS]; /* src\bat.c, 120 bytes */
 int BAT_bricks_remain; /* src\bat.c, 3 bytes */
@@ -25,7 +25,7 @@ int BAT_score; /* src\bat.c, 4 bytes */
 ubyte * BAT_screen; /* src\bat.c, 4 bytes */
 int BAT_state; /* src\bat.c, 4 bytes */
 short IPXHandler[2]; /* struct TbIPXHandler * IPXHandler, src\network.c */
-short IPXPlayer[135]; /* struct TbIPXPlayer IPXPlayer, src\network.c */
+short IPXPlayer[136]; /* struct TbIPXPlayer IPXPlayer, src\network.c */
 ulong NetTimeoutTicks = 4294967295;
 struct MovingPoint SCANNER_arcpoint[SCANNER_ARC_COUNT * SCANNER_POINTS_PER_ARC]; /* src\scanner.h, 320 bytes */
 short SCANNER_bbpadds[64]; /* struct BbpAdds SCANNER_bbpadds[SCANNER_BBP_ADDS_COUNT], src\scanner.c */

@@ -32,6 +32,17 @@ SCALARS = {
 }
 
 
+# Sizes (m68k) of private struct arrays whose asm data has other GLOBAL
+# labels inside (BAT_dwarr_1e27c0 is a field of BAT_balls_store[0], ...):
+# the span to the next label would cut them and the C code would write
+# past them (it broke AHI: BAT_unknsub_20 wrote over AHIBase).
+STRUCT_SIZE = {
+    "BAT_balls_store": 32 * 40,     # struct BATBall[BAT_BALLS_LIMIT]
+    "BAT_bonus_store": 16 * 24,     # struct BATBonus[BAT_BONUSES_LIMIT]
+    "IPXPlayer": 271,               # struct TbIPXPlayer
+}
+
+
 def asm_data_image(names):
     """Return {name: (bytes or None, reason)} from the .sx data sections."""
     want = set(names)
@@ -192,6 +203,9 @@ def main():
                 # a struct or an array of structs: up to the next global
                 # symbol (local labels inside are its fields)
                 size = max(size, span_len)
+            # arrays which the asm cuts with GLOBAL labels inside them: the
+            # span is too short (sizes from the m68k compiler)
+            size = max(size, STRUCT_SIZE.get(n, 0))
             out.append(f"short {n}[{(size + 1) // 2}]; /* {decl}, {where} */")
             continue
         if zero and dims == "[]":

@@ -325,3 +325,19 @@ Decyzje użytkownika: Paula domyślnie, AHI jako opcja; muzyka z płyty przekonw
 Otwarte: odsłuch na prawdziwej Amidze, koszt CPU (pomiar na Amidze 1), `AIL_ms_count` przez
 `gettimeofday` (sprawdzić rozdzielczość/koszt w libnix), wstrzymanie muzyki gubi zakolejkowane
 ~1 s, AHI.
+
+### AHI (15.11.2026)
+
+- `platform/amiga/snd_amiga.c` (dawniej `snd_paula.c`): Paula lub AHI (`ENV:SyndWarsSound=AHI`,
+  bez AHI powrót do Pauli), `ENV:SyndWarsMusic=OFF` wyłącza muzykę.
+- AHI: 8 głosów, prawdziwa panorama jak w PC; sterta dźwięków w Fast RAM (1,5 MB) jako jeden
+  dźwięk AHI, próbki to jej fragmenty; koniec próbki liczony z czasu. Muzyka: dwa pierścienie
+  (lewy/prawy) po 2 połówki po 2 bloki, ładowane jako dźwięki AHI przed startem odtwarzania;
+  funkcja dźwięku (hak z argumentami w rejestrach) liczy rozpoczęte połówki, wolna jest
+  dopełniana z dysku.
+- **Błąd pamięci znaleziony przy tej okazji:** generator `gen_asm_data.py` dawał prywatnym
+  tablicom struktur rozmiar do następnej etykiety GLOBAL, a w asm x86 wewnątrz
+  `BAT_balls_store`/`BAT_bonus_store` są inne etykiety. Na Amidze tablice miały 32/16 B zamiast
+  1280/384 B; `BAT_unknsub_20` (w C od `9d3308ed`, przy każdym starcie) pisało listy wolnych
+  elementów po zmiennych za nimi (tu `AHIBase`). Rozmiary teraz z `sizeof` kompilatora m68k
+  (`STRUCT_SIZE` w generatorze); inne takie tablice sprawdzone – mają zapas.

@@ -168,6 +168,8 @@ void mech_unkn_func_05(int owntng, int a2, int a3);
 ubyte track_target(struct Thing *p_mgun);
 void rotate_object(struct Thing *p_object);
 void init_mgun_explode(struct Thing *p_thing);
+void process_tasered_person(struct Thing *p_person);
+void set_angle_to_avoid_group(struct Thing *p_person);
 
 void set_player_peeps_to_run(struct Thing *p_leader, ushort plyr)
 {
@@ -1961,6 +1963,37 @@ static void test_cmds_process(void)
             rotate_object(&things[mgun]);
             if (gameturn == 900)
                 init_mgun_explode(&things[mgun]);
+        }
+    }
+    if ((gameturn & 1) == 0)
+    {
+        struct Thing *p_pers;
+        ThingIdx thing;
+        s32 best = 0x7FFFFFFF;
+
+        // the nearest person (not an agent) is tasered and avoids a group
+        p_pers = NULL;
+        for (thing = things_used_head; thing > 0; thing = things[thing].LinkChild)
+        {
+            struct Thing *p_thing = &things[thing];
+            s32 d;
+            if ((p_thing->Type != TT_PERSON) ||
+              ((p_thing->Flag & (TngF_PlayerAgent | TngF_Destroyed)) != 0))
+                continue;
+            d = abs((p_thing->X - p_agent->X) >> 8) + abs((p_thing->Z - p_agent->Z) >> 8);
+            if (d < best) {
+                best = d;
+                p_pers = p_thing;
+            }
+        }
+        if (p_pers != NULL)
+        {
+            if (p_pers->U.UPerson.RecoilTimer == 0) {
+                p_pers->U.UPerson.RecoilTimer = 7;
+                p_pers->U.UPerson.OldAnimMode = p_pers->U.UPerson.AnimMode;
+            }
+            process_tasered_person(p_pers);
+            set_angle_to_avoid_group(p_pers);
         }
     }
     switch (gameturn % 120)

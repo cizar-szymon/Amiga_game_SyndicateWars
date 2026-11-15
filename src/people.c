@@ -9372,10 +9372,41 @@ void process_knocked_out(struct Thing *p_person)
     }
 }
 
-void process_tasered_person(struct Thing *p_person)
+#ifdef SW_FNCHK
+static void process_tasered_person_asm(struct Thing *p_person)
 {
     asm volatile ("call ASM_process_tasered_person\n"
-        : : "a" (p_person));
+        : "+a" (p_person) : : "cc", "memory");
+}
+#endif
+
+/** A person hit by a taser shakes (switching between two animations) until
+ * its timer (RecoilTimer) runs out, then gets its old animation back.
+ * Remade from process_tasered_person. */
+static void process_tasered_person_c(struct Thing *p_person)
+{
+    ubyte anim;
+
+    p_person->U.UPerson.RecoilTimer--;
+    if (p_person->U.UPerson.RecoilTimer == 0)
+    {
+        p_person->Flag2 &= ~(TgF2_Unkn00010000 | TgF2_Unkn00100000);
+        p_person->U.UPerson.AnimMode = p_person->U.UPerson.OldAnimMode;
+        p_person->U.UPerson.RecoilTimer = 0;
+        anim = p_person->U.UPerson.AnimMode;
+    }
+    else if ((p_person->U.UPerson.RecoilTimer & 1) != 0)
+        anim = 16;
+    else
+        anim = 0;
+    p_person->Frame = nstart_ani[people_frames[p_person->SubType][anim] + p_person->U.UPerson.Angle];
+    p_person->StartFrame = people_frames[p_person->SubType][anim] - 1;
+}
+
+void process_tasered_person(struct Thing *p_person)
+{
+    FNCHK_VOID("process_tasered_person", process_tasered_person_asm(p_person),
+      process_tasered_person_c(p_person));
 }
 
 #ifdef SW_FNCHK
@@ -11744,12 +11775,62 @@ void person_catch_train(struct Thing *p_person)
       person_catch_train_c(p_person));
 }
 
+#ifdef SW_FNCHK
+static void set_angle_to_avoid_group_asm(struct Thing *p_person)
+{
+    asm volatile ("call ASM_set_angle_to_avoid_group\n"
+        : "+a" (p_person) : : "cc", "memory");
+}
+#endif
+
+/** A person avoiding a group turns away from its nearest member (running
+ * when it is close); when the group is far it wanders, turning a little
+ * now and then.  In that case the asm takes the new angle from an
+ * uninitialised stack word; the C keeps the slightly turned angle.
+ * Remade from set_angle_to_avoid_group. */
+static void set_angle_to_avoid_group_c(struct Thing *p_person)
+{
+    struct Thing *p_near;
+    s32 dx, dz, dist;
+    ubyte dir;
+
+    p_near = &things[find_nearest_from_group(p_person,
+      (ushort)game_commands[p_person->U.UPerson.ComCur].OtherThing, 0)];
+    dx = abs(p_near->X - p_person->X) >> 8;
+    dz = abs(p_near->Z - p_person->Z) >> 8;
+    if (dx > dz)
+        dist = dx + (dz >> 1);
+    else
+        dist = dz + (dx >> 1);
+    if (dist < 0x1E00)
+    {
+        dir = ((short)angle_between_points(p_near->X >> 8, p_near->Z >> 8,
+          p_person->X >> 8, p_person->Z >> 8) + 0x80) >> 8;
+        if (dist < 0xC00)
+            set_person_animmode_run(p_person);
+    }
+    else
+    {
+        switch (((ushort)p_person->ThingOffset + gameturn) & 3)
+        {
+        case 0:
+            p_person->U.UPerson.Angle--;
+            break;
+        case 3:
+            p_person->U.UPerson.Angle++;
+            break;
+        }
+        p_person->U.UPerson.Timer2 = ((LbRandomAnyShort() & 0x0F) >> 1) + 50;
+        dir = p_person->U.UPerson.Angle;
+    }
+    p_person->U.UPerson.Angle = (dir + 8) & 7;
+    p_person->Frame = nstart_ani[(ushort)p_person->StartFrame + p_person->U.UPerson.Angle + 1];
+}
+
 void set_angle_to_avoid_group(struct Thing *p_person)
 {
-#if 1
-    asm volatile ("call ASM_set_angle_to_avoid_group\n"
-        : : "a" (p_person));
-#endif
+    FNCHK_VOID("set_angle_to_avoid_group", set_angle_to_avoid_group_asm(p_person),
+      set_angle_to_avoid_group_c(p_person));
 }
 
 #ifdef SW_FNCHK

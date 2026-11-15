@@ -27,6 +27,16 @@ Dlatego projekt ma dwa duże etapy: **(A) doprowadzić kod do czystego, przenoś
   + `music/track_N.ogg` z ffmpeg). Gra czyta dane z bieżącego katalogu.
   **Danych gry nigdy nie commitujemy.**
 
+## Zgłoszenia błędów od graczy (klawisz Help)
+
+Gra wysyła raporty (Help → okno: e-mail, opis) na serwer gier portów Amigi na Pi400 (repo Settlers,
+`server/`; wersja `SyndWars-…`). Gdy użytkownik prosi o sprawdzenie zgłoszeń:
+1. `sh tools/amiga/server_reports.sh` → `private/reports/<rrrrmmdd-ggmmss>-<nr>/` (`report.json`:
+   wersja, e-mail, opis, maszyna; `SyndWars-state.txt` – misja, tura, opcje; `SyndWars-screen.iff`
+   → `python tools/amiga/iff2png.py PLIK`; `error.log`, `default.ini`).
+2. E-maile graczy tylko w `private/` (poza gitem) – nigdzie ich nie wysyłać ani nie commitować.
+3. Po poprawce: pole `status` w `report.json` na Pi (`~/settlers-server/data/reports/…`).
+
 ## Struktura repozytorium
 
 - Pracujemy na **osobnej gałęzi** (`amiga`), upstream trzymamy jako remote `upstream`.

@@ -74,6 +74,16 @@ static void *pool_alloc(HPool *pl, uint32_t need)
 
     b = start = pl->rover;
     for (;;) {
+        /* a broken block header would loop forever: report it */
+        if ((b->size < sizeof(HBlock)) || ((b->size & 15) != 0) ||
+          ((uint8_t *)b + b->size > pl->end)) {
+            char m[160];
+            snprintf(m, sizeof(m), "wlibc: heap pool %p..%p broken at %p: size 0x%lx used 0x%lx\n",
+              (void *)pl->base, (void *)pl->end, (void *)b, (unsigned long)b->size,
+              (unsigned long)b->used);
+            wl_log(m);
+            return NULL;
+        }
         if (!b->used) {
             /* merge the free blocks after this one */
             HBlock *nx = hnext(b);
@@ -96,12 +106,16 @@ static void *pool_alloc(HPool *pl, uint32_t need)
         }
         b = hnext(b);
         if ((uint8_t *)b >= pl->end) {
+            /* One round only: the start block may have been merged into the
+             * one before it, and then b never comes back to it (that looped
+             * forever when the heap was full, entering a mission from the
+             * menu). */
+            if (wrapped)
+                break;
             b = (HBlock *)pl->base;
             wrapped = 1;
         }
-        if (wrapped && b == start)
-            break;
-        if (wrapped && (uint8_t *)b > (uint8_t *)start)
+        if (wrapped && ((uint8_t *)b >= (uint8_t *)start))
             break;
     }
     return NULL;

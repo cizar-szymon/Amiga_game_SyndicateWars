@@ -125,6 +125,10 @@ void AIL_shutdown(void)
 
 uint32_t AIL_ms_count(void)
 {
+#if defined(SW_WARP)
+    // Warp ARM build: the board's millisecond clock (no gettimeofday)
+    return w_millis();
+#else
     long long now;
     struct timeval tv;
 
@@ -136,6 +140,7 @@ uint32_t AIL_ms_count(void)
         tmcount_start = now;
     }
     return ((now - tmcount_start) / 1000);
+#endif
 }
 
 int32_t AIL_set_preference(uint32_t number, int32_t value)

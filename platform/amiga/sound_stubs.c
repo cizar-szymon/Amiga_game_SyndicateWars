@@ -1,6 +1,6 @@
 /* Amiga build: no joystick or Smacker video yet; these stand in for
  * bfsmacklib and the joystick driver.  Sound is bfsoundlib with the Paula
- * driver (snd_paula.c); the ARM build has no sound yet. */
+ * driver (snd_bfs.c, snd_engine.c; on the Warp ARM snd_proxy.c). */
 #include "bftypes.h"
 #include "bfjoyst.h"
 #include "bfaudio.h"
@@ -12,58 +12,6 @@
 #include "bfsvaribl.h"
 #include "bfsmack.h"
 
-#ifdef SW_WARP
-/* The ARM build has no sound yet: bfsoundlib stand-ins. */
-/* bfaudio */
-void InitAudio(AudioInitOptions *audOpts) { (void)audOpts; }
-void FreeAudio(void) { }
-void SetSoundMasterVolume(long vol) { (void)vol; }
-void SetMusicMasterVolume(long vol) { (void)vol; }
-int LoadSounds(ubyte bank_no) { (void)bank_no; return 0; }
-int LoadMusic(ushort bankNo) { (void)bankNo; return 0; }
-
-/* bfsound */
-TbBool GetSoundAble(void) { return false; }
-TbBool GetSoundActive(void) { return false; }
-TbBool GetSoundInstalled(void) { return false; }
-ubyte GetSoundTpNo(ushort snd_type) { (void)snd_type; return 0; }
-
-/* samples */
-TbBool IsSamplePlaying(long source_id, short smp_id, TbSampleHandle handle)
-{ (void)source_id; (void)smp_id; (void)handle; return false; }
-void ReleaseLoopedSample(ushort source_id, short smp_id) { (void)source_id; (void)smp_id; }
-void SetSamplePitch(long source_id, short smp_id, short pitch)
-{ (void)source_id; (void)smp_id; (void)pitch; }
-void StopAllSamples(void) { }
-void SetSampleVolume(long source_id, short smp_id, short volume)
-{ (void)source_id; (void)smp_id; (void)volume; }
-void SetSamplePan(long source_id, short smp_id, ushort pan)
-{ (void)source_id; (void)smp_id; (void)pan; }
-void StopSample(long source_id, short smp_id) { (void)source_id; (void)smp_id; }
-struct SampleInfo *PlaySampleFromAddress(long source_id, short smp_id,
-  short volume, ushort pan, short pitch, sbyte loop_count, ubyte a7, void *address)
-{ (void)source_id; (void)smp_id; (void)volume; (void)pan; (void)pitch;
-  (void)loop_count; (void)a7; (void)address; return NULL; }
-/* one empty sample info structure, so the game's loops over them end at once */
-static struct SampleInfo stub_sample_info;
-struct SampleInfo *GetFirstSampleInfoStructure(void) { return &stub_sample_info; }
-struct SampleInfo *GetLastSampleInfoStructure(void) { return &stub_sample_info; }
-
-/* music */
-void StartMusic(int songNo, ubyte volume) { (void)songNo; (void)volume; }
-void StopMusicIfActive(void) { }
-void SetMusicTempo(int tempo, int msec) { (void)tempo; (void)msec; }
-void SetMusicTempoNormal(void) { }
-void SetMusicVolume(int msec, ubyte volume) { (void)msec; (void)volume; }
-void DangerMusicFadeSwitch(ubyte direction, ubyte freq) { (void)direction; (void)freq; }
-
-/* CD audio */
-TbBool GetCDAble(void) { return false; }
-void PlayCDTrack(ushort trkno) { (void)trkno; }
-void StopCD(void) { }
-void SetCDVolume(short vol) { (void)vol; }
-
-#endif
 
 /* Smacker video */
 TbResult play_smk(char *fname, u32 smkflags, ushort plyflags)

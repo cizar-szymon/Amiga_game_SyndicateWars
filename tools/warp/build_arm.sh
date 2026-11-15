@@ -38,6 +38,15 @@ for f in src/*.c; do
   esac
 done
 SRCS="$SRCS $(ls swrendersoft/src/*.c bfariadne/src/*.c)"
+# bfsoundlib without OpenAL and Vorbis: snd_bfs.c and the proxy
+# platform/warp/snd_proxy.c (the 68k host plays the sounds)
+for f in bfsoundlib/src/*.c; do
+  case "$f" in
+    */drv_oal.c|*/oggvorbis.c) ;;
+    *) SRCS="$SRCS $f" ;;
+  esac
+done
+SRCS="$SRCS platform/amiga/snd_bfs.c"
 for f in bflibrary/src/general/*.c bflibrary/src/general/*.cpp; do
   case "$f" in
     *_s.c|*/gpng.c) ;;

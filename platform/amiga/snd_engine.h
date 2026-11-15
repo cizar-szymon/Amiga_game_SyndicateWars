@@ -9,7 +9,26 @@
 #ifndef SND_ENGINE_H
 #define SND_ENGINE_H
 
+#if defined(SW_WARP)
+/* the ARM proxy (platform/warp/snd_proxy.c): no AmigaOS headers there */
+#include <stdint.h>
+#ifndef SND_ENGINE_AMIGA_TYPES
+#define SND_ENGINE_AMIGA_TYPES
+typedef uint8_t UBYTE;
+typedef int8_t BYTE;
+typedef uint16_t UWORD;
+typedef int16_t WORD;
+typedef uint32_t ULONG;
+typedef int32_t LONG;
+typedef int16_t BOOL;
+#endif
+#ifndef TRUE
+#define TRUE 1
+#define FALSE 0
+#endif
+#else
 #include <exec/types.h>
+#endif
 
 #define SE_SLOTS 64
 

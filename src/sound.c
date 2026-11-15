@@ -732,7 +732,7 @@ TbResult sound_banks_fname(char *fname, const char *dir, const char *lang)
 /* Paula plays samples only from Chip RAM, so on the Amiga with Paula the
  * sound heap is there, and smaller (the heap keeps the most recent samples);
  * see platform/amiga/snd_amiga.c. */
-#if defined(SW_AMIGA) && !defined(SW_WARP)
+#if defined(SW_AMIGA)
 ulong amiga_sound_heap_max(void);
 void *amiga_sound_heap_alloc(ulong size);
 void amiga_sound_heap_free(void *ptr);
@@ -791,7 +791,7 @@ void setup_heaps(short setup_cmd, const char *lang)
         sound_heap_size = sz;
         break;
     case SHSC_GameSndBestQ:
-#if defined(SW_AMIGA) && !defined(SW_WARP)
+#if defined(SW_AMIGA)
         sz = sound_heap_size; // the heap may be smaller than the maximum
 #else
         sz = 1500000;

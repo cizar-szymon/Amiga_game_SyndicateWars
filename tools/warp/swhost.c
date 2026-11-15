@@ -4,7 +4,9 @@
  * the ARM through cswarp.library and serves it (platform/warp/swlink.h):
  * opens the 8-bit RTG screen, fetches every frame from the ARM straight into
  * the screen bitmap (extFetch), sets the palette, does the file operations,
- * passes the keyboard and the mouse on.  The 68060 does nothing else.
+ * passes the keyboard and the mouse on, plays the sound (swhost_snd.c,
+ * with the engine of the 68k game: Paula or AHI, ENV:SyndWarsSound and
+ * ENV:SyndWarsMusic as there).  The 68060 does nothing else.
  *
  * usage (from the game directory):
  *   swhost [WXT=file] [game arguments...]       e.g. swhost -q -m 0,1
@@ -44,6 +46,7 @@ static APTR LockBitMapTags(APTR bm, ULONG tag, ...) { return __LockBitMapTagList
 #include <stdlib.h>
 
 #include "swlink.h"
+#include "swhost_snd.h"
 
 struct CSWarpBase *csWarpBase;
 
@@ -433,9 +436,15 @@ static void handle(UWORD type, const UBYTE *p, UWORD len)
         ext_exit_code = (LONG)rd32(p);
         hlog("swhost: game exit %ld\n", ext_exit_code);
         break;
-    default:
-        hlog("swhost: unknown record %u (%u bytes)\n", type, len);
+    default: {
+        LONG res, extra;
+        int h = hsnd_handle(type, p, len, &res, &extra);
+        if (h == 2)
+            result(res, extra);
+        else if (h == 0)
+            hlog("swhost: unknown record %u (%u bytes)\n", type, len);
         break;
+    }
     }
 }
 
@@ -640,6 +649,7 @@ int main(int argc, char **argv)
         rx_len += req.received;
         parse_rx();
         read_input();
+        hsnd_service(FALSE);
 
         if (req.state != EXTST_RUNNING && req.outPending == 0 && req.received == 0) {
             hlog("swhost: extension state %lu, exit code %ld\n", req.state, req.exitCode);
@@ -660,7 +670,9 @@ int main(int argc, char **argv)
         }
         if (req.received == 0 && req.outPending == 0 && out_len == 0) {
             ULONG mask = (1UL << door_sig) | SIGBREAKF_CTRL_C;
+            ULONG tmask = hsnd_wait_mask();
             if (win) mask |= 1UL << win->UserPort->mp_SigBit;
+            mask |= tmask;
             if (quit_sent) {
                 Delay(1);
                 continue;
@@ -668,6 +680,7 @@ int main(int argc, char **argv)
             sigs = Wait(mask);
             if (sigs & SIGBREAKF_CTRL_C)
                 SetSignal(SIGBREAKF_CTRL_C, SIGBREAKF_CTRL_C);
+            hsnd_service((sigs & tmask) != 0);
         }
     }
 
@@ -677,6 +690,7 @@ out:
         extStop(2000, &req);
         hlog("swhost: stopped, state %lu, exit %ld\n", req.state, req.exitCode);
     }
+    hsnd_close();
     if (door_sig >= 0) {
         if (csWarpBase) unitSigUnregister(FindTask(NULL), CSWARP_UNIT_EXT);
         FreeSignal(door_sig);

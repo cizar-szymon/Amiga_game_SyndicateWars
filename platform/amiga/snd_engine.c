@@ -33,6 +33,10 @@
 
 #include "snd_engine.h"
 
+#ifndef AHISF_NONE
+#define AHISF_NONE 0    /* older devices/ahi.h */
+#endif
+
 #define MAX_VOICES 8
 #define PAULA_VOICES 4
 #define AHI_VOICES 8

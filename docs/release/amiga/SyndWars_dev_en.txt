@@ -1,0 +1,67 @@
+SYNDICATE WARS for the Amiga - for developers and testers
+========================================================
+
+Version @VERSION@, @DATE@. The sources: the Amiga port of SyndWarsFX (git,
+branch amiga), docs/amiga/porting-notes.md - the decisions and findings,
+docs/amiga/test-log.md - the tests on the real machines.
+
+
+THE PROGRAMS
+------------
+
+  SyndWars      the game for the 68060 (bebbo gcc 6.5, libnix), RTG 8-bit
+                screens through Picasso96 / CyberGraphX; with the Tool Type
+                ARM it starts swhost
+  swhost        the 68k host of the ARM version (vbcc): loads swcore.wxt
+                into the Warp's ARM (cswarp.library 30.41+, boards with
+                SDRAM), shows its frames, plays the sound and the videos,
+                does the files, passes the input on
+  swcore.wxt    the whole game for the ARM (Cortex-M7)
+
+Release number: 0.<commits of the port> (beta); "Version SyndWars", the
+corner of the main menu, the bug reports.
+
+
+ENV VARIABLES (68k, and swhost for the ARM version)
+---------------------------------------------------
+
+  SyndWarsSound=PAULA|AHI|NONE   the sound (the Tool Type SOUND= comes first)
+  SyndWarsMusic=OFF              no music (Tool Type MUSIC=OFF)
+  SyndWarsCivLOD=0..3            far pedestrians (FAR PEDESTRIANS), 3 default
+  SyndWarsRadar2=0|1             radar every 2nd frame (RADAR HALF RATE)
+  SyndWarsAutoDetail=0|1         AUTO DETAIL
+  SyndWarsShowSpeed=0|1          SHOW SPEED
+  SyndWarsReportServer=host[:port]  another server for the bug reports
+  SyndWarsProf=1|2               profiler: times of the parts of a turn
+                                 to error.log every 5 s
+  SyndWarsFPS                    frames a second to RAM:SyndWars-fps.txt
+  SyndWarsSoundLog               sound counters to a file
+Tests:
+  SyndWarsSmkTest=FILE           plays FILE in place of the video asked
+                                 for (e.g. data/chu_ele.smk for the intro)
+  SyndWarsBangTest=N             an explosion every N turns (a heavy scene)
+  SyndWarsBangLo=1               low explosion detail (as DETAIL LO)
+  SyndWarsSaveTest=N             at turn N: save, load, save again, compare
+  SyndWarsSaveTestLoad=1         only load slot 12 (a save of another
+                                 platform) and save it again
+The settings of the options menu are saved in qdata/savegame/default.ini.
+
+
+FILES
+-----
+
+  error.log                      the log (the sound opened, the videos,
+                                 timings)
+  RAM:swarm-log.txt              the log of swhost (ARM version)
+  RAM:SyndWars-state.txt, RAM:SyndWars-screen.iff
+                                 the last bug report's state and screen
+  qdata/savegame/report_email.txt  the e-mail given in the bug report box
+
+
+THE SPEED (68060)
+-----------------
+
+The videos: libsmacker made faster (lookup tables for the Huffman trees):
+the intro 320x200 38 ms a frame with its sound (62.5 ms there are), the
+600x300 elections 43 ms (66 ms); frames decoded ahead into a queue of 32.
+The game: SHOW SPEED shows the speed in %; SyndWarsProf for the times.

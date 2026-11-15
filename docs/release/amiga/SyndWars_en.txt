@@ -1,0 +1,127 @@
+SYNDICATE WARS - SyndWarsFX for the Amiga with a graphics card
+=============================================================
+
+Version @VERSION@ (beta), @DATE@
+
+Syndicate Wars (Bullfrog 1996) on an Amiga with a graphics card (Picasso96)
+and a 68060 - or with the ARM of a Warp 1260 Extreme / Warp 7060.
+It is based on SyndWarsFX (https://github.com/swfans/syndwarsfx, GPL-3.0),
+the fans' version of the PC game. The game's data (graphics, sounds, music,
+videos) come from your own GOG copy of the game - they are not in this
+archive.
+
+
+REQUIREMENTS
+------------
+
+- Amiga 500 / 1200 / 3000 / 4000 with a Warp accelerator (Warp560,
+  Warp1240, Warp1260, Warp1260 Extreme, Warp7060): the port was made and is
+  tested on these cards. Other Amigas with a 68060 and a Picasso96 card run
+  the game, but slower.
+- tested on: A1200 + Warp1260 Extreme (68060) and A4000 + Warp7060 (68060)
+- AmigaOS 3.2, Picasso96 with 8-bit screens of 320x200 and 640x480
+- about 64 MB Fast RAM, about 300 MB on the disk
+- Syndicate Wars from GOG and a PC with Python 3 to make the data
+  (doc/Install.txt)
+
+
+HOW TO START
+------------
+
+1. UnZip SyndWars-@VERSION@.zip -d Work:Games
+2. On a PC: the game's data from the GOG version with pc/SyndWarsData.py,
+   copied into the drawer Work:Games/SyndWars - step by step in
+   doc/Install.txt.
+3. Double-click the SyndWars icon.
+
+
+TWO VERSIONS: 68060 AND ARM
+---------------------------
+
+The drawer has both:
+- SyndWars - the whole game on the 68060 (any card),
+- the ARM version - the game runs on the ARM of a Warp 1260 Extreme /
+  Warp 7060 (faster), the 68060 shows the picture and plays the sound and
+  the videos (the program swhost, swcore.wxt).
+
+Choose it in the icon (Information of the SyndWars icon, Tool Types):
+remove the brackets of (ARM). On a card without an ARM with its own memory a
+requester says so and the game runs on the 68060. From the Shell:
+SyndWars ARM
+
+
+ICON SETTINGS (TOOL TYPES)
+--------------------------
+
+In brackets = off (a hint). Remove the brackets to switch it on.
+
+  ARM            the ARM version (Warp 1260 Extreme and Warp 7060 only)
+  SOUND=AHI      sound through AHI; SOUND=PAULA (default) or SOUND=NONE
+  MUSIC=OFF      no music - all channels for the sound effects
+
+The same words work in the Shell: SyndWars SOUND=AHI MUSIC=OFF
+
+
+KEYS
+----
+
+  Esc       in a mission: "abort mission?" (YES / NO);
+            in the main menu: "quit game?"
+  Help      a bug report (see below)
+  P         pause (the pause menu: volume, detail, ABORT)
+  F8        in a mission: 320x200 (faster) / 640x480
+  Ctrl-C    in the Shell ends the game
+The other keys as in the PC game (SYSTEM -> KEYS in the game's menu).
+
+
+SPEED OPTIONS (SYSTEM -> VISUAL DEPTH)
+-------------------------------------
+
+  FAR PEDESTRIANS  pedestrians far off the screen and the radar are not
+                   moved (faster, the game plays the same); on by default
+  RADAR HALF RATE  the radar drawn every second frame (faster, the dots
+                   blink less); on by default
+  AUTO DETAIL      while the game is slow (big explosions) the explosions
+                   get less detail, then your setting comes back; on by
+                   default
+  SHOW SPEED       the game's speed in % in the bottom right corner (100% =
+                   full speed, 16 turns a second); off by default
+They are saved with the other options of the game.
+
+
+SOUND, MUSIC, VIDEOS
+--------------------
+
+- Paula (default) or AHI (SOUND=AHI); the music of the game's CD.
+- The videos (intro, elections, endings, mission end) with their sound. The
+  intro and the videos end with Esc, Return, Space or a click.
+
+
+SAVED GAMES
+-----------
+
+Save in the menu: SYSTEM -> STORAGE -> SAVE / LOAD (no saving in a mission -
+as in the original). The saves and settings have the same format as on the
+PC (SyndWarsFX) and in the ARM version - they can be moved. They are in
+qdata/savegame.
+
+
+BUG REPORTS
+-----------
+
+The Help key: the game saves the screen and the state of the game, you
+write your e-mail (to hear when it is fixed) and what happened, and SEND
+(or Help again) sends it to the server of the port's author. It needs a
+running TCP/IP stack (e.g. Roadshow). The version of the game is in the
+corner of the main menu and in the Shell: Version SyndWars
+
+Bug reports from the ARM version: not yet (next release) - for a problem
+with the ARM version, describe it with the version number.
+
+
+LICENCES
+--------
+
+The program: GPL-3.0 (doc/COPYING), based on SyndWarsFX.
+The video player: libsmacker (LGPL-2.1, doc/libsmacker-COPYING).
+Syndicate Wars (c) Bullfrog / Electronic Arts - the data from your copy.

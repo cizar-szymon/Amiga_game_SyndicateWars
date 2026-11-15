@@ -1,0 +1,123 @@
+SYNDICATE WARS - SyndWarsFX na Amige z karta graficzna
+=====================================================
+
+Wersja @VERSION@ (beta), @DATE@
+
+Syndicate Wars (Bullfrog 1996) na Amige z karta graficzna (Picasso96) i
+procesorem 68060 - albo z ARM-em karty Warp 1260 Extreme / Warp 7060.
+Podstawa jest SyndWarsFX (https://github.com/swfans/syndwarsfx, GPL-3.0),
+fanowska wersja gry z PC. Dane gry (grafika, dzwieki, muzyka, filmy)
+pochodza z Twojej wersji gry z GOG - nie ma ich w tym archiwum.
+
+
+WYMAGANIA
+---------
+
+- Amiga 500 / 1200 / 3000 / 4000 z akceleratorem Warp (Warp560, Warp1240,
+  Warp1260, Warp1260 Extreme, Warp7060): port powstal i jest testowany na
+  tych kartach. Inne Amigi z 68060 i karta Picasso96 uruchomia gre, ale
+  wolniej.
+- testowane na: A1200 + Warp1260 Extreme (68060) oraz A4000 + Warp7060
+  (68060)
+- AmigaOS 3.2, Picasso96 z ekranami 8-bit 320x200 i 640x480
+- ok. 64 MB Fast RAM, ok. 300 MB na dysku
+- Syndicate Wars z GOG i PC z Pythonem 3 do przygotowania danych
+  (doc/Install.txt)
+
+
+JAK ZACZAC
+----------
+
+1. UnZip SyndWars-@VERSION@.zip -d Work:Games
+2. Na PC: dane gry z wersji GOG narzedziem pc/SyndWarsData.py i skopiowanie
+   ich do szuflady Work:Games/SyndWars - krok po kroku w doc/Install.txt.
+3. Dwuklik na ikonie SyndWars.
+
+
+DWIE WERSJE GRY: 68060 I ARM
+----------------------------
+
+Gra ma dwie wersje w jednej szufladzie:
+- SyndWars - cala gra na 68060 (kazda karta),
+- wersja ARM - gra liczy ARM karty Warp 1260 Extreme / Warp 7060 (szybciej),
+  a 68060 pokazuje obraz, gra dzwiek i filmy (program swhost, swcore.wxt).
+
+Wybor w ikonie (Informacje o ikonie SyndWars, Tool Types): usun nawiasy przy
+(ARM). Karta bez ARM-a z wlasna pamiecia: okienko z wyjasnieniem i gra na
+68060. Z Shella: SyndWars ARM
+
+
+USTAWIENIA IKONY (TOOL TYPES)
+-----------------------------
+
+W nawiasach = wylaczone (podpowiedz). Usun nawiasy, zeby wlaczyc.
+
+  ARM            wersja ARM (tylko Warp 1260 Extreme i Warp 7060)
+  SOUND=AHI      dzwiek przez AHI; SOUND=PAULA (domyslnie) albo SOUND=NONE
+  MUSIC=OFF      bez muzyki - wszystkie kanaly dla efektow
+
+Te same slowa dzialaja w Shellu: SyndWars SOUND=AHI MUSIC=OFF
+
+
+KLAWISZE
+--------
+
+  Esc       w misji: okno "przerwac misje?" (YES / NO);
+            w menu glownym: okno "wyjsc z gry?"
+  Help      zgloszenie bledu (patrz nizej)
+  P         pauza (menu pauzy: glosnosc, szczegoly, ABORT)
+  F8        w misji: 320x200 (szybciej) / 640x480
+  Ctrl-C    w Shellu konczy gre
+Pozostale klawisze jak w grze na PC (SYSTEM -> KEYS w menu gry).
+
+
+OPCJE SZYBKOSCI (SYSTEM -> VISUAL DEPTH)
+---------------------------------------
+
+  FAR PEDESTRIANS  przechodnie daleko poza ekranem i radarem nie sa liczeni
+                   (szybciej, bez zmian w rozgrywce); domyslnie wlaczone
+  RADAR HALF RATE  radar rysowany co druga klatke (szybciej, kropki migaja
+                   mniej); domyslnie wlaczone
+  AUTO DETAIL      gdy gra zwalnia (np. duze wybuchy), wybuchy maja mniej
+                   szczegolow, potem wraca Twoje ustawienie; domyslnie
+                   wlaczone
+  SHOW SPEED       predkosc gry w % w prawym dolnym rogu (100% = pelne
+                   tempo, 16 tur na sekunde); domyslnie wylaczone
+Ustawienia zapisuja sie razem z innymi opcjami gry.
+
+
+DZWIEK, MUZYKA, FILMY
+---------------------
+
+- Paula (domyslnie) albo AHI (SOUND=AHI); muzyka z plyty CD gry.
+- Filmy (intro, wybory, zakonczenia, koniec misji) z dzwiekiem. Intro
+  i filmy mozna pominac klawiszem Esc, Return, Spacja albo kliknieciem.
+
+
+ZAPISY GRY
+----------
+
+Zapis w menu: SYSTEM -> STORAGE -> SAVE / LOAD (w misji nie ma zapisu - tak
+jak w oryginale). Zapisy i ustawienia maja ten sam format co na PC (SyndWarsFX)
+i w wersji ARM - mozna je przenosic. Leza w qdata/savegame.
+
+
+ZGLASZANIE BLEDOW
+-----------------
+
+Klawisz Help: gra zapisuje obraz ekranu i stan gry, w okienku wpisujesz
+e-mail (zeby dostac wiadomosc o poprawce) i co sie stalo, a SEND (albo
+ponownie Help) wysyla to na serwer autora portu. Potrzebny dzialajacy stos
+TCP/IP (np. Roadshow). Numer wersji gry jest w rogu menu glownego i w Shellu:
+Version SyndWars
+
+Zgloszenie bledu w wersji ARM: jeszcze nie dziala (bedzie w nastepnym
+wydaniu) - w razie problemu z wersja ARM opisz go razem z numerem wersji.
+
+
+LICENCJE
+--------
+
+Program: GPL-3.0 (doc/COPYING), na bazie SyndWarsFX.
+Odtwarzacz filmow: libsmacker (LGPL-2.1, doc/libsmacker-COPYING).
+Syndicate Wars (c) Bullfrog / Electronic Arts - dane gry z Twojej kopii.

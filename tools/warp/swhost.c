@@ -884,6 +884,10 @@ int main(int argc, char **argv)
         if ((GetVar((STRPTR)"SyndWarsShowSpeed", (STRPTR)civ, sizeof(civ), 0) >= 0)
           && (civ[0] >= '0') && (civ[0] <= '9'))
             sprintf(args + strlen(args) - 1, " showspeed=%c |", civ[0]);
+        /* the explosions' test scene (a heavy scene to measure) */
+        if ((GetVar((STRPTR)"SyndWarsBangTest", (STRPTR)civ, sizeof(civ), 0) >= 0)
+          && (civ[0] >= '0') && (civ[0] <= '9'))
+            sprintf(args + strlen(args) - 1, " bangtest=%ld |", atol(civ));
     }
     for (i = 1; i < argc; i++) {
         if (strncmp(argv[i], "STAGE=", 6) == 0) {

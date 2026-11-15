@@ -34,6 +34,7 @@ int w_civlod = -1;
 int w_radar2 = -1;
 int w_autodet = -1;
 int w_showspeed = -1;
+int w_bangtest = -1;
 static int w_stage = 99;  /* diagnostics: "stage=N" returns after step N */
 uint32_t w_cpu_hz;
 
@@ -106,6 +107,7 @@ int ext_main(const WarpExtEnv *env)
     if ((p = strstr(cmdline, "radar2=")) != NULL) w_radar2 = p[7] - '0';
     if ((p = strstr(cmdline, "autodet=")) != NULL) w_autodet = p[8] - '0';
     if ((p = strstr(cmdline, "showspeed=")) != NULL) w_showspeed = p[10] - '0';
+    if ((p = strstr(cmdline, "bangtest=")) != NULL) w_bangtest = atoi(p + 9);
     argc = split_args(game_args, argv_buf, 32);
 
     {

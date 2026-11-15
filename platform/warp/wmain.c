@@ -17,6 +17,7 @@ void __arm_relocate_pie_(void) { }   /* the firmware relocates */
 void __arm_preinit_(void) { }        /* wanted by the AC 6.13 linker */
 
 void w_heap_init(void *base, uint32_t size);
+void w_heap_add(void *base, uint32_t size);
 void w_files_init(uint8_t *xfer_buf);
 void w_time_init(void);
 extern uint32_t w_heap_used, w_heap_peak;
@@ -78,6 +79,15 @@ int ext_main(const WarpExtEnv *env)
     env->bufRegister(SWL_BUF_XFER, xfer, SWL_XFER_BYTES);
     w_files_init(xfer);
     w_heap_init(env->arena, env->arenaSize);
+    /* the render area holds the file buffer and WScreen (at most 2560x1441)
+     * at its start and the sound heap (snd_proxy.c) at its end; what is
+     * between is a second heap pool, used when the arena is full */
+    {
+        uint32_t lo = SWL_XFER_BYTES + WARP_RENDER_SCREEN_MAX;
+        uint32_t hi = env->renderArenaSize - WARP_SOUND_HEAP_RESERVE;
+        if (hi > lo + 65536)
+            w_heap_add((uint8_t *)env->renderArena + lo, hi - lo);
+    }
 
     strncpy(cmdline, env->args ? env->args : "", sizeof(cmdline) - 1);
     game_args = strchr(cmdline, '|');

@@ -29,6 +29,11 @@
 #define SWL_XFER_BYTES   (256 * 1024)
 #define SWL_REC_MAX      3072     /* largest record payload */
 
+/* The ARM's render area: SWL_BUF_XFER, then WScreen (at most 2560 x 1441),
+ * a second heap pool (wlibc.c), the sound heap at the end (snd_proxy.c) */
+#define WARP_RENDER_SCREEN_MAX   (2560 * 1441)
+#define WARP_SOUND_HEAP_RESERVE  (1536 * 1024)
+
 /* ARM -> 68k */
 #define SWL_LOG          1        /* text */
 #define SWL_HELLO        2        /* u32 version, u32 cpuHz, u32 window, u32 render */

@@ -23,21 +23,43 @@ typedef struct HBlock {
     uint32_t pad[2];
 } HBlock;
 
-static uint8_t *heap_base, *heap_end;
-static HBlock *heap_rover;
-uint32_t w_heap_used, w_heap_peak;
+/* Two pools: the arena of the extension, and a second one in the render
+ * area (w_heap_add) used when the first is full; free() needs no pool, the
+ * block header is enough. */
+typedef struct {
+    uint8_t *base, *end;
+    HBlock *rover;
+} HPool;
 
-void w_heap_init(void *base, uint32_t size)
+static HPool pools[2];
+static int n_pools;
+uint32_t w_heap_used, w_heap_peak, w_heap2_used;
+
+static void pool_init(HPool *pl, void *base, uint32_t size)
 {
     uintptr_t b = ((uintptr_t)base + 15) & ~(uintptr_t)15;
     size -= (uint32_t)(b - (uintptr_t)base);
     size &= ~15u;
-    heap_base = (uint8_t *)b;
-    heap_end = heap_base + size;
-    heap_rover = (HBlock *)heap_base;
-    heap_rover->size = size;
-    heap_rover->used = 0;
-    w_heap_used = w_heap_peak = 0;
+    pl->base = (uint8_t *)b;
+    pl->end = pl->base + size;
+    pl->rover = (HBlock *)pl->base;
+    pl->rover->size = size;
+    pl->rover->used = 0;
+}
+
+void w_heap_init(void *base, uint32_t size)
+{
+    pool_init(&pools[0], base, size);
+    n_pools = 1;
+    w_heap_used = w_heap_peak = w_heap2_used = 0;
+}
+
+void w_heap_add(void *base, uint32_t size)
+{
+    if ((n_pools >= 2) || (size < 65536))
+        return;
+    pool_init(&pools[n_pools], base, size);
+    n_pools++;
 }
 
 static HBlock *hnext(HBlock *b)
@@ -45,21 +67,18 @@ static HBlock *hnext(HBlock *b)
     return (HBlock *)((uint8_t *)b + b->size);
 }
 
-void *malloc(size_t n)
+static void *pool_alloc(HPool *pl, uint32_t need)
 {
-    uint32_t need = (uint32_t)((n + sizeof(HBlock) + 15) & ~15u);
     HBlock *b, *start;
     int wrapped = 0;
 
-    if (heap_base == NULL || n > 0x7FFFFFF0u)
-        return NULL;
-    b = start = heap_rover;
+    b = start = pl->rover;
     for (;;) {
         if (!b->used) {
             /* merge the free blocks after this one */
             HBlock *nx = hnext(b);
-            while ((uint8_t *)nx < heap_end && !nx->used) {
-                if (heap_rover == nx) heap_rover = b;
+            while ((uint8_t *)nx < pl->end && !nx->used) {
+                if (pl->rover == nx) pl->rover = b;
                 b->size += nx->size;
                 nx = hnext(b);
             }
@@ -71,20 +90,13 @@ void *malloc(size_t n)
                     b->size = need;
                 }
                 b->used = 1;
-                heap_rover = b;
-                w_heap_used += b->size;
-                if (w_heap_used > w_heap_peak) w_heap_peak = w_heap_used;
-                if (wl_trace_mode && n > 65536) {
-                    char m[96];
-                    snprintf(m, sizeof(m), "malloc %lu -> %p\n", (unsigned long)n, (void *)(b + 1));
-                    wl_log(m);
-                }
+                pl->rover = b;
                 return b + 1;
             }
         }
         b = hnext(b);
-        if ((uint8_t *)b >= heap_end) {
-            b = (HBlock *)heap_base;
+        if ((uint8_t *)b >= pl->end) {
+            b = (HBlock *)pl->base;
             wrapped = 1;
         }
         if (wrapped && b == start)
@@ -92,10 +104,39 @@ void *malloc(size_t n)
         if (wrapped && (uint8_t *)b > (uint8_t *)start)
             break;
     }
+    return NULL;
+}
+
+void *malloc(size_t n)
+{
+    uint32_t need = (uint32_t)((n + sizeof(HBlock) + 15) & ~15u);
+    void *p = NULL;
+    int i;
+
+    if (n_pools == 0 || n > 0x7FFFFFF0u)
+        return NULL;
+    for (i = 0; i < n_pools; i++) {
+        p = pool_alloc(&pools[i], need);
+        if (p != NULL)
+            break;
+    }
+    if (p != NULL) {
+        HBlock *b = (HBlock *)p - 1;
+        w_heap_used += b->size;
+        if (i > 0)
+            w_heap2_used += b->size;
+        if (w_heap_used > w_heap_peak) w_heap_peak = w_heap_used;
+        if (wl_trace_mode && n > 65536) {
+            char m[96];
+            snprintf(m, sizeof(m), "malloc %lu -> %p\n", (unsigned long)n, p);
+            wl_log(m);
+        }
+        return p;
+    }
     {
         char m[96];
-        snprintf(m, sizeof(m), "wlibc: malloc(%lu) failed, heap used %lu\n",
-          (unsigned long)n, (unsigned long)w_heap_used);
+        snprintf(m, sizeof(m), "wlibc: malloc(%lu) failed, heap used %lu (second pool %lu)\n",
+          (unsigned long)n, (unsigned long)w_heap_used, (unsigned long)w_heap2_used);
         wl_log(m);
     }
     return NULL;
@@ -111,6 +152,8 @@ void free(void *p)
         return;
     b->used = 0;
     w_heap_used -= b->size;
+    if ((n_pools > 1) && ((uint8_t *)b >= pools[1].base) && ((uint8_t *)b < pools[1].end))
+        w_heap2_used -= b->size;
 }
 
 void *calloc(size_t n, size_t size)

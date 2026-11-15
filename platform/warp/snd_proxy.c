@@ -110,7 +110,6 @@ ULONG se_heap_max(void)
 /* The sound heap lives at the end of the render area (the file transfer
  * buffer and WScreen, at most 2560x1441, are at its start): the game's own
  * heap on the board has no room for it. */
-#define RENDER_USED (SWL_XFER_BYTES + MAX_SUPPORTED_SCREEN_WIDTH * (MAX_SUPPORTED_SCREEN_HEIGHT + 1))
 
 void *se_heap_alloc(ULONG size)
 {
@@ -119,7 +118,8 @@ void *se_heap_alloc(ULONG size)
 
     if (heap != NULL)
         return NULL;
-    if (RENDER_USED + reg + 16 > wl_env->renderArenaSize)
+    if ((reg + 16 > WARP_SOUND_HEAP_RESERVE) ||
+      (SWL_XFER_BYTES + WARP_RENDER_SCREEN_MAX + WARP_SOUND_HEAP_RESERVE > wl_env->renderArenaSize))
         return NULL;
     end = (uint8_t *)wl_env->renderArena + wl_env->renderArenaSize;
     heap = (uint8_t *)(((uintptr_t)(end - reg)) & ~(uintptr_t)15);

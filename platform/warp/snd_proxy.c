@@ -1,9 +1,10 @@
 /* snd_proxy.c - Warp ARM build: the sound engine (platform/amiga/snd_engine.h)
- * as a proxy.  The calls go to the 68k host (tools/warp/swhost.c) as
- * SWL_SND_* / SWL_MUS_* records, where the real engine plays them; the
- * sound heap is registered as SWL_BUF_SOUND, from which the host fetches
- * each sound's bytes.  The ARM keeps the time of each sound itself, the
- * way the engine does for a sound without a voice.
+ * as a proxy.  The 68k host (tools/warp/swhost_snd.c) does all the sound
+ * work: it loads the sound bank into its own memory and plays it; the ARM
+ * only says which sample to play (SWL_SND_* / SWL_MUS_* records).  The
+ * game's sound heap on the ARM holds no sound data, only the head of each
+ * sample (from SND_HEADERS), which is all bfsoundlib looks at.  The ARM
+ * keeps the time of each sound itself.
  * The backend and the music option come from the host's ENV:. */
 #include <stdint.h>
 #include <stdlib.h>
@@ -12,7 +13,11 @@
 #include "snd_engine.h"
 #include "swlink.h"
 #include "wlink.h"
-#include "bfscreen.h"
+#include "bffile.h"
+
+uint8_t *w_xfer_buf(void);
+/** The sample of the sound heap holding p (src/sound.c), -1 none. */
+int sound_heap_locate(const void *p, ULONG *p_offs);
 
 struct PSlot {
     LONG loops;                 /**< repeats after this pass, -1 forever */
@@ -30,6 +35,9 @@ static int backend;
 static int music_on;
 static uint8_t *heap;
 static ULONG heap_size;
+/* heads of the samples of the current bank, SWL_SND_HDR_BYTES each */
+static uint8_t *hdrs;
+static int n_hdrs;
 
 static void put32(uint8_t *p, uint32_t v)
 {
@@ -124,10 +132,6 @@ void *se_heap_alloc(ULONG size)
     end = (uint8_t *)wl_env->renderArena + wl_env->renderArenaSize;
     heap = (uint8_t *)(((uintptr_t)(end - reg)) & ~(uintptr_t)15);
     heap_size = size;
-    if (wl_env->bufRegister(SWL_BUF_SOUND, heap, reg) != 0) {
-        heap = NULL;
-        return NULL;
-    }
     return heap;
 }
 
@@ -135,20 +139,67 @@ void se_heap_free(void *ptr)
 {
     if ((ptr == NULL) || (ptr != heap))
         return;
-    se_close();     /* nothing may fetch from the heap any more */
     heap = NULL;
     heap_size = 0;
 }
 
 /******************************************************************************/
 
+/** SND_BANK and SND_HEADERS: the host loads the bank, the ARM keeps the
+ * heads of its samples.  Gives the number of samples, 0 when none. */
+int amiga_sound_bank_open(const char *fname, int tpno)
+{
+    char real_fname[FILENAME_MAX];
+    const char *path = fname;
+    uint8_t a[4];
+    int n, k;
+
+    n_hdrs = 0;
+    if (backend == SE_NONE)
+        return 0;
+#if LB_FILENAME_TRANSFORM
+    if (lbFileNameTransform != NULL) {
+        lbFileNameTransform(real_fname, fname);
+        path = real_fname;
+    }
+#else
+    (void)real_fname;
+#endif
+    put32(a, (uint32_t)tpno);
+    n = wl_request(SWL_SND_BANK, a, 4, path, (unsigned)strlen(path) + 1, NULL);
+    if ((n <= 0) || ((uint32_t)n * SWL_SND_HDR_BYTES > SWL_XFER_BYTES))
+        return 0;
+    k = wl_request(SWL_SND_HEADERS, NULL, 0, NULL, 0, NULL);
+    if (k != n)
+        return 0;
+    free(hdrs);
+    hdrs = (uint8_t *)malloc((size_t)n * SWL_SND_HDR_BYTES);
+    if (hdrs == NULL)
+        return 0;
+    wl_env->cacheInvalidate(w_xfer_buf(), ((uint32_t)n * SWL_SND_HDR_BYTES + 31) & ~31u);
+    memcpy(hdrs, w_xfer_buf(), (size_t)n * SWL_SND_HDR_BYTES);
+    n_hdrs = n;
+    return n;
+}
+
+/** Puts the head of a sample where the game would load the whole of it. */
+int amiga_sound_sample_header(int id, void *dst, long size)
+{
+    long k = (size < SWL_SND_HDR_BYTES) ? size : SWL_SND_HDR_BYTES;
+
+    if ((id < 0) || (id >= n_hdrs) || (k <= 0))
+        return 0;
+    memcpy(dst, hdrs + (size_t)id * SWL_SND_HDR_BYTES, (size_t)k);
+    return 1;
+}
+
 void se_play(int slot, const void *data, ULONG len, LONG rate, UWORD vol,
     int pan, LONG passes, ULONG pass_ms)
 {
     struct PSlot *ps;
-    const uint8_t *p = (const uint8_t *)data;
-    uint8_t rec[28];
-    uint32_t offs = 0xFFFFFFFFu;
+    uint8_t rec[32];
+    uint32_t id = 0xFFFFFFFFu;
+    ULONG offs = 0;
 
     if ((slot < 0) || (slot >= SE_SLOTS))
         return;
@@ -162,16 +213,20 @@ void se_play(int slot, const void *data, ULONG len, LONG rate, UWORD vol,
     last_pan[slot] = pan;
     if (backend == SE_NONE)
         return;
-    if ((p != NULL) && (heap != NULL) && (p >= heap) && (p + len <= heap + heap_size))
-        offs = (uint32_t)(p - heap);
+    if (data != NULL) {
+        int k = sound_heap_locate(data, &offs);
+        if (k >= 0)
+            id = (uint32_t)k;
+    }
     put32(rec, (uint32_t)slot);
-    put32(rec + 4, offs);
-    put32(rec + 8, len);
-    put32(rec + 12, (uint32_t)rate);
-    put16(rec + 16, vol);
-    put16(rec + 18, (uint32_t)pan);
-    put32(rec + 20, (uint32_t)passes);
-    put32(rec + 24, pass_ms);
+    put32(rec + 4, id);
+    put32(rec + 8, offs);
+    put32(rec + 12, len);
+    put32(rec + 16, (uint32_t)rate);
+    put16(rec + 20, vol);
+    put16(rec + 22, (uint32_t)pan);
+    put32(rec + 24, (uint32_t)passes);
+    put32(rec + 28, pass_ms);
     wl_send(SWL_SND_PLAY, rec, sizeof(rec));
 }
 

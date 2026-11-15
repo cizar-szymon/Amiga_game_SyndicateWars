@@ -1,11 +1,17 @@
-/* swhost_snd.c - the sound of the ARM game, played by its 68k host (vbcc).
+/* swhost_snd.c - the sound of the ARM game, done by its 68k host (vbcc).
  *
- * The SWL_SND_* / SWL_MUS_* records of the ARM (platform/warp/snd_proxy.c)
- * drive the Amiga sound engine (platform/amiga/snd_engine.c, Paula or AHI
- * from ENV:SyndWarsSound, as the 68k game).  For SND_PLAY the sound's
- * bytes are fetched from the ARM's sound heap (SWL_BUF_SOUND) into a ring
- * in the engine's heap (Chip RAM for Paula, Fast RAM for AHI); a sound
- * which is overwritten there is stopped.  The music is read from disk here.
+ * The 68k does all the sound work, as it does in the 68k game; the ARM
+ * (platform/warp/snd_proxy.c) only says what to play:
+ * - SND_BANK: the sound bank file (sound/sound_LANG.dat, the 8-bit Amiga
+ *   one) is loaded whole into the 68k's memory; SND_HEADERS sends the ARM
+ *   the head of each sample (all that the game looks at).
+ * - SND_PLAY: a sample of the bank by its number, in an engine slot
+ *   (platform/amiga/snd_engine.c: Paula or AHI from ENV:SyndWarsSound).
+ *   AHI plays straight from the bank in Fast RAM (the bank is the engine's
+ *   heap).  Paula needs Chip RAM: the engine's heap there is a cache of the
+ *   samples played lately, a sample is copied in once and played from
+ *   there until its place is needed (then what plays from it stops).
+ * - the music is read from disk here (SWL_MUS_*).
  * A timer wakes the host every 20 ms to keep the voices and the music fed. */
 #include <exec/types.h>
 #include <exec/memory.h>
@@ -24,8 +30,8 @@
 
 extern struct CSWarpBase *csWarpBase;
 
-#define FETCH_MAX (256 * 1024)
 #define SERVICE_MS 20
+#define NO_CACHE 0xFFFFFFFFUL
 
 struct Device *TimerBase;
 static struct MsgPort *tport;
@@ -33,18 +39,31 @@ static struct timerequest *treq;
 static BOOL timer_busy;
 static ULONG eclock_kHz = 709;
 
-static UBYTE *heap;             /* the engine's heap, a ring of sounds */
-static ULONG heap_size, ring_pos;
-static UBYTE *fetch_raw, *fetch_buf;
-static CSWarpExtReq freq_;
-static ULONG slot_beg[SE_SLOTS], slot_len[SE_SLOTS];
-static UBYTE slot_on[SE_SLOTS];
 static BOOL opened;
-static ULONG last_service;
-static ULONG fetch_fail, n_play, n_silent, n_toobig, n_fetched;
-static ULONG last_log;
-static LONG last_rc;
-static ULONG last_aoff, last_rows, ok_max_rows, fail_min_rows = 0xFFFFFFFFUL;
+static int backend;
+
+/* the bank: the whole file; for AHI it is the engine's heap */
+static UBYTE *bank;
+static ULONG bank_size;
+static BOOL bank_is_heap;
+static int n_smp;
+static ULONG *smp_pos, *smp_len;
+
+/* Paula: the engine's heap in Chip RAM, a ring of copied samples */
+static UBYTE *chip;
+static ULONG chip_size, ring_pos;
+static ULONG *cache_off;            /* per sample: offset in chip, or NO_CACHE */
+
+static WORD slot_smp[SE_SLOTS];     /* sample playing in the slot, -1 none */
+static UBYTE slot_on[SE_SLOTS];
+
+/* the heads for SND_HEADERS, 16-aligned for extFeed */
+static UBYTE *hdr_raw;
+static CSWarpExtReq hreq;
+
+static ULONG last_service, last_log;
+static ULONG n_play, n_silent, n_copied, n_cached, copy_bytes;
+static ULONG play_ticks, play_ticks_max;
 
 static ULONG rd32(const UBYTE *p) { return p[0] | (p[1] << 8) | ((ULONG)p[2] << 16) | ((ULONG)p[3] << 24); }
 static UWORD rd16(const UBYTE *p) { return (UWORD)(p[0] | (p[1] << 8)); }
@@ -65,6 +84,15 @@ ULONG se_ms(void)
     y = ((x % d) << 16) | (ev.ev_lo & 0xFFFF);
     q2 = y / d;
     return (q1 << 16) + q2;
+}
+
+static ULONG eclock_lo(void)
+{
+    struct EClockVal ev;
+    if (TimerBase == NULL)
+        return 0;
+    ReadEClock(&ev);
+    return ev.ev_lo;
 }
 
 static void timer_open(void)
@@ -135,86 +163,217 @@ static BOOL music_on_env(void)
     return TRUE;
 }
 
-static void snd_close(void)
-{
-    if (!opened)
-        return;
-    se_close();
-    if (heap != NULL)
-        se_heap_free(heap);
-    heap = NULL;
-    opened = FALSE;
-}
+/******************************************************************************/
+/* the bank */
 
-/** SND_OPEN: the engine with the backend of ENV:, its heap as the ring. */
-static LONG snd_open(LONG *extra)
+static void stop_all(void)
 {
-    int be;
-
-    *extra = 0;
-    if (opened)
-        snd_close();
-    if (fetch_raw == NULL) {
-        fetch_raw = AllocVec(FETCH_MAX + 16, MEMF_ANY);
-        if (fetch_raw == NULL)
-            return SE_NONE;
-        fetch_buf = (UBYTE *)(((ULONG)fetch_raw + 15) & ~15UL);
-    }
-    if (TimerBase == NULL)
-        timer_open();
-    be = se_open(se_backend_from_env());
-    if (be == SE_NONE)
-        return SE_NONE;
-    heap_size = se_heap_max();
-    while ((heap = se_heap_alloc(heap_size)) == NULL) {
-        if (heap_size < 200000)
-            break;
-        heap_size -= 50000;
-    }
-    if (heap == NULL) {
-        se_close();
-        return SE_NONE;
-    }
-    ring_pos = 0;
-    memset(slot_on, 0, sizeof(slot_on));
-    opened = TRUE;
-    *extra = music_on_env();
-    return be;
-}
-
-/** A place in the ring for len bytes (16-aligned); the sounds there stop. */
-static UBYTE *ring_alloc(ULONG len)
-{
-    ULONG need = (len + 15) & ~15UL;
     int i;
 
-    if (need > heap_size)
-        return NULL;
-    if (ring_pos + need > heap_size)
-        ring_pos = 0;
     for (i = 0; i < SE_SLOTS; i++) {
-        if (slot_on[i] && (slot_beg[i] < ring_pos + need) &&
-          (slot_beg[i] + slot_len[i] > ring_pos)) {
+        if (slot_on[i])
             se_stop(i);
-            slot_on[i] = 0;
+        slot_on[i] = 0;
+        slot_smp[i] = -1;
+    }
+}
+
+static void bank_free(void)
+{
+    stop_all();
+    if (bank != NULL) {
+        if (bank_is_heap)
+            se_heap_free(bank);
+        else
+            FreeVec(bank);
+    }
+    bank = NULL;
+    bank_size = 0;
+    bank_is_heap = FALSE;
+    if (smp_pos != NULL) FreeVec(smp_pos);
+    if (smp_len != NULL) FreeVec(smp_len);
+    if (cache_off != NULL) FreeVec(cache_off);
+    smp_pos = smp_len = cache_off = NULL;
+    n_smp = 0;
+    ring_pos = 0;
+}
+
+/** SND_BANK: loads the bank file and finds the samples of bank tpno.
+ * Gives their number, 0 when it fails. */
+static LONG bank_load(ULONG tpno, const char *name)
+{
+    BPTR fh;
+    LONG size;
+    ULONG pos, tab, dat, tsz;
+    int i;
+
+    bank_free();
+    fh = Open((STRPTR)name, MODE_OLDFILE);
+    if (fh == 0)
+        return 0;
+    Seek(fh, 0, OFFSET_END);
+    size = Seek(fh, 0, OFFSET_BEGINNING);
+    if (size < 64) {
+        Close(fh);
+        return 0;
+    }
+    if (backend == SE_AHI) {
+        /* AHI plays from the bank: it is the engine's heap (one AHI sound) */
+        bank = se_heap_alloc((ULONG)size);
+        bank_is_heap = (bank != NULL);
+    } else {
+        bank = AllocVec((ULONG)size, MEMF_ANY);
+    }
+    if ((bank == NULL) || (Read(fh, bank, size) != size)) {
+        Close(fh);
+        bank_free();
+        return 0;
+    }
+    Close(fh);
+    bank_size = (ULONG)size;
+    /* the heads of the banks, at the position in the last 4 bytes */
+    pos = rd32(bank + bank_size - 4);
+    if ((tpno >= 9) || (pos + 18 + 16 * 9 > bank_size)) {
+        bank_free();
+        return 0;
+    }
+    tab = rd32(bank + pos + 18 + 16 * tpno);
+    dat = rd32(bank + pos + 18 + 16 * tpno + 4);
+    tsz = rd32(bank + pos + 18 + 16 * tpno + 8);
+    if ((tab == 0) || (tab == 0xFFFFFFFFUL) || (tab + tsz > bank_size) || (tsz < 32)) {
+        bank_free();
+        return 0;
+    }
+    n_smp = (int)(tsz / 32);
+    smp_pos = AllocVec(n_smp * sizeof(ULONG), MEMF_ANY | MEMF_CLEAR);
+    smp_len = AllocVec(n_smp * sizeof(ULONG), MEMF_ANY | MEMF_CLEAR);
+    cache_off = AllocVec(n_smp * sizeof(ULONG), MEMF_ANY);
+    if ((smp_pos == NULL) || (smp_len == NULL) || (cache_off == NULL)) {
+        bank_free();
+        return 0;
+    }
+    for (i = 0; i < n_smp; i++) {
+        const UBYTE *e = bank + tab + 32 * i;
+        ULONG p = dat + rd32(e + 18), l = rd32(e + 26);
+        if ((l > 0) && (p + l <= bank_size)) {
+            smp_pos[i] = p;
+            smp_len[i] = l;
+        }
+        cache_off[i] = NO_CACHE;
+    }
+    return n_smp;
+}
+
+/** SND_HEADERS: the first SWL_SND_HDR_BYTES of each sample to SWL_BUF_XFER. */
+static LONG bank_headers(void)
+{
+    ULONG bytes = ((ULONG)n_smp * SWL_SND_HDR_BYTES + 15) & ~15UL;
+    UBYTE *buf;
+    LONG rc;
+    int i;
+
+    if ((n_smp == 0) || (bytes > SWL_XFER_BYTES))
+        return 0;
+    if (hdr_raw != NULL)
+        FreeVec(hdr_raw);
+    hdr_raw = AllocVec(bytes + 16, MEMF_ANY | MEMF_CLEAR);
+    if (hdr_raw == NULL)
+        return 0;
+    buf = (UBYTE *)(((ULONG)hdr_raw + 15) & ~15UL);
+    for (i = 0; i < n_smp; i++) {
+        ULONG k = smp_len[i] < SWL_SND_HDR_BYTES ? smp_len[i] : SWL_SND_HDR_BYTES;
+        if (k > 0)
+            CopyMem(bank + smp_pos[i], buf + i * SWL_SND_HDR_BYTES, k);
+    }
+    memset(&hreq, 0, sizeof(hreq));
+    hreq.version = CSWARP_EXTREQ_VERSION;
+    rc = extFeed(SWL_BUF_XFER, 0, buf, bytes, &hreq);
+    return (rc == CSWEXT_OK) ? n_smp : 0;
+}
+
+/******************************************************************************/
+/* Paula: the cache of samples in Chip RAM */
+
+/** A place in the ring for a sample; what was there is forgotten, and what
+ * plays from it stops. */
+static UBYTE *chip_alloc(int id)
+{
+    ULONG need = (smp_len[id] + 15) & ~15UL;
+    ULONG beg;
+    int i;
+
+    if ((chip == NULL) || (need > chip_size))
+        return NULL;
+    if (ring_pos + need > chip_size)
+        ring_pos = 0;
+    beg = ring_pos;
+    for (i = 0; i < n_smp; i++) {
+        ULONG o = cache_off[i];
+        if ((o != NO_CACHE) && (o < beg + need) && (o + smp_len[i] > beg)) {
+            int s;
+            cache_off[i] = NO_CACHE;
+            for (s = 0; s < SE_SLOTS; s++) {
+                if (slot_on[s] && (slot_smp[s] == i)) {
+                    se_stop(s);
+                    slot_on[s] = 0;
+                }
+            }
         }
     }
     ring_pos += need;
-    return heap + ring_pos - need;
+    cache_off[id] = beg;
+    return chip + beg;
 }
 
-static ULONG play_ticks, play_ticks_max, play_bytes;
-
-static ULONG eclock_lo(void)
+/** Where sample id is to be played from: the bank (AHI) or its copy in
+ * Chip RAM (Paula), NULL when it cannot be played. */
+static const UBYTE *sample_data(int id)
 {
-    struct EClockVal ev;
-    if (TimerBase == NULL)
-        return 0;
-    ReadEClock(&ev);
-    return ev.ev_lo;
+    UBYTE *c;
+
+    if (backend == SE_AHI)
+        return bank + smp_pos[id];
+    if (cache_off[id] != NO_CACHE) {
+        n_cached++;
+        return chip + cache_off[id];
+    }
+    c = chip_alloc(id);
+    if (c == NULL)
+        return NULL;
+    CopyMem(bank + smp_pos[id], c, smp_len[id]);
+    n_copied++;
+    copy_bytes += smp_len[id];
+    return c;
 }
 
-static void snd_play_do(const UBYTE *p);
+static void snd_play_do(const UBYTE *p)
+{
+    ULONG slot = rd32(p), id = rd32(p + 4), offs = rd32(p + 8), len = rd32(p + 12);
+    LONG rate = (LONG)rd32(p + 16);
+    UWORD vol = rd16(p + 20);
+    int pan = rd16(p + 22);
+    LONG passes = (LONG)rd32(p + 24);
+    ULONG pass_ms = rd32(p + 28);
+    const UBYTE *src = NULL;
+
+    if (slot >= SE_SLOTS)
+        return;
+    n_play++;
+    se_stop((int)slot);
+    slot_on[slot] = 0;
+    slot_smp[slot] = -1;
+    if ((id < (ULONG)n_smp) && (offs + len <= smp_len[id]) && (len >= 2)) {
+        const UBYTE *d = sample_data((int)id);
+        if (d != NULL) {
+            src = d + offs;
+            slot_on[slot] = 1;
+            slot_smp[slot] = (WORD)id;
+        }
+    }
+    if (src == NULL)
+        n_silent++;
+    se_play((int)slot, src, len, rate, vol, pan, passes, pass_ms);
+}
 
 static void snd_play(const UBYTE *p)
 {
@@ -226,65 +385,59 @@ static void snd_play(const UBYTE *p)
         play_ticks_max = t;
 }
 
-static void snd_play_do(const UBYTE *p)
-{
-    ULONG slot = rd32(p), offs = rd32(p + 4), len = rd32(p + 8);
-    LONG rate = (LONG)rd32(p + 12);
-    UWORD vol = rd16(p + 16);
-    int pan = rd16(p + 18);
-    LONG passes = (LONG)rd32(p + 20);
-    ULONG pass_ms = rd32(p + 24);
-    UBYTE *dst = NULL;
+/******************************************************************************/
 
-    if (slot >= SE_SLOTS)
+static void snd_close(void)
+{
+    if (!opened)
         return;
-    n_play++;
-    if (offs == 0xFFFFFFFFUL)
-        n_silent++;
-    se_stop((int)slot);
-    slot_on[slot] = 0;
-    if ((offs != 0xFFFFFFFFUL) && (len >= 2)) {
-        ULONG aoff = offs & ~15UL;
-        ULONG rows = ((offs + len) - aoff + 15) & ~15UL;
-        /* extFetch moves 32 bytes or more (LINK_QSDMA_MIN_LEN): a short one
-         * starts 16 bytes earlier rather than reading past the heap */
-        if ((rows < 32) && (aoff >= 16)) {
-            aoff -= 16;
-            rows = 32;
+    bank_free();
+    if (chip != NULL)
+        se_heap_free(chip);
+    chip = NULL;
+    se_close();
+    opened = FALSE;
+}
+
+/** SND_OPEN: the engine with the backend of ENV:; for Paula its heap in
+ * Chip RAM as the cache of samples. */
+static LONG snd_open(LONG *extra)
+{
+    int i;
+
+    *extra = 0;
+    if (opened)
+        snd_close();
+    if (TimerBase == NULL)
+        timer_open();
+    backend = se_open(se_backend_from_env());
+    if (backend == SE_NONE)
+        return SE_NONE;
+    if (backend == SE_PAULA) {
+        chip_size = se_heap_max();
+        while ((chip = se_heap_alloc(chip_size)) == NULL) {
+            if (chip_size < 200000)
+                break;
+            chip_size -= 50000;
         }
-        if (rows <= FETCH_MAX)
-            dst = ring_alloc(len);
-        else
-            n_toobig++;
-        if (dst != NULL) {
-            LONG rc;
-            memset(&freq_, 0, sizeof(freq_));
-            freq_.version = CSWARP_EXTREQ_VERSION;
-            rc = extFetch(SWL_BUF_SOUND, aoff, fetch_buf, rows, 1, rows, &freq_);
-            if (rc == CSWEXT_OK) {
-                CopyMem(fetch_buf + (offs - aoff), dst, len);
-                play_bytes += len;
-                slot_beg[slot] = (ULONG)(dst - heap);
-                slot_len[slot] = len;
-                slot_on[slot] = 1;
-                n_fetched++;
-                if (rows > ok_max_rows) ok_max_rows = rows;
-            } else {
-                fetch_fail++;
-                last_rc = rc;
-                last_aoff = aoff;
-                last_rows = rows;
-                if (rows < fail_min_rows) fail_min_rows = rows;
-                dst = NULL;
-            }
+        if (chip == NULL) {
+            se_close();
+            return SE_NONE;
         }
     }
-    se_play((int)slot, dst, len, rate, vol, pan, passes, pass_ms);
+    for (i = 0; i < SE_SLOTS; i++) {
+        slot_on[i] = 0;
+        slot_smp[i] = -1;
+    }
+    opened = TRUE;
+    *extra = music_on_env();
+    return backend;
 }
 
 int hsnd_handle(UWORD type, const UBYTE *p, UWORD len, LONG *res, LONG *extra)
 {
     char name[256];
+    ULONG n;
 
     *res = 0;
     *extra = 0;
@@ -295,8 +448,22 @@ int hsnd_handle(UWORD type, const UBYTE *p, UWORD len, LONG *res, LONG *extra)
     case SWL_SND_CLOSE:
         snd_close();
         return 1;
+    case SWL_SND_BANK:
+        if (!opened || (len < 5))
+            return 2;
+        n = len - 4;
+        if (n >= sizeof(name))
+            n = sizeof(name) - 1;
+        memcpy(name, p + 4, n);
+        name[n] = '\0';
+        *res = bank_load(rd32(p), name);
+        return 2;
+    case SWL_SND_HEADERS:
+        if (opened)
+            *res = bank_headers();
+        return 2;
     case SWL_SND_PLAY:
-        if (opened && (len >= 28))
+        if (opened && (len >= 32))
             snd_play(p);
         return 1;
     case SWL_SND_SET:
@@ -314,10 +481,11 @@ int hsnd_handle(UWORD type, const UBYTE *p, UWORD len, LONG *res, LONG *extra)
             se_release((int)rd32(p));
         return 1;
     case SWL_MUS_OPEN:
-        if (len >= sizeof(name))
-            len = sizeof(name) - 1;
-        memcpy(name, p, len);
-        name[len] = '\0';
+        n = len;
+        if (n >= sizeof(name))
+            n = sizeof(name) - 1;
+        memcpy(name, p, n);
+        name[n] = '\0';
         *res = (opened && se_music_open(name)) ? 1 : 0;
         return 2;
     case SWL_MUS_CLOSE:
@@ -363,9 +531,9 @@ void hsnd_service(BOOL timer_signalled)
         if (GetVar((STRPTR)"SyndWarsSoundLog", (STRPTR)buf, sizeof(buf), 0) >= 0) {
             BPTR f = Open((STRPTR)"RAM:SyndWars-host.txt", MODE_NEWFILE);
             if (f) {
-                FPrintf(f, (STRPTR)"play %lu silent %lu fetched %lu fetch_fail %lu too_big %lu ring %lu/%lu play_ms %lu max_us %lu kbytes %lu\n",
-                  n_play, n_silent, n_fetched, fetch_fail, n_toobig, ring_pos, heap_size,
-                  play_ticks / eclock_kHz, (play_ticks_max * 1000) / eclock_kHz, play_bytes / 1024);
+                FPrintf(f, (STRPTR)"play %lu silent %lu copied %lu cached %lu kbytes %lu bank %lu samples %ld chip %lu/%lu play_ms %lu max_us %lu\n",
+                  n_play, n_silent, n_copied, n_cached, copy_bytes / 1024, bank_size, (LONG)n_smp,
+                  ring_pos, chip_size, play_ticks / eclock_kHz, (play_ticks_max * 1000) / eclock_kHz);
                 Close(f);
             }
         }
@@ -376,7 +544,7 @@ void hsnd_close(void)
 {
     snd_close();
     timer_close();
-    if (fetch_raw != NULL)
-        FreeVec(fetch_raw);
-    fetch_raw = NULL;
+    if (hdr_raw != NULL)
+        FreeVec(hdr_raw);
+    hdr_raw = NULL;
 }

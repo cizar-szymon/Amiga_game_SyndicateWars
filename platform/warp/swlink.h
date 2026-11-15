@@ -12,10 +12,12 @@
  *            answers FRAME_DONE (the ARM waits for it before drawing on).
  *   reads:   the ARM sends FREAD; the 68k reads the file and extFeed's the
  *            bytes (padded to 16) into SWL_BUF_XFER, then answers RESULT.
- *   sounds: the ARM registers its sound heap as SWL_BUF_SOUND; with SND_PLAY
- *            the 68k extFetch'es the sound's bytes into its own memory and
- *            plays them (platform/amiga/snd_engine.c); the ARM keeps the
- *            time of each sound itself (platform/warp/snd_proxy.c).
+ *   sounds: the 68k does all of it (tools/warp/swhost_snd.c with
+ *            platform/amiga/snd_engine.c, as the 68k game): it loads the
+ *            sound bank into its memory (SND_BANK) and sends the ARM only
+ *            the head of each sample (SND_HEADERS, through SWL_BUF_XFER);
+ *            the ARM says which sample to play (SND_PLAY) and keeps the time
+ *            of each sound itself (platform/warp/snd_proxy.c).
  * Requests (FOPEN..MKDIR, SND_OPEN, MUS_OPEN) are answered by one RESULT
  * each, in order. */
 #ifndef SWLINK_H
@@ -25,7 +27,6 @@
 
 #define SWL_BUF_XFER     1        /* file read transfer buffer */
 #define SWL_BUF_SCREEN   2        /* the game's screen buffer (WScreen) */
-#define SWL_BUF_SOUND    3        /* the game's sound heap */
 #define SWL_XFER_BYTES   (256 * 1024)
 #define SWL_REC_MAX      3072     /* largest record payload */
 
@@ -54,8 +55,8 @@
 /* sound (slots and units of platform/amiga/snd_engine.h) */
 #define SWL_SND_OPEN     30       /* -> RESULT backend opened (SE_*), heap max */
 #define SWL_SND_CLOSE    31
-#define SWL_SND_PLAY     32       /* u32 slot, u32 offset in SWL_BUF_SOUND (~0: silent), u32 len,
-                                     i32 rate, u16 vol, u16 pan, i32 passes, u32 pass_ms */
+#define SWL_SND_PLAY     32       /* u32 slot, u32 sample (~0: silent), u32 offset in the sample,
+                                     u32 len, i32 rate, u16 vol, u16 pan, i32 passes, u32 pass_ms */
 #define SWL_SND_SET      33       /* u32 slot, i32 rate, u16 vol, u16 pan */
 #define SWL_SND_STOP     34       /* u32 slot */
 #define SWL_SND_RELEASE  35       /* u32 slot */
@@ -64,6 +65,10 @@
 #define SWL_MUS_PLAY     38       /* u16 vol */
 #define SWL_MUS_PAUSE    39
 #define SWL_MUS_REWIND   40
+#define SWL_SND_BANK     41       /* u32 bank (tpno), name -> RESULT samples in the bank, 0 none */
+#define SWL_SND_HEADERS  42       /* -> the first SWL_SND_HDR_BYTES of each sample in
+                                     SWL_BUF_XFER, RESULT samples */
+#define SWL_SND_HDR_BYTES 64
 
 /* 68k -> ARM */
 #define SWL_RESULT       100      /* i32 value, i32 extra */

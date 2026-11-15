@@ -387,8 +387,14 @@ static struct SampleInfo *play_sample_using_heap_c(ulong bank_id, short smptbl_i
         if (p_item != NULL)
         {
             p_item->smptbl_id = smptbl_id;
+#if defined(SW_WARP)
+            // The 68k host has the whole bank and plays it; the ARM keeps
+            // only the head of the sample, which is all bfsoundlib reads.
+            amiga_sound_sample_header(smptbl_id, p_item->data, size);
+#else
             LbFileSeek(sound_file, p_smpent->field_0, Lb_FILE_SEEK_BEGINNING);
             LbFileRead(sound_file, p_item->data, size);
+#endif
         }
         p_smpent->hmhandle = (struct HeapMgrHandle *)p_item;
     }
@@ -622,6 +628,33 @@ struct HeapMgrHeader *heapmgr_init(void *p_buf, int buf_size, int n_samples)
     return p_hmhead;
 }
 
+#if defined(SW_WARP)
+int amiga_sound_bank_open(const char *fname, int tpno);
+int amiga_sound_sample_header(int id, void *dst, long size);
+
+/** The sample of the sound heap which holds p, and p's offset in it; -1
+ * when none (for the ARM's sound proxy, platform/warp/snd_proxy.c). */
+int sound_heap_locate(const void *p, ulong *p_offs)
+{
+    int i;
+
+    if (sample_table == NULL)
+        return -1;
+    for (i = 1; i < samples_in_bank; i++)
+    {
+        struct HeapMgrItem *p_item = (struct HeapMgrItem *)sample_table[i].hmhandle;
+        if (p_item == NULL)
+            continue;
+        if (((const ubyte *)p >= p_item->data) &&
+          ((const ubyte *)p < p_item->data + p_item->size)) {
+            *p_offs = (ulong)((const ubyte *)p - p_item->data);
+            return i;
+        }
+    }
+    return -1;
+}
+#endif
+
 int setup_heap_manager(struct SampleTable *smptable, size_t smptb_len,
   const char *fname, ushort sndtype)
 {
@@ -690,6 +723,13 @@ int setup_heap_manager(struct SampleTable *smptable, size_t smptb_len,
         reset_heaps();
         return 0;
     }
+#if defined(SW_WARP)
+    // the 68k host loads the bank and plays from it
+    if (amiga_sound_bank_open(fname, tpno) != samples_in_bank) {
+        reset_heaps();
+        return 0;
+    }
+#endif
     sample_table = smptable;
     smptb_len_diff = smptb_len - tab_smptb_len;
     p_smptb_end = (ubyte *)smptable + tab_smptb_len;

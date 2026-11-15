@@ -220,6 +220,11 @@ typedef struct {
 static WFile fds[MAX_FD];
 static uint8_t *xfer;   /* SWL_BUF_XFER, in the render area */
 
+uint8_t *w_xfer_buf(void)
+{
+    return xfer;
+}
+
 void w_files_init(uint8_t *xfer_buf)
 {
     memset(fds, 0, sizeof(fds));

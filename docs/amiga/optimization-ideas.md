@@ -8,4 +8,4 @@ się je włącza i wyłącza). Stan: ⏳ do zrobienia, 🔧 w pracy, ✅ zrobion
 | 15.11.2026 | Przy dużym obciążeniu (duży wybuch na ekranie) wolniej odświeżać HUD | ⏳ | bezpieczne – nie zmienia logiki gry |
 | 15.11.2026 | Przy dużym obciążeniu liczyć tylko osoby widoczne na ekranie | ⏳ | zmienia przebieg misji (wrogowie/agenci poza ekranem by stanęli) – tylko ostrożnie, np. wzmocnić istniejące pomijanie dalekich cywilów (`SyndWarsCivLOD`) |
 | 15.11.2026 | Znacznik „gra spada poniżej 16 kl./s” i wtedy w czasie rzeczywistym włączać dodatkowe optymalizacje | ⏳ | z histerezą, żeby nie migało |
-| 15.11.2026 | HUD odświeżany 2 razy rzadziej niż obraz 3D (też punkty ludzi na radarze migają za agresywnie) | 🔧 | |
+| 15.11.2026 | HUD odświeżany 2 razy rzadziej niż obraz 3D (też punkty ludzi na radarze migają za agresywnie) | 🔧 | radar: opcja **RADAR HALF RATE** (menu opcji, `SyndWarsRadar2`) – od 15.11.2026 domyślnie włączona na Amidze i ARM ✅; reszta paneli (agenci, broń): ⏳ – trzeba zapamiętywać ich piksele jak przy radarze, nowa opcja „HUD HALF RATE” |

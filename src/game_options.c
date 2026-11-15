@@ -565,7 +565,9 @@ void set_default_speed_options(void)
     /* on by default on the Amiga and the Warp ARM - the user found no
      * change in the game; ENV: variables set the start values */
     far_peds = amiga_getenv_int("SyndWarsCivLOD", 3);
-    scan_half = amiga_getenv_int("SyndWarsRadar2", 0);
+    /* radar every 2nd frame: on by default (user's choice, 15.11.2026:
+     * the people's dots blinked too much) */
+    scan_half = amiga_getenv_int("SyndWarsRadar2", 1);
 #else
     /* the PC build stays the reference */
     {

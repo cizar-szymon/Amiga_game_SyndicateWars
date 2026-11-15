@@ -2284,7 +2284,8 @@ void draw_new_panel_weapon_overlay(short panel, ushort plagent, TbBool darkened)
 int amiga_getenv_int(const char *name, int dflt);
 #endif
 
-/* Scanner drawn every 2nd frame (option, off by default): on the other
+/* Scanner drawn every 2nd frame (option; on by default on the Amiga and
+ * the Warp ARM, off on the PC): on the other
  * frames its pixels from the frame before are put back. The scanner is
  * see-through, so the view under it then changes every 2nd frame only.
  * Set in the options menu ("RADAR HALF RATE"), kept in the user settings;

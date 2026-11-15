@@ -1,6 +1,6 @@
-/* Amiga build, first stage: no sound, music, CD audio, joystick or Smacker
- * video. These stand in for bfsoundlib, bfsmacklib and the joystick driver.
- * The game sees "no sound hardware". */
+/* Amiga build: no joystick or Smacker video yet; these stand in for
+ * bfsmacklib and the joystick driver.  Sound is bfsoundlib with the Paula
+ * driver (snd_paula.c); the ARM build has no sound yet. */
 #include "bftypes.h"
 #include "bfjoyst.h"
 #include "bfaudio.h"
@@ -12,6 +12,8 @@
 #include "bfsvaribl.h"
 #include "bfsmack.h"
 
+#ifdef SW_WARP
+/* The ARM build has no sound yet: bfsoundlib stand-ins. */
 /* bfaudio */
 void InitAudio(AudioInitOptions *audOpts) { (void)audOpts; }
 void FreeAudio(void) { }
@@ -60,6 +62,8 @@ TbBool GetCDAble(void) { return false; }
 void PlayCDTrack(ushort trkno) { (void)trkno; }
 void StopCD(void) { }
 void SetCDVolume(short vol) { (void)vol; }
+
+#endif
 
 /* Smacker video */
 TbResult play_smk(char *fname, u32 smkflags, ushort plyflags)

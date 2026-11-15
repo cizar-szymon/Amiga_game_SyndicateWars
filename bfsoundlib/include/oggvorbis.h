@@ -22,8 +22,15 @@
 #define OGGVORBIS_H_
 
 #include <stdbool.h>
+#ifdef SW_AMIGA
+#include <stdint.h>
+/* No OpenAL or Vorbis on the Amiga: platform/amiga/snd_paula.c plays
+ * pre-converted PCM tracks with the same functions. */
+typedef uint32_t ALuint;
+#else
 #include <vorbis/vorbisfile.h>
 #include LBS_OPENAL_AL_H
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,6 +41,16 @@ extern "C" {
 
 typedef struct OggVorbisStream OggVorbisStream;
 
+#ifdef SW_AMIGA
+struct OggVorbisStream
+{
+  ALuint	 source;
+  bool		 playing;
+  char		*file_name;
+  float		 gain;
+  void		*priv;
+};
+#else
 struct OggVorbisStream
 {
   ALuint	 source;
@@ -44,6 +61,7 @@ struct OggVorbisStream
   ALuint	 buffers[SOUND_MUSIC_BUFFERS];
   size_t	 buffer_count;
 };
+#endif
 
 bool ogg_vorbis_stream_init (OggVorbisStream *stream);
 void ogg_vorbis_stream_free (OggVorbisStream *stream);

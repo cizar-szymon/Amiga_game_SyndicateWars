@@ -77,6 +77,12 @@ sbyte InitialCDVolume = -1;
 
 OggVorbisStream sound_music_stream;
 
+/** Extension of the music track files; the Amiga plays pre-converted
+ * PCM tracks instead of Ogg/Vorbis ones. */
+#ifndef MUSIC_TRACK_EXT
+#define MUSIC_TRACK_EXT "ogg"
+#endif
+
 /** Informs whether the CD Playback Timer is active.
  */
 TbBool CDPlayTimerActive = false;
@@ -259,7 +265,7 @@ void ogg_list_music_tracks(void)
         int len;
 
         len = snprintf(file_name, sizeof(file_name),
-              "%s" FS_SEP_STR "track_%i.ogg",
+              "%s" FS_SEP_STR "track_%i." MUSIC_TRACK_EXT,
               music_dir, trkno - 1);
         if ((len < 1) || (len > (int)sizeof(file_name))) {
             SNDLOGFAIL("CDA list", "unacceptable music path");
@@ -318,7 +324,7 @@ void PlayMusicOGGTrack(ushort trkno)
     int len;
 
     len = snprintf(file_name, sizeof(file_name),
-          "%s" FS_SEP_STR "track_%i.ogg",
+          "%s" FS_SEP_STR "track_%i." MUSIC_TRACK_EXT,
           music_dir, trkno - 1);
 
     if ((len < 1) || (len > (int)sizeof(file_name))) {

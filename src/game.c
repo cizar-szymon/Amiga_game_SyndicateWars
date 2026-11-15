@@ -1424,7 +1424,11 @@ void init_syndwars(void)
     audOpts.DisableLoadSounds = 1;
     audOpts.InitRedbookAudio = 2;
     audOpts.UseCurrentAwe32Soundfont = 1;
+#ifdef SW_AMIGA
+    audOpts.AbleFlags = 0x02; // no MIDI music, the CD tracks play
+#else
     audOpts.AbleFlags = 3;
+#endif
     audOpts.SoundType = 1622;
     audOpts.MaxSamples = 10;
     InitAudio(&audOpts);

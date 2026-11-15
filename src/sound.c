@@ -729,6 +729,20 @@ TbResult sound_banks_fname(char *fname, const char *dir, const char *lang)
     return Lb_FAIL;
 }
 
+/* Paula plays samples only from Chip RAM, so on the Amiga the sound heap
+ * is there, and smaller (the heap keeps the most recent samples). */
+#if defined(SW_AMIGA) && !defined(SW_WARP)
+void *amiga_chip_alloc(ulong size);
+void amiga_chip_free(void *ptr);
+#define SOUND_HEAP_ALLOC(sz) amiga_chip_alloc(sz)
+#define SOUND_HEAP_FREE(ptr) amiga_chip_free(ptr)
+#define SOUND_HEAP_MAX 800000
+#else
+#define SOUND_HEAP_ALLOC(sz) LbMemoryAlloc(sz)
+#define SOUND_HEAP_FREE(ptr) LbMemoryFree(ptr)
+#define SOUND_HEAP_MAX 1500000
+#endif
+
 void setup_heaps(short setup_cmd, const char *lang)
 {
     char locstr[DISKPATH_SIZE];
@@ -750,10 +764,10 @@ void setup_heaps(short setup_cmd, const char *lang)
     case 99:
         break;
     case SHSC_GameSndAutoQ:
-        sz = 1500000;
+        sz = SOUND_HEAP_MAX;
         while ((sound_heap_memory == NULL) && (sz > 100))
         {
-            sound_heap_memory = LbMemoryAlloc(sz);
+            sound_heap_memory = SOUND_HEAP_ALLOC(sz);
             if (sound_heap_memory == NULL)
                 sz -= 30000;
         }
@@ -775,7 +789,11 @@ void setup_heaps(short setup_cmd, const char *lang)
         sound_heap_size = sz;
         break;
     case SHSC_GameSndBestQ:
+#if defined(SW_AMIGA) && !defined(SW_WARP)
+        sz = sound_heap_size; // the heap may be smaller than the maximum
+#else
         sz = 1500000;
+#endif
         if (sound_banks_fname(locstr, pinfo->directory, lang) == Lb_FAIL) {
             LOGERR("Matching sound banks file not found.");
             ingame.Flags &= ~GamF_Unkn00020000;
@@ -789,7 +807,7 @@ void setup_heaps(short setup_cmd, const char *lang)
     default:
         sz = 1500000;
         reset_heaps();
-        LbMemoryFree(sound_heap_memory);
+        SOUND_HEAP_FREE(sound_heap_memory);
         sound_heap_size = sz;
         break;
     }

@@ -30,6 +30,9 @@
 
 #define SW_AMIGA 1
 
+/* Music: pre-converted PCM tracks (tools/amiga/make_music.py). */
+#define MUSIC_TRACK_EXT "smu"
+
 /* No text/binary distinction on AmigaDOS. */
 #ifndef O_BINARY
 #define O_BINARY 0

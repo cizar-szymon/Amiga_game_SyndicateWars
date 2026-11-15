@@ -31,7 +31,8 @@ CFLAGS="$COMMON -std=gnu99"
 CXXFLAGS="$COMMON -fno-exceptions -fno-rtti"
 
 # Source sets. Not built: asm (.sx), DOS/Windows/SDL platform code,
-# bfsoundlib and bfsmacklib (stubbed), network transports.
+# bfsmacklib (stubbed), network transports, the OpenAL and Vorbis parts of
+# bfsoundlib (platform/amiga/snd_paula.c instead).
 SRCS=""
 for f in src/*.c; do
   case "$f" in
@@ -40,6 +41,12 @@ for f in src/*.c; do
   esac
 done
 SRCS="$SRCS $(ls swrendersoft/src/*.c bfariadne/src/*.c)"
+for f in bfsoundlib/src/*.c; do
+  case "$f" in
+    */drv_oal.c|*/oggvorbis.c) ;;
+    *) SRCS="$SRCS $f" ;;
+  esac
+done
 for f in bflibrary/src/general/*.c bflibrary/src/general/*.cpp; do
   case "$f" in
     *_s.c|*/gpng.c) ;;

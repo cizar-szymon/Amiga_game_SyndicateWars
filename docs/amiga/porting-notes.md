@@ -341,3 +341,16 @@ Otwarte: odsłuch na prawdziwej Amidze, koszt CPU (pomiar na Amidze 1), `AIL_ms_
   1280/384 B; `BAT_unknsub_20` (w C od `9d3308ed`, przy każdym starcie) pisało listy wolnych
   elementów po zmiennych za nimi (tu `AHIBase`). Rozmiary teraz z `sizeof` kompilatora m68k
   (`STRUCT_SIZE` w generatorze); inne takie tablice sprawdzone – mają zapas.
+
+### Dźwięk w wersji ARM (15.11.2026)
+
+- Silnik wydzielony: `platform/amiga/snd_engine.c` (Paula/AHI, sloty, muzyka; gcc i vbcc),
+  `snd_bfs.c` (bfsoundlib → silnik, wspólny dla 68k i ARM), `snd_env.c` (opcje z ENV: na 68k).
+- ARM: `platform/warp/snd_proxy.c` udaje silnik i wysyła rekordy `SWL_SND_*`/`SWL_MUS_*`
+  (`swlink.h`); czas dźwięków liczy sam. Sterta dźwięku 1,5 MB na końcu obszaru render (na stercie
+  ARM brak miejsca – gra zajmuje ~17,3 z 17,7 MB), zarejestrowana jako `SWL_BUF_SOUND`.
+- 68k: `tools/warp/swhost_snd.c` – ten sam silnik; przy `SND_PLAY` pobiera bajty próbki
+  (`extFetch`, min. 32 B) do pierścienia w stercie silnika (Chip RAM dla Pauli), nadpisane dźwięki
+  zatrzymuje; muzykę czyta z dysku; budzi się co 20 ms. Opcje Paula/AHI/muzyka czyta `swhost`
+  z ENV: i odsyła w `SND_OPEN`. `swhost` zostaje na vbcc (nagłówki `cswarp.library` tylko dla vbcc).
+- Koszt na ARM: 0,4 ms (Paula) – 1,4 ms (AHI) na turę.

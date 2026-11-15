@@ -7467,6 +7467,15 @@ void joy_input(void)
  */
 #if defined(SW_AMIGA)
 int amiga_getenv_int(const char *name, int dflt);
+#else
+static int amiga_getenv_int(const char *name, int dflt)
+{
+    // the PC names: SW_BANGTEST, SW_BANGLO
+    const char *s = getenv((strcmp(name, "SyndWarsBangTest") == 0) ? "SW_BANGTEST" :
+      (strcmp(name, "SyndWarsBangLo") == 0) ? "SW_BANGLO" : name);
+    return (s != NULL) ? atoi(s) : dflt;
+}
+#endif
 
 /** Test scene for measuring explosions (ENV:SyndWarsBangTest=N): every N
  * game turns a visual explosion (no damage) somewhere within 8 tiles of
@@ -7499,7 +7508,6 @@ static void amiga_bang_test(void)
     dz = (s32)((seed >> 8) % 4096) - 2048;
     bang_new4(p_agent->X + (dx << 8), p_agent->Y, p_agent->Z + (dz << 8), 0x0F);
 }
-#endif
 
 void game_process_orbital_station_explode(void)
 {
@@ -7627,9 +7635,7 @@ void game_process(void)
 
         update_unkn_changing_colors();
         game_process_orbital_station_explode();
-#if defined(SW_AMIGA)
         amiga_bang_test();
-#endif
         gameturn++;
         scene_post_effect_prepare();
     }

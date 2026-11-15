@@ -26,6 +26,9 @@ extern time_t w_start_time;
 jmp_buf w_exit_jump;
 int w_exit_code;
 int w_prof_level;
+/* release of the port (main menu, bug reports) */
+#include "sw_version.h"
+const char amiga_port_version[] = SW_PORT_VERSION;
 /* ENV:SyndWarsCivLOD of the 68k side, -1 when not set (amiga_getenv_int) */
 int w_civlod = -1;
 int w_radar2 = -1;

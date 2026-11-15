@@ -45,13 +45,16 @@
  * ENV:SyndWarsReportServer="host[:port]" sets another. */
 #define REPORT_HOST "83.12.152.135"
 #define REPORT_PORT 6810
-#define REPORT_VERSION "SyndWars-0.01"
 
 #define REPORT_SCREEN "RAM:SyndWars-screen.iff"
 #define REPORT_STATE  "RAM:SyndWars-state.txt"
 #define REPORT_EMAIL  "qdata/savegame/report_email.txt"
 
 extern const char amiga_version_tag[];
+extern const char amiga_port_version[];
+static char report_version[32];
+#define REPORT_VERSION (snprintf(report_version, sizeof(report_version), \
+  "SyndWars-%s", amiga_port_version), report_version)
 extern long lbSpeedMeter;
 
 static char prog_dir[256];

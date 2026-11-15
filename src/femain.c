@@ -301,6 +301,23 @@ void show_main_screen(void)
     main_quit_button.DrawFn(&main_quit_button);
     main_load_button.DrawFn(&main_load_button);
     main_login_button.DrawFn(&main_login_button);
+#if defined(SW_AMIGA)
+    {
+        // the release of the Amiga port, for bug reports
+        extern const char amiga_port_version[];
+        char txt[40];
+        const struct TbSprite *old_font = lbFontPtr;
+
+        snprintf(txt, sizeof(txt), "AMIGA PORT %s", amiga_port_version);
+        lbFontPtr = small_font;
+        lbDisplay.DrawFlags = 0;
+        my_set_text_window(0, 0, lbDisplay.GraphicsScreenWidth,
+          lbDisplay.GraphicsScreenHeight);
+        my_draw_text(lbDisplay.GraphicsScreenWidth - my_string_width(txt) - 8,
+          lbDisplay.GraphicsScreenHeight - 12, txt, 0);
+        lbFontPtr = old_font;
+    }
+#endif
 }
 
 void init_main_screen_boxes(void)

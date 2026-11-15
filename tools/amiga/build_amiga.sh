@@ -8,6 +8,16 @@ IMAGE=amixcom-build:latest
 
 if [ "$1" != "--in-docker" ]; then
   cd "$(dirname "$0")/../.."
+  # Release number of the port: 0.<commits of the port since upstream>
+  # (beta; 1.xx for official releases), with the build date. Written only
+  # when it changes, so that a build stays incremental.
+  N=$(git rev-list --count upstream/master..HEAD 2>/dev/null || echo 0)
+  V="#define SW_PORT_VERSION \"0.$N\"
+#define SW_PORT_DATE \"$(date +%d.%m.%Y)\""
+  mkdir -p build/amiga
+  if [ "$(cat build/amiga/sw_version.h 2>/dev/null)" != "$V" ]; then
+    printf '%s\n' "$V" > build/amiga/sw_version.h
+  fi
   export MSYS_NO_PATHCONV=1
   exec docker run --rm -v "$(pwd -W 2>/dev/null || pwd):/src" -w /src "$IMAGE" \
     bash tools/amiga/build_amiga.sh --in-docker "$@"
@@ -25,7 +35,7 @@ COMMON="-m68060 -mtune=68060 -O2 -fomit-frame-pointer -noixemul
   -DHAVE_CONFIG_H -DSW_AMIGA -include platform/amiga/config.h
   -Iplatform/amiga -Isrc -Ibflibrary/include -Ibfsoundlib/include
   -Ibfsmacklib/include -Iswrendersoft/include -Ibfariadne/include
-  -Ibflibrary/src/m68k-amigaos
+  -Ibflibrary/src/m68k-amigaos -Ibuild/amiga
   -Wno-unused-variable -Wno-unused-but-set-variable"
 CFLAGS="$COMMON -std=gnu99"
 CXXFLAGS="$COMMON -fno-exceptions -fno-rtti"

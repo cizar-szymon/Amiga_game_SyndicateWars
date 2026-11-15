@@ -7,6 +7,15 @@
 # The extension key is only read by mkwxt.py from its path, never copied.
 set -e
 cd "$(dirname "$0")/../.."
+# release number of the port, as tools/amiga/build_amiga.sh writes it
+N=$(git rev-list --count upstream/master..HEAD 2>/dev/null || echo 0)
+V="#define SW_PORT_VERSION \"0.$N\"
+#define SW_PORT_DATE \"$(date +%d.%m.%Y)\""
+mkdir -p build/amiga
+if [ "$(cat build/amiga/sw_version.h 2>/dev/null)" != "$V" ]; then
+  printf '%s
+' "$V" > build/amiga/sw_version.h
+fi
 AC6=${AC6:-/c/Keil_v5/ARM/ARMCLANG/bin}
 FW_COMMON=${FW_COMMON:-/c/Workprojects/csAmigaWarp/Arm/common}
 EXT_KEY=${EXT_KEY:-$FW_COMMON/ext_key_warp.h}
@@ -23,7 +32,7 @@ COMMON="--target=arm-arm-none-eabi -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=ha
   -Iplatform/warp -Iplatform/warp/include -Iplatform/amiga -I$FW_COMMON
   -Isrc -Ibflibrary/include -Ibfsoundlib/include
   -Ibfsmacklib/include -Iswrendersoft/include -Ibfariadne/include
-  -Ibflibrary/src/arm-warp
+  -Ibflibrary/src/arm-warp -Ibuild/amiga
   -Wno-everything"
 CFLAGS="$COMMON -std=gnu99"
 CXXFLAGS="$COMMON -xc++ -std=gnu++11 -fno-exceptions -fno-rtti"

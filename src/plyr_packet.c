@@ -165,6 +165,9 @@ ubyte all_group_arrived_square(ushort group, short x, short z, short x2, int z2)
 ubyte group_not_seen(ushort group);
 void person_intel(struct Thing *p_person);
 void mech_unkn_func_05(int owntng, int a2, int a3);
+ubyte track_target(struct Thing *p_mgun);
+void rotate_object(struct Thing *p_object);
+void init_mgun_explode(struct Thing *p_thing);
 
 void set_player_peeps_to_run(struct Thing *p_leader, ushort plyr)
 {
@@ -1941,6 +1944,25 @@ static void test_cmds_process(void)
     p_agent = p_player->MyAgent[n];
     if ((p_agent == NULL) || ((p_agent->Flag & TngF_Destroyed) != 0))
         return;
+    if ((gameturn & 3) == 0)
+    {
+        ThingIdx mgun;
+
+        // aim the first mounted gun at the agent; blow it up at turn 900
+        for (mgun = things_used_head; mgun > 0; mgun = things[mgun].LinkChild) {
+            if ((things[mgun].Type == TT_BUILDING) && (things[mgun].SubType == 0x20) &&
+              ((things[mgun].Flag & TngF_Destroyed) == 0))
+                break;
+        }
+        if (mgun > 0)
+        {
+            things[mgun].PTarget = p_agent;
+            track_target(&things[mgun]);
+            rotate_object(&things[mgun]);
+            if (gameturn == 900)
+                init_mgun_explode(&things[mgun]);
+        }
+    }
     switch (gameturn % 120)
     {
     case 65:

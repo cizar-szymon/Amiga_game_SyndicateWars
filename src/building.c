@@ -1007,12 +1007,32 @@ void collapse_building_station(struct Thing *p_building)
     }
 }
 
-void init_mgun_explode(struct Thing *p_thing)
+#ifdef SW_FNCHK
+static void init_mgun_explode_asm(struct Thing *p_thing)
 {
     asm volatile (
       "call ASM_init_mgun_explode\n"
-        :  : "a" (p_thing));
-    return;
+        : "+a" (p_thing) : : "cc", "memory");
+}
+#endif
+
+/** A mounted gun is destroyed: a bang, the gun goes and a shock wave as big
+ * as 4 times its radius.  Remade from init_mgun_explode. */
+static void init_mgun_explode_c(struct Thing *p_thing)
+{
+    if ((p_thing->Flag & TngF_Destroyed) != 0)
+        return;
+    p_thing->Flag |= TngF_Destroyed;
+    play_dist_sample(p_thing, 0x25, 0x7F, 0x40, 100, 0, 3);
+    p_thing->State = 0x0D;
+    if ((p_thing->X < 0) || ((p_thing->X >> 8) >= 0x8000) ||
+      ((p_thing->Z >> 8) < 0) || ((p_thing->Z >> 8) >= 0x8000))
+        return;
+    bang_new4(p_thing->X, p_thing->Y, p_thing->Z, 0x0F);
+    delete_node(p_thing);
+    remove_thing(p_thing->ThingOffset);
+    do_shockwave(p_thing->X >> 8, p_thing->Y >> 8, p_thing->Z >> 8,
+      (ushort)p_thing->Radius << 2, 5000, NULL);
 }
 
 void collapse_building(short x, short y, short z, struct Thing *p_building)
@@ -1194,10 +1214,29 @@ void bul_hit_vector(int x, int y, int z, short col, int hp, int type)
       bul_hit_vector_c(x, y, z, col, hp, type));
 }
 
-void rotate_object(struct Thing *p_object)
+#ifdef SW_FNCHK
+static void rotate_object_asm(struct Thing *p_object)
 {
     asm volatile ("call ASM_rotate_object\n"
-        : : "a" (p_object));
+        : "+a" (p_object) : : "cc", "memory");
+}
+#endif
+
+void rotate_obj(short angle_a, short angle_b, short angle_c, struct M33 *p_mat);
+
+/** Turns a mounted gun by its turn rate and sets its matrix from its
+ * angles.  Remade from rotate_object. */
+static void rotate_object_c(struct Thing *p_object)
+{
+    struct M33 *p_mat;
+
+    p_object->U.UMGun.AngleY = (p_object->U.UMGun.AngleY + (p_object->U.UMGun.AngleDY >> 3)
+      + 0x800) & 0x7FF;
+    p_mat = &local_mats[p_object->U.UMGun.MatrixIndex];
+    if (p_object->U.UMGun.AngleX > 0x400)
+        p_object->U.UMGun.AngleX -= 0x800;
+    rotate_obj(0, -p_object->U.UMGun.AngleY, 0, p_mat);
+    rotate_object_axis(p_mat, 0, -p_object->U.UMGun.AngleX, 0);
 }
 
 #ifdef SW_FNCHK
@@ -1372,13 +1411,70 @@ ThingIdx aquire_target(struct Thing *p_gun)
     return ret;
 }
 
-ubyte track_target(struct Thing *p_mgun)
+ubyte track_target(struct Thing *p_mgun);
+void rotate_object(struct Thing *p_object);
+
+#ifdef SW_FNCHK
+static ubyte track_target_asm(struct Thing *p_mgun)
 {
-    ubyte ret;
+    int ret;
     asm volatile (
       "call ASM_track_target\n"
-        : "=r" (ret) : "a" (p_mgun));
+        : "=a" (ret) : "0" (p_mgun) : "cc", "memory");
     return ret;
+}
+#endif
+
+/** Brings an angle difference into -0x400..0x400 as the asm does: only
+ * the low 16 bits are adjusted. */
+static short mgun_wrap_angle(short diff)
+{
+    if (diff < -0x400)
+        return (short)(diff + 0x800);
+    if (diff > 0x400)
+        return (short)(diff - 0x800);
+    return diff;
+}
+
+/** A mounted gun turns towards its target: the turn rate (AngleDY) is set
+ * from the horizontal angle difference, the gun is tilted (AngleX) half way
+ * to the target.  True when it points at the target, within 200 both ways.
+ * As the original, the tilt angle is computed from the squares of the
+ * height and of the distance.  Remade from track_target. */
+static ubyte track_target_c(struct Thing *p_mgun)
+{
+    struct Thing *p_target;
+    s32 dx, dz, dy, dist2;
+    short angle, diff;
+
+    if (p_mgun->U.UMGun.WeaponTurn != 0)
+        p_mgun->U.UMGun.WeaponTurn--;
+    p_target = p_mgun->PTarget;
+    dx = (p_target->X >> 8) - (p_mgun->X >> 8);
+    dz = (p_target->Z >> 8) - (p_mgun->Z >> 8);
+    angle = arctan(dx, dz);
+    diff = mgun_wrap_angle((short)(p_mgun->U.UMGun.AngleY - angle));
+    if (diff < 0) {
+        if (diff > -20)
+            p_mgun->U.UMGun.AngleDY = 0;
+        else
+            p_mgun->U.UMGun.AngleDY = 0x100;
+    } else if (diff > 0) {
+        if (diff < 20)
+            p_mgun->U.UMGun.AngleDY = 0;
+        else
+            p_mgun->U.UMGun.AngleDY = -0x100;
+    }
+    if ((diff <= -200) || (diff >= 200))
+        return 0;
+    dist2 = (s32)((u32)dz * (u32)dz + (u32)dx * (u32)dx);
+    dy = (p_target->Y >> 4) - (p_mgun->Y >> 5);
+    angle = arctan((s32)((u32)dy * (u32)dy), dist2) - 0x400;
+    diff = mgun_wrap_angle((short)(p_mgun->U.UMGun.AngleX - angle));
+    p_mgun->U.UMGun.AngleX = ((p_mgun->U.UMGun.AngleX - (diff >> 1)) + 0x800) & 0x7FF;
+    if (abs(diff) < 200)
+        return 1;
+    return 0;
 }
 
 ubyte mgun_shoot_at_target(struct Thing *p_mgun)
@@ -1758,3 +1854,20 @@ int building_hit_by_bullet(struct Thing *p_thing, short hp,
 }
 
 /******************************************************************************/
+
+ubyte track_target(struct Thing *p_mgun)
+{
+    ubyte ret;
+    FNCHK_RET("track_target", ret, track_target_asm(p_mgun), track_target_c(p_mgun));
+    return ret;
+}
+
+void rotate_object(struct Thing *p_object)
+{
+    FNCHK_VOID("rotate_object", rotate_object_asm(p_object), rotate_object_c(p_object));
+}
+
+void init_mgun_explode(struct Thing *p_thing)
+{
+    FNCHK_VOID("init_mgun_explode", init_mgun_explode_asm(p_thing), init_mgun_explode_c(p_thing));
+}

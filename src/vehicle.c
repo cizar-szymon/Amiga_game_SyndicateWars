@@ -602,7 +602,7 @@ ushort veh_passenger_count(struct Thing *p_veh)
     return c;
 }
 
-static void rotate_obj(short angle_a, short angle_b, short angle_c, struct M33 *p_mat);
+void rotate_obj(short angle_a, short angle_b, short angle_c, struct M33 *p_mat);
 
 #ifdef SW_FNCHK
 static void VNAV_unkn_func_207_asm(struct Thing *p_thing)
@@ -3059,7 +3059,7 @@ extern ulong last_swoosh_turn;
 /** Rotation matrix (14-bit fixed point) of the three angles (0..0x7FF).
  * Remade from rotate_obj.
  */
-static void rotate_obj(short angle_a, short angle_b, short angle_c, struct M33 *p_mat)
+void rotate_obj(short angle_a, short angle_b, short angle_c, struct M33 *p_mat)
 {
     s32 s1, c1, s2, c2, s3, c3;
     s32 a, b, c;

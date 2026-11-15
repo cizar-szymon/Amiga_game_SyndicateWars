@@ -1,7 +1,8 @@
 #!/bin/bash
 # One test iteration: build, install, run the game, show its output.
 # usage: sh tools/amiga/iter.sh [game args, default "-q -m 0,1"] [--no-build]
-# Target: WinUAE (default; game data dir mounted as SWARS:) or a real Amiga
+# Target: WinUAE (default; the Amiga data dir "Syndicate Wars/amiga_data",
+#   made by tools/amiga/make_amiga_data.sh, mounted as SWARS:) or a real Amiga
 #   with TARGET=amiga1 (AmiAgent default config) or TARGET=amiga2
 #   (amiagent-2.cfg), both WorkSD:Games/SyndWars.
 # The game is started asynchronously; after WAIT seconds (default 40) its
@@ -27,7 +28,7 @@ if [ "$2" != "--no-build" ]; then
   [ -f build/amiga/SyndWars ] || { tail -15 build/amiga/build.log; exit 1; }
 fi
 if [ "$TARGET" = "winuae" ]; then
-  cp build/amiga/SyndWars "Syndicate Wars/syndwarsfx/SyndWars" || exit 1
+  cp build/amiga/SyndWars "Syndicate Wars/amiga_data/SyndWars" || exit 1
 else
   $AR put build/amiga/SyndWars $GDIR/SyndWars > /dev/null || exit 1
 fi

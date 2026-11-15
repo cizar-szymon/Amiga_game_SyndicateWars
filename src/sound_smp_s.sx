@@ -1056,7 +1056,7 @@ GLOBAL (dword_1DDECC)	/* 0x1DDECC */
 		.fill   0x4
 GLOBAL (sound_heap_memory)	/* 0x1DDED4 */
 		.long	0x0
-data_1dded8:
+GLOBAL (data_1dded8)
 		.fill   0x190
 GLOBAL (ail_sample_ids)	/* 0x1DE068 */
 		.fill   0x50

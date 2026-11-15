@@ -2467,10 +2467,20 @@ static void find_and_stasis_asm(struct SimpleThing *p_stasis, int radius)
 
 /** Volume of a sample already playing for a simple thing (the sound code
  * is still the original). */
-static void set_dist_volume(struct SimpleThing *p_sthing, ushort smptbl_id, ushort vol)
+#ifdef SW_FNCHK
+static void set_dist_volume_asm(struct SimpleThing *p_sthing, ushort smptbl_id, ushort vol)
 {
     asm volatile ("call ASM_set_dist_volume\n"
         : : "a" (p_sthing), "d" ((u32)smptbl_id), "b" ((u32)vol) : "cc", "memory");
+}
+#endif
+
+void sound_set_dist_volume(struct SimpleThing *p_sthing, ushort smptbl_id, ushort vol);
+
+static void set_dist_volume(struct SimpleThing *p_sthing, ushort smptbl_id, ushort vol)
+{
+    FNCHK_VOID("set_dist_volume", set_dist_volume_asm(p_sthing, smptbl_id, vol),
+      sound_set_dist_volume(p_sthing, smptbl_id, vol));
 }
 
 /** A stasis field freezes (Flag2 0x02000000) everything within `radius`

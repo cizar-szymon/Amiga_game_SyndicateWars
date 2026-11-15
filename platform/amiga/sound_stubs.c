@@ -9,6 +9,7 @@
 #include "bfsound.h"
 #include "bfmusic.h"
 #include "ssampply.h"
+#include "bfsvaribl.h"
 #include "bfsmack.h"
 
 /* bfaudio */
@@ -32,6 +33,19 @@ void ReleaseLoopedSample(ushort source_id, short smp_id) { (void)source_id; (voi
 void SetSamplePitch(long source_id, short smp_id, short pitch)
 { (void)source_id; (void)smp_id; (void)pitch; }
 void StopAllSamples(void) { }
+void SetSampleVolume(long source_id, short smp_id, short volume)
+{ (void)source_id; (void)smp_id; (void)volume; }
+void SetSamplePan(long source_id, short smp_id, ushort pan)
+{ (void)source_id; (void)smp_id; (void)pan; }
+void StopSample(long source_id, short smp_id) { (void)source_id; (void)smp_id; }
+struct SampleInfo *PlaySampleFromAddress(long source_id, short smp_id,
+  short volume, ushort pan, short pitch, sbyte loop_count, ubyte a7, void *address)
+{ (void)source_id; (void)smp_id; (void)volume; (void)pan; (void)pitch;
+  (void)loop_count; (void)a7; (void)address; return NULL; }
+/* one empty sample info structure, so the game's loops over them end at once */
+static struct SampleInfo stub_sample_info;
+struct SampleInfo *GetFirstSampleInfoStructure(void) { return &stub_sample_info; }
+struct SampleInfo *GetLastSampleInfoStructure(void) { return &stub_sample_info; }
 
 /* music */
 void StartMusic(int songNo, ubyte volume) { (void)songNo; (void)volume; }

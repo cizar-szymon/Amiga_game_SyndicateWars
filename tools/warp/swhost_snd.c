@@ -203,7 +203,30 @@ static UBYTE *ring_alloc(ULONG len)
     return heap + ring_pos - need;
 }
 
+static ULONG play_ticks, play_ticks_max, play_bytes;
+
+static ULONG eclock_lo(void)
+{
+    struct EClockVal ev;
+    if (TimerBase == NULL)
+        return 0;
+    ReadEClock(&ev);
+    return ev.ev_lo;
+}
+
+static void snd_play_do(const UBYTE *p);
+
 static void snd_play(const UBYTE *p)
+{
+    ULONG t0 = eclock_lo(), t;
+    snd_play_do(p);
+    t = eclock_lo() - t0;
+    play_ticks += t;
+    if (t > play_ticks_max)
+        play_ticks_max = t;
+}
+
+static void snd_play_do(const UBYTE *p)
 {
     ULONG slot = rd32(p), offs = rd32(p + 4), len = rd32(p + 8);
     LONG rate = (LONG)rd32(p + 12);
@@ -240,6 +263,7 @@ static void snd_play(const UBYTE *p)
             rc = extFetch(SWL_BUF_SOUND, aoff, fetch_buf, rows, 1, rows, &freq_);
             if (rc == CSWEXT_OK) {
                 CopyMem(fetch_buf + (offs - aoff), dst, len);
+                play_bytes += len;
                 slot_beg[slot] = (ULONG)(dst - heap);
                 slot_len[slot] = len;
                 slot_on[slot] = 1;
@@ -339,9 +363,9 @@ void hsnd_service(BOOL timer_signalled)
         if (GetVar((STRPTR)"SyndWarsSoundLog", (STRPTR)buf, sizeof(buf), 0) >= 0) {
             BPTR f = Open((STRPTR)"RAM:SyndWars-host.txt", MODE_NEWFILE);
             if (f) {
-                FPrintf(f, (STRPTR)"play %lu silent %lu fetched %lu fetch_fail %lu too_big %lu ring %lu/%lu rc %ld aoff %lu rows %lu okmax %lu failmin %lu\n",
+                FPrintf(f, (STRPTR)"play %lu silent %lu fetched %lu fetch_fail %lu too_big %lu ring %lu/%lu play_ms %lu max_us %lu kbytes %lu\n",
                   n_play, n_silent, n_fetched, fetch_fail, n_toobig, ring_pos, heap_size,
-                  last_rc, last_aoff, last_rows, ok_max_rows, fail_min_rows);
+                  play_ticks / eclock_kHz, (play_ticks_max * 1000) / eclock_kHz, play_bytes / 1024);
                 Close(f);
             }
         }

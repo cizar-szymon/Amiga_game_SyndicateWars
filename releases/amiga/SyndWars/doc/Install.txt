@@ -1,0 +1,132 @@
+Syndicate Wars for the Amiga - Install / Instalacja
+
+  English ............ first
+  Polski ............. dalej (po angielskim)
+
+
+########################################################################
+
+
+SYNDICATE WARS - INSTALLATION STEP BY STEP
+==========================================
+
+What you need: an Amiga with a Warp accelerator (or another Amiga with a
+68060 and a Picasso96 card, slower), AmigaOS 3.2, about 64 MB Fast RAM and
+300 MB on the disk; Syndicate Wars bought from GOG (gog.com) and installed on
+a PC (Windows, Linux or macOS) with Python 3 (python.org).
+
+
+STEP 1 - unpack the archive on the Amiga
+----------------------------------------
+
+Open a Shell and type (Work:Games is only an example):
+
+  UnZip SyndWars-0.220.zip -d Work:Games
+
+This makes the drawer Work:Games/SyndWars with the program, its icon, the
+ARM version (swhost, swcore.wxt), the texts of the game (language), the
+settings (conf), the drawer doc (these texts, the licences) and the drawer
+pc (the tool for the PC). (UnZip is on Aminet: util/arc/UnZip.)
+
+
+STEP 2 - make the game's data on the PC
+---------------------------------------
+
+The data (graphics, levels, sounds, music, videos) come from your GOG copy.
+Copy the drawer pc of the archive to the PC (or take it from the ZIP on the
+PC) and in a command window there type:
+
+  python SyndWarsData.py "C:\GOG Games\Syndicate Wars" SyndWarsData
+
+The first name is the folder where GOG installed the game (it has the
+folder SWARS with game.ins and game.gog); the second a new folder. The tool
+reads the CD image, downloads the three data packages of SyndWarsFX from
+GitHub (levels, graphics, sounds), turns the sounds and the music into the
+Amiga's formats and writes all into the new folder (about 260 MB, a minute
+or less). Another language of the game: --lang ger (fre, ita, pol, spa,
+swe); without internet: --packages with the three zips downloaded before.
+With ffmpeg installed the music sounds a little better.
+
+
+STEP 3 - copy the data to the Amiga
+-----------------------------------
+
+Copy everything in the folder SyndWarsData into the drawer
+Work:Games/SyndWars on the Amiga, next to the program SyndWars (the
+folders data, intro, levels, maps, music, qdata, sound and config.ini;
+a folder that is there already gets the new files). Any way works: a
+network share, a CF / SD card, a USB stick, an FTP program.
+
+
+STEP 4 - start the game
+-----------------------
+
+Double-click the icon SyndWars. The intro plays (Esc skips it), then the
+main menu with the version of the port in its corner.
+
+The ARM version (Warp 1260 Extreme, Warp 7060): in the icon's Information
+remove the brackets of (ARM). Sound through AHI: remove the brackets of
+(SOUND=AHI). More in doc/SyndWars_en.txt.
+
+
+########################################################################
+
+
+SYNDICATE WARS - INSTALACJA KROK PO KROKU
+=========================================
+
+Potrzebne: Amiga z akceleratorem Warp (albo inna Amiga z 68060 i karta
+Picasso96, wolniej), AmigaOS 3.2, ok. 64 MB Fast RAM i 300 MB na dysku;
+Syndicate Wars kupione w GOG (gog.com) i zainstalowane na PC (Windows, Linux
+albo macOS) z Pythonem 3 (python.org).
+
+
+KROK 1 - rozpakowanie archiwum na Amidze
+---------------------------------------
+
+W Shellu (Work:Games to tylko przyklad):
+
+  UnZip SyndWars-0.220.zip -d Work:Games
+
+Powstaje szuflada Work:Games/SyndWars z programem, ikona, wersja ARM
+(swhost, swcore.wxt), tekstami gry (language), ustawieniami (conf),
+szuflada doc (te teksty, licencje) i szuflada pc (narzedzie na PC). (UnZip
+jest na Aminecie: util/arc/UnZip.)
+
+
+KROK 2 - dane gry na PC
+-----------------------
+
+Dane (grafika, poziomy, dzwieki, muzyka, filmy) pochodza z Twojej kopii z
+GOG. Skopiuj szuflade pc z archiwum na PC (albo wez ja z ZIP-a na PC) i w
+oknie polecen wpisz tam:
+
+  python SyndWarsData.py "C:\GOG Games\Syndicate Wars" SyndWarsData
+
+Pierwsza nazwa to katalog, w ktorym GOG zainstalowal gre (jest w nim katalog
+SWARS z game.ins i game.gog); druga - nowy katalog. Narzedzie czyta obraz
+plyty, pobiera z GitHuba trzy paczki danych SyndWarsFX (poziomy, grafika,
+dzwieki), zamienia dzwieki i muzyke na formaty Amigi i zapisuje wszystko w
+nowym katalogu (ok. 260 MB, minuta albo mniej). Inny jezyk gry: --lang pol
+(fre, ger, ita, spa, swe); bez internetu: --packages z trzema pobranymi
+wczesniej zipami. Z zainstalowanym ffmpeg muzyka brzmi troche lepiej.
+
+
+KROK 3 - dane na Amige
+----------------------
+
+Skopiuj cala zawartosc katalogu SyndWarsData do szuflady Work:Games/SyndWars
+na Amidze, obok programu SyndWars (katalogi data, intro, levels, maps, music,
+qdata, sound i config.ini; katalog, ktory juz jest, dostaje nowe pliki).
+Dowolnie: przez siec, karte CF / SD, pendrive, FTP.
+
+
+KROK 4 - start gry
+------------------
+
+Dwuklik na ikonie SyndWars. Najpierw intro (Esc pomija), potem menu glowne
+z numerem wersji portu w rogu.
+
+Wersja ARM (Warp 1260 Extreme, Warp 7060): w Informacjach o ikonie usun
+nawiasy przy (ARM). Dzwiek przez AHI: usun nawiasy przy (SOUND=AHI). Wiecej
+w doc/SyndWars.txt.

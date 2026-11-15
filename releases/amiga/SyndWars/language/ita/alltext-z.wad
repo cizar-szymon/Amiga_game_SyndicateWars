@@ -1,0 +1,1556 @@
+# == map screen text ==
+# map screen title
+#UTOPIA
+# map screen headings
+Pellegrinaggio
+Pagani
+Geografia
+Lingua
+Beni materiali
+Lascito
+
+# city data
+
+Londra
+21,13 M
+Postindustriale
+Basso inglese
+Progettaz. software, Servizi finanziari
+Rifiuti chimici, Scarico umano
+
+Detroit
+10,98 M
+Complesso urbano
+Nuovo americano
+Industria automobile
+Industria pesante, Scorie radioatt.
+
+Hong Kong
+17,55 M
+Complesso urbano
+Indo-cinese
+Memorie in plastica
+Industria leggera
+
+Pechino
+38,89 M
+Ultra-metropoli
+Proto-mandarino
+Produz. plastica, Produz. hardware
+Scorie radioatt., Scarico umano
+
+Vienna
+6,99 M
+Urbano semplice
+C.E.C. (Centro-europeo comune)
+Rilavoraz. minerali
+Industria leggera
+
+Ginevra
+7,65 M
+Urbano semplice
+C.E.C. (Centro-europeo comune)
+Depurazione delle acque e dell'aria
+Scorie radioattive
+
+Salisburgo
+9,27 M
+Complesso urbano
+Neo-slavo
+Rigeneraz. vegetativa
+Industria leggera
+
+Singapore
+21,71 M
+Ultra-metropoli
+Pseudo-malese
+Depuraz. delle acque, Produz. hardware
+Scarico umano, Industria pesante
+
+Phoenix
+13,26 M
+Complesso urbano
+Continente americano interno
+Produz. energia
+Scorie radioattive
+
+Roma
+10,92 M
+Postindustriale
+Basso latino
+Beni di consumo durevoli
+Industria pesante
+
+Al Manamah
+10,98 M
+Complesso urbano
+Nuovo arabo
+Raffinaz. petrolio, Lavoraz. minerali
+Rifiuti chimici
+
+New York
+25,24 M
+Postind.
+Alto inglese
+Produzione di armi
+Industria ultra-pesante, Scorie radioatt., Scarico umano
+
+Santiago
+7,81 M
+Complesso urbano
+Neo-ispanico
+Produzione di gomma
+Rifiuti chimici
+
+Buenos Aires
+15,71 M
+Ultra-metropoli
+Modul
+Produzione alimentare
+Industria pesante, Scarico umano
+
+CittÖ del Capo
+10,27 M
+Complesso urbano
+Afrikaans (Antico)
+Lavoraz. minerali
+Industria pesante
+
+Adelaide
+8,7 M
+Urbano semplice
+Sotto-inglese
+Fabbricaz. della birra, Zootecnia
+Rifiuti chimici, Scarico animale
+
+Christchurch
+4,9 M
+Urbano semplice
+Idioma Bahasa
+Fabbrica vestiti, Preparaz. alimentari
+Rifiuti chimici
+
+Reykjavik
+4,37 M
+Urbano semplice
+Demi-scandinavo
+Depurazione delle acque e dell'aria
+Scorie radioattive
+
+Mosca
+16,54 M
+Complesso urbano
+Moldavo
+Fabbrica di vestiti, Alcolici
+Fallout radioatt., Scarico umano
+
+Tokyo
+16,70 M
+Ultra-metropoli
+Neo-giapponese
+Produz. hi-tech, Servizi finanz.
+Industria pesante
+
+Bangkok
+24,37 M
+Ultra-metropoli
+Pseudo-Thai
+Produz. simulante, Turismo
+Rifiuti chimici, Scarico umano
+
+Honolulu
+7,01 M
+Urbano semplice
+Nuovo americano
+Depurazione delle acque e dell'aria
+Industria leggera
+
+Johannesburg
+15,64 M
+Complesso urbano
+Afrikaans (Antico)
+Lavoraz. minerali
+Industria pesante
+
+Il Cairo
+3,16 M
+Urbano semplice
+Nuovo arabo
+Manufatti storici, Turismo
+Rifiuti chimici
+
+Nuova Delhi
+28,73 M
+Ultra-metropoli
+Proto-Hindustani
+Abbigliam. intellig.
+Industria pesante, Rifiuti chimici, Scarico umano
+
+Sebastopoli
+9,26 M
+Complesso urbano
+Moldavo
+Alcolici
+Fallout radioattivo
+
+Tripoli
+8,73 M
+Complesso urbano
+Arabo (Antico)
+Raffinaz. petrolio
+Fallout radioattivo
+
+Riyadh
+2.03 M
+Urbano semplice
+Nuovo arabo
+Raffinaz. petrolio
+Industria pesante
+
+Colombo
+3,35 M
+Urbano semplice
+Neo Singalese
+Depurazione delle acque e dell'aria
+Scorie radioattive
+
+Stazione Orbitale Colombo
+0,0001 M
+Speriment.
+Codice multi-stato tec. EuroCorp
+Trasporto interstel., Produz. in microgravitÖ
+Nessuno
+
+Matochkin Shar
+0,017 M
+Urbano semplice
+Proto-moldavo
+Depurazione dell'aria
+Industria leggera
+
+Voss
+0,023 M
+Sub-urbano semplice
+Scandinavo totale
+Silvi-coltura
+Industria leggera
+
+Omsk
+0,48 M
+Urbano semplice
+Russo (Antico)
+Alcolici
+Fallout radioattivo
+
+Beirut
+0,75 M
+Sub-sub-urbano semplice
+Nuovo arabo
+Produzione di armi
+Rifiuti chimici, Scarico umano
+
+Ulan Bator
+0,274 M
+Sub-urbano semplice
+Mongolo-cinese
+Estraz. di minerali
+Fallout radioattivo
+
+Seul
+6,5 M
+Complesso urbano
+Coreano Unito
+Lavoraz. chimiche, Industria automobile
+Rifiuti chimici, Industria pesante
+
+Hanoi
+3,3 M
+Urbano semplice
+Mandarino locale
+Zootecnia, Rigeneraz. vegetativa
+Scarico animale, Rifiuti chimici
+
+Manila
+8,5 M
+Complesso urbano
+Mandarino locale
+Produz. di mobilio
+Industria leggera
+
+Freetown
+0,18 M
+Sub-urbano semplice
+Idioma Afrikaans
+Lavoraz. minerali
+Industria leggera
+
+Monrovia
+0,65 M
+Sub-urbano semplice
+Idioma Afrikaans
+Alcolici
+Industria leggera
+
+Lagos
+1,25 M
+Urbano semplice
+Idioma Afrikaans
+Estraz. di minerali
+Industria pesante
+
+Nairobi
+2,3 M
+Urbano semplice
+Somalo neutrale
+Zootecnia, Concia
+Industria leggera
+
+Port Moresby
+0,93 M
+Sub-urbano semplice
+Idioma Bahasa
+Estraz. di minerali
+Rifiuti chimici
+
+Anchorage
+2,2 M
+Urbano semplice
+Amer-eskimo
+Depuraz. delle acque
+Rifiuti chimici
+
+Vancouver
+3,5 M
+Complesso urbano
+Pseudo lingua
+Lavoraz. magnetica
+Industria pesante
+
+Nuuk
+0,065 M
+Comune
+Demi-scandinavo
+Aria
+Bassa radio-attivitÖ
+
+George-town
+0,08 M
+Sub-urbano semplice
+Idioma Spania
+Estraz. di minerali
+Rifiuti chimici
+
+Lima
+3,4 M
+Complesso urbano
+Idioma Spania
+Produzione di armi
+Scorie radioatt., Industria pesante
+
+San Paulo
+18,9 M
+Ultra-metropoli
+Portoghese (Antico)
+Estraz. di minerali
+Scorie radioatt., Industria leggera
+INCIDENTE NEL LABORATORIO
+CAUSE NATURALI
+VIRUS A TEMPO
+SPERIMENTAZIONE ERRATA
+FATALE ERRORE DI CALCOLO
+DEDUZIONE ILLOGICA
+DELUSIONE ETERNA
+GIUDIZIO AFFRETTATO
+RAGIONAMENTO INSENSATO
+PAZZIA
+NEGLIGENZA
+PROCEDURA INSICURA
+ESAURIMENTO MENTALE
+MALFUNZIONAMENTO
+TEST FALLITO
+ARRESTO CARDIACO
+CONCLUSIONE ERRATA
+FOLGORAZIONE
+DISINTEGRAZIONE
+DISAVVENTURA
+\hBenedizioni, Discepolo.\n
+\c2\n
+La tua missione consiste nell'assumere il controllo di una sotto-stazione che appartiene alla rete 
+UTOPIA dell'EuroCorp. Si trova a Detroit. Quando sarÖ in nostro possesso, il Cataclisma inizierÖ.\n
+\c5\n
+Ti viene consegnato oggi il virus informatico automorfico che porrÖ fine alla tirannia che il Sindacato 
+chiama UTOPIA. Abbiamo chiamato questo virus Harbinger (Araldo) e questo strapperÖ il controllo dal 
+Sindacato, computer per computer, preparando la via per la luce di conoscenza che seguirÖ.\n
+\n
+Conduci i tuoi Accoliti nella stazione terrestre di UTOPIA a Detroit, per permetterci di inoculare il 
+virus. Gli agenti del Sindacato che sorvegliano la stazione non si aspettano un'azione di forza, perchÇ 
+sono anni che non viene usata. Questo ä il nostro vantaggio.\n
+\n
+Sia tu benedetto.\n
+\n
+\c4Virgil\n
+\n
+\c1I non-credenti scalarono per giorni per confrontarsi con il maestro nelle montagne. "Da dove viene la
+ tua cosiddetta fede?" gli hanno chiesto.\n
+\n
+"Voi l'avete portata," rispose il maestro. "Siete saliti cosç in alto".\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hCongratulazioni, Discepolo.\n
+\c2\n
+La salda guida dei tuoi Accoliti ä richiesta a Tripoli, dove il caos emergente portato dal Cataclisma 
+minaccia il nostro nuovo tempo. Difendi la nostra fede con la massima forza.\n
+\c5\n
+Harbinger, il nostro sacro virus, ha cominciato a liberare la popolazione. Tuttavia, non tutti coloro 
+che sono stati liberati dal giogo della repressione abbracciano immediatamente il cammino di luce che la
+ nostra Chiesa offre. In veritÖ, senza la nostra guida, molti si perderanno. Presto vi sarÖ il Giorno 
+del Giudizio e ogni anima conterÖ.\n
+\n
+Il nostro Giardino della Meditazione di Tripoli ä assediato dalle anime perdute che il Sindacato chiama 
+Non Guidati. Purtroppo, dobbiamo proteggerci con la massima forza, poichÇ questa ä la lezione di tutte 
+le religioni. Dota i tuoi accoliti di attrezzature adeguate e inviali a Tripoli per riportare 
+l'ordine.\n
+\n
+Abbiamo piani per la Terra, Accolito. La Chiesa deve cambiare il mondo intero. Questo ä il nostro tempo.
+ Salveremo solo i prescelti. Questo ä tutto per ora.\n
+\n
+I Novi hanno parlato.\n
+\n
+\c4Virgil\n
+\n
+\c1Il Maestro disse ai suoi discepoli, "Dimenticatevi dell'insegnamento e concentratevi 
+sull'apprendimento. Quando siete sicuri, mettete tutto in discussione."\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hIl virus Harbinger sta per essere scatenato. Preghiamo.\n
+\c2\n
+Dobbiamo mettere mano alla situazione a Buenos Aires. Convertendo due nemici reciproci, la nostra Chiesa
+ assumerÖ il controllo dell'intera cittÖ.\n
+\c5\n
+I nostri fratelli e sorelle nell'America del Sud hanno raccolto informazioni utili per la nostra causa. 
+Hanno identificato Juan Ormandoz, un lacchä anziano dell'EuroCorp di Buenos Aires, che sta tentando di 
+mantenere la stabilitÖ della cittÖ nonostante le attivitÖ dei Non Guidati. Il capo di questo gruppo, 
+Chico Ramirez, ritiene stoltamente di poter assumere e mantenere il controllo di un distretto 
+commerciale di bassa categoria dell'EuroCorp. Convertili entrambi e riusciremo dove l'EuroCorp ha fino 
+ad ora fallito.\n
+\n
+Diffondi la lieta novella.\n
+\n
+\c4Virgil\n
+\n
+\c1Menti fedeli non bastano. Dacci anche cervelli.\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hLe nostre preghiere sono con te, \l.\n
+\c2\n
+‘ giunto il momento di mettere alla prova la forza della nostra fede. Un agente solitario del Sindacato 
+ä stato visto aggirarsi tra le ombre di Santiago. Convertilo.\n
+\c5\n
+Quale luogo migliore per trovare coloro che possiedono la forza che cerchiamo tra le schiere del nostro 
+nemico, il Sindacato? I suoi agenti non sono altro che nostri futuri Accoliti. Cosç come tu eri uno di 
+loro, prima che ti mostrassimo la luce, cosç presto guiderai l'Çlite dell'EuroCorp dal sentiero oscuro 
+nel quale vaga. Un agente dell'EuroCorp ä stato inviato a Santiago per scardinare il nostro lavoro. Non 
+consentirai che questo accada.\n
+\n
+Prima di inviare i tuoi accoliti a Santiago, accertati che abbiano con sÇ l'Indottrinatore e che lo 
+usino in modo che anche altri possano vedere la luce. Quando un vero discepolo utilizza 
+l'Indottrinatore, la crudele illusione di UTOPIA viene infranta dalla nostra VeritÖ. Coloro che la 
+vedono, poi si uniscono e seguono l'accolito che li guida. E quando il loro numero sarÖ sufficiente, 
+anche l'agente dell'EuroCorp udirÖ il loro canto e si unirÖ loro in letizia.\n
+\n
+Che la pace sia con te.\n
+\n
+\c4Virgil\n
+\n
+\c1Contrassegna il tuo nemico, perchÇ tutto ciï che separa i dannati dai prescelti ä un punto di luce 
+monocromatica proiettato sulla parte posteriore del collo.\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hTu sei benedetto, \l.\n
+\c2\n
+Le nostre fondamenta sono forti e costose. Due veicoli blindati pieni d'oro che stiamo seguendo a 
+Johannesburg riforniranno le nostre casse sfornite. Prendili, la tua causa ä giusta.\n
+\c5\n
+La nostra causa procede dello stesso passo. I sovvertitori della mente del Sindacato risponderanno 
+presto dei loro crimini. Noi vogliamo che questo giorno di giudizio arrivi presto, ma ci occorrono fondi
+ per raggiungere la potenza materiale dell'EuroCorp.\n
+\n
+I Novi ci hanno dato il Codex. Questo sacro libro rappresenta la base della nostra salvezza. Eppure 
+dobbiamo pagare un prezzo per ogni capitolo che trasformiamo in realtÖ. ‘ ciï che chiamiamo ricerca. 
+Cosç pió conquistiamo ricchezze materiali, pió ci avviciniamo a possedere le menti degli dei.\n
+\n
+Vai a Johannesburg, dove la strozzatura logistica dell'EuroCorp ha provocato un ritardo nelle spedizioni
+ di oro. Questo oro servirÖ bene la nostra causa. L'oro viene consegnato in veicoli corazzati tenuti 
+sotto costante sorveglianza. Occorrono due veicoli corazzati per consegnare un carico. Dirotta i veicoli
+ corazzati e portali al punto di raccolta prestabilito. Ti invitiamo a non entrare nÇ attaccare la 
+roccaforte pesantemente difesa. Ci sono altri modi per mettere le mani sul denaro. Usa la mente e non 
+solo la forza delle armi.\n
+\n
+\c4Virgil\n
+\n
+\c1Ricorda, l'umile non erediterÖ nulla.\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hLa pace sia con te, \l.\n
+\c2\n
+Discepolo scelto, Mirabelle Lucy De Saxo ä stata consacrata dai Novi. Guidala nel cuore di un 
+laboratorio dell'EuroCorp, cosç che possa indottrinare uno scienziato la cui ricerca puï servire alla 
+nostra causa.\n
+\n
+Porta questo scienziato al nostro tempio pió vicino, dove padre Black ascolterÖ la sua confessione.\n
+\n
+Manda De Saxo dove ti dice lo scienziato e portaci i suoi segreti.\n
+\c5\n
+Presta orecchio ai Novi. Vi sono quelli che hanno grandi cervelli, ma menti perse. Essi vagano 
+nell'oscuritÖ senza riuscire ancora a vedere la luce della nostra fede. Un uomo simile sta ora 
+combattendo contro il virus Harbinger per conto dell'EuroCorp. I Novi intendono salvare la sua anima 
+utilizzando il suo intelletto per la divina causa di trasformare il Codex in nuova tecnologia.\n
+\n
+Il tuo obiettivo, il dottor Schweizer, lavora in un laboratorio dell'EuroCorp a Ginevra. ‘ troppo 
+sorvegliato perchÇ i tuoi Accoliti possano penetrarvi, pertanto guiderai il nostro agente infiltrato 
+speciale, Mirabelle Lucy De Saxo, attraverso le barriere di sicurezza. Una volta che avrÖ convertito 
+Schweizer, dovrÖ fare in modo che venga accolto nel vecchio tempio del quale ci siamo impadroniti. La 
+discrezione ä l'arma pió potente di Mirabelle. Prenditi cura di lei per nostro conto.\n
+\n
+Padre Black, il nostro pastore locale, ascolterÖ la confessione del dottore, non appena Schweizer 
+entrerÖ nel tempio. Questo darÖ a Mirabelle le informazioni di cui ha bisogno per risalire al lavorodel 
+dottore. Mandala in questo luogo e fai in modo che la nostra figlia raccolga i frutti del lavoro del 
+dottore e li porti a noi.\n
+\n
+La tua anima ä sempre pió benedetta ad ogni tua azione.\n
+\n
+\c4Virgil\n
+\n
+\c1Tutta la conoscenza ä conservata in un luogo. Che sia nei libri, nelle teste o sotto i ghiacciai. E 
+quando la troviamo, la facciamo nostra. La fede sono i mattoni; la conoscenza ä il cemento.\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hSia tu benedetto, Discepolo.\n
+\c2\n
+Quando i caotici venti del Cataclisma ci sferzeranno in faccia dovremo restare saldi. Proteggi il nostro
+ tempio di Hong Kong dalla banda dei Non Guidati che si avvicinano all'isola.\n
+\c5\n
+I Novi hanno avuto una visione. I Non Guidati mirano a scardinare i nostri piani per l'area del 
+Pacifico. Un eretico, noto come Ko-Paull Vissick, perverte il nostro messaggio inondando la marmaglia 
+Non guidata con testi apocrifi attribuiti ai Novi. Questa imprudenza premeditata puï solo danneggiare le
+ menti non preparate e, con questa sedizione, Vissick crea ulteriore inimicizia verso la Chiesa.\n
+\n
+Ora ci giungono notizie di massicci sbarchi di Non Guidati a Hong Kong. Riteniamo che siano diretti alla
+ nostra chiesa. ‘ compito tuo e dei tuoi Accoliti raggiungere la chiesa prima dei Non Guidati e 
+difenderla dall'inevitabile massacro.\n
+\n
+Servo fedele, ecco altre rivelazioni. Deventeremo simili agli dei. Una macchina promette di rimodellare 
+il mondo. Non vacillare nella tua fede e acquista il tuo posto nella sicurezza. Tutti gli altri saranno 
+persi.\n
+\n
+Il giorno della rettitudine si avvicina.\n
+\n
+\c4Virgil\n
+\n
+\c1Colui che grida pió forte puï solo udire la sua voce. Quelli con vera conoscenza ascoltano coloro che
+ hanno vera fede. E coloro che hanno le orecchie indurite non sentono mai il colpo di lama del 
+mietitore.\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hAcoltami, Discepolo.\n
+\c2\n
+Il destino ci mette alla prova, \l. Desideriamo che sia posto fine alle azioni malefiche dei Non Guidati
+ contro la cittÖ di Roma. Libera questo luogo dai non credenti.\n
+\c5\n
+La presenza di questa marmaglia, fino ad ora, ci ä stata utile, in quanto impegnava le risorse 
+dell'EuroCorp nella regione, ma non ä pió richiesta. Elimina questa gentaglia a vista.\n
+\n
+Davvero, tu sei stato scelto.\n
+\n
+\c4Virgil\n
+\n
+\c1I cattivi operai danno la colpa ai loro attrezzi. I buoni operai costruiscono attrezzi migliori. Gli 
+operai migliori fanno in modo che gli attrezzi lavorino al loro posto.\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hRicevi la nostra benedizione, Figlio della Luce.\n
+\c2\n
+Lavorando dove il nostro nemico ä pió debole, abbiamo iniziato a diffondere il nostro credo. I Novi 
+prevedono ora una controffensiva dell'EuroCorp nelle cittÖ sotto il nostro controllo.\n
+\n
+Il Sindacato ha giÖ avviato operazioni di ricognizione a Johannesburg, Buenos Aires, Santiago e Tripoli.
+ Questo ä intollerabile. Coloro che sfidano la Chiesa della Nuova Epoca devono unirsi a noi o perire.\n
+\c5\n
+Abbiamo conferma del fatto che intrusi sono stati visti a Johannesburg, Buenos Aires, Santiago e 
+Tripoli. La nostra forza permanente in queste cittÖ ci consente solo di monitorare i movimenti del 
+nemico, e nient'altro.\n
+\n
+I tuoi Accoliti devono fare in modo che nessuna spia dell'EuroCorp torni al Sindacato. Non riposare fino
+ a quando non avrai distrutto o convertito ogni intruso cyborg.\n
+\n
+Il giorno del giudizio si avvicina con ogni nuova mente che reclutiamo. Il dio macchina ha bisogno di 
+credenti. E coloro che desiderano sopravvivere al Cataclisma devono credere.\n
+\n
+Sii coraggioso, Accolito. E sii brutale. ‘ l'unico modo.\n
+\n
+\c4Virgil\n
+\n
+\c1C'ä gioia nel rubare le anime delle macchine.\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hPossa la fede ardere in te, oh Prediletto.\n
+\c2\n
+I nostri oracoli ci informano che un importantissimo funzionario del Sindacato, chiamato Koto Sek, ä in 
+visita al Cairo. Egli dispone di molte guardie del corpo ed ä ben protetto. Tuttavia, nel nome di tutto 
+ciï che ä giusto, egli deve morire.\n
+\c5\n
+Koto Sek intende imbarcarsi su una navicella per una destinazione ignota. Fermalo prima possibile. 
+Accertati che sia morto prima della tua prossima relazione. Se ci saranno altre vittime, significa 
+cheerano necessarie. Sono certo che ormai ci sei abituato.\n
+\n
+Vai avanti.\n
+\n
+\c4Virgil\n
+\n
+\c1Non solo tutti gli occhi saranno puntati sui capi degli uomini, ma anche tutti i mirini.\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hTu brilli radioso, Apostolo.\n
+\c2\n
+A Bahrain, l'EuroCorp si prepara ad un assalto contro il nostro cammino verso la luce. AvverrÖ, dunque, 
+che tu sarai l'ostacolo che li fermerÖ.\n
+\c5\n
+Per la ricchezza della nostra fede, ti abbiamo dato molti bersagli e ti abbiamo messo a disposizione un 
+carro armato. Sii saggio, Accolito. Utilizza le nostre attrezzature bene e accertati di distruggere la 
+voce dell'EuroCorp e ciascuno dei suoi tirapiedi. DovrÖ essere cosç se vogliamo trionfare e liberare il 
+mondo.\n
+\n
+La luce del tuo essere diventa sempre pió luminosa.\n
+\n
+\c4Virgil\n
+\n
+\c1Le genti, come grano nei campi, ascoltavano il Maestro. Quando la lama del mietitore le ebbe recise 
+tutte, il Maestro tacque. Altri avrebbero appreso la lezione.\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hCongratulazioni per i tuoi progressi, Discepolo.\n
+\c2\n
+Ti ä stato assegnato il sacro compito di appropriarti di due veicoli pieni d'oro che, secondo le nostre 
+fonti, stanno consegnando lingotti alla sede della Banca Centrale di Singapore.\n
+\c5\n
+Ovviamente, l'EuroCorp sarÖ in allarme rosso e vi saranno guardie ovunque. Riteniamo che un attacco 
+scoperto non sia saggio, dato che questo ä ciï che si aspetta il sindacato. Abbiamo pregato perchÇ ci 
+fosse un altro modo per impadronirsi di questi fondi e le nostre preghiere hanno ricevuto risposta. Il 
+resto ä compito tuo, Accolito.\n
+\n
+Ricorda le meraviglie che il denaro compie.\n
+\n
+\c4Virgil\n
+\n
+\c1Il Maestro non ha bisogno di denaro. Ma Egli si siede e lo conta. Come meditazione.\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hSaluti, Accolito.\n
+\c2\n
+Abbiamo un piano audace per te. Vogliamo che tu rapisca un importante dirigente del Sindacato, sotto il 
+naso dei servizi di sicurezza dell'EuroCorp, dalla sede di Londra.\n
+\c5\n
+Il professor Kurt Drennan ä un membro chiave del programma di ricerca e sviluppo dell'EuroCorp. Gli 
+agenti dell'EuroCorp sono venuti a conoscenza delle nostre scoperte di Reykjavik. Drennan dovrebbe 
+informarne i dirigenti dell'EuroCorp nel corso di un incontro a Londra. Allo stesso tempo, gli verrÖ 
+assegnato un nuovo assistente. Agisci fermamente con questo sostituto. Istruisci la beata Mirabelle in 
+modo che prenda il proprio posto al momento giusto e Drennan cadrÖ nelle nostre mani.\n
+\n
+Una volta che Mirabelle avrÖ assunto con successo il posto dell'assistente, dovrÖ rimanere in incognito 
+e comportarsi bene mentre Drennan farÖ il suo discorso. Subito dopo, il professore se ne andrÖ in 
+macchina per un altro impegno. Preoccupati di fare in modo che Mirabelle si allontani nella stessa 
+macchina, e Drennan non arriverÖ mai all'appuntamento successivo. Con le nostre preghiere, Drennan 
+dovrebbe rivelarsi pió che disponibile a fare la propria confessione.\n
+\n
+Il tuo spirito camminerÖ con i Novi per l'eternitÖ.\n
+\n
+\c4Virgil\n
+\n
+\c1Cento elefanti possono distruggere le mura esterne di una fortezza. Un topo infetto puï uccidere 
+tutti coloro che si trovano all'interno.\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hMedita con noi, Discepolo.\n
+\c2\n
+Ruba i piani della nuova arma del Sindacato dalla base dell'EuroCorp di New York.\n
+\c5\n
+Il professor Drennan ä morto. La sua resistenza alle nostre sonde neurali gli ha provocato una massiccia
+ emorragia. Peccato. Ma nonostante tutto, grazie alle nostre preghiere, ä sopravvissuto abbastanza a 
+lungo per rivelarci informazioni affidabili secondo le quali il Sindacato sta preparando una grossa 
+controffensiva contro la nostra venerata Chiesa. I preparativi per questaazione sono in corso nelle basi
+ di New York dell'EuroCorp.\n
+\n
+A New York i tecnici ben protetti del Sindacato hanno collaudato un'arma termonucleare maneggiabile, per
+ la quale abbiamo giÖ previsto un uso. Due giorni fa i nostri fratelli e sorelle, che occupano la 
+Cattedrale della cittÖ, in aperta sfida alla presenza dell'EuroCorp, hanno assistito ad una terribile 
+esplosione all'interno della base nemica. ‘ da questa base che Drennan ha affermato avrebbe avuto i dati
+ sperimentali su questi congegni. Tuttavia la base ä molto ben difesa; probabilmente, sarÖ necessario un
+ diversivo.\n
+\n
+Fratel Methuselah abbandonerÖ il rifugio rappresentato dalla cattedrale e si incontrerÖ con te all'IML. 
+Ti condurrÖ ad un settore residenziale e commerciale dove solleverÖ una rivolta, lanciando una nuvola di
+ gas allucinogeno tra la popolazione civile. Durante questo tempo, dovrai trovare il modo di entrare 
+nella base. La risposta del Sindacato alla rivolta dovrebbe occupare alcune delle guardie per un po' di 
+tempo.\n
+\n
+\c4Virgil\n
+\n
+\c1Il coraggioso entra nelle grotte oscure per primo. L'intelligente invia il coraggioso per primo. Il 
+pió intelligente attende alle spalle dell'intelligente.\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hPrezioso Credente,\n
+\c2\n
+Distruggi il deposito d'armi dell'EuroCorp a Riyadh. Scatenando questa devastazione celebriamo il 
+Cataclisma.\n
+\c5\n
+Harbinger ha messo in ginocchio UTOPIA. Il continuo tentativo dell'EuroCorp di costruire un nuovo 
+esercito prova l'efficacia dei nostri colpi contro di esso. Molte delle armi del Sindacato vengono 
+accumulate, per dare alle criovasche svuotate il tempo di riparare il numero di agenti in diminuzione. 
+Drennan ci ha confessato il luogo dove vengono accumulate tutte queste armi. Si trova all'interno delle 
+vecchie mura della cittÖ di Riyadh.\n
+\n
+‘ sacro volere dei Novi che questo arsenale venga sepolto per sempre sotto la sabbia del deserto. Trova 
+questo bunker e distruggilo. Converti o annienta qualsiasi agente che osi incrociare la tua strada. Usa 
+il tuo giudizio in questa faccenda. Quando l'arsenale del Sindacato non sarÖ che un lontano ricordo, il 
+tuo nome verrÖ cantato dai fedeli.\n
+\n
+Le nostre macchine ricostruiranno il mondo, Accolito. Faranno piombare il pianeta nel disordine. La 
+maggior parte della popolazione morirÖ, ma ä il rinnovamento della vita che ci chiama. Immagina un mondo
+ senza sindacati, senza controllo della mente, senza violenza. AccadrÖ, Discepolo. AccadrÖ. Sono 
+necessarie altre menti.\n
+\n
+Tempus fugit.\n
+\n
+\c4Virgil\n
+\n
+\c1Gli apprendisti chiesero al Maestro. "Quando raggiungeremo l'immortalitÖ?"\n
+\n
+E il Maestro rispose, "Non in questa vita."\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hCoraggioso Apostolo.\n
+\c2\n
+La nostra figlia della Nuova Epoca, Mirabelle Lucy De Saxo, ha eseguito un atterraggio di fortuna nel 
+territorio dei Non Guidati, vicino alla sua base di CittÖ del Capo. I tuoi accoliti devono affrettarsi 
+al suo fianco. Deve vivere per portare a compimento il suo destino di essere la prima a percorrere il 
+cammino verso la salvezza.\n
+\c5\n
+Sappiamo che ä ancora viva, ma ha urgente bisogno di aiuto. Ovviamente, sei stato scelto per primo per 
+questo pericoloso compito. Entra nella zona dei Non Guidati e trova la De Saxo. Portala via di lÖ in 
+fretta. Potrebbe essere in pericolo di vita. Sii risoluto con coloro che ti impediscono il passaggio.\n
+\n
+\c4Virgil\n
+\n
+\c1Il coraggio ti porterÖ nei luoghi pió pericolosi. Una potenza di fuoco schiacciante ti consentirÖ di 
+attraversarli in tutta sicurezza.\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hChe la fede sia con te, \l.\n
+\c2\n
+Scova e annienta un pericoloso hacker ficcanaso che si nasconde tra i Non Guidati, perchÇ ha assunto il 
+controllo di un satellite militare strategico stazionato sopra Pechino.\n
+\c5\n
+Un hacker reietto con accesso alle difese satellitari di UTOPIA sta facendo cadere la pioggia di acciaio
+ dal cielo quando e ovunque lo desideri. Deve essere fermato. Deve essere trovato e eliminato.\n
+\n
+Fai attenzione, Discepolo. Pechino ä un luogo senza fede, pieno di reietti che vedono solo attraverso il
+ mirino delle loro armi.\n
+\n
+Vai nello spirito.\n
+\n
+\c4Virgil\n
+\n
+\c1Colui che vive nell'occhio del ciclone ä un fuscello nell'occhio di un dio pieno d'ira.\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hDiscepolo, la tua aureola alimenta la nostra forza.\n
+\c2\n
+Il Sindacato ha perso il controllo di Sebastopoli a favore dei Non Guidati. Cavalcando il mezzo 
+corazzato rubato ai nemici sconfitti, i non credenti eretici portano desolazione ovunque. Sono falsi 
+profeti, tutti loro. Mandali al Cataclisma.\n
+\c5\n
+Coloro che usano queste armi infernali contro di noi dovranno pagare il prezzo pió alto. Non c'ä onore 
+nel distruggere le macchine ed ä un'operazione estremamente pericolosa.\n
+\n
+Avanza cautamente mentre ti avvicini all'isola. Per prima cosa conquistala.\n
+\n
+Sii pieno di spirito.\n
+\n
+\c4Virgil\n
+\n
+\c1Il coraggioso si nasconde dietro la tecnologia. Lo stupido si nasconde da essa. Ma gli astuti hanno 
+la tecnologia e la nascondono.\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hBenedizioni, oh Prescelto.\n
+\c2\n
+Portaci il segreto che l'EuroCorp sta proteggendo a Bangkok e pregheremo per la tua salvezza.\n
+\c5\n
+Il tanfo del caos si diffonde in ogni angolo, mentre UTOPIA abbandona la plebaglia e porta i suoi figli 
+prediletti nelle viscere della terra. A Bangkok il sindacato ha completamente abbandonato ogni tentativo
+ di restaurare il proprio regime. Ha, invece, imposto una zona morta. Cosa accada lÖ, non lo sappiamo 
+per certo.\n
+\n
+Di recente, uno dei nostri fratelli ha tentato di scoprire cosa l'EuroCorp nasconda con tanto 
+accanimento. Egli ha appreso che gli agenti del nemico si avventurano di tanto in tanto nella zona 
+morta, al fine di rapire dei Non Guidati, molti dei quali sono ancora aggrappati alle loro vane speranze
+ tra le rovine fumanti. Gli agenti tornano poi nella roccaforte con i prigionieri. I Novi non capiscono 
+perchÇ il Sindacato debba agire cosç, quando altrove elimina a vista tutti i Non Guidati.\n
+\n
+Vogliamo ragguagli su questa situazione. Manda i tuoi Accoliti tra le ostili periferie della cittÖ, fino
+ alla zona morta. Scopri qual ä lo scopo dell'EuroCorp e compi qualsiasi azione ritieni necessaria per 
+affrontare la situazione che troverai. Quindi ritorna e confessaci tutto ciï che avrai scoperto, cosç 
+che possiamo purificarti dal male che potresti aver incontrato.\n
+\n
+Non perdonare nulla.\n
+\n
+\c4Virgil\n
+\n
+\c1Un rifugiato di guerra cercï il Maestro. Gli disse, "Tu sei saggio e sereno. Insegnami a fuggire 
+dagli orrori di questo mondo". E il Maestro lo accecï con un attizzatoio.\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hAscolta bene, Accolito.\n
+\c2\n
+Ci serve un collegamento IML per Reykjavik, dove i sacramenti della nostra religione di fondazione sono 
+in pericolo. La nostra figlia prediletta, Mirabelle Lucy De Saxo, deve riattivare questo cammino. ‘ 
+compito tuo aprire un varco per la stazione IML a nord-est di Christchurch.\n
+\c5\n
+Cammina con prudenza, pellegrino. Trappole e imboscate abbondano e, per salvaguardare la nostra fede, 
+dovrai usare la forza delle armi contro chiunque ostacoli il nostro cammino. De Saxo ä speciale e non 
+dovrÖ accaderle nulla di male. Prega per questo e fai tutto quanto in tuo potere per trasformarlo in 
+realtÖ.\n
+\n
+Quando la nostra fede avrÖ abbastanza adepti, apriremo un cancello nella ionosfera terrestre con una 
+lente radio a bassissima frequenza. Scatenati su una qualsiasi parte del pianeta, gli effetti dei raggi 
+cosmici esposti al cancello ionico distruggeranno praticamente tutto. Solo quelli che lavorano per la 
+causa verranno salvati. Riazzereremo il mondo ed esso rinascerÖ, sicuro nella nostra religione.\n
+\n
+Fatica per la nostra causa.\n
+\n
+\c4Virgil\n
+\n
+\c1Segui il ladro pió scaltro e ruba le sue idee.\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hBeato,\n
+\c2\n
+Distruggi il laboratorio di Ricerca e sviluppo avanzato dell'EuroCorp vicino a Reykjavik. Elimina gli 
+agenti EuroCorp che vedi.\n
+\c5\n
+La storia di questo luogo ä la vera e propria struttura della Chiesa della Nuova Epoca. Qui vedrai 
+l'essenza stessa che ci porta tutti a credere e l'EuroCorp la sta contaminando. Tu devi sradicare con 
+estrema forza qualsiasi agente che troverai.\n
+\n
+Devi distruggere tutti i luoghi dove i Novi hanno preparato le proprie menti per il seme della saggezza.
+ ‘ solo sostanza materiale e la nostra fede vive e batte nei nostri cuori. Non vacillare. Distruggi. Non
+ accadrÖ nulla di male alla Chiesa ora, perchÇ il Codex ha trovato dimora nel profondo delle menti dei 
+Novi. Solo ombre della sua saggezza restano a Reykjavik. Sii accurato nel tuo lavoro e agisci con la 
+massima precisione.\n
+\n
+In sante impronte.\n
+\n
+\c4Virgil\n
+\n
+\c1"Ecco!" disse il Maestro. "Costruisci per me una grande tomba in questo luogo". I suoi apprendisti lo
+ fecero. Brillava al sole. "Ora entrate". Essi entrarono. Allora, un terremoto distrugge la tomba, 
+seppellendovi gli apprendisti al suo interno.\n
+\n
+Il Maestro sorrise. "Anche i fedeli non sempre sono scelti".\n
+\n
+"Questo si chiama sacrificio ".\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hCammina nella Luce, Discepolo.\n
+\c2\n
+Elimina Mirabelle Lucy De Saxo immediatamente. La troverai al santuario di CittÖ del Capo che le abbiamo
+ affidato e che ora le togliamo.\n
+\c5\n
+Il tuo cuore batte solo per noi. Non mettere in dubbio la fede quando richiede azioni che tu ancora non 
+comprendi. De Saxo ha agito contro di noi. I Novi hanno scoperto che ä un nostro nemico incarnato. ‘ un 
+agente del Sindacato. Muoviti con la vendetta nel tuo petto e terminala.\n
+\n
+I deboli di spirito si schiereranno al suo fianco. Fa loro sentire la forza della vera via.\n
+\n
+Abbiamo fatto quasi abbastanza per avviare l'ultima fase del Cataclisma e cambiare questo mondo oltre 
+ogni immaginazione. Combatti per questo, Accolito. Tu sei stato scelto e sarai salvato. Milioni di non 
+credenti periranno. Noi purificheremo questo pianeta.\n
+\n
+Mantieni salda la tua fede.\n
+\n
+\c4Virgil\n
+\n
+\c1Anche la salamandra a volte brucia.\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hAscolta queste parole, Apostolo.\n
+\c2\n
+La Grande Chiesa a Johannesburg ä stata contaminata da uno sciame di Non Guidati. Uno di loro, Rene 
+Galact, sta guidando la moltitudine. Deve essere distrutto in nome di tutto ciï che ä giusto.\n
+\c5\n
+Nella cittÖ la presenza dei Non Guidati ä imperdonabilmente numerosa. La zona elevata a sud-ovest della 
+cittÖ ä ora la fortezza dei reietti. Una grande vittoria sorgerÖ dalla distruzione di tutti coloro che 
+si nascondono dietro le sue insignificanti mura e la Chiesa si avvicinerÖ ancora di pió all'Ultimo 
+Giorno. ‘ scritto nel Codex, Discepolo.\n
+\n
+Avanza con fuoco e serenitÖ.\n
+\n
+\c4Virgil\n
+\n
+\c1Togliere una vita ä un peccato. Toglierne mille ä religione.\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hBenedizioni, Accolito.\n
+\c2\n
+Si ä verificata un'emergenza che ci mette alla prova. Uno dei Novi ä stato catturato. Attualmente ä 
+detenuto in una prigione ad Adelaide. Devi liberarlo e scortarlo al santuario.\n
+\c5\n
+Dovrai pregare per trovare il modo di entrare nella prigione e dovrai portare armi con te per annientare
+ quei miscredenti che vogliono ostacolare il tuo cammino. ‘ qui che la tua fede verrÖ messa alla prova, 
+Discepolo. Non fallire. Sii vigile. Abbi fiducia nella vera via e, se cosç dovrÖ essere, avrai 
+successo.\n
+\n
+Cammina per sacri sentieri.\n
+\n
+\c4Virgil\n
+\n
+\c1Nei tempi pió oscuri, il vero credente affila le proprie abilitÖ di combattente.\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hDiscepolo.\n
+\c2\n
+Ci hai servito bene. Ora il momento ä nostro. Resta dove sei e non seguirci. Procederemo verso la 
+Struttura a lenti ioniche. Quando la attiveremo, coloro che saranno rimasti sulla Terra periranno.Non 
+temere, il tuo nome verrÖ ricordato nei secoli e ti chiameremo Santo della Nuova Epoca.\n
+\c5\n
+La vita umana su questo pianeta verrÖ praticamente eliminata e noi torneremo a ripopolare il globo con i
+ nostri simili. Questa ä sempre stata la nostra fede ed ora la porteremo avanti da soli.\n
+\n
+Chiunque cerchi di fermarci verrÖ sterminato dalle Guardie scelte del Santo Protettorato. Accetta il tuo
+ destino: non agire stoltamente tentando di interferire con i nostri piani. Il potere del Santo 
+Protettorato ä immenso. Resta dove sei e deponi le tue armi, perchÇ ä finita e noi abbiamo vinto.\n
+\n
+\c4Virgil\n
+\n
+\c1Il mondo sarÖ trasformato e la razza umana scomparirÖ.\n
+\n
+Tutto ricomincia da capo. La fede ha esaurito il suo corso ed ä finita.\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hSplendore, Altruista Uno.\n
+\c2\n
+Demolisci una stazione di terra di UTOPIA e spazza via la sua guarnigione di sicurezza.\n
+\c5\n
+La tua guida ä richiesta a Bangkok, che salveremo presto dal Sindacato.\n
+\n
+La presenza di EuroCorp ä stata ridotta a una stazione di terra di UTOPIA con la sua guarnigione di 
+sicurezza. Intanto i tuoi fratelli e sorelle si stanno raccogliendo sull'altra sponda del fiume, 
+preparandosi ad eseguire il grande sacrificio.\n
+\n
+Apri la strada. Distruggi le costruzioni che formano la catena di schiavitó che Eurocorp chiama UTOPIA. 
+Mostra ai nostri discepoli la strada del Cataclisma eliminando il personale di sicurezza.\n
+\n
+Fai questo per i Novi.\n
+\n
+\c4Virgil\n
+\n
+\c1Il Maestro alzï le mani. "Guardate le mie ferite", disse. Gli spettatori osservarono le stigmate a la
+ luce del sole che filtrava attraverso le Sue grandi mani.\n
+\n
+"Che il dolore sia."\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+\hApostle of the New Epoch.\n
+\c2\n
+There is a task you must perform for us. The Unguided are foolish enough to think they can use our 
+belief against us. Our sources have told us that a contingent of punks have taken civilians hostage. 
+Your team will be sent in against them.\n
+\c5\n
+We have the element of surprise. The Unguided expect us to rescue the hostages. All you must do is 
+destroy the Unguided causing this irritation. Do not worry about the public held to ransom. They are not
+ Churchmembers and mean nothing. Just stop the Unguided in whichever way you choose. Make sure it is 
+permanent.\n
+\n
+\c4Virgil\n
+\n
+\c1When tact is required, use brute force. When force is required, use greater force. When the greatest 
+force is required, use your head. Surprise is everything.\n
+\n
+- Il Libro del Cataclisma.\n
+\c5\n
+# Names.txt
+# Contains all city drop names in the mission number order.
+
+1.
+2.Missionario
+3.
+4.
+5.
+6.Il Sacco di Roma
+7.
+8.
+9.
+10.Un incontro di menti
+11.L'Uovo del serpente
+12.Una pagliuzza nell'occhio di Dio
+13.Audacia
+14.I livellatori
+15.Pioggia di terrore
+16.Scudo degli dei
+17.Fondamenta
+18.Decostruzione
+19.Giorno dei dannati
+20.
+21.
+22.
+23.
+24.
+25.
+26.
+27.Prova di fede
+28.
+29.
+30.
+31.Eretici
+32.
+33.Non uno di noi
+34.
+35.
+36.
+37.
+38.
+39.Crociato dell'anima
+40.
+41.
+42.
+43.Raccolto mortale
+44.Mercante di energia
+45.Castigo
+46.
+47.
+48.Araldo
+49.
+50.
+51.Conversioni
+52.Guardiano
+53.Stabilisci il collegamento
+54.
+55.
+56.
+57.
+58.
+59.
+60.
+61.
+62.
+63.
+64.
+65.
+66.
+67.
+68.
+69.
+70.
+71.Riconquista
+72.Luce divina
+73.Donazione
+74.
+75.
+76.
+77.
+78.
+79.
+80.
+81.
+82.
+83.
+84.
+85.La zona morta
+86.
+87.Caduto tra i ladri
+88.
+89.
+90.
+91.
+92.
+93.
+94.
+95.
+96.
+97.
+98.
+99.
+100.Rivelazioni
+101.
+102.Cataclisma
+103.
+104.
+105.
+106.
+107.
+108.The Shining
+109.
+110.Unrest
+# Netscan.txt
+# Master file containing all OBJ****.txt files.
+# Files indexed Sn and Cn in Miss***.txt order.
+# Scan entries listed by Points Of Significance (POS).
+[3502]
+Zona di atterraggio: collegamento IML di Detroit
+Costruzione obiettivo: stazione a terra dell'AI EuroCorp
+Disposizione guardie EuroCorp
+Santuario: collegamento IML di Detroit
+Notizie: mezzi raccomandati per guadagnare l'entrata alla Stazione di Terra del Sindacato
+[0310]
+Landing Ground: Bangkok Cathedral
+Support acolytes in A-grav APC
+Target installations
+IML branch connections
+Disposizione guardie EuroCorp
+Local police have recently escorted armoured cars to the city vault
+[2516]
+Zona di atterraggio: collegamento IML di Tripoli
+Il nostro Giardino della Meditazione
+[2546]
+Zona di atterraggio: collegamento IML di Tripoli
+Il nostro Giardino della Meditazione
+Coloro che devi difendere
+Santuario: collegamento IML di Tripoli
+Forziere: valore stimato Cr 800.000
+Allarme satellite: rilevata chiave di identificazione tipo agente EuroCorp, tracciati instabili
+[2602]
+Zona di atterraggio: collegamento IML di Buenos Aires
+Juan Ormandoz lavora in questo ufficio esecutivo
+Chico Ramirez e la sua banda occupa questa antica strada
+Santuario: collegamento IML di Buenos Aires
+Notizie: stato stimato che i forzieri della cittÖ contengano Cr 1.000.000
+[2603]
+Zona di atterraggio: collegamento IML di Buenos Aires
+Presidio milizia EuroCorp
+Santuario: collegamento IML di Buenos Aires
+[0703]
+Zona di atterraggio: APC per l'invio dei tuoi Accoliti
+Area di ricerca degli agenti EuroCorp
+Santuario: Complesso monastico di Santiago
+I ponti sono stati distrutti durante un attacco del Sindacato
+Notizie: il percorso dall'IML al bersaglio controllato dalle forze dell'EuroCorp
+[2203]
+Zona di atterraggio: collegamento IML di Johannesburg
+Forziere EuroCorp
+Convoglio dell'oro
+Veicolo obiettivo
+Destinazione del convoglio
+Santuario: collegamento IML di Johannesburg
+[2202]
+Zona di atterraggio: collegamento IML di Johannesburg
+Distretto della CittÖ sotto nostro controllo
+Tuo confratello
+Notizie: rilevato armeggiamento con il segnale di identificazione UTOPIA, con particolare attenzione agli ingressi dei tubi di trasporto e rilevamento del trasporto di ordigni esplosivi
+[2204]
+Zona di atterraggio: collegamento IML di Johannesburg
+I Non Guidati
+Rene Galact
+Santuario: collegamento IML di Johannesburg
+[2146]
+Zona di atterraggio: collegamento IML di Ginevra
+Centro conferenze EuroCorp
+Dott. Schweizer
+Tempio di Padre Black
+[5047]
+Zona di atterraggio: collegamento IML di Vancouver
+Laboratorio del Dott. Schweizer
+Santuario: collegamento IML di Vancouver
+Notizie: rilevati agenti del sindacato
+[0103]
+Zona di atterraggio: collegamento IML di Hong Kong
+Il nostro tempio e i confratelli
+Zona di atterraggio dei Non Guidati
+Notizie: agenti speciali EuroCorp (genieri) sono stati inviati a Hong Kong
+[2831]
+Zona di atterraggio: collegamento IML di Roma
+Zona urbana ad alto degrado devastata dai Non Guidati
+Presidio EuroCorp
+Agenti EuroCorp
+Notizie: contenuto del forziere stimato in Cr 400.000
+[0705]
+Zona di atterraggio: collegamento IML di Santiago
+Il nostro tempio
+Santuario: collegamento IML di Santiago
+Notizie: la squadra d'attacco del Sindacato ha previsto l'arrivo entro le prossime 48 ore
+[4501]
+Zona di atterraggio: destinazione APC
+Quartier Generale EuroCorp
+Shuttle dell'esecutivo con Koto Sek a bordo
+Santuario: collegamento IML di Cairo
+[4402]
+Zona di atterraggio: destinazione APC
+La blasfema Mirabelle Lucy De Saxo
+Santuario: collegamento IML a CittÖ del Capo
+[4147]
+Zona di atterraggio: collegamento IML di Bahrain
+Zona di ricreazione EuroCorp
+Notizie: la polizia incaricata di scortare un direttore finanziario della EuroCorp in visita d'affari fino alla zona nord-est della cittÖ
+[0903]
+Zona di atterraggio: collegamento IML di Singapore
+Forziere (vuoto)
+Veicoli A e B da attaccare
+Punto di ritrovo
+Notizie: destinazione veicolo A
+Notizie: destinazione veicolo B
+[3002]
+Zona di atterraggio: collegamento IML di Londra
+Assistente del professor Drennan
+Professor Drennan
+Podio di presentazione
+Santuario: Strada dello sbocco di Londra
+Notizie: il compito del professore include la raccolta di dati da questo palazzo
+Notizie: imminente un'invasione di Non Guidati a nord
+[0403]
+Zona di atterraggio: collegamento IML di New York
+Vie di accesso alla costruzione EuroCorp
+Luogo dell'esplosione
+Edificio da attaccare
+Un diversivo verrÖ creato in questa zona commerciale
+Il nostro tempio e collegamento con il satellite
+Santuario: collegamento IML di New York
+Notizie: valore stimato del forziere Cr 2.000.000
+[2016]
+Zona di atterraggio: collegamento IML di Riyadh
+Bunker da attaccare
+Santuario: collegamento IML di Riyadh
+[4403]
+Zona di atterraggio: destinazione APC CittÖ del Capo
+Luogo incidente della De Saxo
+Santuario: collegamento IML a CittÖ del Capo
+Notizie: la squadra EuroCorp ha previsto l'arrivo in meno di 36 ore
+[3202]
+Zona di atterraggio: collegamento IML di Pechino
+Posizione dell'hacker
+Santuario: collegamento IML di Pechino
+Notizie: stato stimato che il forziere della cittÖ contenga Cr 1.500.000
+[2701]
+Zona di atterraggio: collegamento IML di Nuova Delhi
+Forze EuroCorp nell'isola-porto fluviale
+I Non Guidati
+Santuario: collegamento IML di Nuova Delhi
+[0302]
+Zona di atterraggio: collegamento IML di Bangkok
+Perimetro della zona morta
+Avamposto EuroCorp
+Santuario: collegamento IML di Bangkok
+Qui esiste ancora un forziere commerciale
+Allarme satellite: rilevato test di armi nell'avamposto
+[3602]
+Zona di atterraggio: collegamento IML A di Christchurch
+Collegamento IML B di Christchurch
+[0603]
+Zona di atterraggio: collegamento IML di Adelaide
+Fortezza dove viene tenuto Fratello IX
+Punto di ritrovo
+Spiegamento MBT del Sindacato
+[4602]
+Zona di atterraggio: piattaforma dello Shuttle esecutivo di Colombo
+La tua posizione ottimale
+Ascensore orbitale di Colombo
+Sistema missilistico anti-missili dell'ascensore
+[1002]
+Zona di atterraggio: Tempio della Fenice
+Sequestratori dei Non Guidati
+Sanctuary: Phoenix Temple
+[6503]
+[7931]
+[0801]
+[1101]
+[6502]
+[7902]
+ELIMINA I NON GUIDATI
+TORNA AL QUARTIER GENERALE
+PERSUADI I TECNICI DI YAMAGUCHI
+EVACUA
+MORTE DI UN TECNICO
+PERSUADI I DIRIGENTI DI YAMAGUCHI
+MORTE DI UN DIRIGENTE
+NEUTRALIZZA GLI AGENTI DI YAMAGUCHI
+MORTE DI UN AGENTE
+PERSUADI GLI SCIENZIATI DI BLUESKY
+PERSUADI LO SCIENZIATO DI BLUESKY
+AGGIORNAMENTO: ELIMINA LA MINACCIA DEI NON GUIDATI
+SCORTA GLI SCIENZIATI AL COLLEGAMENTO IML
+RUBA LA MACCHINA D'ORO
+LA MACCHINA D'ORO STATA DISTRUTTA
+LA MACCHINA D'ORO HA RAGGIUNGO IL QUARTIER GENERALE TANG
+PORTA LA MACCHINA ALLA ZONA DI EVACUAZIONE
+RUBA IL MANUFATTO DAL TEMPIO
+PORTA IL MANUFATTO ALLA ZONA DI EVACUAZIONE
+RIMUOVI LA ROCCAFORTE DEI NON GUIDATI
+ELIMINA I MANIFESTANTI
+STERILIZZA IL SETTORE
+ELIMINA LE GUARDIE
+ELIMINA L'AGENTE
+PERSUADI L'AGENTE
+L'AGENTE BERSAGLIO MORTO
+L'AGENTE BERSAGLIO FUGGITO
+PERSUADI IL DIPENDENTE NAA
+PERSUADI JENNIFER TAKS
+SCORTA TAKS AL COLLEGAMENTO IML
+JENNIFER TAKS MORTA
+ELIMINA I FANATICI
+PERSUADI LO SCIENZIATO DI GEL DATA
+PERSUADI GLI SCIENZIATI DI GEL DATA
+PERSUADI LO SCIENZIATO DI HEXAGON
+PERSUADI GLI SCIENZIATI DI HEXAGON
+SCORTA LO SCIENZIATO AL COLLEGAMENTO IML
+SCORTA GLI SCIENZIATI AL COLLEGAMENTO IML
+AGGIORNAMENTO: ELIMINA LA MINACCIA DEI FANATICI
+VEICOLO DISTRUTTO: AGENTI APPIEDATI
+SCIENZIATO PERSO
+PERSUADI SCIENZIATI C3
+SCIENZIATI C3 ELIMINATI
+LABORATORIO DISTRUTTO
+BASE DISTRUTTA
+STERILIZZA CITT
+PROTEGGI DRENNAN
+PROTEGGI L'ASSISTENTE DEL PROFESSORE
+PROTEGGI I DIRIGENTI
+IL PROFESSOR DRENNAN MORTO
+L'AIUTO DEL PROFESSOR DRENNAN MORTO
+I DIRIGENTI EUROCORP SONO STATI ELIMINATI
+SALVA IL PROFESSOR DRENNAN
+SCORTA IL PROFESSOR DRENNAN ALLA BASE EUROCORP
+AGGIORNAMENTO: EVACUA TUTTO IL PERSONALE
+EVACUAZIONE FALLITA
+PERSUADI MIRABELLE LUCY DE SAXO
+LA DE SAXO FUGGITA: NUOVI ORDINI DISPONIBILI
+ELIMINA NIRABELLE LUCY DE SAXO
+SOFFOCA LA RIVOLTA
+ELIMINA I RIBELLI NON GUIDATI
+PROTEGGI L'AI DEL BAHRAIN
+L'AI DEL BAHRAIN STATA DISTRUTTA
+PROTEGGI L'ASCENSORE ORBITALE
+AGENTI INSUFFICIENTI PER COMPLETARE LA MISSIONE
+L'ASCENSORE ORBITALE STATO DISTRUTTO
+LA STAZIONE SPAZIALE STATA DISTRUTTA
+PRENDI IL COMPUTER DI NAVIGAZIONE DELLA NAVETTA
+DISPOSITIVO AUTODISTRUZIONE STAZIONE ATTIVATO: DISATTIVALO
+PRENDI IL MODULO DI SUPPORTO VITALE DELLA NAVETTA
+VAI NEL NAVICELLA LUNARE
+ELIMINA I NOVI
+I NOVI HANNO ATTIVATO LA BARRIERA A IONI. SEI STATO SCONFITTO.
+ELIMINA I PAGANI NON GUIDATI
+IL NOSTRO GIARDINO DELLA MEDITAZIONE STATO DISTRUTTO
+CONVERTI L'AGENTE EUROCORP
+SCORTA L'AGENTE AL COLLEGAMENTO IML
+IL TUO BERSAGLIO STATO ELIMINATO
+IL TUO BERSAGLIO FUGGITO
+ACQUISISCI FONDI
+LA TUA CAVA ANDATA PERDUTA
+PORTA IL DR. SCHWEIZER DA PADRE BLACK
+IL DR SCHWEIZER MORTO
+PADRE BLACK MORTO
+PROTEGGI I TUOI CONFRATELLI E IL TEMPIO
+I TUOI CONFRATELLI SONO TUTTI MORTI
+IL TEMPIO STATO DISTRUTTO
+DISPERDI I MISCREDENTI
+PUNISCI I DIMOSTRANTI
+ANNIENTA LE FORZE DEL CAOS
+DISTRUGGI I PARASSITI NON GUIDATI
+SPAZZA VIA IL PERSONALE EUROCORP
+ELIMINA GLI AGENTI EUROCORP
+AIUTA GLI ACCOLITI
+ASSASSINA IL SABOTATORE
+SGOMINA I DISSACRATORI
+PROTEGGI L'ORDINE DEGLI ACCOLITI
+L'ORDINE DEGLI ACCOLITI STATO COMPLETAMENTE ELIMINATO
+PORTA LA MACCHINA D'ORO AL PUNTO DI RACCOLTA
+LA MACCHINA D'ORO STATA DISTRUTTA
+ASSASSINA L'ASSISTENTE DEL PROFESSORE
+PRENDI IL POSTO DELL'ASSISTENTE A FIANCO DEL PROFESSORE
+RACCOGLI DATI VIDEO PER LA LEZIONE
+RECATI AL PODIO
+PRESENZIA ALLA LEZIONE
+SCORTA IL PROFESSOR DRENNAN
+IL PROFESSORE HA INCONTRATO IL SUO ASSISTENTE
+IL PROFESSORE MORTO
+MIRABELLE LUCY DE SAXO MORTA
+DISTRUGGI IL BUNKER DELLE ARMI DELL'EUROCORP
+RUBA IL PROGETTO DELL'ARMA EUROCORP
+TRASMETTI IL PROGETTO DELL'ARMA
+RITORNA
+ACCOLITI APPIEDATI: IMPOSSIBILE COMPLETARE LA MISSIONE
+ASSASSINA L'HACKER
+ELIMINA LE FORZE CHE CONTROLLANO IL PORTO FLUVIALE
+TORNA AL COLLEGAMENTO IML
+RAPISCI IL PRIGIONIERO EUROCORP
+IL BERSAGLIO STATO ELIMINATO
+DISTRUGGI IL LABORATORIO DI RICERCA E SVILUPPO
+ELIMINA GLI AGENTI DI EUROCORP
+LA DE SAXO DEVE MORIRE
+VATTENE DA QUI
+SOTTOMETTI I NON GUIDATI
+CERCA E DISTRUGGI IL CAPO DELLA RIVOLTA
+SALVA IX E CONDUCILO AL PUNTO DI RITROVO
+PROTEGGI IX
+HAI CONSENTITO LA MORTE DI IX
+NIENTE PU“ FERMARE I NOVI ORA. SEI STATO SCONFITTO.
+NON FARE NULLA: OBBEDISCI AI NOVI
+CONTROLLO CITT PERDUTO: I FANATICI DELLA CHIESA HANNO CONVERTITO TUTTI
+ELIMINA L'INTRUSORE
+ELIMINA GLI INTRUSORI
+PERSUADI L'INFILTRATO
+PROCEDI AL COLLEGAMENTO IML
+BERSAGLIO ELIMINATO
+ATTIVA COLLEGAMENTO IML
+COLLEGAMENTO IML DISTRUTTO
+ELIMINA GLI AGENTI
+PENETRA IL BUNKER: RILASCIA IL VIRUS
+PARTI
+RITIRATI
+CONVERTI ORMANDOZ
+CONVERTI RAMIREZ
+PORTALI A NOI
+HAI CONSENTITO LA MORTE DI ORMANDOZ
+HAI CONSENTITO LA MORTE DI RAMIREZ
+RUBA IL LAVORO DEL DR. SCHWEIZER
+TORNA DA NOI
+GLI AGENTI EUROCORP DEVONO UNIRSI A NOI O MORIRE
+NEUTRALIZZA GLI AGENTI EUROCORP
+ASSASSINA KOTO SEK
+NEUTRALIZZA TUTTI GLI AGENTI EUROCORP
+FA IN MODO CHE NON ACCADA NULLA ALLA DE SAXO
+ASSUMI IL CONTROLLO DEL COLLEGAMENTO IML
+LA NOSTRA AMATA FIGLIA MORTA
+MORIRAI PER QUESTA ERESIA!
+EUROCORP DEVE SCEGLIERE TRA LA NOSTRA FEDE E LA MORTE
+CERCA RIPARO
+ENTRA
+PERSUADI LO SCIENZIATO DI BLUESKY
+IL TUO BERSAGLIO FUGGITO
+BERSAGLIO PERSUASO
+NEUTRALIZZA L'AGENTE
+CERCA E DISTRUGGI - CITTADINI CATEGORIA U - NON GUIDATI
+AGGIORNAMENTO MISSIONE: ELIMINA I CULTISTI
+RILEVATO PROFESSOR KLEIN - PERSUADI IL PROFESSORE
+PROTEGGI IL PROFESSOR KLEIN - EVACUA
+IL PROFESSOR KLEIN ‘ MORTO
+DISTRUGGI LA STAZIONE DI TERRA
+PUNISCI I NOSTRI NEMICI
+[header_win]
+[message_win]
+CosÏ la fiducia in te stesso ne uscita trionfante. Non solo hai contrastato il folle piano dei Novi di ricreare la razza umana clonando se stessi, ma hai anche preso possesso della pió potente arma mai costruita.
+
+Sulla Terra, l'UTOPIA del Sindacato in rovina. In milioni sentono la voce di Ko-Paull Vissick che invoca affinch la ragione prevalga.
+
+Ma lascia che la tua volontÖ sia compiuta.
+[weapons]
+UZI
+Arma di difesa personale di vecchio tipo. L'originale sparava munizioni cinetiche a propulsione chimica. Questa versione aggiornata molto affidabile in quanto si basa su una cellula di energia propria per il rilascio di ogni colpo. Nonostante ciï, l'Uzi il ricordo di un'altra era e come tali lo consideriamo virtualmente obsoleto. La Chiesa della Nuova Epoca sta lavorando ad armi largamente superiori da offrire ai propri Discepoli.
+MINIGUN
+Nonostante assomigli pió ad un pezzo da museo, questo dispositivo cinetico a tamburo rotante considerato superiore all'Uzi e pió efficace contro i nemici della nostra fede. Come l'Uzi, stata aggiornata in modo da trarre energia dalla cellula personale. I punti a suo sfavore sono le dimensioni e il rumore, ma vengono pió che compensati dalla portata e dal potere esplosivo. Quando utilizzate in gran numero, le pistole sono efficace contro i veicoli.
+ELLASER
+I Novi hanno scoperto la struttura sub-fotonica della luce e ne hanno svelato i segreti. La loro santa ricerca ha sviluppato un concentratore ionico che trasferisce scariche su un bersaglio. La portata dell'arma superiore a quella delle armi a energia cinetica ed particolarmente efficace sull'acciaio conduttivo.
+LASER
+I nostri scribi hanno sviluppato un'arma efficace basata sul laser convenzionale. Il gas TriSodico 89 viene iniettato nella camera di sparo del laser ad impulsi dove viene trasformato elettricamente in fascio luminoso. La pressione del gas nella camera di sparo puï essere aumentata trattenendo il grilletto, sovraccaricando l'arma e rendendola, dunque, pió efficace.
+BEAM
+Quest'arma utilizza l'energia combinata degli elettroni accelerati per emettere un fascio di energia instabile lungo un'onda magnetica portante. Un significativo progresso per la Chiesa che conferma il valore degli insegnamenti dei Novi.
+RAP
+Una granata a implosione viene lanciata verso il bersaglio ed utilizza il proprio sistema di guida per garantire la detonazione all'impatto. I lanciagranate si avvalgono di slitte acceleratrici monopolari per assicurare una portata notevole e raramente il bersaglio riesce a sfuggire al sistema di guida giroscopico. Quest'arma superba inoltre utile per creare incendi in zone circoscritte. Il tempo richiesto dalla ricarica, automatica, rende effettivamente vulnerabili i nostri santi Accoliti per un breve periodo di tempo.
+NUCLGREN
+La luce della fede verrÖ vista a chilometri di distanza quando una granata nucleare verrÖ detonata in nome della Chiesa. Utilizzala con cura, Apostolo: la devastazione provocata da questa arma notevole. Ritirati dalla zona nella quale cadrÖ. particolarmente efficace contro strutture e gruppi; utilizzarla contro un singolo nemico equivarrebbe a una bestemmia.
+PERSUADER
+La nostra congregazione cresce ogni giorno. Alcune anime, tuttavia, pongono resistenza al cammino di veritÖ che offriamo: per questo che abbiamo l'Indottrinatore. In un istante, inculca nelle menti di quei miscredenti tutto ciï in cui crediamo. Come potranno resistere a questa valanga di conoscenza e saggezza?
+FLAMER
+Coloro che si oppongono al cammino della rettitudine bruceranno in eterno. Questi enormi lanciafiamme sono il loro primo assaggio dell'inferno. Non hanno certo la portata delle armi a energia e neppure di quelle cinetiche, ma hanno impieghi specifici, come contro la folla. I lanciafiamme ispirano inoltre il terrore e la sottomissione che desideriamo.
+H2HTASER
+Questa piccola unitÖ rende non persuaso il bersaglio, o i seguaci persuasi del bersaglio, con estrema semplicitÖ. Sebbene il Distruttore non sia una vera alternativa alle armi di distruzione create dai nostri scienziati e benefattori, comunque un'arma meravigliosamente sovversiva.
+CRAZYGAS
+Distillato da un narcotico fungoide alieno, il Gas Allucinogeno l'arma ideale per provocare caos su larga scala. Lanciato contro un gruppo di civili, provocherÖ istantaneamente una sommossa incontrollabile. Questo costringerÖ le autoritÖ a sprecare le proprie energie per riacquisire il controllo, consentendo ai tuoi santi Accoliti di proseguire la missione.
+KOGAS
+Questo incensiere produce una nuvola che si posa su tutti i bersagli non protetti che tocca. La semplicitÖ benvenuta quando puï essere cosÏ efficace.
+ELEMINE
+Attivata da presenze nemiche nelle vicinanza, la Mina a ioni emette lingue di energia elettrica in tutte le direzioni ed estremamente efficace contro i nemici della fede all'interno di un veicolo o a piedi. Questo dispositivo attivato dalla prossimitÖ del bersaglio. La sua scarica avrÖ effetto anche sullo stato del CHIP di coloro colpiti dall'esplosione.
+EXPLMINE
+Una mina convenzionale che utilizza un detonatore a ritardo inserito direttamente nella carica di detonazione. Un'arma pratica da utilizzare contro carri o altri veicoli corazzati.
+LONGRANGE
+Il nostro divino lavoro comporta a volte l'eliminazione di singoli individui anzichÈ la liquidazione di gruppi di persone. Il fucile a lungo raggio spara colpi cinetici a uranio impoverito con grande accuratezza anche a lunga distanza. Sono pochi I giubbotti antiproiettile in grado di sopportare il colpo inferto da questi proiettili avanzati. In genere un colpo abbatterÖ un bersaglio e sarÖ possibile fuggire senza essere visti.
+AIRSTRIKE
+Possiamo acquisire i codici di lancio per molti dei satelliti geostazionari che sorvolano il nostro pianeta, ma i costi di elaborazione per superare le difese codificate del Sindacato sono alti. Quando si attiva un colpo, nel giro di pochi secondi, il satellite pió vicino punterÖ la posizione designata e lancerÖ barre di una lega di tungsteno e uranio che si surriscaldano nell'atmosfera e provocano distruzioni massicce in tutta la zona.
+QDEVASTATOR
+Questo dispositivo l'arma pió distruttiva che i Novi sono riusciti a rendere portatile. La Pistola gravitazionale puï rilasciare un'energia tale da ridurre una montagna in briciole. Ammirate l'ira dei Novi!
+RAZORWIRE
+Una bobina di filo con spine intrecciate. Il Filo spinato difficile da rilevare, specialmente in situazione di combattimento. Collocatelo in punti strategici e i vostri avversari si feriranno gravemente inciampando nei fili. Un'arma che ha dato prova del proprio valore per lungo tempo.
+STASISFLD
+Solo degli dei hanno potuto creare un dispositivo simile. Quando lo si attiva, viene creata una cupola di spazio sub-temporale atomicamente stabile. Conosciuto nel corso dei secoli come tempo stregato, quando si verifica naturalmente, ha l'effetto di rallentare drasticamente chiunque o qualunque cosa all'interno della cupola. La sua vista ti spinge a pregare.
+SOULGUN
+I nostri scienziati hanno svelato altri arcani segreti del Codex ed hanno costruito un congegno in grado di esportare le forze elettrochimiche naturali contenute nelle cellule di qualsiasi struttura organica. Questo dispositivo succhia l'energia di qualsiasi cosa vivente o morta, a patto che la sua struttura cellulare non sia stata distrutta. Loda i Novi per la loro sagacia, Accolito.
+TIMEGUN
+Il Codex ci ha dato questo. Utilizzando il tempo stregato in modo ancora pió avanzato, ora possibile trasportare i nemici in altri piani temporali. Un vero e proprio scivolo del tempo, perfetto per far scomparire un bersaglio. Puoi usarlo anche sui tuoi compagni, ma presta attenzione: gli effetti non sono del tutto prevedibili.
+CEREBUSIFF
+Una sentinella radiocomandata dotata di un laser ad alto potenziale. Un rilevatore termico e di movimento costruito nella base connesso ad un lettore di chiave di identitÖ e la sentinella spara contro qualsiasi movimento sconosciuto. Queste unitÖ sono particolarmente efficaci in zone aperte con un ampio campo visivo.
+MEDI1
+Credi nella Chiesa e la Chiesa si prenderÖ cura di te. Quando uno o pió Discepoli vengono feriti nella guerra santa contro EuroCorp, l'utilizzo di questa unitÖ riporterÖ la salute e la forma fisica. Un congegno di questo tipo dimostra la cura e la comprensione sulle quali fondata la Chiesa della Nuova Epoca.
+MEDI2
+Un'unitÖ di riparazione avanzata che si occuperÖ delle tue ferite senza distrarre i membri del tuo gruppo. Un'aggiunta inestimabile all'attrezzatura operativa degli adepti che diffondono la parola della fede nel Cataclisma.
+EXPLWIRE
+Una trappola che, quando installata nella posizione prescelta, distruggerÖ chiunque si avventuri attraverso il cavo molecolare tirato tra due punti. Senza volerlo, il nemico provocherÖ un'esplosione che non lo renderÖ pió un ostacolo alla causa della diffusione della nostra religione.
+CLONESHLD
+Questo dispositivo renderÖ uno del tuo gruppo completamente invisibile. ApparirÖ agli occhi di EuroCorp e di altri come un innocuo dirigente e sarÖ in grado di camminare attraverso le zone di controllo del fuoco che i nostri Accoliti non riuscirebbero sicuramente ad attraversare. Il perfetto travestimento, particolarmente utile per operazioni segrete nel nome della Chiesa.
+[mods]
+LEGS1
+Il tempo nostro. Non dobbiamo sprecarlo. Ogni nanosecondo sacro. I tuoi Accoliti devono agire in fretta e con vigore. Rimuovendo la loro carne mortale e sostituendola con questo prodigio tecnologico, come descritto negli insegnamenti del Codex, puoi offrire loro entrambi.
+LEGS2
+Possa la lezione dei salmi frattali illuminarci sempre. I segreti del cosmo sono stati svelati per creare materiali che non potevano essere creati nei confini della gravitÖ. Utilizzando oculatamente i nostri fondi, abbiamo utilizzato queste rare sostanze per creare queste protesi superiori.
+LEGS3
+Per salvare un'anima, si dovrÖ prima investire la massima tecnologia in questo sforzo. Beati, dunque, coloro che camminano sulla terra ferma con un santo scopo nel loro passo. Che incarnino gli ideali della Chiesa; dota i tuoi Accoliti delle migliori opere dei Novi.
+ARMS1
+Possa la tua mira essere sempre giusta. A questo scopo, i miglioramenti offerti dal braccio cinetico rappresentano un ausilio significativo alla precisione. Questa corazza supplementare offre inoltre maggiori probabilitÖ di sopravvivenza ai tuoi Accoliti. Gli Accoliti dotati di braccia di questo tipo possono inoltre lanciare gli oggetti a maggiore distanza.
+ARMS2
+‘ il nostro cosç che uniamo la macchina all'uomo. Se uno migliora l'uomo, allora dovrÖ anche migliorare la macchina. Le nuove tecniche di costruzione utilizzate per queste braccia migliorano i benefici apportati dalle braccia cibernetiche ai tuoi Accoliti. Siano ringraziati i Novi.
+ARMS3
+Ora che il Cataclisma prossimo, solo i pió forti parlano. Le enormi armi che utilizziamo richiedono una grande forza per essere usate. Con queste braccia i tuoi Accoliti avranno i mezzi per la nostra vittoria e possederanno la forza per piegare chiunque tenti di impedire il Cataclisma.
+CHEST1
+Il cammino del fedele contrassegnato da continui miglioramenti cibernetici. da qui che inizia il viaggio della salvezza. Questo sofisticato torso artificiale, che aumenta la resistenza e la salute di un discepolo, funge inoltre da base per altre protesi.
+CHEST2
+L'anima puï essere indistruttibile, ma il corpo non lo . Se troppi dei tuoi Accoliti compiono l'estremo sacrificio, offri loro questi sistemi respiratori che garantiscono uno scudo leggero in metallo multicellulare.
+CHEST3
+Arriva un tempo di grandi cambiamenti; questo tempo richiede che le grandi forze siano messe alle prova. Un discepolo modificato con questo santo tessuto sofisticato non teme alcun male. I tuoi fratelli saranno addirittura in grado di camminare in mezzo a una nuvola di gas nervino senza essere uccisi. Ammira la corazza di coloro che portano il Cataclisma!
+BRAIN1
+Col prosieguo della nostra missione, la sfida alle nostre attivitÖ diviene pió forte. Aumenta la percezione e la salute dei tuoi Accoliti e le masse si prostreranno. cosÏ che verrÖ conosciuto il nome della Chiesa della Nuova Epoca.
+BRAIN2
+Conosci il tuo nemico, discepolo, e riconoscilo a grande distanza, cosÏ che tu possa prepararti a purificarlo. I Novi hanno rivolto la loro attenzione a ciï che richiesto ai nostri Accoliti, mentre preparano la strada del Cataclisma. Migliora le menti dei tuoi Accoliti con nuovi cervelli.
+BRAIN3
+La mente di un dio la mente di una macchina. Per una consapevolezza accresciuta oltre i limiti dei soli mezzi biologici, dota i tuoi Accoliti dell'ultimo ritrovato in fatto di Intelligenza artificiale mobile. Con la comprensione viene grande potere. Incarna questa comprensione e abbraccia il potere.
+SKIN1
+A volte, il nostro nemico EuroCorp crea alcune tecnologie innovative. Da questo progetto di cyberpelle possiamo produrre un'epidermide migliore rispetto a quella tradizionale. Un rivestimento costituito da una trama molecolare sospesa in un materiale multicellulare rende gli Accoliti che lo indossano praticamente invulnerabili ai colpi ad energia cinetica.
+SKIN2
+Il calore uno dei nemici del combattente. In nostro nemico se ne preoccupato ed ha trovato la soluzione descritta in questi documenti. Utilizzando tessuti provenienti dall'industria spaziale, hanno elaborato un progetto di cyberpelle in grado di rendere i nostri Accoliti resistenti alle fiamme e all'energia termica.
+SKIN3
+Anche i Novi sono rimasti colpiti dalla teoria che sta alla base di questo ritrovato. Utilizzando alcune tecnologie Codex, pervertite dalla loro inferiore comprensione, gli EuroCorp erano prossimi a inserire nella cyberpelle una trama a tecnologia spettrale in grado di assorbire l'energia, proteggendo cosÏ i loro agenti dagli effetti delle armi elettromagnetiche. Interessante. Possiamo ora completare il loro lavoro e sfruttare queste conoscenze per noi stessi.
+SKIN4
+Ancor pió esecrabili, gli EuroCorp non hanno smesso di tentare di competere con la nostra tecnologia infinitamente superiore. Nonostante ciï, questi documenti indicano che hanno prodotto qualcosa di veramente speciale: le istruzioni per produrre una cyberpelle dotata di alcune delle proprietÖ dello Schermo clonatore. In particolare, questa pelle riflette in continuazione un dirigente civile agli scanner di UTOPIA, nascondendo pertanto una minaccia fino a quando non entra nel campo visivo. Anche noi potremmo utilizzare questa tecnica.

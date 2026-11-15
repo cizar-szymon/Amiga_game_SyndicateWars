@@ -1,0 +1,1622 @@
+# == map screen text ==
+# map screen title
+#UTOPIA
+# map screen headings
+Dropp-plats
+UTOPIA ID-nycklar
+Infrastruktur
+Dialekt
+Handel
+Giftighet
+
+# city data
+
+London
+21.13 M
+Post-Industriell
+L†g-Engelska
+Programvaruindustri, Finansiella tj„nster
+Kemiskt avfall, M„nskligt avfall
+
+Detroit
+10.98 M
+Komplex t„tort
+Ny-Amerikanska
+Fordonstillverkning
+Tunga industrier, Radioaktivt avfall
+
+Hong Kong
+17.55 M
+Komplex t„tort
+Indokinesiska
+Minnesplastik
+L„tt industriell
+
+Peking
+38.89 M
+Ultra-Metropol
+Proto-Mandarin
+Plastfabrikation, H†rdvarutillverkning
+Radioaktivt avfall, M„nskligt avfall
+
+Wien
+6.99 M
+Enkel t„tort
+N.C.E. (Normal Central Europeiska)
+Omarbetning av mineral
+L„tt industriell
+
+Geneve
+7.65 M
+Enkel t„tort
+N.C.E. (Normal Central Europeiska)
+Vattenavgiftning, Luftbearbetning
+Radioaktivt avfall
+
+Salzburg
+9.27 M
+Komplex t„tort
+Neu-Slaviska
+Vegetativ f”rnyelse
+L„tt industriell
+
+Singapore
+21.71 M
+Ultra-Metropol
+Pseudo-Malayiska
+Vattenavgiftning, H†rdvarutillverkning
+M„nskligt avfall, Tung industri
+
+Phoenix
+13.26 M
+Komplex t„tort
+Interkontinental amerikanska
+Krafttillverkning
+Radioaktivt avfall
+
+Rom
+10.92 M
+Post-Industriell
+L†g-Latin
+Varaktiga konsumtionsvaror
+Tung industri
+
+Manamah
+10.98 M
+Komplex t„tort
+Ny-Arabiska
+Br„nsleraffinering, Mineralbearbetning
+Kemiskt avfall
+
+New York
+25.24 M
+Post-Industriell
+H”g-Engelska
+Vapentillverkning
+Ultra-Tung industri, Radioaktivt avfall, M„nskligt avfall
+
+Santiago
+7.81 M
+Komplex t„tort
+Neu-Spanska
+Gummitillverkning
+Kemiskt avfall
+
+Buenos Aires
+15.71 M
+Ultra-Metropol
+Modul
+Livsmedelstillverkning
+Tung industri, M„nskligt avfall
+
+Kapstaden
+10.27 M
+Komplex t„tort
+Afrikaans (Forntida)
+Mineralbearbetning
+Tung industri
+
+Adelaide
+8.7 M
+Enkel t„tort
+Sub-Engelska
+Bryggerin„ring, Boskapssk”tsel
+Kemiskt avfall, Djuravfall
+
+Christchurch
+4.9 M
+Enkel t„tort
+Idiom-Bahasa
+Kl„dtillverkning, Livsmedelsf”rberedning
+Kemiskt avfall
+
+Reykjavik
+4.37 M
+Enkel t„tort
+Demi-Skandinaviska
+Vattenavgiftning, Luftbearbetning
+Radioaktivt avfall
+
+Moskva
+16.54 M
+Komplex t„tort
+Moldaviska
+Kl„dtillverkning, Destillering
+Radioaktivt nedfall, M„nskligt avfall
+
+Tokyo
+16.70 M
+Ultra-Metropol
+Neo-Japanska
+H”gteknologisk tillverkning, Finasiella tj„nster
+Tung industri
+
+Bangkok
+24.37 M
+Ultra-Metropol
+Pseudo-Thai
+Simulanttillverkning, Turism
+Kemiskt avfall, M„nskligt avfall
+
+Honolulu
+7.01 M
+Enkel t„tort
+Ny-Amerikanska
+Vattenavgiftning, Luftbearbetning
+L„tt industriell
+
+Johannesburg
+15.64 M
+Komplex t„tort
+Afrikaans (Forntida)
+Mineralbearbetning
+Tung industri
+
+Kairo
+3.16 M
+Enkel t„tort
+Ny-Arabiska
+Historiska artefakter, Turism
+Kemiskt avfall
+
+New Delhi
+28.73 M
+Ultra-Metropol
+Proto-Hindustani
+Intelligenta kl„der
+Tung industri, Kemiskt avfall, M„nskligt avfall
+
+Sevastopol
+9.26 M
+Komplex t„tort
+Moldaviska
+Destillering
+Radioaktivt nedfall
+
+Tripoli
+8.73 M
+Komplex t„tort
+Arabiska (Forntida)
+Br„nsleraffinering
+Radioaktivt nedfall
+
+Riyadh
+2.03 M
+Enkel t„tort
+Ny-Arabiska
+Br„nsleraffinering
+Tung industri
+
+Colombo
+3.35 M
+Enkel t„tort
+Ny-Singalesiska
+Vattenavgiftning, Luftbearbetning
+Radioaktivt avfall
+
+Colombo Omloppsstation
+0.0001 M
+Experimentell
+EuroCorp Teknisk multistatskod
+Interstell„ra transporter, Mikrogravitationstillverkning
+Inga
+
+Matochkin Shar
+0.017 M
+Enkel t„tort
+Proto-Moldaviska
+Luftbearbetning
+L„tt industriell
+
+Voss
+0.023 M
+Sub-Enkel t„tort
+Omni-Skandinaviska
+Skogsindustri
+L„tt industriell
+
+Omsk
+0.48 M
+Enkel t„tort
+Ryska (Forntida)
+Destillering
+Radioaktivt nedfall
+
+Beirut
+0.75 M
+Sub-Enkel t„tort
+Ny-Arabiska
+Vapentillverkning
+Kemiskt avfall, M„nskligt avfall
+
+Ulan Bator
+0.274 M
+Sub-Enkel t„tort
+Mongol-Kinesiska
+Delmetallsutvinning
+Radioaktivt nedfall
+
+Seoul
+6.5 M
+Komplex t„tort
+F”renad koreanska
+Kemisk behandling, Fordonstillverkning
+Kemiskt avfall, Tung industri
+
+Hanoi
+3.3 M
+Enkel t„tort
+Zonal-Mandarin
+Boskapssk”tsel, Vegetativ upparbetning
+Djuravfall, Kemiskt avfall
+
+Manila
+8.5 M
+Komplex t„tort
+Zonal-Mandarin
+M”beltillverkning
+L„tt industriell
+
+Freetown
+0.18 M
+Sub-Enkel t„tort
+Idiom-Afrikaans
+Delmetallsbehandling
+L„tt industriell
+
+Monrovia
+0.65 M
+Sub-Enkel t„tort
+Idiom-Afrikaans
+Destillering
+L„tt industriell
+
+Lagos
+1.25 M
+Enkel t„tort
+Idiom-Afrikaans
+Delmetallsutvinning
+Tung industri
+
+Nairobi
+2.3 M
+Enkel t„tort
+Neutral Somaliska
+Boskapssk”tsel, Garvning
+L„tt industriell
+
+Port Moresby
+0.93 M
+Sub-Enkel t„tort
+Idiom-Bahasa
+Delmetallsutvinning
+Kemiskt avfall
+
+Anchorage
+0.86 M
+Enkel t„tort
+Anglo-Kyrillisk
+V„dermanipulation
+H”gradioaktivt avfall, l„tt industri
+
+Vancouver
+3.5 M
+Komplex t„tort
+Pseudo-Lingvo
+Magnetisk behandling
+Tung industri
+
+Nuuk
+0.065 M
+Kommun
+Demi-Skandinaviska
+Luft
+L†g radioaktivitet
+
+Georgetown
+0.08 M
+Sub-Enkel t„tort
+Idiom-Spanska
+Mineralutvinning
+Kemiskt avfall
+
+Lima
+3.4 M
+Komplex t„tort
+Idiom-Spanska
+Vapentillverkning
+H”gradioaktivt avfall, Tung industri
+
+Sao Paulo
+18.9 M
+Ultra-Metropol
+Portugisiska (Forntida)
+Mineralutvinning
+Radioaktivt avfall, L„tt industriell
+LABORATORIEOLYCKA
+NATURLIGA ORSAKER
+TIDSINSTLLT VIRUS
+EXPERIMENTFEL
+FATAL FELBERKNING
+OLOGISK HRLEDNING
+SLUTGILTIG VILLFARELSE
+F™RHASTAD BED™MNING
+BRISTANDE RESONEMANG
+VANSINNE
+SLARV
+OSKER PROCEDUR
+MENTAL KOLLAPS
+FELAKTIG UTRUSTNING
+MISSLYCKAT TEST
+HJRTSTILLESTND
+FELAKTIGT ANTAGANDE
+D™DLIG ELCHOCK
+UPPL™ST
+OLYCKSHNDELSE
+\hMeddelandetyp: DIREKT\n
+\n
+Prioritet: 3\n
+\n
+Meddelandet b”rjar:\n
+\c2\n
+Order\n
+\n
+London: O kategorin av civila rapporterade i brott mot uppf”randekoder inom en kvadratkilometer fr†n 
+denna substation. V„lj agenter. Kv„s oordning.\n
+\c5\n
+Extraordin„ra tekniska fel hos UTOPIA-chips har blivit rapporterade. De tekniska felen „r totala 
+utsl„ckningar, fullst„ndiga CHIP-fel. F”ljande kategori av medborgare „r O: Ostyrda.\n
+\n
+\c4EuroCorp K„rna 0-1-0/171261/26D: Londons Artificiella Intelligens, UTOPIA\n
+\n
+\c4U\c3niversal \c4T\c3ransferred \c4O\c3rganic \c4P\c3rocessing \c4I\c3nterface \c4A\c3rchitecture\n
+\c5\n
+\hMeddelandetyp: HARDWIRED\n
+\n
+Prioritet: 1 - N”dfall\n
+\n
+Meddelandet b”rjar:\n
+\c2\n
+Order\n
+\n
+Detroit: S”k r„tt p† medlemmar fr†n Nya Epokens kyrka och utrota dem. Neutralisera kategori O - Ostyrda 
+medborgare.\n
+\c5\n
+Lystring, direkt”rn \l. Jag „r UTOPIA Agenten Maritz, EuroCorps Intelligens.\n
+\n
+Situationen „r kritisk. UTOPIA har attackerats. EuroCorps informationsinfrastruktur har blivit 
+fundamentalt „ventyrad. N”d†tg„rder har initierats.\n
+\n
+Jag ”verf”r alla EuroCorps kommandobeslut till Backup-AIn omedelbart. Jag kommer att rel„a analyser och 
+order till dig. Jag repeterar, h”gsta EuroCorp kommandot h†ller p† att ”verf”ras till Londons 
+Artificiella Intelligens. Dess prim„ra st†ende order „r att †teruppbygga UTOPIA, fr†n f”rsta 
+best†ndsdelen om n”dv„ndigt.\n
+\n
+London AI g”r redan sin f”rsta bed”mning av situationen. Utformningen av uppdrag kommer att f”lja.\n
+\n
+Du kommer dirigera agenterna att utf”ra dessa uppdrag.\n
+\n
+Den allm„na situationen ser allvarlig ut. En global attack har satts ig†ng mot syndikatet. Detroits 
+UTOPIA AI var m†l och min motsvarighet d„r eliminerades. Detroits attackerare frigjorde ett sofistikerat
+ virus i UTOPIA. Fels„kerhetsk”rning „r inte aktiverad. Vad det „n „r f”r typ av virus, s† hoppar den 
+fr†n AI till AI snabbare „n vi kan sp†ra det.\n
+\n
+En helt oauktoriserad grupp kallad Nya Epokens kyrka tar p† sig ansvaret f”r viruset - de kallar det 
+"Harbinger" - och har f”rklarat krig mot EuroCorp. Det „r Harbinger som orsakar de exponentiellt ”kande 
+CHIP-utsl„ckningarna. Nya Epokens kyrka har ocks† p†b”rjat en propagandakampanj som uppmuntrar till v†ld
+ mot EuroCorp, som s„nds p† kapade UTOPIA-kanaler.\n
+\n
+Anh„ngare till denna s† kallade "Kyrka" ser sig sj„lva som "L„rjungar" och b„r karakteristiskt omlagd 
+kroppssvepning.\n
+\n
+\c4Maritz\n
+\c5\n
+\hMeddelandetyp: HARDWIRED\n
+\n
+Prioritet: 1\n
+\n
+Meddelandet b”rjar:\n
+\c2\n
+Order\n
+\n
+Hong Kong: ™vertala Yamaguchis kraftverkstekniker.\n
+\n
+Peking: ™vertala Yamaguchis f”retagsledare.\n
+\c5\n
+Gratulerar, \l. Detroit har framg†ngsrikt stabiliserats. Men det kaos som utbrutit av Harbinger viruset 
+har spridit sig till andra st„llen. Syndikatets kommunikation snappas upp och bryts globalt och 
+oauktoriserade orderkoder skickas ut ”ver hela UTOPIA. Regionala EuroCorp divisioner h†ller p† att 
+isolera sig sj„lva f”r sin egen s„kerhet, vilket effektivt skapar nya syndikat. Dessa m†ste †terf”ras 
+under EuroCorps kontroll d„r det „r m”jligt. Annars m†ste de f”rg”ras.\n
+\n
+I Hong Kong f”rs”ker Yamaguchi Holodata, Stillahavsomr†dets UTOPIA CHIP tillverkare, att etablera ett 
+oberoende syndikat. Vi t„nker underminera Yamaguchis planer i tv† st”rre attacker.\n
+\n
+F”retaget Yamaguchis energi kommer huvudsakligen fr†n Hong Kongs fusionsanl„ggning. Skicka en grupp 
+agenter att ta sig in i anl„ggningen och ”vertala teknikerna att g† med oss. Utan teknikernas 
+uppm„rksamhet kommer reaktorh„rden att ”verbelastas och orsaka en explosion. Att f”rst”ra denna 
+anl„ggning b”r vara tillr„ckligt f”r att Yamaguchi skall vara upptagen med annat ett tag.\n
+\n
+F”r att sl† spiken i kistan mot Yamaguchi, g”r ett bes”k p† deras kontor i Peking. Lokalisera och 
+”vertala deras f”retagsledare. Neuatralisera alla agenter du st”ter p†. Eftersom London AIs 
+uppdragssimuleringar indikerar ett behov av fler agenter f”r att komplettera dessa i stagnation i v†ra 
+kryofat, f†r du befogenhet att anv„nda ”vertalotronen efter eget tycke.\n
+\n
+N„r du klarat av ditt uppdrag b”r Yamaguchi vara angel„gen att gl”mma bort alla tankar p† att l„mna 
+EuroCorp.\n
+\n
+\c4Maritz\n
+\c5\n
+\hMeddelandetyp: HARDWIRED\n
+\n
+Prioritet: 1\n
+\n
+Meddelandet b”rjar:\n
+\c2\n
+Order\n
+\n
+Geneve, Vancouver och Matochkin Shar: S”k upp och ”vertala Bluesky Tendencies vetenskapsm„n i dessa 
+st„der.\n
+\c5\n
+Lyck”nskningar, \l. Din framg†ng „r uppmuntrande.\n
+\n
+Ditt n„sta uppdrag „r att bist† oss med de hj„rnor vi beh”ver f”r att bygga en ny forskningsavdelning. 
+Bluesky Tendencies laboratorier i Geneve, Vancouver och Matochkin Shar har alla Grad A personal 
+tilldelade till sig. S† fort dina agenter n†r n†gon av dessa destinationer, b”r en UTOPIA ID-sp†rning i 
+det lokala n„tverket plocka ut deras m†lpersonal.\n
+\n
+Dessa vetenskapsm„n „r n†gra av de mest prisade hj„rnorna i syndikatet. Det „r absolut n”dv„ndigt att se
+ till att de inte kommer till skada.\n
+\n
+Updatering: Den mystiska Nya Epokens kyrka f†r fler och fler anh„ngare f”r varje timme som g†r, och de 
+konverterar medborgare med en kombination av hj„rntv„tt och CHIP-hackningstekniker. De konverterade 
+visar v„ldigt sm† bevis p† „kta religi”s ”vertygelse. Nya Epokens kyrka talar om f”r sina anh„ngare att 
+v„rldens underg†ng „r n„ra och att bara kyrkan innehar den teknologi som beh”vs f”r att r„dda de trogna 
+fr†n katastrofen. Deras doktrin „r trotsigt antisyndikatisk.\n
+\n
+Betackande nog g†r inte alla Ostyrda medborgare med i denna kult, inte ens n„r de st”ter p† deras v„rsta
+ fanatiker.\n
+\n
+Det verkar ocks† som om v†ra ™vertalartroner inte fungerar p† sektmedlemmarna sj„lva. Vi vet inte 
+varf”r. Vi vet praktiskt taget ingenting om sektens teknologi, men unders”kningar av den har p†b”rjats 
+med h”gsta prioritet. Deras tekniska expertis „r utan tvekan imponerande.\n
+\n
+\c4Maritz\n
+\c5\n
+\hMeddelandetyp: HARDWIRED\n
+\n
+Prioritet: 1\n
+\n
+Meddelandet b”rjar:\n
+\c2\n
+Order\n
+\n
+Singapore: Neutralisera alla fiender. Stj„l guldbilar. terv„nd till basen n„r du klarat dessa m†l.\n
+\c5\n
+\l, Din rapport „r intressant. Ett antal av den mest kvalificerade forskningspersonal EuroCorp n†gonsin 
+har haft till sitt f”rfogande kvarst†r fortfarande som of”rklarligt borta, s† vi m†ste ta reda p† deras 
+nuvarande uppeh†llsort och aktiviteter. Det finns en m”jlighet att de arbetar f”r ett utbrytarsyndikat. 
+Jag kommer forts„tta att ”vervaka alla kanaler f”r ytterligare information.\n
+\n
+Ett mer br†dskande problem kr„ver omedelbart din uppm„rksamhet. Det Singaporeanska s„kerhetsf”retaget 
+Tang Assurance har d†raktigt nog best„mt sig f”r att utropa staden som oberoende. Som en konsekvens av 
+detta skall guld flyttas fr†n centralbanken till Tangs huvudkontor under bev„pnad eskort. Det finns 
+ingen tid till att f”rst”ra banken, eftersom Tangs folk kommer anl„nda innan dina agenter. Men detta ger
+ oss m”jligheten att kapa pansareskorten innan den n†r sin destination.\n
+\n
+\c4Maritz\n
+\c5\n
+\hMeddelandetyp: HARDWIRED\n
+\n
+Prioritet: 1\n
+\n
+Meddelandet b”rjar:\n
+\c2\n
+Order\n
+\n
+Phoenix: Bryt igenom f”rsvaret till kultens templet och stj„l dess teknologiska hemligheter.\n
+\c5\n
+Lyck”nskningar, \l.\n
+\n
+Nya Epokens kyrka utvecklar allt mer sofistikerade vapen, designade med teknologier som „r helt nya f”r 
+v†r forskningsavdelning. Vi vill ha tag p† fler exempel av denna teknologi, f”r att med analyser kunna 
+best„mma vilka som ligger bakom sekten och hur vi b„st kan bek„mpa dess inflytande.\n
+\n
+Enligt motsvarande n„tscanningar och satellitsvep, har sekten etablerat ett st”rre operationellt center 
+i Phoenix. Harbinger f”rst”rde helt den UTOPIA AI som fanns p† plats, vilket gjorde det m”jligt f”r 
+sekten att st”rta EuroCorps makt. ldre medhj„lpare tar nykonverterade fanatiker till ett tempel i 
+Phoenix f”r ett intensivt indoktrinerings- och tr„ningsprogram. Fanatikernas effektivitet h„rdas sedan i
+ de blodbad som formas av Ostyrda medborgare som skapades i efterdyningarna av virusattacken.\n
+\n
+G† till templet och leta efter allt som kan f”rklara mer f”r oss.\n
+\n
+\c4Maritz\n
+\c5\n
+\hMeddelandetyp: HARDWIRED\n
+\n
+Prioritet: 1\n
+\n
+Meddelandet b”rjar:\n
+\c2\n
+Order\n
+\n
+Rom: Alla kategori O medborgare m†ste helt elimineras, f”r att budskapet att EuroCorp kommer beh†lla 
+kontrollen skall g† fram till andra Harbinger offer.\n
+\n
+F”rhindra m”jliga utbrott av lokala oberoende syndikat genom att f”rst”ra den lokala garnisonen.\n
+\c5\n
+V„l m”tt, \l.\n
+\n
+Harbinger har varit speciellt effektiv i Rom. I dess sp†r bryter en v†g av kaos ut p† gatorna. Ostyrda 
+samlas och f”rst”r staden, sten f”r sten.\n
+\n
+Niv†n av anarki i stadens centrum stiger. Den f”reg†ende EuroCorp s„kerhetsgarnisonen har l†st in sig 
+sj„lva medan den agent som „r stationerad d„r f”rs”ker †terf† kontrollen ”ver den lokala virush„rjade 
+AIn. Men den lokala agentens infekterade uppdragsorder l„mnar garnisonen s†rbar. F”rinta all 
+garnisonspersonal. N„r du har staden under v†r kontroll igen kommer vi s„nda ers„ttningsvakter.\n
+\n
+\c4Maritz\n
+\c5\n
+\hMeddelandetyp: HARDWIRED\n
+\n
+Prioritet: 1\n
+\n
+Meddelandet b”rjar:\n
+\c2\n
+Order\n
+\n
+Hong Kong, Peking och Phoenix: S”k in mot alla ID-nycklar och ”vertala alla skurkaktiga cyborgagenter 
+att †terv„nda till sina kryofat.\n
+\n
+terv„nd till basen f”r ytterligare instruktioner.\n
+\c5\n
+Gratulationer, \l.\n
+\n
+F”ljande meddelande togs upp genom n„tscanning klockan 06:55 ig†r. Londons AI har just dekrypterat 
+det.\n
+\n
+\c3Meddelandetyp: Kodad utskift\n
+\n
+Prioritet: H”g\n
+\n
+FRN: Kontrollen\n
+\n
+TILL: Alla f„ltchefer\n
+\n
+Meddelandet b”rjar:\n
+\n
+Agenter som utgett sig f”r att representera EuroCorp har utf”rt hemliga operationer i sektorer som „r 
+intressanta f”r oss.\n
+\n
+Spaning i dessa omr†den ”nskas. Agenter skall inkludera uppskattningar av deras nya modeller i sina 
+rapporter.\n
+\n
+Meddelandet slutar.\n
+\c5\n
+Det framg†r av detta meddelande att v†ra aktiviteter har ”vervakats av skurkaktiga agenter med tillg†ng 
+till v†r cyberteknologi. En del av denna teknologi kan vara mer avancerad „n v†r - vi vet inte vilka 
+utvecklingsresurser denna grupp har till sitt f”rfogande.\n
+\n
+Meddelandet har sp†rats till destinationer i Hong Kong, Peking och Phoenix. Anv„nd dig av en grupp 
+cyborger f”r att sp†ra oauktoriserad agentverksamhet i dessa st„der. V†r AI som finns p† plats h†ller nu
+ p† att modifiera dessa st„ders ”vervakningssystem f”r att kunna k„nna av agenter utrustade med 
+avancerade cybernetiska f”rb„ttringar.\n
+\n
+Ytterligare: Studierna av de indoktrinatorkomponenter du h„mtade fr†n Phoenix har avsl”jat hur Nya 
+Epokens kyrka f†r konverterade. Sektmedlemmarna anv„nder en apparat som inneh†ller en transceiverkrets 
+inst„lld p† UTOPIAs frekvens. Med andra ord, v†r fiende har n†got som fungerar p† samma s„tt som v†r 
+™vertalartron. Med ytterligare studier f”rv„ntar sig v†r forksningsavdelning kunna designa en 
+effektivare ™vertalartron, en som skulle fungera p† fanatiker.\n
+\n
+\c4Maritz\n
+\c5\n
+\hMeddelandetyp: HARDWIRED\n
+\n
+Prioritet: 1\n
+\n
+Meddelandet b”rjar:\n
+\c2\n
+Order\n
+\n
+Rom: ™vertala skurkaktig agent.\n
+\c5\n
+H„lsningar, \l.\n
+\n
+Det var ett v„ldigt framg†ngsrikt svep dina agenter genomf”rde. Men de skurkaktiga agenternas 
+gruppledare tog en IML med sig till Rom och attackerade den utpost vi nyligen etablerade, antagligen i 
+ett f”rs”k att bryta sig in i valvet d„r. Vi vill att denna kapabla agent skall g† med oss.\n
+\n
+Uppdatering: Vi hade tur som uppt„ckte Harbinger n„r vi gjorde. Det betyder i alla fall att vi har en 
+intakt AI vilken forts„tter att visa sig anv„ndbar. T„nk p† detta: v†ra s† kallade "Ostyrda" h†ller p† 
+att transfomeras, fr†n en besv„rlig p”bel till en best„md stridsstyrka. Vid rodret - en Ko-Paull 
+Vissick; m†ngkunnigt underbarn och exceptionellt beg†vad intellektuellt sett. Vissick antas vara en av 
+v†ra toppforskare men London AI har plockat upp hans signaler d„r de inte skall vara.\n
+\n
+Vi har sp†rat s† mycket av UTOPIAs trafik som vi kan. Nya Epokens kyrka har kapat †t sig m„ngder av den 
+och mycket av det som „r kvar „r bara meningsl”st skr„p som l„mnats av Harbinger. Men, London AI m„rkte 
+att n†gon annan ocks† h”ll p† och hackade i UTOPIA, nu n„r s†dant „r m”jligt igen. Det visade sig vara 
+Vissick. Slutligen visade det sig vara ett sp”ke. Det var om”jligt att s„ga var det hade s„nts fr†n. Men
+ det m†ste ha varit Vissick. N„stan ingen annan i syndikatet skulle kunna g”ra det han gjorde. Bara gud 
+vet varf”r han har slagit sig ihop med detta Ostyrda avskum. Jag skall se till att titta lite n„rmare p†
+ det.\n
+\n
+\c4Maritz\n
+\c5\n
+\hMeddelandetyp: HARDWIRED\n
+\n
+Prioritet: 1\n
+\n
+Meddelandet b”rjar:\n
+\c2\n
+Order\n
+\n
+New York: ™vertala Jennifer Taks.\n
+\c5\n
+Tillf„lliga h„lsningar, direkt”rn \l.\n
+\n
+Din n„rvaro kr„vs i New York. Flera nordamerikanska f”retag har f”renat sig lokalt under fanan Nya 
+Atlantiska Alliansen (NAA). Den snabba utvecklingen av detta syndikat „r anm„rkningsv„rd, med tanke p† 
+”del„ggelsen av UTOPIAs kommunikationssystem.\n
+\n
+Det verkar som om en av v†ra tidigare mediachefer, Jennifer Taks, anv„nder sin priviligierade access 
+till Global News och Public Access Networks f”r att hantera lokal information till NAAs f”rdel. Ms Taks 
+verkar ha betydande framg†ng med detta bem”dande. Vi vill ha henne.\n
+\n
+Skicka iv„g en grupp till New York och infiltrera NAAs Manhattankontor i Global News Network blocket. 
+Leta reda p† Ms Taks och ”vertyga henne om att hennes lojaliteter ligger hos oss.\n
+\n
+Centrets s„kerhet „r extremt h†rd. Det kan vara om”jligt att tvinga sig in. Jag kommer f”rs”ka sp†ra 
+UTOPIAs ID-signaler fr†n centrets personal f”r att se om n†gon av dem l„mnar centret av n†gon anledning.
+ All personal har kodtransplanterade passerkort, s† du m†ste ”vertala dem att f”lja med dig genom 
+s„kerhetssp„rrarna. Var f”rsiktig s† du inte drar uppm„rksamheten till dig av de lokala polisenheterna 
+vilka har en upph”jd uppm„rksamhetsstatus.\n
+\n
+\c4Maritz\n
+\c5\n
+\hMeddelandetyp: HARDWIRED\n
+\n
+Prioritet: 1\n
+\n
+Meddelandet b”rjar:\n
+\c2\n
+Order\n
+\n
+Santiago, Buenos Aires, Kapstaden, Adelaide: Skicka iv„g s”kgrupper till dessa st„der. Kom tillbaka med 
+alla vetenskapsm„n du kan hitta.\n
+\c5\n
+Djupa h„lsningar.\n
+\n
+Londons AI har gjort en psykologisk profil p† meddelandeinneh†llet av ett ”kande antal 
+samh„llsomst”rtande s„ndningar fr†n Vissick. Det „r mycket intressant l„sning.Hans id‚v„ckande 
+meddelande, s„nt p† en ”ppen kanal, var en klar provokation som uppmanade de Ostyrda att resa sig, inte 
+bara mot syndikatet, utan „ven mot Nya Epokens kyrka. Olyckligtvis var Vissick sm„delser fyllda av 
+domedagsprofetior, vilket kan indikera att hans nuvarande mentala status „r l†ngt fr†n stabil. Han sade,
+ till exempel, att Nya Epokens kyrka skulle bringa inget mindre „n den avg”rande striden. Jag kan bara 
+spekulera i hur en grupp med religi”sa extremister skulle kunna starta en global f”rintelse.\n
+\n
+Vissicks senaste uppdrag var s† hemligt - och UTOPIA har varit s† ”delagd av Harbinger viruset - att 
+information om hans uppdrag „r knapph„ndiga. Men vad vi vet „r att han arbetade i en grupp med 
+toppforskare fr†n Gel Data och Hexagon Corporation med ett projekt p† Island. n s† l„nge har ingen av 
+de andra medlemmarna i gruppen lokaliserats. S”k igenom alla Gel Datas och Hexagons faciliteter efter de
+ saknade forskarna. Dessa f”retag har kontor i Santiago, Buenos Aires, Kapstaden och Adelaide.\n
+\n
+Lycka till, \l.\n
+\n
+\c4Maritz\n
+\c5\n
+\hMeddelandetyp: HARDWIRED\n
+\n
+Prioritet: 1\n
+\n
+Meddelandet b”rjar:\n
+\c2\n
+Order\n
+\n
+Christchurch: Skicka iv„g en grupp agenter omedelbart. Lokalisera och s„kra den transpol„ra l„nken.\n
+\c5\n
+Det verkar som om Vissick strax innan Harbinger tr„ngde in i UTOPIA var engagerad i ett topphemligt 
+forskningsprogram i Reykjavik. Programmets m†l var att designa en maskin kapabel att f”rst„rka m„nskliga
+ inl„rningsf”rm†gor. Tydligen kom gruppen l„ngre „n till designstadiet. De byggde maskinen. Men de 
+vetenskapsm„n du ”vertalade fungerade bara som underordnade tekniker till huvudprojektets grupp och hade
+ inte s† mycket mer information att l„mna.\n
+\n
+De tio nyckelmedlemmarna i gruppen var k„nda som Cybernetic Cognition Conference eller C3. Deras chef 
+var Ko-Paull Vissick. Alla C3 medlemmar plockades fr†n EuroCorps forskarelit.\n
+\n
+F”r n„rvarande „r alla sp†rl”st f”rsvunna.\n
+\n
+Detta har samband med en nyhetsrapport om misslyckandet med Reykjaviks IML-l„nk f”rra m†naden, en 
+h„ndelse som verkar ha iscensatts f”r att ge gruppen maximal s„kerhet under deras arbete. Under tiden 
+best„llde C3 sin egen transpol„ra l„nk till Christchurch. Till synes verkar detta vara gjort nyligen.\n
+\n
+\c4Maritz\n
+\c5\n
+\hMeddelandetyp: HARDWIRED\n
+\n
+Prioritet: 1\n
+\n
+Meddelandet b”rjar:\n
+\c2\n
+Order\n
+\n
+Reykjavik: Ta reda p† vad som h„nde C3-projektet. Aktivera IML-l„nken till Nuuk.\n
+\n
+Nuuk: Utf”r en full svepning av staden.\n
+\c5\n
+Gratulerar att du lyckades med dina senaste uppdrag, \l.\n
+\n
+Det „r absolut n”dv„ndigt att v†ra agenter omedelbart utnyttjar f”rdelen med att ha tillg†ng till den 
+transpol„ra IMLen. S„nd din grupp till Reykjavik f”r att unders”ka forskningsplats C3. Det „r sv†rt att 
+r†dg”ra dig om vilken typ av n„rvaro du kan finna d„r men, med tanke p† den k„nsliga typen av plats, 
+skall dina agenter vara maximalt uppm„rksamma. H„mta in bevis f”r C3-programmets status.\n
+\n
+™vrigt: Sedan CHIP-driftstoppet b”rjade har Nuuk varit helt avsk„rmat fr†n ytterv„rlden. Det har funnits
+ rapporter om st”rre kyrkaktiviteter runt stadens ytterkanter, men ingenting har n†tt oss fr†n stadens 
+insida. Nuuk „r direkt ansluten till Reykjavik via IML. Kanske „r denna l„nk fortfarande ”ppen. N„r du 
+klarat av Reykjavikdelen av ditt uppdrag, leta upp och, vid behov, aktivera IML-l„nken. Forts„tt till 
+Nuuk och unders”k situationen d„r.\n
+\n
+Var f”rsiktig!\n
+\n
+\c4Maritz\n
+\c5\n
+\hMeddelandetyp: DIREKT\n
+\n
+Prioritet: 1\n
+\n
+Meddelandet b”rjar:\n
+\c2\n
+Order\n
+\n
+London: S”rj f”r maximal s„kerhet vid ledningsm”tet. Diskretion med vapen „r inte n”dv„ndig.\n
+\c5\n
+Lyssna, direkt”rn \l. Detta „r Londons Artificiella Intelligens. Jag har nya intelligenta order †t 
+dig.\n
+\n
+Jag vet nu mer om Nya Epokens kyrka. C3 tillverkade verkligen en intelligensf”rh”jande anordning, 
+effektivare „n allt annat inom konventionell cybernetik.\n
+\n
+Mot Ko-Paull Vissicks order anv„nde sedan vissa medlemmar i gruppen den cerebrala f”rst„rkaren p† sig 
+sj„lva. C3 medlemmen Tyrone Chodak var den f”rsta att anv„nda anordningen. Chodak var ocks† den som 
+f”rde uppdragets loggbok. Flera av loggningarna refererar till en andra bok, vilken Chodak b”rjade 
+skriva f”r att f”rklara n†gra av de vetenskapliga teorier hans f”rb„ttrade hj„rna nu var kapabel att 
+formulera. Han kallade denna andra bok f”r 'Kodexen' och, tack vare dig, har vi nu en kopia av den. 
+Inneh†llet best†r av enormt komplicerad matematik, kvantfysik, genetik och helt nytt arbete inom s† vitt
+ skilda f„lt som enade styrkors mekanism och evolutionskognition. Kodexen inneh†ller tillr„ckligt med 
+revolution„r vetenskap f”r att h†lla varenda AI i UTOPIA upptagen i †ratal. Londons AI skall g”ra sitt 
+b„sta f”r att studera den sj„lv.\n
+\n
+Fr†n uppdragsloggen verkar det som det var en maktkamp mellan Chodak och Vissick, vilket fick sin klimax
+ med en explosion som raserade C3s Reykjavikanl„ggning. I sina anteckningar anklagade Chodak Vissick - 
+som inte gick att finna efter explosionen - f”r sabotage. Chodak anklagar ocks† EuroCorp f”r delaktighet
+ och hotade att anv„nda teknologin fr†n Kodexen f”r att f”rinta syndikatet. Resten av C3 accepterade 
+Chodaks ledarskap.\n
+\n
+B†de explosionen i Reykjavik och f”rsvinnandet av C3 h„nde mindre „n 48 timmar innan viruset Harbinger 
+drabbade UTOPIA.\n
+\n
+Analyser av v†ra agentattacker p† Nuuks katedral visade att den sektpropaganda som fanns skriven p† 
+v„ggar och pelare mysteriskt refererar till 'De Nio'. Det „r rimligt att anta att De Nio och C3 „r en 
+och samma grupp, och att Nya Epokens kyrka bara „r en fasad som f”r ut Chodaks hot att f”rg”ra 
+syndikatet.\n
+\n
+Detta betyder att vi st†r mot EuroCorps tidigare intellektuella elit, utrustad med avancerade 
+teknologier, likv„l som mot Vissick som hj„lper de Ostyrda.\n
+\n
+Professor Kurt Drennan kommer ge v†r departementsledning en omedelbar strategigenomg†ng h„r i London. 
+Drennan och hans medhj„lpare skall plocka upp en kopia av Kodexen f”r presentationen i New Hyde Park. 
+V†r nyligen konstruerade chefsgrupp kommer n„rvara. Omr†det kommer h†llas fritt fr†n l„gre personal av 
+den lokala polisen under v†r direkta kontroll.\n
+\n
+\c4Londons Artificiella Intelligens\n
+\c5\n
+\hMeddelandetyp: DIREKT\n
+\n
+Prioritet: 1\n
+\n
+Meddelandet b”rjar:\n
+\c2\n
+Order\n
+\n
+Tokyo: R„dda Professor Drennan fr†n sektmedlemmarna.\n
+\n
+Bangkok: Eskortera professorn till EuroCorps l„ger. Se till att professorn †terl„mnas till oss 
+oskadad.\n
+\c5\n
+Lystring, direkt”rn. Professor Drennan har kidnappats. En f”rr„dare kunde undkomma mina scanningar, d”da
+ Drennans medhj„lpare och ta dennes plats under genomg†ngen. Sj„lva kidnappningen „gde rum direkt efter 
+m”tet. Den kostsamma fanatikerattacken p† m”tet och f”rlusten av personal var bara avledningsman”vrar 
+f”r att t„cka den slutliga fasen med Drennans kidnappning.\n
+\n
+Jag sp†rar fortfarande Drennan. Han h†lls i Tokyo. Hans UTOPIA-chip har inte „ndrats.\n
+\n
+N„r du fritagit professorn, f”r honom i s„kerhet. V†rt operationscenter i Bangkok „r s„kert; f”r honom 
+dit.\n
+\n
+\c4Londons Artificiella Intelligens\n
+\c5\n
+\hMeddelandetyp: HARDWIRED\n
+\n
+Prioritet: 1\n
+\n
+Meddelandet b”rjar:\n
+\c2\n
+Order\n
+\n
+Hawaii: Ditt uppdrag „r att bidra med v†r del av s„kerhetsarrangemangen. Det „r av yttersta vikt, f”r 
+deras f”rtroende f”r EuroCorps skull, att ingen av Hawaii AIs personal kommer till skada.\n
+\c5\n
+Gratulerar, \l. Sk”nt att vara i kontakt med dig igen.\n
+\n
+Drennan kom tillbaka s„kert och genomg†r nu en neural omkalibrering. Under sin korta tid hos Nya Epokens
+ kyrka, lyckades professorn l„ra sig mer om De Nio och vad de planerat f”r oss. S† fort han slutar 
+dr„ggla kommer vi fr†ga honom vad han vet.\n
+\n
+Under tiden har vi f†tt ett meddelande fr†n Hawaiis AI. Hawaiis AI ”nskar bekr„fta en v„nlig status med 
+EuroCorp. Den har aldrig st”tt fiender till EuroCorps strategi, och den b„r inte p† Harbinger viruset. 
+Den „r redo att ”verf”ra alla sina resurser till EuroCorps absoluta kommando. V†rt och deras folk kommer
+ m”tas p† Hawaii f”r att byta protokollnycklar. S„kerheten under dessa f”rehavanden kommer sk”tas 
+gemensamt.\n
+\n
+\c4Maritz\n
+\c5\n
+\hMeddelandetyp: DIREKT\n
+\n
+Prioritet: 1\n
+\n
+Meddelandet b”rjar:\n
+\c2\n
+Order\n
+\n
+Johannesburg: Initiera anslutningen direkt och ta kontroll ”ver Agent Wu. S”k upp och ”vertala Mirabelle
+ Lucy De Saxo.\n
+\c5\n
+Direkt”rn, h„r „r „n en g†ng Londons AI.\n
+\n
+Jag har nu UTOPIAs ID-nyckel av den sektagent som kidnappade professor Drennan. Hon „r Mirabelle Lucy De
+ Saxo IK-771.6482.2002, f”r n„rvarande lokaliserad i Johannesburg.\n
+\n
+Jag har precis mottagit denna information fr†n en pensionerad EuroCorp agent, vars antika cyberteknologi
+ „nd† gjorde det m”jligt f”r honom att ”verleva oberoende efter driftstoppet b”rjade. Hans namn „r Wu. 
+Tack vare Wus extrema anv„ndbarhet, har jag gjort ett avtal med honom. Wu kommer ge mig full access till
+ alla sina p† h”gre niv† bel„gna hj„rnfunktioner f”r mer „n ett uppdrag. Om han framg†ngsrikt klarar av 
+det, kommer jag bygga mig sj„lv mer bubbelminne och g”ra hans medvetande till en del av mitt eget s† 
+fort UTOPIA „r †terskapat.\n
+\n
+Jag vill ha Wu till att ”vertala De Saxo. Jag misst„nker att hon kan detektera EuroCorp agenter. Wu har 
+redan utrustat sig sj„lv med en av kyrkans modifierade ™vertalartroner, och „r fullt f”rberedd f”r den 
+uppgift som ligger framf”r honom. Om han lyckas, „r n„stan o„ndligt medvetande hans.\n
+\n
+\c4Londons Artificiella Intelligens\n
+\c5\n
+\hMeddelandetyp: DIREKT\n
+\n
+Prioritet: 1\n
+\n
+Meddelandet b”rjar:\n
+\c2\n
+Order\n
+\n
+Kairo: Eliminera Mirabelle Lucy De Saxo.\n
+\c5\n
+Direkt”rn, jag „ndrar dina order. Wus ™vertalartron kunde inte etablera n†gon positiv l†sning p† sitt 
+m†ls ID-nyckel. De Saxo kan aldrig bli en av oss. D„rf”r m†ste hon elimineras.\n
+\n
+Wu s†g v†rt byte borda en IML med destination Kairo. Skicka genast en grupp agenter till Kairo. De Saxo 
+f†r under inga omst„ndigheter komma undan.\n
+\n
+\c4Londons Artificiella Intelligens\n
+\c5\n
+\hMeddelandetyp: DIREKT\n
+\n
+Prioritet: 1\n
+\n
+Meddelandet b”rjar:\n
+\c2\n
+Order\n
+\n
+Sevastopol: Vi vill ha Sevastopol steriliserat. L„mna ingenting levande d„r. Vi kan †terbefolka senare 
+n„r v†ra klonfabriker „r redo igen.\n
+\n
+Delhi: Eliminera Deel Gonda. Krossa upproret.\n
+\c5\n
+Lystring, direkt”rn. Du har just eliminerat Anika Maritz.\n
+\n
+Hon var en dubbelagent. Jag visste detta n„stan redan fr†n b”rjan, eftersom direkt”r Maritz informerade 
+mig om hennes plan att infiltrera Nya Epokens kyrka. Jag hade bara b”rjat misst„nka hennes f”rr„deri n„r
+ professor Drennan kidnappades. Vid sin †terkomst ber„ttade Maritz att hennes dubbelspel hade varit 
+n”dv„ndigt f”r att kunna ”vertyga De Nio om sin trohet. Trov„rdigheten i hennes historia var beroende av
+ att du kunde f† tillbaka professorn, vilket du lyckades med. Jag var dock „nd† inte ”vertygad.\n
+\n
+N„r hon utan f”rvarning f”rsvann en andra g†ng accepterade jag slutligen att hon var korrumperad av Nya 
+Epokens kyrka. Detta gav mig inga val. Anika-Mirabelle var tvungen att f”rg”ras.\n
+\n
+Vi m†ste forts„tta att †terst„lla UTOPIAs integritet. Du kommer att erh†lla ytterligare instruktioner 
+direkt fr†n mig.\n
+\n
+Uppdatering: Uppf†ngade kommunikationer mellan Ko-Paull Vissick och hans n„rmaste indikerar att de 
+Ostyrda planerar att bryta sig ut bortom stadsgr„nsen. Vissick f”rv„ntar sig att hans anh„ngare skall 
+sammanstr†la p† den Tibetanska plat†n. H„r kommer de, enligt Vissick, att ”verleva Kataklysmen. 
+Sanningen „r att slutet kommer drabba dem l†ngt innan de hinner n† sin slutdestination. Likv„l, massiva 
+uppror rapporteras fr†n Delhi och Sevastopol, d„r vi „nnu inte lyckats †teretablera EuroCorp kontroll. 
+Det „r denna situation du m†ste f† under kontroll.\n
+\n
+Sevastopols sektor f”r tung industri har helt invaderats av den Ostyrda p”beln. Allt som inte redan 
+f”rst”rts „r i deras h„nder. Lyckligtvis verkar de v„nta p† n†got, kanske n†gra slutliga instruktioner 
+fr†n Vissick, innan de f”rs”ker bryta genom stadens ytterkontroller.\n
+\n
+Det „r ett liknande problem i Delhi. Vi har fortfarande operativa enheter i staden, men de „r klart 
+underl„gsna i antal och inst„ngda i den gamla polisomr†det. Deras enda kvarvarande stridsvagn h†ller de 
+Ostyrda st†ngen s† h„r l†ngt.\n
+\n
+De Ostyrda sj„lva „r tungt f”rsvarade inom stadens flodportsdistrikt, vilket de har tagit ”ver, 
+antagligen eftersom det ger dem en flyktv„g. En ex-strateg f”r EuroCorp, Deel Gonda, styr ”ppet de 
+Ostyrda d„rifr†n. Utan hans taktiska expertis, skulle upproret vara d”mt att misslyckas.\n
+\n
+\c4Londons Artificiella Intelligens\n
+\c5\n
+\hMeddelandetyp: DIREKT\n
+\n
+Prioritet: 1\n
+\n
+Meddelandet b”rjar:\n
+\c2\n
+Order\n
+\n
+Bahrain: Neutralisera skurkaktiga agenter. S”k upp och f”rg”r Ostyrda angrepp innan de n†r AIn.\n
+\c5\n
+Direkt”rn \l.\n
+\n
+Oroande underr„ttelserapporter n†r oss fr†n Bahrain. Rester av de Ostyrda har p† n†got s„tt lyckats 
+utrusta sig med tung bev„pning och omringat stadens utkanter. En fullskalig attack verkar ”verh„ngande. 
+Deras troliga m†l „r Bahrains AI, navet i UTOPIAs kontrollsystem i mellan”stern. Om denna f”rst”rs, 
+kommer det v„rldsomfattande †terskapandet av EuroCorp ta †ratal.\n
+\n
+Bahrains AI kontrollerar en kader av tidigare EuroCorp agenter och har s„nt dessa till 
+f”rsvarspositioner ”ver stadens centrala distrikt. Vi m†ste †terta kontrollen ”ver staden innan vitala 
+faciliteter tr„ffas.\n
+\n
+\c4Londons Artificiella Intelligens\n
+\c5\n
+\hMeddelandetyp: DIREKT\n
+\n
+Prioritet: 1\n
+\n
+Meddelandet b”rjar:\n
+\c2\n
+Order\n
+\n
+Colombo: S„kra omloppsbanans hissfaciliteter. Ytterligare arbetare kommer finnas p† plats som hj„lp.\n
+\c5\n
+Vissick sj„lv har flytt men hans uppror „r ”ver. Han och n†gra andra kommer d” i den giftiga vildmarken 
+bortanf”r stadens utkanter. N„r vi tagit hand om kyrkan, kan vi starta en s”kning efter kropparna.\n
+\n
+Jag har dechiffrerat de kodade order Anika-Mirabelle hade p† sig n„r du fixade henne. Hon hade planerat 
+att tr„ffa sektens ledare - De Nio - i Sri Lanka. Jag misst„nker att kyrkans planer „r att ta ”ver 
+Clarkes omloppshiss i Colombo. D„rifr†n skulle de kunna ta kontroll ”ver m†nen.\n
+\n
+Professor Drennan tror att sektens hj„rntv„ttarteknologi bygger p† en hittills odetekterbar psykisk 
+"kanal", och att De Nio kanske beh”ver denna kanal f”r att kunna beh†lla kontrollen ”ver sina anh„ngare.
+ Han „r ocks† r„dd att de kan ha planer p† att verkst„lla n†gra av de teorier som finns i Kodex. 
+N„mligen, att ”ka kraften p† den experimentella jonosf„riska †terkalibreringsutrustning som utvecklats 
+av vetenskapsm„n p† Amundsens forskningskoloni p† m†nens yta.\n
+\n
+Rapporter fr†n andra AIs antyder en global minskning av fanatisk aktivitet, vilket kan inneb„ra att 
+kyrkan kanske h†ller p† att samla en s† stor attackstyrka som m”jligt. En attack mot Colombo „r n„ra 
+f”rest†ende.\n
+\n
+F† r†d: I h„ndelse av of”rm†ga att l”sa situationen p† marken kan du beh”va sopa anl„ggningar ”ver 
+orbitalhissen. Det avr†ds starkt fr†n att ta med spr„ng„mnen - att anv„nda eller b„ra dem i omloppsbanan
+ riskerar att permanent st„nga den v„gen. Det f”rv„ntas ocks† att De Nio har tagit n†gra nya 
+vapenprototyper och planterat f„llor. De kan vara utmanande, och det finns ingen †terv„ndo.\n
+\n
+\c4Londons Artificiella Intelligens\n
+\c5\n
+\hMeddelandetyp: DIREKT\n
+\n
+Prioritet: 3\n
+\n
+Meddelandet b”rjar:\n
+\c2\n
+Order\n
+\n
+Tokyo: Bev„pnad kategori O - Ostyrda medborgare rapporterade i strid med beteendekoder. K„llst”rning.\n
+\n
+\hUTOPIA-arkitekten Professor Klein har sp†rats av Netscan. ™vertala professorn igen att komma och 
+arbeta f”r oss en g†ng till.\n
+\c5\n
+Ytterligare: ivriga medlemmar av New Epoch-kulten har uppt„ckts i detta omr†de. Eftersom v†rt lager inte
+ inneh†ller en ”vertalningstron kommer det att bli n”dv„ndigt att avlasta deras eldsj„lar.\n
+\n
+\hEffekterna av sektens Harbinger-virus p† Tokyos UTOPIA-nod g”r kontinuerligt Netscan-fl”de om”jligt. 
+Ingen ytterligare information finns tillg„nglig.\n
+\n
+\c4EuroCorp K„rna 0-1-0/171261/26D: Londons Artificiella Intelligens, UTOPIA\n
+\n
+\c4U\c3niversal \c4T\c3ransferred \c4O\c3rganic \c4P\c3rocessing \c4I\c3nterface \c4A\c3rchitecture\n
+\c5\n
+\hMeddelandetyp: DIREKT\n
+\n
+Prioritet: 3\n
+\n
+Meddelandet b”rjar:\n
+\c2\n
+Order\n
+\n
+Tokyo: Bev„pnad kategori O - Ostyrda medborgare rapporterade i strid med beteendekoder. K„llst”rning.\n
+\n
+\hUTOPIA-arkitekten Professor Klein har sp†rats av Netscan. ™vertala professorn igen att komma och 
+arbeta f”r oss en g†ng till.\n
+\c5\n
+Ytterligare: ivriga medlemmar av New Epoch-kulten har uppt„ckts i detta omr†de. Eftersom v†rt lager inte
+ inneh†ller en ”vertalningstron kommer det att bli n”dv„ndigt att avlasta deras eldsj„lar.\n
+\n
+\hEffekterna av sektens Harbinger-virus p† Tokyos UTOPIA-nod g”r kontinuerligt Netscan-fl”de om”jligt. 
+Ingen ytterligare information finns tillg„nglig.\n
+\n
+\c4EuroCorp K„rna 0-1-0/171261/26D: Londons Artificiella Intelligens, UTOPIA\n
+\n
+\c4U\c3niversal \c4T\c3ransferred \c4O\c3rganic \c4P\c3rocessing \c4I\c3nterface \c4A\c3rchitecture\n
+\c5\n
+# Names.txt
+# Contains all city drop names in the mission number order.
+
+1.Ledningsvarning
+2.
+3.V„nlig ”vertalning
+4.Var finns vishet?
+5.Plundringen av Rom
+6.
+7.M”rka „nglar i arkitekturen
+8.Dubbelspel
+9.Specialagenten
+10.
+11.
+12.
+13.
+14.
+15.
+16.
+17.
+18.
+19.
+20.Utvandring
+21.Phoenix i flammor
+22.Fusion
+23.Ta tillbaka honom levande
+24.M”rkrets kant
+25.Promenad
+26.F”rbjuden kunskap
+27.
+28.Bikupan
+29.F”rlorade sinnen
+30.
+31.
+32.
+33.
+34.™ppna guld
+35.Tagen till Taks
+36.Djupt sinne
+37.Guru
+38.Eurolore
+39.
+40.
+41.
+42.
+43.
+44.
+45.
+46.
+47.
+48.
+49.Detroit avhoppare
+50.Hemligheter
+51.
+52.
+53.
+54.
+55.Kropps„mnen
+56.Inkr„ktare
+57.Head Hunt
+58.Halvautomatisk
+59.Saknade l„nken
+60.
+61.
+62.
+63.
+64.
+65.
+66.
+67.
+68.
+69.
+70.
+71.
+72.
+73.
+74.tergruppering
+75.
+76.
+77.
+78.
+79.
+80.
+81.
+82.
+83.L†ngsamdykning
+84.Konfrontation
+85.
+86.
+87.
+88.High Sierra
+89.
+90.
+91.
+92.Arab Agenda
+93.
+94.
+95.
+96.
+97.
+98.
+99.
+100.
+101.Det f”rgiftade sinnets kyrka
+102.
+103.
+104.Tokyo Fuseki
+# Netscan.txt
+# Master file containing all OBJ****.txt files.
+# Files indexed Sn and Cn in Miss***.txt order.
+# Scan entries listed by Points Of Significance (POS).
+[3016]
+Dropp-plats: EuroCorp Londons AI-markstation
+Kategori O - Ostyrda medborgare uppt„ckta i f”retagsomr†de
+Markstationspersonal: kommer f”rsvara markstationen mot attacker eller infiltration
+Avlyssning: polisen patrullerar med order att g† till anfall mot alla som b„r vapen
+[3501]
+Stadens ”vervakningskamera spelar in
+Dropp-plats: Detroits IML-l„nk
+Port till attackerad markstation
+Avlyssning: polisen rapporterar ”kat antal uppf”randebrott av Ostyrda medborgare
+[0101]
+Dropp-plats: Hong Kongs IML-l„nk
+Yamaguchis fusionsbatterier
+Tekniker
+Evakueringszon: IML-l„nk
+Fanatiker fr†n Nya Epokens kyrka har siktats i staden
+[0115]
+Dropp-plats: Hong Kongs IML-l„nk
+M†linvisa agent
+L„mpligt fordon f”r tilltr„de till basen
+[3216]
+Dropp-plats: Pekings IML-l„nk
+Yamaguchichef Zaibatsu
+Yamaguchis tr„ningsl„ger f”r agenter
+Evakueringszon: IML-l„nk
+Avlyssning: polisen rapporterar om uppror av de Ostyrda
+[1001]
+Dropp-plats: Phoenixs IML-l„nk
+Nya Epokens sekttempel
+Uppskattad plats f”r kyrkans indoktrinationspack
+Evakueringszon: IML-l„nk
+Avlyssning: de Ostyrda „r helt utan kontroll
+Londons AI analys: undvika att anfalla de Ostyrda
+[0401]
+Dropp-plats: New Yorks IML-l„nk
+Nya Atlantiska Alliansens HK
+Bost„der f”r civil personal
+Evakueringszon: IML-l„nk
+Avlyssning: polisen har nyligen uppgraderat deras svarsgrupp f”r valvinbrytningar
+[0701]
+Dropp-plats: Santiagos IML-l„nk
+M†lvetenskapsman
+Evakueringszon: IML-l„nk
+Nordsidan invaderad av fanatiker
+[2601]
+Dropp-plats: Buenos Aires IML-l„nk
+Hexagon f”retags-HK
+M†lvetenskapsman
+Evakueringszon: IML-l„nk
+Avlyssning: Hexagons reservvalv
+Ytterligare sektaktivitet detekterad
+[4401]
+Dropp-plats: Kapstaden via APC
+Port till Hexagons forskningsanl„ggning
+M†lvetenskapsman
+Evakueringszon: IML-l„nk
+Avlyssning: Fanatiker har tagit kontrollen ”ver denna installation
+[0601]
+Dropp-plats: Adelaides IML-l„nk
+Gel Datas testanl„ggning
+M†lvetenskapsman
+Evakueringszon: IML-l„nk
+[3215]
+Dropp-plats: Pekings IML-l„nk
+M†linvisa agent
+Avlyssning: banks„kerhetssystem har nyligen f”rb„ttrats
+[2131]
+Dropp-plats & Evakueringszon: Geneves IML-l„nk
+Bluesky laboratorierna
+Avlyssning: Bluesky beg„r poliseskort f”r Niv† D finanschef
+[5001]
+Dropp-plats & Evakueringszon: Vancouvers IML-l„nk
+Bluesky laboratoriet
+Avlyssning: Ostyrdas aktivitet f”ljs av polisen
+Satellitvarning: Persontransporter med fanatiker uppt„ckta n„rmande sig staden fr†n sydv„st
+[0201]
+Dropp-plats: Matochkin Shars IML-l„nk
+Blueskys forskningsanl„ggning
+Licenser f”r sv„varbil avk„nd
+Avlyssning: Kredit”verf”ring sp†rad till Ny Epokens kyrkas tempel
+[0901]
+Dropp-plats: Singapores IML-l„nk
+Singapore City Bank
+Prim„ra valvet (underjordiskt)
+Tang skyddar guldkonvoj
+M†linvisa fordon
+M”tesplats
+Tang HK
+[4001]
+Dropp-plats: Honolulus vattenreningsanl„ggning
+M”tesplats
+[1015]
+Dropp-plats: Phoenixs IML-l„nk
+M†linvisa agent
+[2846]
+Dropp-plats: Roms IML-l„nk
+L†gniv†s bostadsbunkerkomplex bef„st av kategori O - Ostyrda medborgare
+S„kerhetsgarnison
+Garnisonsvalv (underjordiskt): ber„knat v„rde 0.4 MCr
+Satellitvarning: kontrollen ”ver Roms strategiska f”rsvarssatellit har f”rlorats till ok„nda fiendestyrkor
+[2815]
+Dropp-plats: Roms IML-l„nk
+M†linvisa agent
+Avlyssning: polisen p† spaning efter en grupp Ostyrda vilka har infiltrerat staden f”r att kunna bekosta ett nytt uppror
+Avlyssning: ostabil UTOPIA ID-signal detekterad - m”jligt g”mst„lle f”r Ostyrda
+[3601]
+Dropp-plats: Christchurchs IML-l„nk A
+M†lomr†de: Christchurchs IML-l„nk B
+Skyddsagenter fr†n Tang detekterade
+Tangagenternas order uppsnappade - agentens m†l „r stadsbankens valv
+[3046]
+Dropp-plats: (a) Presentationspodium (b) Professor Drennans plats
+Datavalv, inneh†llande digitalfilm ”ver Reykjavikanl„ggningen
+EuroCorp direkt”r
+Massiv ID-nyckelaktivitet fr„n Ostyrda norr om HKs distrikt
+[4701]
+Dropp-plats: Tokyos IML-l„nk A
+F„ste f”r sektmedlemmar
+Professor Drennan
+Evakueringszon: Tokyos IML-l„nk B
+Lasertorn under poliskontroll
+Ber„knat v„rde av bankvalvets inneh†ll: 2.5M Cr
+[7011]
+Dropp-plats: Tokyos IML-l„nk A
+Kategori O - Ostyrda medborgare sp†rade till dessa platser
+Kult "tempel"
+Professor Kleins nuvarande plats
+[4711]
+Dropp-plats: Tokyos IML-l„nk A
+Kategori O - Ostyrda medborgare sp†rade till dessa platser
+Kult "tempel"
+Professor Kleins nuvarande plats
+[0301]
+Dropp-plats: Bangkoks IML-l„nk
+EuroCorp Bangkoks operationscentral
+[2216]
+Agent Wus nuvarande position
+De Saxos nuvarande position
+Fanatikerh†llna faciliteter
+[4502]
+Dropp-plats: Kairos IML-l„nk A
+Evakueringszon: IML-l„nk B
+Avlyssning: betydande sektn„rvaro ”ver hela staden - inget polissvar
+Avlyssning: Foamsteel Defence Industries ledning planerade att m”ta sektmedlemmar - ok„nd anledning
+[2702]
+Dropp-plats: Delhis IML-l„nk
+Kemisk anl„ggning
+FoamSteel Defence Industries produktionsanl„ggning
+Satellitvarning: EuroCorp arbetare och MBT
+[0501]
+Dropp-plats: Sydsidans grind
+Forskningsanl„ggning
+Avlyssning: m”jligt sp”ksp†r - Ko-Paull Vissick
+[4103]
+Dropp-plats: Bahrains IML-l„nk
+AI-bunker
+tg„rder mot skurkagenter
+Direktiv om n„rmande Ostyrda styrkor
+En mindre helgedom tillh”rande Nya Epokens kyrka f”rblir ockuperad
+[4615]
+Dropp-plats
+Hiss f”r omloppsbana
+Anti-missilsystem f”r omloppsbanans hiss
+[6503]
+[7931]
+[0801]
+[1101]
+[6502]
+[7902]
+ELIMINERA DE OSTYRDA
+TERVND TILL HK
+™VERTALA YAMAGUCHIS TEKNIKER
+EVAKUERA
+TEKNIKERS D™DSOLYCKA
+™VERTALA YAMAGUCHIS LEDNING
+LEDARES D™DSOLYCKA
+NEUTRALISERA YAMAGUCHIS AGENTER
+AGENTS D™DSOLYCKA
+™VERTALA BLUESKYS VETENSKAPSMN
+™VERTALA BLUESKYS VETENSKAPSMAN
+UPPDRAGSUPPDATERING: ELIMINERA OSTYRDA HOT
+ESKORTERA VETENSKAPSMN TILL IML-LNK
+STJL GULDBIL
+GULDBILEN HAR F™RST™RTS
+GULDBILEN HAR NTT TANGS HK
+LEVERERA BILEN TILL EVAKUERINGSZONEN
+STJL ARTEFAKT FRN TEMPLET
+LEVERERA ARTEFAKT TILL EVAKUERINGSZON
+AVLGSNA OSTYRDAS FSTEN
+ELIMINERA UPPRORSMAKARE
+STERILISERA SEKTOR
+ELIMINERA VAKTER
+ELIMINERA AGENT
+™VERTALA AGENT
+MLAGENT HAR D™TT
+MLAGENT HAR FLYTT
+™VERTALA NAA ANSTLLD
+™VERTALA JENNIFER TAKS
+ESKORTERA TAKS TILL IML-LNK
+JENNIFER TAKS R D™D
+ELIMINERA FANATIKER
+™VERTALA GEL DATAS VETENSKAPSMAN
+™VERTALA GEL DATAS VETENSKAPSMN
+™VERTALA HEXAGONS VETENSKAPSMAN
+™VERTALA HEXAGONS VETENSKAPSMN
+ESKORTERA VETENSKAPSMAN TILL IML-LNK
+ESKORTERA VETENSKAPSMN TILL IML-LNK
+UPPDATERING: ELIMINERA FANATIKERHOT
+FORDON F™RST™RT: AGENTER STRANDSATTA
+VETENSKAPSMAN F™RLORAD
+™VERTALA C3 VETENSKAPSMN
+C3 VETENSKAPSMN ELIMINERADE
+LABORATORIUM F™RST™RT
+FACILITET F™RST™RD
+STERILISERA STAD
+SKYDDA DRENNAN
+SKYDDA PROFESSORNS ASSISTENT
+SKYDDA LEDARE
+PROFESSOR DRENNAN R D™D
+PROFESSOR DRENNANS MEDHJLPARE R D™D
+EUROCORP LEDARE HAR SLAGITS UT
+RDDA PROFESSOR DRENNAN
+ESKORTERA PROFESSOR DRENNAN TILL EUROCORP FACILITET
+UPPDRAGSUPPDATERING: EVAKUERA ALL PERSONAL
+EVAKUERING MISSLYCKAD
+™VERTALA MIRABELLE LUCY DE SAXO
+DE SAXO HAR FLYTT: NYA ORDER TILLGNGLIGA
+ELIMINERA MIRABELLE LUCY DE SAXO
+KROSSA UPPRORET
+ELIMINERA OSTYRDA REBELLER
+SKYDDA BAHRAINS AI
+BAHRAINS AI HAR F™RST™RTS
+SKRA OMLOPPSBANANS HISS
+OTILLRCKLIGT MED AGENTER F™R ATT AVSLUTA UPPDRAG
+OMLOPPSBANANS HISS HAR F™RST™RTS
+RYMDSTATIONEN HAR F™RST™RTS
+SKAFFA RYMDFRJANS NAVIGATIONSDATOR
+STATIONENS SJLVF™RST™RELSE AKTIVERAD: AVAKTIVERA
+SKAFFA RYMDFRJANS LIVSST™DSMODUL
+TILLTRD MNFRJAN
+ELIMINERA DE NIO
+DE NIO HAR AKTIVERAT JONGRINDEN. DU HAR BESEGRATS.
+ELIMINERA DE OSTYRDA HEDNINGARNA
+VR TRDGRD F™R MEDITATION HAR F™RST™RTS
+KONVERTERA EUROCORP AGENT
+ESKORTERA AGENT TILL IML-LNKEN
+DITT ML HAR ELIMINERATS
+DITT ML HAR FLYTT
+SKAFFA EKONOMISKA MEDEL
+DITT BYTE HAR F™RLORATS
+TA DR SCHWEIZER TILL FADER SVART
+DR SCHWEIZER R D™D
+FADER SVART R D™D
+SKYDDA DINA BR™DER OCH TEMPLET
+ALLA DIN BR™DER R D™DA
+TEMPLET HAR F™RST™RTS
+KUVA DE OTROGNA
+STRAFFA UPPRORSMAKARNA
+F™RINTA KAOSENS STYRKOR
+F™RST™R DEN OSTYRDA OHYRAN
+SL UT EUROCORPS PERSONAL
+ELIMINERA EUROCORPS AGENTER
+ASSISTERA FANATIKER
+D™DA SABOT™REN
+BESEGRA SKNDARNA
+SKYDDA MEDHJLPARNAS ORDEN
+MEDHJLPARNAS ORDEN HAR ELIMINERATS HELT
+LEVERERA GULDBIL TILL SAMLINGSPUNKTEN
+GULDBILEN HAR F™RST™RTS
+D™DA PROFESSORNS ASSISTENT
+TA ASSISTENTENS PLATS VID PROFESSORNS SIDA
+SAMLA VIDEODATA TILL F™RELSNING
+G TILL PODIUM
+NRVAR VID F™RELSNING
+ESKORTERA PROFESSOR DRENNAN
+PROFESSORN HAR M™TT SIN ASSISTENT
+PROFESSORN R D™D
+MIRABELLE LUCY DE SAXO R D™D
+F™RST™R EUROCORPS VAPENBUNKER
+STJL EUROCORPS VAPENDESIGN
+LADDA UPP VAPENDESIGN
+TERVND
+MEDHJLPARNA STRANDSATTA: KAN INTE FULLF™LJA UPPDRAG
+D™DA HACKER
+ELIMINERA STYRKORNA SOM KONTROLLERAR FLODPORT
+TERVND TILL IML-LNK
+KIDNAPPA EUROCORPS FNGE
+MLET HAR ELININERATS
+F™RST™R FORSKNINGSFACILITETER
+ELIMINERA AGENTER FRN EUROCORP
+DE SAXO MSTE G UNDER
+LMNA DENNA PLATS
+UNDERKUVA DE OSTYRDA
+S™K UPP OCH F™RG™R UPPRORETS LEDARE
+RDDA IX OCH F™R HONOM TILL M™TESPLATSEN
+SKYDDA IX
+DU HAR LTIT IX G UNDER
+INGET KAN STOPPA DE NIO NU. DU HAR BESEGRATS.
+G™R INGENTING: LYD DE NIO
+KONTROLLEN ™VER STADEN F™RLORAD: KYRKFANATIKER HAR KONVERTERAT ALLA MEDBORGARE
+ELIMINERA INKRKTAREN
+ELIMINERA INKRKTARE
+™VERTALA INFILTRAT™R
+FORTSTT TILL IML-LNK
+MLET ELIMINERAT
+AKTIVERA IML-LNK
+IML-LNK F™RST™RD
+ELIMINERA AGENTER
+TA DIG IN I BUNKER: FRIG™R VIRUS
+AVVIK
+RETRTT
+KONVERTERA ORMANDOZ
+KONVERTERA RAMIREZ
+TA DEM ALLA TILL OSS
+DU HAR LTIT ORMANDOZ G UNDER
+DU HAR LTIT RAMIREZ G UNDER
+STJL DR SCHWEIZERS ARBETE
+TERVND TILL OSS
+EUROCORP AGENTER MSTE G MED OSS ELLER D™
+NEUTRALISERA EUROCORP AGENTER
+D™DA KOTO SEK
+NEUTRALISERA ALLA EUROCORP AGENTER
+LT INGENTING HNDA DE SAXO
+TA KONTROLL ™VER IML-LNKEN
+VR VLSIGNADE DOTTER R D™D
+DU KOMMER D™ F™R DETTA KTTERI!
+EUROCORP MSTE VLJA MELLAN VRT ™DE OCH D™DEN
+S™K FRISTAD
+HOPPA IN
+™VERTALA BLUESKYS VETENSKAPSMAN
+DITT ML HAR FLYTT
+ML ™VERTALAT
+OSKADLIGG™R AGENT
+S™K OCH F™RST™R - KATEGORI U - OSTYRDA MEDBORGARE
+UPPDATERING AV UPPDRAGET: ELIMINERA SEKTMEDLEMMAR
+PROFESSOR KLEIN UPPTCKT - ™VERTALA PROFESSORN
+SKYDDA PROFESSOR KLEIN - EVAKUERA
+PROFESSOR KLEIN R D™D
+F™RST™R MARKSTATIONEN
+SL VR FIENDE
+[header_win]
+[message_win]
+Du har besegrat De Nio. Du har framg†ngsrikt besegrat hela Nya Epokens kyrka och lyckats f”rhindra Kataklysmen. UTOPIA „r †teruppbyggt. Gratulerar till din befordran, f”rste direkt”r.
+[weapons]
+UZI
+Fr†n det kaos som fanns, p.g.a. gatustriderna, under mitten av 2000-talet kommer detta modifierade energipelletsvapen, Uzi 9 mm, och det „r fortfarande basvapnet i EuroCorps operationsteknik. Det „r en billig och l„tt backup f”r agenter som tar hand om fall med utslagna psykfall.
+MINIGUN
+Genom Nya Kalender syndikatets utnyttjande av tr”ghetsd„mpade kedjevapen har de blivit vanligare. Denna 20 mms avfyrare av plasmakapslar, med vridmomentsstabiliserande funktion, har en skumk„rna f”r att minska massan och produktionskostnaden.
+ELLASER
+Detta „r ett typiskt exempel p„ kyrkans revolutionerande vetenskapliga t„nkande. Enkelt sett „r det en form av blixtpiska. Vi har aldrig gjort s„dana enheter praktiska; den energim„ngd som kr„vdes var alltid o”verkomlig. Denna enhet anv„nder ett sofistikerat system med subatomiska spakar som garanterar att det blir minimal avtappning fr†n det personliga paketet, „nd† kan den ”verbelastas. Verkligt imponerande teknologi.
+LASER
+Denna laser anv„nder sig av basgasen TriSodium 89 (utvecklad c:a -20 NC). Vapnet kan ”verbelastas genom att avtryckarsl„ppet f”rsenas. I kritiska situationer i n„rkvarter kan energiladdningen ”verbelastas med en hastighet av 10 g†nger per minut.
+BEAM
+Tekniker f”r elektronf”rst”relsevapen har bidragit till utvecklingen av detta kraftfulla vapen. Det anv„nder monopol„r fokus f”r att projicera ett str†lstrukturerat f„lt som omvandlar atmosf„riska molekyler till plasma. Solida „mnen f”r†ngas vid kontakt med plasman, vilket frig”r „nnu mer energi. F„ltet kan ordna stor ”del„ggelse ”ver ett ganska stort avst†nd. Det g†r att ”verbelasta den monopol„ra fokusen f”r effektivare resultat mot t†ta och tempererade material.
+RAP
+Designad f”r att m”ta utmaningen av cyberf”r”kning fr†n Nya Kalender syndikatet. Denna raket avfyrar en s”kande granat som frig”r en spray av klusterbomber vid tr„ff. Raketsystemet har gyrostabilisering f”r m†ls”kning.
+NUCLGREN
+Stressad techium i denna termonukle„ra enhets h”lje d„mpar spr„ngprodukterna, och h†ller den uppkomna kedjereaktionen inom ett starkt begr„nsat omr„de. En specialisotopsk„rna garanterar att de radioaktiva niv†erna faller inom accepterbara toleransniv†er n„stan direkt efter explosionen. Dessa f”rb„ttringar g”r det m”jligt att f”r f”rsta g†ngen stoppa in detonatorn i ett handh†llet h”lje. Trots det kr„ver exposionens aktiva radie att du t„nker p„ s„kerheten.
+PERSUADER
+Ett standardtillbeh”r f”r att f†nga de h”gre hj„rnfunktionerna av medborgare utrustade med UTOPIAs CHIP. ven om de „r l„ttviktiga och har v„ldigt l†g kraft, skall ”vertalotronernas historiska betydelse inte underskattas, eftersom det var instrumentet som anv„ndes f”r att skaffa EuroCorp global dominans. ™vertalade individer f”ljer den kontrollerande agenten utan fr†gor, till den grad att de utrustar sig sj„lva f”r strid och ger sig p† fienden utan fruktan.
+FLAMER
+Retro-forskning rekommenderar denna handh†llna napalmjet. N„r den „r aktiverad spyr den ut t„nd petroleumgele. Vid kontakt med organisk materia, sticker napalmen och brinner kraftigt. En h”geffektiv l”sning f”r kontroll av folksamlingar.
+H2HTASER
+Denna omgivningsenhet aktiverar en resonant jonv„g vilken st”r CHIP-programmeringen hos alla som drabbas av v„gfronten. Enkelt sagt har den effekten av att f„ ”vertalade individer till att bli icke ”vertalade individer igen. Avbrytaren kommer visa sig effektivast mot anv„ndare av ”vertalotroner, d„r jonv„gen kan attackera signalen vid sj„lva k„llan och †terst„lla alla ”vertalade f”ljare till deras tidigare o”vertalade status.
+CRAZYGAS
+Forskning om narkotiska svamp„mnen har gett den aktiva ingrediensen i denna farliga hallucinogen. Den handh†llna beh†llaren inneh†ller en blandning av svampsporer och ett oxiderande „mne vilka frig”rs i ett moln, som orsakar psykotiskt beteende hos alla som tr„ffas. Detta vapen „r en bra avledningstaktik n„r antalet fientliga „r f”r stort f”r andra former av neutralisation, „ven om resultatet „r of”rutserbart.
+KOGAS
+Gasmasker „r inget skydd mot denna handgranat, eftersom den inneh„ller ett kv„vande nerv„mne. Det moln som sprids vid detonation g”r alla personer i detta omr†de medvetsl”sa under en begr„nsad tid.
+ELEMINE
+En elektromagnetisk pulsmina som sm„ller av vid aktivitet i omgivningen. Utrustning som f†ngas i pulsf„ltet „r tempor„rt, eller ibland permanent, obrukbara och de elektroniska mekanismerna hos organisk v„vnad br„nns s”nder. Ledande objekt, som fordon, gatm”bler och cyborgar tar det mesta av laddningen. Kan p†verka den ”vertalade statusen p„ alla som f„ngas inom dess effektomr„de.
+EXPLMINE
+Detta „r ett basvapen som „nd† „r effektivt, med en imponerande effektarea och tillr„ckligt med explosiv kraft f”r att s„nka fordon och orsaka omfattande skador p† byggnader. Placera d„r du k„nner f”r det p† strategiska platser inom uppdragszonen och dra bort dina agenter till s„kert avst†nd. Spr„ngladdningen s„tts av med en timer.
+LONGRANGE
+Det nya LD-gev„ret anv„nder sig av monopol„r sl„dteknologi f”r att accelerera h”gkalibrig utt”md uraniumammunition till Mach 5.2. Sl„dens kondensatorer laddar helt ur p† ett skott och m†ste laddas fullt innan du kan skjuta igen, men dess tr„ffs„kerhet och anv„ndningsr„ckvidd „r o”vertr„ffad av andra system. F”r att h†lla designspecifikationerna fick avfyrningstiden offras f”r direktkalibrering, vilket g”r detta vapen till det ultimata pricksskyttevapnet.
+AIRSTRIKE
+Alla satelliter i UTOPIAs n„tverk av geosynkrona omloppsplattformar, „r utrustade med en lagervara av stavar i blandningen tungsten-uranium p† styrbara f„sten. N„r dessa stavar avfyras, g”r processen med atmosf„riskt †terintr„de att de hettas upp till en punkt vid vilken de sm„lter, vilket producerar ett plasmaregn med „kta slagf„ltspotential. Vi kan nu framg†ngsrikt g† f”rbi systemets utl†sning orsakad av Harbinger. Genom att s„nda †terinitierande protokoll kan systemet anv„ndas av din agent. Detta kan g”ras med en handh†llen aktivator, men f”rsiktighet b”r iakttas; kostnaden f”r att avfyra detta system „r extremt h”gt.
+QDEVASTATOR
+Dubbla gravitonprismor i en Noxonfylld kammare fungerar som en katalysator f”r en kedjereaktion, vilken inverterar de starka molekylkrafterna l„ngs en bana definierad av gravitativ polarisation. Kedjereaktionen b”rjar n„r avtryckaren trycks ned och beh†lls i Noxonkammaren, d„r den byggs upp tills avtryckaren sl„pps. Tr„ffade „mnen slits s”nder molekyl f”r molekyl. Vapnet kan orsaka skador †t sidorna, eftersom den emitterar kl„ngen av ”verfl”dsenergi.
+RAZORWIRE
+Denna wire, med en blandning av titan och st†l, tillverkas i formen av en v„ldigt l†ng, v„ldigt tunn och v„ldigt vass spetsig spole. Dess anv„ndning f”rhindrar tilltr„de av oauktoriserade civila till s„krade omr†den, och „r ett p†tagligt hinder f”r „ven cybernetiskt f”rb„ttrade inkr„ktare att ta sig genom. Dess d”dliga natur f”rst„rks av att den „r n„stan helt osynlig f”r omodifierade ”gon.
+PERSUADER2
+Drennans p†g†ende forskning om kyrkteknologi har betalat sig med utvecklingen av ”vertalotronen II. Denna manick „r kapabel att infiltrera sinnen hos „ven de mest stridsf”rh„rdade fanatiker. Bara de en g†ng blivit exponerade f”r dess inflytande, kommer sektmedlemmarna lyda dina order lika ih„rdigt som de f”ljde kyrkans galna l„ror.
+STASISFLD
+Denna portabla f„ltgenerator f”r„ndrar den puls med vilken tiden passerar inom f„ltet. H†llen i n„stan helt avstannad animation „r reaktionshastigheten p† den eller det i f„ltet negligerbar, vilket g”r offret s†rbarare f”r andra typer av attacker. Den energi som kr„vs f”r att aktivera f„ltet „r betydande och timingen f”r dess anv„ndning m„ste v„ljas med omsorg.
+SOULGUN
+I ett av De Nios mest esoteriska genombrott, har de l„rt sig hur man frig”r de elektrokemiska krafter som „r l†sta i kropparna hos d”da organismer. Den f”rst†else av dessa mekanismer vi nu har ger oss total makt ”ver dem. Kromt”mmaren „r baserad p„ denna teknologi. Den utvinner energi fr„n organiska „mnen p„ cellul„r niv† och ”verf”r den till den som kontrollerar den. Kromot”mmaren „r speciellt anv„ndbar f”r †teruppladdning av agenter efter en eldstrid, eftersom den fortfarande kan utnyttja den cellul„ra energin hos d”da.
+TIMEGUN
+Professor Drennan har kommit upp med prylarna igen. F”rflyttotronen anv„nder en k„rna av ultrat„t materia omgiven av ett stroboskopiskt stasskal, f”r att erbjuda begr„nsad access till h”gre dimensionell tid. Detta f†r m†let att f”rsvinna helt och †ter dyka upp vid en tidpunkt i den n„ra framtiden. Aldrig tidigare har en sabot”r getts ett kraftfullare verktyg.
+CEREBUSIFF
+Denna elektroniska vakt kan g”ra stor skillnad p† din agents defensiva handlingar och attacker. Positionerad p† en l„mplig plats och bev„pnad med en pulslaser tar den p† sig vakttj„nstg”ring, och kommer ”ppna eld mot alla omedvetna fiendem†l som kommer inom r„ckh†ll, tills den g”r slut p„ sitt energipaket eller f”rst”rs.
+MEDI1
+Detta multifunktionspaket kan anv„ndas f”r att snabbt reparera de typer av skador och s†r som erh†lls i strid. Paketet best†r av en extra seg skinnv„vnadsbit, impregnerad med bed”vningsmedel och kirurgiska nanolarver. Kan bara anv„ndas en g†ng.
+MEDI2
+Precis som l„kepaketet f”rutom att denna uppgraderade version b„rs av anv„ndaren, s† att det automatiskt kan k„nna av vilken skadeniv† som uppst†tt. Om skadeniv†n sjunker under en viss kritisk niv†, aktiverar auto l„kepaketet sig sj„lvt och genomf”r accelererade kirurgiska reparationer. Det tar en liten stund innan auto l„kepaketet s„tter ig†ng, s† en anv„ndare som har en ih†llande allvarlig skada kan hinna d” innan paketet f†r en chans att b”rja arbeta.
+EXPLWIRE
+Precis som rakbladswire, „r avfyrningswiren ett utm„rkt verktyg f”r att f”rhindra intr†ng. D† avfyrningswiren bara „r ett par molekyler tjock, „r den v„ldigt sv†r att uppt„cka ens med den nyare typen av modifierade ”gon. N„r den vidr”rs, aktiveras multipla explosioner efter hela dess l„ngd.
+CLONESHLD
+Producerar en f”rkl„dnad s† effektiv att den t.o.m. lurar UTOPIAs scanneravl„sningar. Klonsk”lden f”r„ndrar organisk bekl„dnad och en agents drag, vilket f†r anv„ndaren att se ut som en ordin„r direkt”r under en tid. Detta kan vara extremt anv„ndbart f”r agenter ute p† infiltrationsuppdrag, eftersom de d† sm„lter in i alla direkt”rszoner.
+[mods]
+LEGS1
+Konstruerad av en l„ttviktig plastk„rna med fatv„xt organiskt ytterlager. Dessa artificiella ben ger en direkt f”rb„ttring av b†de agentens h„lsa och toppfart. Uth†lligheten blir ocks„ b„ttre, vilket ”kar den r„ckvidd en agent utrustad med dessa ben kan t„cka med maximal hastighet.
+LEGS2
+F”rb„ttringar i skummetalls teknologier har producerat detta cybernetiska lemsystem. Ben 2 ger en imponerande ”kning av hastighet, uth†llighet och h„lsa, vilket f”rl„nger din agents maximala operationella kapacitet „nnu mer.
+LEGS3
+Niv„ 3 ben ers„tter den fiberoptiska ”verf”ring som hittas i l„gre niv†er med minnesplastik av supersynapstyp. Utnyttjandet av agenter modifierade med niv† 3 ben kommer troligen ha en djupg†ende effekt p† slagf„ltsprestandan.
+ARMS1
+Med de tungstenssenor och st†lmuskler som finns i cybernetiska armar, kommer dina agenter uppleva en direkt f”rb„ttring i tr„ffs„kerheten vid skytte, vilket f”ljdaktligen sparar ammunition. Den operationella livsl„ngden f”r en agent utrustad med dessa armar f”rl„ngs ocks† av den karakteristiska h„lso”kningen som kommer med cybernetiska f”rb„ttringar.
+ARMS2
+Tillverkningsprocessen f”r skummetall „r nu framg†ngsrikt applicerad „ven p† precisionscybernetik. Med mindre tr”ghet att komma ”ver, levererar dessa l„ttviktsarmar inte bara en demonstrerbar f”rb„ttring av tillf”rlitligheten utan „ven av r„ckvidden.
+ARMS3
+Det ultimata inom armteknologi till din anv„ndning. D† v†ra agenter m”ter allt b„ttre utrustade skurkar och sektmedlemmar, kommer de p†tagliga f”rb„ttringar av stridsskickligheten som dessa armar erbjuder hj„lpa dig att bibeh†lla v†r uppn†dda framg†ngsniv† f”r uppdrag.
+CHEST1
+F”r signifikant ”kad ”verlevnadsf”rm†ga i fientliga milj”er, inneslut en agents vitala organ i trippellager med titanlegering. En f”rb„ttrad kroppsmodifikation erbjuder det st”rsta skyddet mot bestraffning du kan ge en cyborg. T„nk p† att denna modifikation m†ste g”ras f”r att cyborgen skall st”dja andra modeller.
+CHEST2
+Denna f”rb„ttring anv„nder en por”s superstruktur av skummetall som h„rdats i den mikrogravitation som finns i l†ga omloppsbanor. Allt f”r att g”ra den l„ttare „n den kroppsprotes som f”r n„rvarande anv„nds, och den ger dessutom en h”gre dragh†llfasthet. F”rb„ttrade energireserver „r bara en av f”rdelarna med en niv† 2 kroppsuppgradering. Operationellt ”vers„tts detta till mer kraft och l„gre risk f”r kritiska skador. Med en niv† 2 kropp, „r v„gen ”ppen f”r en uppgradering till niv† 3s modifikationer i alla andra kategorier.
+CHEST3
+K”p niv† 3 modellen f”r att ytterligare f”rb„ttra den maximala h„lsan p† din arbetare. Minnessenor av plast ers„tter de st†lmikrofibrer som fanns i tidigare modeller, vilket g”r cyborgen betydligt tuffare „n andra med uppgraderingar av l„gre teknisk typ. Det mest anm„rkningsv„rda „r att denna f”rb„ttring skyddar agenten fr„n alla k„nda typer av nervgasvapen.
+BRAIN1
+Dess f”rm†ga att fatta beslut oberoende av ledningskontroll, „r det som skiljer en beslutsam agent fr„n en d”d agent. D† agenten nu „r dubbelt s† smart, „r det h„lften s† stor risk att han d”das. Denna enhet inneh†ller diamantprocessorer i en 3D-matris, integrerade med cyborgens konventionella kognitiva biomassa. Den ”kar den grundl„ggande perceptionsf”rm†gan och inneh†ller programvara f”r trauma”vervakning, f”r att f”rb„ttra cyborgens f”rm†ga att motst† annars kritiska skador.
+BRAIN2
+Holografiskt k„rnminne minskar reaktionstiden och ”kar ”vertalotronens r„ckvidd och signalstyrka. Den ”kar ocks† cyborgens motst†ndskraft mot ”vertalningsf”rs”k. Denna hj„rnmodell ger uppfattbara f”rb„ttringar ”ver hela linjen och ytterligare f”rb„ttringar av traumaprogramvaran, vilket ”kar cyborgens ”verlevnadsmarginal.
+BRAIN3
+H”jdpunkten inom portabel AI-teknologi. P„ niv† 3 ger en modifierad hj„rna inte bara ”kad h„lsa, utan garanterar ocks„ f”rb„ttrad m†lnoggrannhet, tr„ffs„kerhet och energieffektivitet. Cyborgen kan uts„ttas f”r milj”er vilka skulle f”rst”ra en biologisk hj„rna n„stan direkt; denna enhet kan helt s„kerhetskopiera den biologiska datan vilket g”r att aganten kan forts„tta att fungera.
+SKIN1
+Detta „r en ritning f”r cyberskinn; en komplex cellul„r v„v som „r t„nkt att erbjuda en skotts„ker hud som radikalt minskar skadeverkningarna fr†n projektilvapen. Utveckling av en tjockhudig/st†lmaskig hybrid och noggranna kosmetiska f”rb„ttringar ger en substans som „r extraordin„rt stark men lika flexibel som normal, kryofatsodlad cyborghud.
+SKIN2
+Denna ritning f”r cyberskinn drar nytta av det senaste inom giftfri asbest designad f”r anv„ndning i rymdskepp vid †terintr„den. Vid operationer under eldstormar kommer en agent som b„r detta skinn drabbas mindre av br„nnskador „n en som inte g”r det.
+SKIN3
+Detta „r en ritning f”r en cyberskinnvariant baserad p„ kolv„tepolymerer f”rst„rkt av fiberoptiska mikrotr†dar. Denna typ av skinn b”r absorbera mycket av energibaserade vapensystems destruktiva kraft. Energin sprids fr„n tr„ffst„llet runt den modifierade agentens kropp, och †tervinns f”r att bibeh†lla skinnets skyddsegenskaper.
+SKIN4
+Detta dokument beskriver det mest avancerade inom cyberskinnsteknologi. Mycket av det „r spekulativt men l†ngt fr†n helt korkat. Det finns en beskrivning f”r hur man bygger en fotomorfisk v„v som kan anv„ndas f”r att framvisa viss klonssk”ldskarakteristika. Vi kan tillverka denna. Den b”r f† en agent att se ut som en direkt”r f”r UTOPIAs scanningar.

@@ -1,0 +1,66 @@
+SYNDICATE WARS na Amige - dla programistow i testerow
+====================================================
+
+Wersja 0.220, 15.11.2026. Zrodla: port SyndWarsFX na Amige (git, galaz
+amiga), docs/amiga/porting-notes.md - decyzje i odkrycia,
+docs/amiga/test-log.md - testy na prawdziwych Amigach.
+
+
+PROGRAMY
+--------
+
+  SyndWars      gra na 68060 (bebbo gcc 6.5, libnix), ekrany RTG 8-bit przez
+                Picasso96 / CyberGraphX; z Tool Type ARM uruchamia swhost
+  swhost        program 68k wersji ARM (vbcc): laduje swcore.wxt do ARM-a
+                Warpa (cswarp.library 30.41+, karty z SDRAM), pokazuje jego
+                klatki, gra dzwiek i filmy, obsluguje pliki, przekazuje
+                klawiature i mysz
+  swcore.wxt    cala gra dla ARM-a (Cortex-M7)
+
+Numer wydania: 0.<liczba commitow portu> (beta); "Version SyndWars", rog
+menu glownego, zgloszenia bledow.
+
+
+ZMIENNE ENV (68k, a dla wersji ARM - swhost)
+--------------------------------------------
+
+  SyndWarsSound=PAULA|AHI|NONE   dzwiek (Tool Type SOUND= ma pierwszenstwo)
+  SyndWarsMusic=OFF              bez muzyki (Tool Type MUSIC=OFF)
+  SyndWarsCivLOD=0..3            dalecy przechodnie (FAR PEDESTRIANS), 3
+  SyndWarsRadar2=0|1             radar co 2. klatke (RADAR HALF RATE)
+  SyndWarsAutoDetail=0|1         AUTO DETAIL
+  SyndWarsShowSpeed=0|1          SHOW SPEED
+  SyndWarsReportServer=host[:port]  inny serwer zgloszen
+  SyndWarsProf=1|2               profiler: czasy czesci tury do error.log
+                                 co 5 s
+  SyndWarsFPS                    klatki na sekunde do RAM:SyndWars-fps.txt
+  SyndWarsSoundLog               liczniki dzwieku do pliku
+Testy:
+  SyndWarsSmkTest=PLIK           gra PLIK zamiast filmu, o ktory gra prosi
+                                 (np. data/chu_ele.smk zamiast intro)
+  SyndWarsBangTest=N             wybuch co N tur (ciezka scena)
+  SyndWarsBangLo=1               niskie szczegoly wybuchow (jak DETAIL LO)
+  SyndWarsSaveTest=N             w turze N: zapis, wczytanie, zapis,
+                                 porownanie
+  SyndWarsSaveTestLoad=1         tylko wczytanie slotu 12 (zapis z innej
+                                 platformy) i ponowny zapis
+Ustawienia z menu opcji: qdata/savegame/default.ini.
+
+
+PLIKI
+-----
+
+  error.log                      log (otwarty dzwiek, filmy, czasy)
+  RAM:swarm-log.txt              log swhost (wersja ARM)
+  RAM:SyndWars-state.txt, RAM:SyndWars-screen.iff
+                                 stan i ekran ostatniego zgloszenia
+  qdata/savegame/report_email.txt  e-mail podany w oknie zgloszenia
+
+
+SZYBKOSC (68060)
+----------------
+
+Filmy: libsmacker przyspieszony (tablice drzew Huffmana): intro 320x200
+38 ms na klatke z dzwiekiem (dostepne 62,5 ms), wybory 600x300 43 ms (66 ms);
+klatki dekodowane naprzod do kolejki 32. Gra: SHOW SPEED pokazuje tempo
+w %, SyndWarsProf - czasy.

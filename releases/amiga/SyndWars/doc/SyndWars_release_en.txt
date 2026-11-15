@@ -1,0 +1,32 @@
+SYNDICATE WARS for the Amiga - release history
+=============================================
+
+BUG REPORTS
+-----------
+
+The Help key in the game: it saves the screen and the state of the game,
+you give your e-mail and what happened, SEND sends the report to the port's
+author. The version is in the corner of the main menu (AMIGA PORT 0.xxx) and
+in the Shell: Version SyndWars. Without a network: describe the bug with
+the version and add the file error.log of the game's drawer (the ARM
+version: also RAM:swarm-log.txt).
+
+
+0.220 (15.11.2026) - the first release (beta)
+--------------------------------------------
+
+- The whole of Syndicate Wars (SyndWarsFX) on an Amiga with a 68060 and a
+  Picasso96 card: campaigns, missions, menus, saves.
+- The ARM version for the Warp 1260 Extreme and Warp 7060 (Tool Type ARM):
+  the game runs on the ARM, the 68060 shows the picture and plays the sound
+  and the videos.
+- Sound through Paula or AHI (Tool Type SOUND=), the music of the game's CD
+  (MUSIC=OFF switches it off).
+- The videos (intro, elections, endings, mission end) with their sound.
+- Speed options in SYSTEM -> VISUAL DEPTH: FAR PEDESTRIANS, RADAR HALF
+  RATE, AUTO DETAIL, SHOW SPEED.
+- Esc asks before aborting a mission / quitting the game.
+- Help: a bug report from the game (68060 version).
+- Saves and settings in the PC's format - they go between the Amiga and
+  SyndWarsFX on the PC.
+- The game's data from the GOG version with pc/SyndWarsData.py (Python 3).

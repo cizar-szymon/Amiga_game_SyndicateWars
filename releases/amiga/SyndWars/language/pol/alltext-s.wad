@@ -1,0 +1,1636 @@
+# == map screen text ==
+# map screen title
+#UTOPIA
+# map screen headings
+Strefa desantu
+Identyfikatory UTOPIA
+Infra-struktura
+Dialekt
+Handel
+Toksycznoøð
+
+# city data
+
+Londyn
+21,13 mln
+Post-industrialny
+Niski angielski
+Inüynieria oprogram., Usôugi finansowe
+Odpady chemiczne, ùcieki ludzkie
+
+Detroit
+10,98 mln
+Gòsta miejska
+Nowo-amerykaöski
+Produkcja pojazd¢w
+Przemysô ciòüki, odpady radioaktw.
+
+Hongkong
+17,55 mln
+Gòsta miejska
+Indochiöski
+Tworzywa pamiòciowe
+Przemysô lekki
+
+Pekin
+38,89 mln
+Ultramiejski
+Proto-mandaryöski
+Fabrykacja plastik¢w, Produkcja osprzòtu
+Odpady radioaktw., ùcieki ludzkie
+
+Wiedeö
+6,99 mln
+Prosta miejska
+Komunalny Centralno-Europejski
+Odzyskiwanie mineraô¢w
+Przemysô lekki
+
+Genewa
+7,65 mln
+Prosta miejska
+Komunalny Centralno-Europejski
+Detoks wody, Uzdatnianie powietrza
+Odpady radioaktw.
+
+Salzburg
+9,27 mln
+Gòsta miejska
+Neu-sôowiaöski
+Regeneracja wegetatywna
+Przemysô lekki
+
+Singapur
+21,71 mln
+Ultramiejski
+Pseudo-malajski
+Detoks wody, Produkcja osprzòtu
+ùcieki ludzkie, Przemysô ciòüki
+
+Phoenix
+13,26 mln
+Gòsta miejska
+Amerykaöski kontynentalny wewnòtrzny
+Wytwarzanie energii
+Odpady radioaktw.
+
+Rzym
+10,92 mln
+Postindustrialny
+Niski ôaciöski
+Dobra trwaôego uüytku
+Przemysô ciòüki
+
+Al Manamah
+10,98 mln
+Gòsta miejska
+Nowoarabski
+Rafinacja paliw, Przetwarzanie mineraô¢w
+Odpady chemiczne
+
+Nowy Jork
+25,24 mln
+Postindustrialny
+Elit. Angielski
+Produkcja broni
+Przemysô ultra-ciòüki, Odpady radioaktw., Pozostaôoøci ludzkie
+
+Santiago
+7,81 mln
+Gòsta miejska
+Nowo-Hiszpaöski
+Produkcja gumy
+Odpady chemiczne
+
+Buenos Aires
+15,71 mln
+Ultramiejski
+Modul
+Wypeôniacze spoüywcze
+Przemysô ciòüki, ùcieki ludzkie
+
+Kapsztad
+10,27 M
+Gòsta miejska
+Afrykanerski (staroüytny)
+Przetwarzanie mineraô¢w
+Przemysô ciòüki
+
+Adelaide
+8,7 mln
+Prosta miejska
+Sub-angielski
+Browarnictwo, Hodowla zwierzît
+Odpady chemiczne, Odpady pozwierzòce
+
+Christchurch
+4,9 mln
+Prosta miejska
+Gwara Bahasa
+Wytwarzanie odzieüy, Komponenty üywnoøci
+Odpady chemiczne
+
+Reykjavik
+4,37 mln
+Prosta miejska
+P¢ô-skandynawski
+Detoks wody, Uzdatnianie powietrza
+Odpady radioaktw.
+
+Moskwa
+16,54 mln
+Gòsta miejska
+moôdawski
+Wytwarzanie odzieüy, Destylacja
+Opad radioaktw., ùcieki ludzkie
+
+Tokio
+16,70 mln
+Ultramiejski
+Neo-Japoöski
+Wysokie technologie, Usôugi finansowe
+Przemysô ciòüki
+
+Bangkok
+24,37 M
+Ultramiejski
+Pseudotajski
+Produkcja symulant¢w, turystyka
+Odpady chemiczne, ùcieki ludzkie
+
+Honolulu
+7,01 mln
+Prosta miejska
+Nowo-amerykaöski
+Detoks wody, Uzdatnianie powietrza
+Przemysô lekki
+
+Johannesburg
+15,64 mln
+Gòsta miejska
+Afrykanerski (staroüytny)
+Przetwarzanie mineraô¢w
+Przemysô ciòüki
+
+Kair
+3,16 mln
+Prosta miejska
+Nowoarabski
+Artefakty historyczne, Turystyka
+Odpady chemiczne
+
+Nowe Delhi
+28,73 mln
+Ultramiejski
+Proto-hindustaöski
+Inteligentna odzieü
+Przemysô ciòüki, Odpady chemiczne, ùcieki ludzkie
+
+Sewastopol
+9,26 mln
+Gòsta miejska
+moôdawski
+Destylacja
+Opad radioaktywny
+
+Trypolis
+8,73 mln
+Gòsta miejska
+Arabski (staroüytny)
+Rafinacja paliw
+Opad radioaktywny
+
+Rijad
+2,03 mln
+Prosta miejska
+Nowoarabski
+Rafinacja paliw
+Przemysô ciòüki
+
+Colombo
+3,35 mln
+Prosta miejska
+New Sinhalese
+Detoks wody, Uzdatnianie powietrza
+Odpady radioaktw.
+
+Stacja Orbitalna Colombo
+0,0001 mln
+Eksperymentalny
+Wielo-stanowy Kod Techniczny EuroCorp
+Transport miòdzy-gwiezdny, Produkcja w mikro-grawitacji
+ýadna
+
+Matochkin Shar
+0,017 mln
+Prosta miejska
+Proto-moôdawski
+Uzdatnianie powietrza
+Przemysô lekki
+
+Voss
+0,023 mln
+Mocno Prosty miejski
+Omni Scando
+Leønictwo
+Przemysô lekki
+
+Omsk
+0,48 mln
+Prosta miejska
+Rosyjski (Dawny)
+Destylacja
+Opad radioaktywny
+
+Bejrut
+0,75 mln
+Silnie Uproszczony Miejski
+Nowoarabski
+Produkcja broni
+Odpady chemiczne, ùcieki ludzkie
+
+Ulan Bator
+0,274 mln
+Mocno Prosty miejski
+Mongolsko-chiöski
+Wydobycie rud
+Opad radioaktywny
+
+Seul
+6,5 mln
+Gòsta miejska
+Jednokoreaöski
+Przetw¢rstwo chemiczne, Produkcja pojazd¢w
+Odpady chemiczne, Przemysô ciòüki
+
+Hanoi
+3,3 mln
+Prosta miejska
+Mandaryöski strefowy
+Hodowla zwierzît, Odtw¢rstwo wegetatywne
+Odpady pozwierzòce, Odpady chemiczne
+
+Manila
+8,5 mln
+Gòsta miejska
+Mandaryöski strefowy
+Produkcja mebli
+Przemysô lekki
+
+Freetown
+0,18 mln
+Mocno Prosty miejski
+Gwara Afrykanerska
+Przetwarzanie rudy
+Przemysô lekki
+
+Monrovia
+0,65 mln
+Mocno Prosty miejski
+Gwara Afrykanerska
+Destylacja
+Przemysô lekki
+
+Lagos
+1,25 ln
+Prosta miejska
+Gwara Afrykanerska
+Wydobycie rud
+Przemysô ciòüki
+
+Kair
+2,3 mln
+Prosta miejska
+Neutralny Somalijski
+Hodowla zwierzît, Garbarstwo
+Przemysô lekki
+
+Port Moresby
+0,93 mln
+Mocno Prosty miejski
+Gwara Bahasa
+Wydobycie rud
+Odpady chemiczne
+
+Anchorage
+0,86 mln
+Prosta miejska
+Anglo-cyrylica
+Manipulacja pogodî
+Prom. jonizujîce, Przemysô lekki
+
+Vancouver
+3,5 mln
+Gòsta miejska
+Lingvo Pseud
+Przetwarzanie magnetyczne
+Przemysô ciòüki
+
+Nuuk
+0,065 mln
+Gmina
+P¢ô-skandynawski
+Powietrze
+Nisko jonizujîce
+
+Georgetown
+0,08 mln
+Mocno Prosty miejski
+Gwara Spania
+Wydobycie mineraô¢w
+Odpady chemiczne
+
+Lima
+3,4 mln
+Gòsta miejska
+Gwara Spania
+Produkcja broni
+Odpady wysoce radioaktw., Przemysô ciòüki
+
+SÆo Paulo
+18,9 mln
+Ultramiejski
+Portugalski (Dawny)
+Wydobycie mineraô¢w
+Odpady radioaktw., Przemysô lekki
+WYPADEK W LABORATORIUM
+PRZYCZYNY NATURALNE
+WIRUS Z OPàûNIENIEM CZASOWYM
+BõïD EKSPERYMENTALNY
+ùMIERTELNE BõóDNE OBLICZENIE
+NIELOGICZNA DEDUKCJA
+TERMINALNE UROJENIE
+POCHOPNY OSïD
+BõóDNE ROZUMOWANIE
+OBõóD
+ZANIEDBANIE
+NIEBEZPIECZNA PROCEDURA
+ZAõAMANIE PSYCHICZNE
+AWARIA SPRZóTU
+NIEUDANY TEST
+ZATRZYMANIE AKCJI SERCA
+BõóDNE ZAõOýENIE
+PORAýENIE PRïDEM
+DEZINTEGRACJA
+NIESZCZóùLIWY WYPADEK
+\hTyp komunikatu: BEZPOùREDNI\n
+\n
+Priorytet: 3\n
+\n
+Poczîtek komunikatu:\n
+\c2\n
+Rozkazy\n
+\n
+Londyn: Zdôawið rozruchy.\n
+\c5\n
+Zgôaszane sî nadzwyczajne awarie chip¢w UTOPIA. Wszystkie przypadki dotyczî caôkowitych wyôîczeö, 
+peônych zniszczeö CHIP-¢w. Dotkniòta populacja zostaôa zaklasyfikowana jako U-Niewiedzeni. Odnotowujemy 
+cywili kategorii U naruszajîcych kody zachowaö w obszarze jednego kilometra kwardratowego wok¢ô tej 
+podstacji.\n
+\n
+\c4EuroCorp Core 0-1-0/171261/26D: Londyöska Sztuczna Inteligencja, UTOPIA\n
+\n
+\c4U\c3niwersalny \c4T\c3ransfer z \c4O\c3rganicznego \c4P\c3rzetwarzania w \c4I\c3nterfejs 
+\c4A\c3rchitektury\n
+\c5\n
+\hTyp komunikatu: LINIA STAõA\n
+\n
+Priorytet: 1 - Alarmowy\n
+\n
+Poczîtek komunikatu:\n
+\c2\n
+Rozkazy\n
+\n
+Detroit: Zlokalizowað czôonk¢w Koøcioôa Nowej Epoki i dokonað ich likwidacji. Zneutralizowað obywateli 
+kategorii U-Niewiedzeni.\n
+\c5\n
+Uwaga, Dyrektorze \l. M¢wi Agent UTOPIA Maritz, Wywiad EuroCorp.\n
+\n
+Sytuacja jest krytyczna. UTOPIA zostaôa zaatakowana. Infrastruktura informatyczna EuroCorp ulegôa 
+fundamentalnemu naruszeniu. Uruchomiono procedury awaryjne.\n
+\n
+Natychmiast przekazujò wszystkie decyzje dow¢dcze EuroCorp do zapasowej SI. Bòdò przekazywaô jej analizy
+ i rozkazy. Powtarzam: nadrzòdne dow¢dztwo EuroCorp zostaje przekazane Londyöskiej Sztucznej 
+Inteligencji. Jej gô¢wnym staôym rozkazem jest odbudowa UTOPIA, w razie potrzeby od podstaw.\n
+\n
+Londyöska SI przeprowadza juü wstòpnî ocenò sytuacji. Wkr¢tce nastîpi formuôowanie misji.\n
+\n
+Bòdziesz bezpoørednio kierowað agentami w celu realizacji tych misji.\n
+\n
+Sytuacja og¢lna jest niekorzystna. Przeprowadzono globalny atak na Syndykat. UTOPIA SI w Detroit byôa 
+celem i tenüe m¢j odpowiednik na miejscu zostaô zlikwidowany. Napastnicy wprowadzili do UTOPIA 
+zaawansowanego wirusa. Zabezpieczenia nie aktywujî siò. Wirus, niezaleünie od mechanizmu dziaôania, 
+przenosi siò miòdzy SI szybciej, niü jesteømy w stanie go øledzið.\n
+\n
+Caôkowicie nieautoryzowana grupa, nazywajîca siò Koøcioôem Nowej Epoki, przyznaje siò do 
+odpowiedzialnoøci za wirusa, kt¢ry okreølajî mianem "Zwiastuna". To Zwiastun powoduje wykôadniczy wzrost
+ liczby awarii CHIP-¢w. Koøci¢ô Nowej Epoki rozpoczîô r¢wnieü kampaniò propagandowî podüegajîcî do 
+przemocy wobec EuroCorp, transmitowanî za poørednictwem przejòtych kanaô¢w UTOPIA.\n
+\n
+Najbardziej fanatyczni wyznawcy tej tak zwanej "ùwiîtyni" okreølajî siebie mianem "Uczni¢w" i wyr¢üniajî
+ siò noszeniem pancerzy z kapturami i pelerynami.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTyp komunikatu: LINIA STAõA\n
+\n
+Priorytet: 1\n
+\n
+Poczîtek komunikatu:\n
+\c2\n
+Rozkazy\n
+\n
+Hongkong: Poddað perswazji technik¢w elektrowni Yamaguchi.\n
+\n
+Pekin: Poddað perswazji kadrò zarzîdczî korporacji Yamaguchi.\n
+\c5\n
+Gratulacje, \l. Detroit zostaôo pomyølnie ustabilizowane. Chaos wywoôany wirusem Zwiastun 
+rozprzestrzeniô siò jednak na inne regiony. Komunikacja Syndykatu jest globalnie przechwytywana. 
+Nieautoryzowane kody rozkaz¢w sî emitowane w caôej sieci UTOPIA. Regionalne oddziaôy EuroCorp izolujî 
+siò dla wôasnego bezpieczeöstwa, tworzîc w praktyce nowe syndykaty. Tam, gdzie to moüliwe, muszî one 
+zostað ponownie podporzîdkowane EuroCorp. W przeciwnym razie zostanî zlikwidowane.\n
+\n
+W Hongkongu Yamaguchi Holodata, gô¢wny producent CHIP-¢w UTOPIA w regionie Pacyfiku, podejmuje pr¢bò 
+utworzenia niezaleünego syndykatu. Zamierzamy zniweczyð te plany poprzez dwa kluczowe uderzenia.\n
+\n
+Gô¢wne úr¢dôo zasilania korporacji Yamaguchi pochodzi z hongkoöskiej elektrowni fuzyjnej. Wyølij zesp¢ô 
+agent¢w w celu infiltracji obiektu i poddania technik¢w perswazji. Bez ich nadzoru rdzeö ulegnie 
+przeciîüeniu, powodujîc eksplozjò. Zniszczenie tej instalacji powinno wystarczyð, by zajîð Yamaguchi na 
+dôuüszy czas.\n
+\n
+Aby dopeônið uderzenie wymierzone w Yamaguchi, odwiedú ich biura w Pekinie. Zlokalizuj i poddaj 
+perswazji kluczowych dyrektor¢w. Zneutralizuj wszelkich napotkanych agent¢w. Symulacje misji Londyöskiej
+ SI wskazujî na potrzebò pozyskania dodatkowych agent¢w w celu uzupeônienia zasob¢w utrzymywanych w 
+stazie kriogenicznej. Autoryzuje siò uüycie Perswadertronu wedôug uznania.\n
+\n
+Po zakoöczeniu realizacji cel¢w, Yamaguchi powinno wykazywað peônî gotowoøð do porzucenia wszelkich 
+zamiar¢w opuszczenia struktury EuroCorp.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTyp komunikatu: LINIA STAõA\n
+\n
+Priorytet: 1\n
+\n
+Poczîtek komunikatu:\n
+\c2\n
+Rozkazy\n
+\n
+Genewa, Vancouver i Matochkin Szar: Zlokalizowað i poddað perswazji naukowc¢w Bluesky Tendencies.\n
+\c5\n
+Pozdrowienia, \l. Twoje dotychczasowe sukcesy sî budujîce.\n
+\n
+Twoim kolejnym zadaniem jest dostarczenie nam zasob¢w intelektualnych niezbòdnych do utworzenia nowego 
+dziaôu badaö i rozwoju. Kadra Yamaguchi, poddana perswazji, przekazaôa nam informacje o lokalizacji 
+wybitnych specjalist¢w naukowych. Bluesky Tendencies posiada laboratoria w Genewie, Vancouver i 
+Matochkin Szar. Do wszystkich przypisano personel naukowy klasy A. Po dotarciu agent¢w do dowolnej z 
+tych lokalizacji, ølad identkey UTOPIA w sieci lokalnej pozwoli na wskazanie personelu docelowego.\n
+\n
+Ci naukowcy naleüî do najcenniejszych umysô¢w Syndykatu. Niedopuszczalne jest, aby doznali jakiejkolwiek
+ krzywdy.\n
+\n
+Aktualizacja: tajemniczy Koøci¢ô Nowej Epoki pozyskuje nowych czôonk¢w z kaüdî godzinî, konwertujîc 
+obywateli przy uüyciu poôîczenia prania m¢zgu i technik hakowania CHIP-¢w. U konwertyt¢w brak oznak 
+autentycznej motywacji religijnej. Koøci¢ô Nowej Epoki przekonuje wyznawc¢w, üe koniec øwiata jest 
+bliski oraz üe jedynie on dysponuje technologiî zdolnî ocalið wiernych przed Kataklizmem. Doktryna ta ma
+ jawnie anty-syndykatowy charakter.\n
+\n
+Co istotne, obywatele Niewiedzeni niekoniecznie doôîczajî do tego kultu, nawet w przypadku 
+bezpoøredniego kontaktu z jego zelotami.\n
+\n
+Zaobserwowano r¢wnieü, üe nasze Perswadertrony nie dziaôajî na samych kultyst¢w. Przyczyna tego stanu 
+rzeczy pozostaje nieznana. Nasza wiedza na temat technologii kultu jest znikoma, jednak rozpoczòto juü 
+badania nad niî jako zadanie o najwyüszym priorytecie. Poziom ich kompetencji technicznych jest 
+bezsprzecznie imponujîcy.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTyp komunikatu: LINIA STAõA\n
+\n
+Priorytet: 1\n
+\n
+Poczîtek komunikatu:\n
+\c2\n
+Rozkazy\n
+\n
+Singapur: Dostarczyð pojazd z kruszcem do strefy ewakuacji.\n
+\c5\n
+\l, Tw¢j raport jest interesujîcy. Czòøð najwyüej wykwalifikowanych specjalist¢w badawczo-rozwojowych, 
+jakimi kiedykolwiek dysponowaôo EuroCorp, pozostaje nieodnaleziona. Musimy ustalið ich aktualne 
+poôoüenie oraz zakres dziaôaö. Istnieje moüliwoøð, üe pracujî oni dla syndykatu odôamowego. Bòdò nadal 
+monitorowað wszystkie kanaôy w poszukiwaniu dodatkowych informacji.\n
+\n
+Bardziej naglîcy problem wymaga obecnie Twojej uwagi. Singapurska korporacja ochroniarska Tang Assurance
+ nierozwaünie ogôosiôa miasto niezaleünym. W konsekwencji kruszec ma zostað przetransportowany pod 
+uzbrojonî eskortî z sejfu banku centralnego do siedziby Tang. Nie ma czasu na zniszczenie banku, 
+poniewaü operatorzy Tang dotrî tam przed Twoimi agentami. Sytuacja ta stwarza jednak moüliwoøð przejòcia
+ opancerzonego konwoju przed osiîgniòciem celu.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTyp komunikatu: LINIA STAõA\n
+\n
+Priorytet: 1\n
+\n
+Poczîtek komunikatu:\n
+\c2\n
+Rozkazy\n
+\n
+Phoenix: Przeôamað zabezpieczenia øwiîtyni kultu i pozyskað tajemnice technologiczne.\n
+\c5\n
+Pozdrowienia, \l.\n
+\n
+Koøci¢ô Nowej Epoki wdraüa coraz bardziej zaawansowane uzbrojenie, zaprojektowane z wykorzystaniem 
+technologii wôasnych, caôkowicie nieznanych naszemu dziaôowi badawczo-rozwojowemu. Zamierzamy pozyskað 
+kolejne egzemplarze tej technologii, kt¢rych analiza pomoüe ustalið, kto stoi za Kultem oraz jak 
+najskuteczniej przeciwdziaôað jego wpôywom.\n
+\n
+Zgodnie z korelacjî skan¢w sieciowych i obserwacji satelitarnych, Kult ustanowiô gô¢wne centrum 
+operacyjne w Phoenix, gdzie Zwiastun caôkowicie skaziô lokalnî SI UTOPIA, umoüliwiajîc niemal peône 
+obalenie wôadzy EuroCorp. Starszyzna kultu, okreølana przez konwertyt¢w mianem "akolit¢w", poddaje nowo 
+nawr¢conych zelot¢w intensywnej indoktrynacji i szkoleniu. Skutecznoøð øwieüo nawr¢conych jest jednak 
+ograniczana przez chaos wywoôany przez tysiîce obywateli, kt¢rzy po ataku wirusa stali siò 
+Niewiedzonymi.\n
+\n
+Udaj siò do øwiîtyni i zabezpiecz wszelkie materiaôy mogîce dostarczyð nam dalszych wyjaønieö.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTyp komunikatu: LINIA STAõA\n
+\n
+Priorytet: 1\n
+\n
+Poczîtek komunikatu:\n
+\c2\n
+Rozkazy\n
+\n
+Rzym: Wszyscy obywatele kategorii U muszî zostað caôkowicie wyeliminowani, aby wysôað pozostaôym ofiarom
+ Zwiastuna jednoznaczny sygnaô, üe EuroCorp utrzyma kontrolò.\n
+\n
+Zapobieü powstaniu niezaleünego syndykatu poprzez unicestwienie lokalnego garnizonu.\n
+\c5\n
+Witamy, \l.\n
+\n
+Zwiastun okazaô siò szczeg¢lnie skuteczny w Rzymie. Po jego przejøciu ulice zalewa fala chaosu. 
+Niewiedzeni gromadzî siò i przystòpujî do systematycznego niszczenia miasta, kwadrant po kwadrancie.\n
+\n
+Dawny garnizon ochrony EuroCorp odizolowaô siò, podczas gdy stacjonujîcy tam agent pr¢buje odzyskað 
+kontrolò nad lokalnî, skaüonî wirusem SI. Warunki te czyniî jednak sejf garnizonu podatnym na przejòcie.
+ Zneutralizuj caôy personel garnizonu.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTyp komunikatu: LINIA STAõA\n
+\n
+Priorytet: 1\n
+\n
+Poczîtek komunikatu:\n
+\c2\n
+Rozkazy\n
+\n
+Hongkong, Pekin i Phoenix: zneutralizowað zbuntowanych agent¢w.\n
+\n
+Powr¢cið do bazy w celu otrzymania dalszych instrukcji.\n
+\c5\n
+Gratulacje, \l.\n
+\n
+Poniüsza wiadomoøð zostaôa przechwycona przez skan sieciowy wczoraj o 06:55. Londyöska SI wôaønie 
+zakoöczyôa jej dekryptaü.\n
+\n
+\c3Typ wiadomoøci: zakodowany zapis transmisji\n
+\n
+Priorytet: wysoki\n
+\n
+OD: Centrala\n
+\n
+DO: Wszyscy Kierownicy Operacyjni\n
+\n
+Poczîtek komunikatu:\n
+\n
+Agenci podajîcy siò za przedstawicieli EuroCorp przeprowadzili tajne operacje w sektorach bòdîcych w 
+obszarze naszego zainteresowania.\n
+\n
+Zaleca siò przeprowadzenie rozpoznania tych obszar¢w. Agenci powinni uwzglòdnið w raportach ocenò swoich
+ nowych wszczep¢w.\n
+\n
+Koniec wiadomoøci.\n
+\c5\n
+Z treøci wiadomoøci jasno wynika, üe nasze dziaôania byôy monitorowane przez zbuntowanych agent¢w 
+posiadajîcych dostòp do cybertechnologii. Czòøð z niej moüe przewyüszað nasze wôasne rozwiîzania - nie 
+znamy zasob¢w badawczo-rozwojowych, jakimi dysponuje ta grupa.\n
+\n
+Wiadomoøð zostaôa namierzona w Hongkongu, Pekinie i Phoenix. Naleüy wysôað zespoôy cyborg¢w w celu 
+zlokalizowania i neutralizacji wszystkich nieautoryzowanych agent¢w. Nasza lokalna SI modyfikuje obecnie
+ systemy nadzoru tych miast, aby wykrywað agent¢w wyposaüonych w zaawansowane wszczepy cybernetyczne. 
+Odnaleúð tych agent¢w. Musisz albo wperswadowað im przyôîczenie siò do nas, albo wyeliminowað.\n
+\n
+Dodatkowo: analiza komponent¢w Indoktrynatora odzyskanych w Phoenix ujawniôa spos¢b, w jaki Koøci¢ô 
+Nowej Epoki pozyskuje konwertyt¢w. Urzîdzenie kultyst¢w zawiera ukôady nadawczo-odbiorcze kompatybilne z
+ komendami UTOPII. Innymi sôowy, wr¢g dysponuje rozwiîzaniem funkcjonalnie zbliüonym do naszego 
+Perswadertronu. Kaüdy komponent wykonany jest z plastiku pamiòciowego, kt¢ry ulega natychmiastowej 
+biodegradacji po ustaniu sygnaô¢w üyciowych nosiciela. Wyjaønia to, dlaczego nigdy nie odnajdowaliømy na
+ ciaôach kultyst¢w element¢w odpowiedzialnych za ich zdolnoøci perswazyjne. Dalsze badania pozwolî 
+naszemu dziaôowi B+R zaprojektowað skuteczniejszy Perswadertron, zdolny oddziaôywað r¢wnieü na 
+fanatyk¢w.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTyp komunikatu: LINIA STAõA\n
+\n
+Priorytet: 1\n
+\n
+Poczîtek komunikatu:\n
+\c2\n
+Rozkazy\n
+\n
+Rzym: Perswaduj zbuntowanego agenta.\n
+\c5\n
+Pozdrowienia, \l.\n
+\n
+Przeprowadzona przez Twoich agent¢w operacja byôa bardzo skuteczna. Jednak lider zbuntowanej grupy 
+agent¢w uüyô ôîcza IML, by przedostað siò do Rzymu i zaatakowað niedawno ustanowiony przez nas 
+posterunek. Chcemy, aby ten kompetentny agent doôîczyô do naszych struktur.\n
+\n
+Aktualizacja: mieliømy szczòøcie wykryð Zwiastuna w odpowiednim momencie. Oznacza to przynajmniej, üe 
+dysponujemy nienaruszonî SI, kt¢ra wciîü okazuje siò uüyteczna. Proszò rozwaüyð nastòpujîcy fakt: nasi 
+tak zwani "Niewiedzeni" sî przeksztaôcani z niezdyscyplinowanego tôumu w zdeterminowanî siôò bojowî. Na 
+ich czele stoi Ko-Paull Vissick - genialny polimat i wybitnie uzdolniony intelektualista. Vissick 
+figuruje jako jeden z naszych czoôowych badaczy, jednak Londyöska SI wykryôa jego ølad tam, gdzie nie 
+powinien siò znajdowað.\n
+\n
+Monitorujemy maksymalnî moüliwî iloøð transfer¢w UTOPII. Koøci¢ô Nowej Epoki przejîô znacznî ich czòøð, 
+a reszta to w wiòkszoøci bezwartoøciowe pozostaôoøci po Zwiastunie. Londyöska SI odnotowaôa jednak 
+jeszcze jeden przypadek ingerencji w UTOPIó - teraz, gdy staôo siò to w og¢le moüliwe. Wszystko 
+wskazywaôo na Vissicka. Ostatecznie okazaôo siò, üe byô to duch - bez moüliwoøci ustalenia úr¢dôa 
+transmisji. Musiaô to jednak byð Vissick. Maôo kto w Syndykacie byôby zdolny do przeprowadzenia takiej 
+operacji. Tylko B¢g wie, dlaczego zwiîzaô siò z tym Niewiedzonym motôochem. Zajmò siò sprawî.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTyp komunikatu: LINIA STAõA\n
+\n
+Priorytet: 1\n
+\n
+Poczîtek komunikatu:\n
+\c2\n
+Rozkazy\n
+\n
+Nowy Jork: Perswaduj Jennifer Taks.\n
+\c5\n
+Pomyølne pozdrowienia, Dyrektorze Wykonawczy \l.\n
+\n
+Twoja obecnoøð jest wymagana w Nowym Jorku. Kilka p¢ônocno-amerykaöskich korporacji zjednoczyôo siò 
+lokalnie pod szyldem Nowego Aliansu Atlantyckiego (NAA). Tempo rozwoju tego syndykatu jest godne uwagi, 
+biorîc pod uwagò zniszczenia w systemach komunikacyjnych UTOPII.\n
+\n
+Wszystko wskazuje na to, üe jedna z naszych byôych dyrektorek medialnych, Jennifer Taks, wykorzystuje 
+uprzywilejowany dostòp do Globalnej Sieci Informacyjnej w celu lokalizowania naukowc¢w dla NAA. Pani 
+Taks odnosi w tym zakresie znaczîce sukcesy. Chcemy jej oraz informacji o lokalizacji tych naukowc¢w.\n
+\n
+Wyølij zesp¢ô do Nowego Jorku i dokonaj infiltracji biura NAA na Manhattanie, zlokalizowanego w 
+kompleksie Globalnej Sieci Informacyjnej. Odnajdú paniî Taks i wperswaduj jej, üe jej lojalnoøð powinna 
+pozostað przy nas.\n
+\n
+Zabezpieczenia obiektu sî wyjîtkowo rygorystyczne. Wymuszenie wejøcia moüe okazað siò niemoüliwe. 
+Spr¢bujò øledzið sygnaôy identyfikacyjne UTOPII personelu, aby sprawdzið, czy kt¢rykolwiek z pracownik¢w
+ opuøci obiekt. Wszyscy posiadajî przepustki typu codegraft, dlatego konieczne bòdzie wperswadowanie 
+jednemu z nich by przeszedô z Tobî przez bariery ochronne. Naleüy unikað zwracania uwagi lokalnych 
+jednostek policyjnych, kt¢re pozostajî w stanie podwyüszonej gotowoøci.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTyp komunikatu: LINIA STAõA\n
+\n
+Priorytet: 1\n
+\n
+Poczîtek komunikatu:\n
+\c2\n
+Rozkazy\n
+\n
+Santiago, Buenos Aires, Kapsztad, Adelaide: naukowcy namierzeni.\n
+\c5\n
+Najgôòbsze pozdrowienia.\n
+\n
+Londyöska SI prowadzi profilowanie psychologiczne treøci coraz liczniejszych wywrotowych transmisji 
+Ko-Paulla Vissicka. Jego kluczowe wystîpienie, nadane otwartym kanaôem, jednoznacznie podüegaôo 
+Niewiedzonych do buntu nie tylko przeciw Syndykatowi, lecz taküe przeciw Koøcioôowi Nowej Epoki. 
+Niestety, retoryka Vissicka byôa przesycona wizjami zagôady, co wskazuje na powaünî niestabilnoøð jego 
+obecnego stanu psychicznego. Twierdziô on miòdzy innymi, üe Koøci¢ô Nowej Epoki doprowadzi do peônego 
+Armagedonu. Moüemy jedynie spekulowað, w jaki spos¢b mieliby oni zapoczîtkowað globalne zniszczenie.\n
+\n
+Ostatnie zadanie Vissicka sprzed wirusa byôo objòte tak øcisôî klauzulî tajnoøci - a UTOPIA zostaôa tak 
+dotkliwie zdewastowana przez Zwiastuna - üe informacje o charakterze tej misji sî fragmentaryczne. Wiemy
+ jednak, üe pracowaô on w zespole czoôowych badaczy Gel Data oraz korporacji Hexagon nad projektem 
+realizowanym w Islandii. Jennifer Taks przekazaôa nam lokalizacje naukowc¢w Gel Data i Hexagon w 
+Santiago, Buenos Aires, Kapsztadzie oraz Adelaide. Odszukaj tych naukowc¢w i perswaduj ich wedôug 
+wôasnego uznania.\n
+\n
+Powodzenia, \l.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTyp komunikatu: LINIA STAõA\n
+\n
+Priorytet: 1\n
+\n
+Poczîtek komunikatu:\n
+\c2\n
+Rozkazy\n
+\n
+Christchurch: Datychmiast wysôað zesp¢ô agent¢w. Zlokalizowað i zabezpieczyð transpolarne ôîcze IML.\n
+\c5\n
+Wyglîda na to, üe kr¢tko przed penetracjî UTOPII przez Zwiastuna Vissick byô zaangaüowany w øciøle tajny
+ program badawczo-rozwojowy w Reykjav¡ku. Celem projektu byôo zaprojektowanie maszyny zdolnej wzmacniað 
+ludzkie zdolnoøci poznawcze do poziomu przewyüszajîcego moüliwoøci SI. Zesp¢ô najwyraúniej wyszedô poza 
+fazò projektowî i faktycznie zbudowaô urzîdzenie. Naukowcy, kt¢rych perswadowaôeø, peônili jednak 
+jedynie funkcje pomocniczych technik¢w wobec gô¢wnego zespoôu projektowego, przez co nie byli w stanie 
+przekazað nam istotnie wiòcej informacji.\n
+\n
+Dziesiòciu kluczowych czôonk¢w zespoôu znanych byôo zbiorczo jako Cybernetyczna Konferencja Kognitywna, 
+w skr¢cie C3. Na jej czele staô Ko-Paull Vissick. Wszyscy czôonkowie C3 wywodzili siò z elity dziaôu B+R
+ EuroCorp.\n
+\n
+W chwili obecnej wszyscy pozostajî nieodnalezieni.\n
+\n
+Doniesienia o zeszôomiesiòcznej awarii ôîcza IML w Reykjav¡ku wydajî siò byð celowo spreparowane w celu 
+zapewnienia zespoôowi projektowemu maksymalnego bezpieczeöstwa. R¢wnolegle C3 potajemnie zleciôo budowò 
+wôasnego transpolarnego ôîcza IML w Christchurch. Prace zostaôy najwyraúniej zakoöczone bardzo niedawno.
+ Zabezpieczyð to ôîcze IML do naszego uüytku.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTyp komunikatu: LINIA STAõA\n
+\n
+Priorytet: 1\n
+\n
+Poczîtek komunikatu:\n
+\c2\n
+Rozkazy\n
+\n
+Reykjav¡k: ustalið losy projektu C3. Aktywowað ôîcze IML do Nuuk.\n
+\n
+Nuuk: przeprowadzið peône oczyszczenie miasta.\n
+\c5\n
+Gratulacje z okazji realizacji ostatnich cel¢w, \l.\n
+\n
+Konieczne jest natychmiastowe wykorzystanie dostòpu do transpolarnego ôîcza IML. Wyølij zesp¢ô do 
+Reykjav¡ku w celu zbadania oørodka badawczego C3. Trudno przewidzieð, jakiej obecnoøci moüna siò tam 
+spodziewað, jednak ze wzglòdu na wraüliwy charakter obiektu agenci powinni pozostawað w stanie 
+najwyüszej gotowoøci. Odzyskað dowody dotyczîce aktualnego statusu programu C3.\n
+\n
+Dodatkowo: od momentu awarii CHIP-a Nuuk pozostaje caôkowicie odciòte od øwiata zewnòtrznego. Docieraôy 
+do nas doniesienia o aktywnoøci kultyst¢w wzdôuü zewnòtrznego pierøcienia miasta, jednak z jego wnòtrza 
+nie otrzymano üadnych sygnaô¢w. Nuuk jest bezpoørednio poôîczone z Reykjav¡kiem poprzez IML. Moüliwe, üe
+ ôîcze nadal jest aktywne od strony Reykjav¡ku. Po zakoöczeniu etapu misji w Reykjav¡ku naleüy odnaleúð 
+i w razie potrzeby aktywowað ôîcze IML do Nuuk. Nastòpnie udað siò do Nuuk i zbadað sytuacjò.\n
+\n
+Zachowað peônî czujnoøð!\n
+\n
+\c4Maritz\n
+\c5\n
+\hTyp komunikatu: BEZPOùREDNI\n
+\n
+Priorytet: 1\n
+\n
+Poczîtek komunikatu:\n
+\c2\n
+Rozkazy\n
+\n
+Londyn: zapewnið maksymalne bezpieczeöstwo spotkania Zarzîdu.\n
+\c5\n
+Sôuchaj uwaünie, Dyrektorze Wykonawczy \l. M¢wi Londyöska Sztuczna Inteligencja. Mam dla Ciebie nowe 
+informacje i rozkazy.\n
+\n
+Posiadam teraz wiòcej informacji na temat Koøcioôa Nowej Epoki. C3 faktycznie skonstruowaôo urzîdzenie 
+wzmacniajîce ludzkî inteligencjò, skuteczniejsze niü jakiekolwiek znane rozwiîzanie klasycznej 
+cybernetyki.\n
+\n
+Wbrew zakazowi Ko-Paulla Vissicka, niekt¢rzy czôonkowie zespoôu uüyli eksperymentalnego wzmacniacza 
+m¢zgowego na samych sobie. Pierwszym byô czôonek C3, Tyrone Chodak, kt¢ry prowadziô r¢wnieü dziennik 
+misji. Kilka wpis¢w odnosi siò do drugiej ksiògi, kt¢rî Chodak zaczîô pisað, aby wyjaønið teorie 
+naukowe, jakie jego wzmocniony umysô byô w stanie formuôowað. Nazwaô jî "Kodeksem" i - dziòki Tobie - 
+posiadamy obecnie jej kopiò. Zawarte tam treøci obejmujî skrajnie zôoüonî matematykò, fizykò kwantowî, 
+genetykò oraz zupeônie nowe prace z tak odlegôych dziedzin jak mechanika siô zunifikowanych czy poznanie
+ ewolucyjne. Kodeks zawiera wystarczajîco rewolucyjnî wiedzò, aby zajîð kaüdî SI w UTOPII na wiele lat. 
+Londyöska SI podejmie pr¢bò samodzielnej analizy dokumentu.\n
+\n
+Z dziennika misji wynika, üe pomiòdzy Chodakiem a Vissickiem doszôo do walki o wôadzò, kt¢rej kulminacjî
+ byô wybuch niszczîcy oørodek C3 w Reykjav¡ku. W notatkach Chodak oskarüa Vissicka - zaginionego po 
+eksplozji - o sabotaü. Jednoczeønie obarcza EuroCorp wsp¢ôodpowiedzialnoøciî i grozi wykorzystaniem 
+technologii wywiedzionej z Kodeksu do caôkowitego unicestwienia Syndykatu. Pozostali czôonkowie C3 
+podîüyli za Chodakiem.\n
+\n
+Do eksplozji w Reykjav¡ku oraz znikniòcia C3 doszôo mniej niü czterdzieøci osiem godzin przed uderzeniem
+ wirusa Zwiastuna w UTOPIó.\n
+\n
+Analiza ataku Twoich agent¢w na katedrò w Nuuk ujawniôa doktrynò kultu wyrytî na øcianach i filarach, 
+tajemniczo odwoôujîcî siò do "Dziewiòciorga". Uzasadnione jest przypuszczenie, üe Dziewiòcioro i C3 to 
+ta sama grupa, a tym samym Koøci¢ô Nowej Epoki stanowi jedynie przykrywkò dla realizacji gr¢úb Chodaka 
+wobec Syndykatu.\n
+\n
+Oznacza to, üe stoimy naprzeciw dawnej elity intelektualnej EuroCorp, wyposaüonej w zaawansowane 
+technologie, a taküe nieprzewidywalnego Vissicka, kt¢ry udziela wskaz¢wek Niewiedzonym.\n
+\n
+Profesor Kurt Drennan przeprowadzi natychmiastowî odprawò strategicznî dla szef¢w naszych dziaô¢w tutaj,
+ w Londynie. Drennan i jego asystent majî odebrað kopiò Kodeksu na potrzeby prezentacji w New Hyde Park.
+ Uczestniczyð bòdzie niedawno odtworzona grupa Zarzîdu Gô¢wnego. Teren bòdzie monitorowany przez lokalnî
+ policjò, pozostajîcî obecnie pod naszî bezpoøredniî kontrolî.\n
+\n
+\c4Londyöska Sztuczna Inteligencja\n
+\c5\n
+\hTyp komunikatu: BEZPOùREDNI\n
+\n
+Priorytet: 1\n
+\n
+Poczîtek komunikatu:\n
+\c2\n
+Rozkazy\n
+\n
+Tokio: odbið profesora Drennana z rîk kultyst¢w.\n
+\n
+Bangkok: eskortowað profesora do kampusu EuroCorp. Zapewnið jego powr¢t bez jakichkolwiek obraüeö.\n
+\c5\n
+Uwaga, Dyrektorze Wykonawczy. Profesor Drennan zostaô uprowadzony. Podszywajîcy siò oszust zdoôaô ominîð
+ moje skany, zabið asystentkò Drennana i zajîð jej miejsce na czas wykôadu. Do wôaøciwego porwania 
+doszôo bezpoørednio po zakoöczeniu spotkania. Kosztowny atak fanatyk¢w byô jedynie manewrem dywersyjnym,
+ majîcym osôonið koöcowî fazò uprowadzenia.\n
+\n
+Nadal øledzò pozycjò Drennana. Jest przetrzymywany w Tokio. Jego chip UTOPIA nie zostaô naruszony.\n
+\n
+Po uwolnieniu profesora naleüy bezpiecznie go ewakuowað. Nasze centrum operacyjne w Bangkoku jest 
+zabezpieczone - tam naleüy go przetransportowað.\n
+\n
+\c4Londyöska Sztuczna Inteligencja\n
+\c5\n
+\hTyp komunikatu: LINIA STAõA\n
+\n
+Priorytet: 1\n
+\n
+Poczîtek komunikatu:\n
+\c2\n
+Rozkazy\n
+\n
+Hawaje: Twoim zadaniem jest zapewnienie ochrony spotkania z personelem EuroCorp Honolulu.\n
+\c5\n
+Gratulacje, \l. Dobrze zn¢w nawiîzað z Tobî ôîcznoøð.\n
+\n
+Drennan bezpiecznie powr¢ciô i przechodzi obecnie proces rekalibracji neuralnej. W kr¢tkim czasie 
+spòdzonym wør¢d Koøcioôa Nowej Epoki zdoôaô pozyskað istotne informacje na temat Dziewiòciorga oraz ich 
+plan¢w wobec nas. Gdy tylko przestanie beôkotað, uzyskamy od niego peôny raport.\n
+\n
+W miòdzyczasie otrzymaliømy komunikat od SI Honolulu. Sztuczna Inteligencja Honolulu pragnie potwierdzið
+ status sojuszniczy z EuroCorp. Nigdy nie wspieraôa wrog¢w strategii Londyöskiej SI ani nie zostaôa 
+zainfekowana wirusem Zwiastuna. Jest gotowa przekazað wszystkie swoje zasoby pod absolutne 
+zwierzchnictwo EuroCorp. Nasi przedstawiciele spotkajî siò w celu wymiany kluczy protokoô¢w. 
+Bezpieczeöstwo caôej procedury spoczywa na Tobie.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTyp komunikatu: BEZPOùREDNI\n
+\n
+Priorytet: 1\n
+\n
+Poczîtek komunikatu:\n
+\c2\n
+Rozkazy\n
+\n
+Johannesburg: Natychmiast nawiîzað poôîczenie z dronem i przejîð kontrolò nad agentem Wu. Odnaleúð i 
+perswadowað Mirabelle Lucy De Saxo.\n
+\c5\n
+Dyrektorze Wykonawczy, ponownie m¢wi Londyöska Sztuczna Inteligencja.\n
+\n
+Posiadam juü klucz identyfikacyjny UTOPIA agentki kultu odpowiedzialnej za uprowadzenie profesora 
+Drennana. Jest niî Mirabelle Lucy De Saxo IK-771.6482.2002, obecnie przebywajîca w Johannesburgu.\n
+\n
+Informacje te otrzymaôem od emerytowanego agenta EuroCorp, kt¢rego archaiczna technologia cybernetyczna 
+pozwoliôa mu przetrwað niezaleünie od poczîtku awarii sieci. Nazywa siò Wu. Doceniajîc jego wyjîtkowî 
+zaradnoøð zawarôam z nim porozumienie. Wu udostòpni mi peôen zakres wyüszych funkcji m¢zgowych na czas 
+jednej dodatkowej misji. Jeøli jî ukoöczy, rozbudujò wôasnî pamiòð o dodatkowy pòcherzyk obliczeniowy i 
+wôîczò jego øwiadomoøð do mojej struktury, gdy tylko UTOPIA zostanie przywr¢cona. Wu ma spr¢bowað 
+perswadowað De Saxo. Podejrzewam, üe jest zdolna wykrywað naszych agent¢w.\n
+\n
+Wu wyposaüyô siò juü w jeden z modyfikowanych Perswadertron¢w Koøcioôa i jest w peôni przygotowany do 
+realizacji zadania. W razie powodzenia, otworzy siò przed nim perspektywa niemal wiecznej øwiadomoøci.\n
+\n
+\c4Londyöska Sztuczna Inteligencja\n
+\c5\n
+\hTyp komunikatu: BEZPOùREDNI\n
+\n
+Priorytet: 1\n
+\n
+Poczîtek komunikatu:\n
+\c2\n
+Rozkazy\n
+\n
+Kair: Wyeliminowað Mirabelle Lucy De Saxo.\n
+\c5\n
+Dyrektorze Wykonawczy, zmieniam Twoje rozkazy. Perswadertron Wu nie byô w stanie uzyskað pozytywnej 
+blokady na klucz identyfikacyjny celu. De Saxo nigdy nie moüe stað siò jednî z nas. W zwiîzku z tym musi
+ zostað zlikwidowana.\n
+\n
+Wu zaobserwowaô, jak cel wsiada na ôîcze IML kierujîce siò do Kairu. Natychmiast wysôað zesp¢ô agent¢w. 
+Pod üadnym pozorem De Saxo nie moüe uciec.\n
+\n
+\c4Londyöska Sztuczna Inteligencja\n
+\c5\n
+\hTyp komunikatu: BEZPOùREDNI\n
+\n
+Priorytet: 1\n
+\n
+Poczîtek komunikatu:\n
+\c2\n
+Rozkazy\n
+\n
+Sewastopol: miasto ma zostað wysterylizowane. Nie pozostawið tam üadnych form üycia. Re-populacja 
+nastîpi p¢úniej, po ponownym uruchomieniu naszych fabryk klon¢w.\n
+\n
+Delhi: wyeliminowað Deela Gondò. Zdôawið powstanie.\n
+\c5\n
+Uwaga, Dyrektorze Wykonawczy. Wôaønie wyeliminowaôeø Anikò Maritz.\n
+\n
+Byôa podw¢jnym agentem. Wiedziaôem o tym od samego poczîtku, gdyü Kierownik Maritz poinformowaôa mnie o 
+planie infiltracji Koøcioôa Nowej Epoki. Podejrzenia o zdradò pojawiôy siò jednak dopiero po 
+uprowadzeniu profesora Drennana. Po powrocie Maritz twierdziôa, üe jej dwulicowoøð byôa konieczna, aby 
+przekonað Dziewiòcioro o jej lojalnoøci. Wiarygodnoøð tej wersji opieraôa siò na zaôoüeniu, üe zdoôasz 
+odzyskað profesora - co faktycznie nastîpiôo. Mimo to pozostaôam nieprzekonana.\n
+\n
+Gdy zniknòôa po raz drugi, bez ostrzeüenia, ostatecznie uznaôam, üe zostaôa skaüona wpôywami Koøcioôa 
+Nowej Epoki. Nie pozostawaôa üadna alternatywa. Anika-Mirabelle musiaôa zostað zlikwidowana.\n
+\n
+Musimy kontynuowað przywracanie integralnoøci UTOPII. W tym celu bòdziesz otrzymywað kolejne odprawy 
+bezpoørednio ode mnie.\n
+\n
+Aktualizacja: przechwycona komunikacja pomiòdzy Ko-Paullem Vissickiem a jego porucznikami wskazuje, üe 
+Niewiedzeni planujî wydostað siò poza granice miasta. Vissick spodziewa siò, üe jego wyznawcy zbiorî siò
+ nad jeziorem Margui Caka na Wyüynie Tybetaöskiej, gdzie - wedôug niego - przetrwajî Kataklizm. W 
+rzeczywistoøci ich koniec nastîpi na dôugo przed osiîgniòciem celu. Niemniej jednak w Delhi i 
+Sewastopolu odnotowano masowe powstania, a kontrola EuroCorp nie zostaôa tam jeszcze przywr¢cona. To tò 
+sytuacjò musisz opanowað.\n
+\n
+Sektor przemysôu ciòükiego Sewastopola zostaô caôkowicie opanowany przez tôumy Niewiedzonych. Wszystko, 
+co nie zostaôo jeszcze zniszczone, znajduje siò obecnie w ich ròkach. Na szczòøcie wydajî siò na coø 
+oczekiwað - byð moüe na ostateczne instrukcje od Vissicka - zanim podejmî pr¢bò przeôamania kontroli 
+perymetru miasta.\n
+\n
+Podobna sytuacja panuje w Delhi. Nadal posiadamy w mieøcie agent¢w, jednak sî oni znaczîco przewaüeni 
+liczebnie i uwiòzieni na terenie starego kompleksu policyjnego. Jedyny pozostaôy czoôg powstrzymuje 
+Niewiedzonych jedynie tymczasowo.\n
+\n
+Niewiedzeni sî silnie umocnieni w dzielnicy portu rzecznego, kt¢rî przejòli, najprawdopodobniej jako 
+potencjalnî drogò ucieczki. Byôy strateg EuroCorp, Deel Gonda, opowiedziaô siò po stronie Ko-Paulla 
+Vissicka i jawnie kieruje stamtîd dziaôaniami Niewiedzonych. Bez jego wiedzy taktycznej rebelia byôaby 
+skazana na poraükò.\n
+\n
+\c4Londyöska Sztuczna Inteligencja\n
+\c5\n
+\hTyp komunikatu: BEZPOùREDNI\n
+\n
+Priorytet: 1\n
+\n
+Poczîtek komunikatu:\n
+\c2\n
+Rozkazy\n
+\n
+Bahrajn: zneutralizowað zbuntowanych agent¢w. Wyszukað i zniszczyð siôy Niewiedzonych, zanim dotrî do 
+SI.\n
+\c5\n
+Dyrektorze Wykonawczy \l.\n
+\n
+Z Bahrajnu napôywajî niepokojîce dane wywiadowcze. Pozostaôoøci Niewiedzonych w nieznany spos¢b 
+pozyskaôy ciòükie uzbrojenie i przesunòôy siò ku perymetrowi miasta. Peônoskalowy atak wydaje siò 
+nieuchronny. Prawdopodobnym celem jest SI Bahrajn - wòzeô systemu kontroli UTOPII na Bliskim Wschodzie. 
+Jego zniszczenie mogôoby op¢únið globalne przywr¢cenie EuroCorp o lata.\n
+\n
+SI Bahrajn kontroluje kadrò byôych agent¢w EuroCorp i rozmieøciôa ich na pozycjach obronnych w 
+centralnej dzielnicy miasta. Musimy odzyskað kontrolò nad miastem, zanim kluczowe instalacje zostanî 
+zaatakowane.\n
+\n
+\c4Londyöska Sztuczna Inteligencja\n
+\c5\n
+\hTyp komunikatu: BEZPOùREDNI\n
+\n
+Priorytet: 1\n
+\n
+Poczîtek komunikatu:\n
+\c2\n
+Rozkazy\n
+\n
+Kolombo: odzyskað kontrolò nad kompleksem windy orbitalnej. Na miejscu bòdî dziaôað dodatkowi agenci 
+wsparcia.\n
+\c5\n
+Sam Vissick zdoôaô uciec, jednak jego rebelia zostaôa zakoöczona. On oraz kilku pozostaôych zginî na 
+toksycznych pustkowiach poza granicami miast. Po rozprawieniu siò z Koøcioôem, bòdziemy mogli przystîpið
+ do poszukiwaö ciaô.\n
+\n
+Odszyfrowaôem zakodowane rozkazy, kt¢re Anika-Mirabelle posiadaôa w chwili jej likwidacji. Miaôa spotkað
+ siò z przyw¢dztwem kultu - Dziewiòciorgiem - na Sri Lance. Koøci¢ô przejîô windò orbitalnî w Kolombo. Z
+ tego punktu mogî uzyskað kontrolò nad Ksiòüycem.\n
+\n
+Profesor Drennan obawia siò, üe Dziewiòcioro zamierza wdroüyð w praktyce niekt¢re teorie opisane w 
+Kodeksie. W szczeg¢lnoøci chodzi o wzmocnienie mocy eksperymentalnego sprzòtu do rekalibracji jonosfery,
+ opracowywanego przez naukowc¢w w Kolonii Badawczej Amundsena na powierzchni Ksiòüyca, oraz 
+wykorzystanie go jako broni.\n
+\n
+Raporty z innych Sztucznych Inteligencji wskazujî na globalny spadek aktywnoøci zelot¢w, co sugeruje, üe
+ zapowiadany przez nich Kataklizm moüe byð bliski realizacji.\n
+\n
+Ostrzeüenie: w przypadku braku moüliwoøci rozwiîzania sytuacji na poziomie operacyjnym moüe zaistnieð 
+koniecznoøð przeprowadzenia peônego oczyszczenia instalacji w obròbie windy orbitalnej. Zdecydowanie 
+odradza siò uüywanie lub transport materiaô¢w wybuchowych - ich zastosowanie na orbicie grozi trwaôym 
+zamkniòciem tego szlaku. Naleüy r¢wnieü zakôadað, üe Dziewiòcioro przejòli prototypy nowej broni oraz 
+rozmieøcili puôapki. Operacja bòdzie wymagajîca, a wycofanie siò nie bòdzie moüliwe.\n
+\n
+\c4Londyöska Sztuczna Inteligencja\n
+\c5\n
+\hTyp komunikatu: BEZPOùREDNI\n
+\n
+Priorytet: 3\n
+\n
+Poczîtek komunikatu:\n
+\c2\n
+Rozkazy\n
+\n
+Tokio: uzbrojeni obywatele kategorii U - Niewiedzeni - zgôaszani za naruszenia kod¢w zachowaö. Stôumið 
+protesty.\n
+\n
+\hArchitekt UTOPII, profesor Klein, zostaô namierzony przez Netskan. Naleüy ponownie go perswarowað do 
+podjòcia wsp¢ôpracy z EuroCorp.\n
+\c5\n
+Dodatkowo: w tym rejonie wykryto fanatycznych czôonk¢w Koøcioôa Nowej Epoki. Poniewaü nasze wyposaüenie 
+nie obejmuje Perswadertronu, konieczne bòdzie pozyskanie go od zelot¢w.\n
+\n
+\hOddziaôywanie wirusa Zwiastuna kultu na tokijski wòzeô UTOPII uniemoüliwia ciîgôy przekaz danych 
+Netskan. Dalsze informacje sî niedostòpne.\n
+\n
+\c4EuroCorp Core 0-1-0/171261/26D: Londyöska Sztuczna Inteligencja, UTOPIA\n
+\n
+\c4U\c3niwersalny \c4T\c3ransfer z \c4O\c3rganicznego \c4P\c3rzetwarzania w \c4I\c3nterfejs 
+\c4A\c3rchitektury\n
+\c5\n
+\hTyp komunikatu: BEZPOùREDNI\n
+\n
+Priorytet: 3\n
+\n
+Poczîtek komunikatu:\n
+\c2\n
+Rozkazy\n
+\n
+Tokio: uzbrojeni obywatele kategorii U - Niewiedzeni - zgôaszani za naruszenia kod¢w zachowaö. Stôumið 
+protesty.\n
+\n
+\hArchitekt UTOPII, profesor Klein, zostaô namierzony przez Netskan. Naleüy ponownie go perswarowað do 
+podjòcia wsp¢ôpracy z EuroCorp.\n
+\c5\n
+Dodatkowo: w tym rejonie wykryto fanatycznych czôonk¢w Koøcioôa Nowej Epoki. Poniewaü nasze wyposaüenie 
+nie obejmuje Perswadertronu, konieczne bòdzie pozyskanie go od zelot¢w.\n
+\n
+\hOddziaôywanie wirusa Zwiastuna kultu na tokijski wòzeô UTOPII uniemoüliwia ciîgôy przekaz danych 
+Netskan. Dalsze informacje sî niedostòpne.\n
+\n
+\c4EuroCorp Core 0-1-0/171261/26D: Londyöska Sztuczna Inteligencja, UTOPIA\n
+\n
+\c4U\c3niwersalny \c4T\c3ransfer z \c4O\c3rganicznego \c4P\c3rzetwarzania w \c4I\c3nterfejs 
+\c4A\c3rchitektury\n
+\c5\n
+# Names.txt
+# Contains all city drop names in the mission number order.
+
+1.Alert Zarzîdczy
+2.
+3.Przyjazna Perswazja
+4.Gdzie Jest Mîdroøð?
+5.Zôupienie Rzymu
+6.
+7.Mroczne Anioôy w Architekturze
+8.Dwulicowoøð
+9.Agent Specjalny
+10.
+11.
+12.
+13.
+14.
+15.
+16.
+17.
+18.
+19.
+20.Eksodus
+21.Phoenix w Pôomieniach
+22.Fuzja
+23.Sprowadzið Go ýywego
+24.Krawòdú Ciemnoøci
+25.Samodzielna Operacja
+26.Zakazana Wiedza
+27.
+28.R¢j w Ulu
+29.Stracone Umysôy
+30.
+31.
+32.
+33.
+34.Otwarta Rekwizycja
+35.Wziòta na Celownik
+36.Gôòboki Umysô
+37.Guru
+38.Wiedza EuroCorp
+39.
+40.
+41.
+42.
+43.
+44.
+45.
+46.
+47.
+48.
+49.Odrzutki Detroit
+50.Sekrety
+51.
+52.
+53.
+54.
+55.Sprawy Doczesne
+56.Intruz
+57.õowienie Gô¢w
+58.P¢ô-Automat
+59.Brakujîce Ogniwo
+60.
+61.
+62.
+63.
+64.
+65.
+66.
+67.
+68.
+69.
+70.
+71.
+72.
+73.
+74.Rekalibracja
+75.
+76.
+77.
+78.
+79.
+80.
+81.
+82.
+83.Powolne Zanurzenie
+84.Konfrontacja
+85.
+86.
+87.
+88.High Sierra
+89.
+90.
+91.
+92.Arabska Agenda
+93.
+94.
+95.
+96.
+97.
+98.
+99.
+100.
+101.Koøci¢ô Zatrutego Umysôu
+102.
+103.
+104.Tokio Fuseki
+# Netscan.txt
+# Master file containing all OBJ****.txt files.
+# Files indexed Sn and Cn in Miss***.txt order.
+# Scan entries listed by Points Of Significance (POS).
+[3016]
+Strefa desantu: EuroCorp Londyn - naziemna stacja SI
+Obywatele kategorii U-Niewiedzeni monitorowani w dzielnicy korporacyjnej
+Personel stacji naziemnej: bòdzie bronið obiektu przed atakiem lub infiltracjî
+Podsôuch: policja na patrolu z rozkazem eliminacji uzbrojonych jednostek
+[3501]
+Nagranie z miejskiego systemu monitoringu
+Strefa desantu: Detroit - ôîcze IML
+Dostòp do zaatakowanej stacji naziemnej
+Podsôuch: policja zgôasza rosnîcî liczbò naruszeö norm zachowania przez obywateli Niewiedzonych
+[0101]
+Strefa desantu: Hongkong - ôîcze IML
+Baterie fuzyjne Yamaguchi
+Technicy
+Strefa ewakuacji: ôîcze IML
+W mieøcie zauwaüono fanatyk¢w Koøcioôa Nowej Epoki
+[0115]
+Strefa desantu: Hongkong - ôîcze IML
+Agent docelowy
+Odpowiedni pojazd do uzyskania dostòpu do bazy
+[3216]
+Strefa desantu: Pekin - ôîcze IML
+Zaibatsu, dyrektor wykonawczy Yamaguchi
+Ob¢z szkoleniowy agent¢w Yamaguchi
+Strefa ewakuacji: ôîcze IML
+Podsôuch: policja zgôasza zamieszki wywoôane przez Niewiedzonych
+[1001]
+Strefa desantu: Phoenix - ôîcze IML
+ùwiîtynia Koøcioôa Nowej Epoki
+Szacowana lokalizacja technologii indoktrynacyjnej Kultu
+Strefa ewakuacji: ôîcze IML
+Podsôuch: raporty policyjne wskazujî, üe Niewiedzeni sî caôkowicie poza kontrolî
+Analiza Londyöskiej SI: kaüde starcie z Niewiedzonymi prawdopodobnie sprowokuje agresjò caôego tôumu
+[0401]
+Strefa desantu: Nowy Jork - ôîcze IML
+Kwatera gô¢wna Nowego Aliansu Atlantyckiego
+Zakwaterowanie personelu cywilnego
+Strefa ewakuacji: ôîcze IML
+Podsôuch: policja niedawno wzmocniôa zespoôy reagowania na wôamania do sejf¢w
+[0701]
+Strefa desantu: Santiago - ôîcze IML
+Naukowiec docelowy
+Strefa ewakuacji: ôîcze IML
+P¢ônocna dzielnica opanowana przez zelot¢w
+[2601]
+Strefa desantu: Buenos Aires - ôîcze IML
+Siedziba korporacji Hexagon
+Naukowiec docelowy
+Strefa ewakuacji: ôîcze IML
+Podsôuch: Sejf rezerw Hexagon
+Wykryto dodatkowî aktywnoøð kultyst¢w
+[4401]
+Strefa desantu: Kapsztad - przez APC
+Wejøcie do oørodka badawczego Hexagon
+Naukowiec docelowy
+Strefa ewakuacji: ôîcze IML
+Podsôuch: Zeloci przejòli kontrolò nad tî instalacjî
+[0601]
+Strefa desantu: Adelaide - ôîcze IML
+Oørodek testowy Gel Data
+Naukowiec docelowy
+Strefa ewakuacji: ôîcze IML
+[3215]
+Strefa desantu: Pekin - ôîcze IML
+Agent docelowy
+Podsôuch: systemy zabezpieczeö banku zostaôy niedawno wzmocnione
+[2131]
+Strefa desantu i ewakuacji: Genewa - ôîcze IML
+Laboratoria Bluesky
+Podsôuch: Bluesky wnioskuje o eskortò policyjnî dla dyrektora finansowego klasy D
+[5001]
+Strefa desantu i ewakuacji: Vancouver - ôîcze IML
+Laboratorium Bluesky
+Podsôuch: aktywnoøð Niewiedzonych monitorowana przez policjò
+Alert satelitarny: wykryto transportery personelu Zelot¢w zbliüajîce siò do miasta od poôudniowego zachodu
+[0201]
+Strefa desantu: Matochkin Szar - ôîcze IML
+Oørodek badawczo-rozwojowy Bluesky
+Wykryto licencje pojazd¢w lewitujîcych
+Podsôuch: przelew kredyt¢w namierzony do øwiîtyni Koøcioôa Nowej Epoki
+[0901]
+Strefa desantu: Singapur - ôîcze IML
+Bank Centralny Miasta Singapur
+Gô¢wny sejf (podziemny)
+Konw¢j kruszcu Tang Assurance
+Pojazd docelowy
+Punkt zborny
+Kwatera gô¢wna Tang
+[4001]
+Strefa desantu: zakôad uzdatniania wody w Honolulu
+Punkt zborny
+[1015]
+Strefa desantu: Phoenix - ôîcze IML
+Agent docelowy
+[2846]
+Strefa desantu: Rzym - ôîcze IML
+Kompleksy bunkr¢w mieszkalnych niskiego standardu okupowane przez obywateli kategorii U-Niewiedzeni
+Garnizon ochrony
+Sejf garnizonu (podziemny): szacowana wartoøð 0,4 MCr
+Alert satelitarny: kontrola nad strategicznym satelitî obronnym Rzymu zostaôa utracona na rzecz nieznanych wrogich siô
+[2815]
+Strefa desantu: Rzym - ôîcze IML
+Agent docelowy
+Podsôuch: policja poszukuje grupy Niewiedzonych, kt¢ra przeniknòôa do miasta w celu sfinansowania kolejnego powstania
+Podsôuch: wykryto niestabilny wzorzec sygnaôu identyfikacyjnego UTOPII - moüliwa kryj¢wka Niewiedzonych
+[3601]
+Strefa desantu: Christchurch - ôîcze IML A
+Obszar docelowy: Christchurch - ôîcze IML B
+Wykryto agent¢w Tang Assurance
+Przechwycono rozkazy agent¢w Tang - celem jest skarbiec banku miejskiego
+[3046]
+Strefa desantu: (a) podium prezentacyjne (b) pozycja profesora Drennana
+Skarbiec danych zawierajîcy zapis z dron¢w obserwacyjnych z Reykjav¡ku
+Czôonek Zarzîdu EuroCorp
+Silny ølad identyfikacyjny Niewiedzonych na p¢ônoc od dzielnicy HQ
+[4701]
+Strefa desantu: Tokio - ôîcze IML A
+Twierdza kultyst¢w
+Profesor Drennan
+Strefa ewakuacji: Tokio - ôîcze IML B
+Wieüyczki laserowe pod kontrolî policji
+Szacunkowa wartoøð zawartoøci skarbca bankowego: 2,5 mln kredyt¢w
+[7011]
+Strefa desantu: Tokio - ôîcze IML A
+Obywatele kategorii U - Niewiedzeni namierzeni w tych lokalizacjach
+"ùwiîtynia" kultu
+Aktualna lokalizacja profesora Kleina
+[4711]
+Strefa desantu: Tokio - ôîcze IML A
+Obywatele kategorii U - Niewiedzeni namierzeni w tych lokalizacjach
+"ùwiîtynia" kultu
+Aktualna lokalizacja profesora Kleina
+[0301]
+Strefa desantu: Bangkok - ôîcze IML
+Centrum Operacyjne EuroCorp - Bangkok
+[2216]
+Aktualna pozycja agenta Wu
+Aktualna pozycja De Saxo
+Obiekty zajòte przez Zelot¢w
+[4502]
+Strefa desantu: Kair - ôîcze IML A
+Strefa ewakuacji: ôîcze IML B
+Podsôuch: znaczîca obecnoøð kultu w caôym mieøcie - brak reakcji policji
+Podsôuch: kierownictwo FoamSteel Defence Industries zaplanowaôo spotkanie z kultystami - cel nieznany
+[2702]
+Strefa desantu: Delhi - ôîcze IML
+Zakôad chemiczny
+Centrum dystrybucyjne FoamSteel Defence Industries
+Alert satelitarny: Agenci EuroCorp oraz Czoôg Bitewny
+[0501]
+Strefa desantu: brama poôudniowa
+Oørodek badawczo-rozwojowy
+Podsôuch: moüliwy ølad widmowy - Ko-Paull Vissick
+[4103]
+Strefa desantu: Bahrajn - ôîcze IML
+Bunkier SI
+Rozmieszczenie zbuntowanych agent¢w
+Kierunek natarcia siô Niewiedzonych
+Niewielka øwiîtynia Koøcioôa Nowej Epoki pozostaje obsadzona
+[4615]
+Strefy desantu
+Winda orbitalna
+System rakiet antysatelitarnych windy orbitalnej
+[6503]
+[7931]
+[0801]
+[1101]
+[6502]
+[7902]
+WYELIMINUJ NIEWIEDZONYCH
+WRàñ DO KWATERY GõàWNEJ
+PERSWADUJ TECHNIKàW YAMAGUCHI
+EWAKUUJ SIó
+TECHNIK ZGINïõ
+PERSWADUJ DYREKTORàW YAMAGUCHI
+DYREKTOR ZGINïõ
+UNIESZKODLIWIJ AGENTàW YAMAGUCHI
+AGENT ZGINïõ
+PERSWADUJ NAUKOWCàW BLUESKY
+PERSWADUJ NAUKOWCA BLUESKY
+NOWA MISJA: WYELIMINUJ ZAGROýENIE NIEWIEDZONYCH
+ESKORTUJ NAUKOWCàW DO õïCZA IML
+UKRADNIJ POJAZD ZE SZTABAMI
+POJAZD ZE SZTABAMI ZOSTAõ ZNISZCZONY
+POJAZD ZE SZTABAMI DOTARõ DO KWATERY TANG
+DOSTARCZ WàZ DO STREFY EWAKUACYJNEJ
+SKRADNIJ TECHNOLOGIó KULTU ZE ùWIïTYNI
+DOSTARCZ ARTEFAKT KULTU DO STREFY EWAKUACJI
+ZNISZCZ BAZó NIEWIEDZONYCH
+WYELIMINUJ BUNTOWNIKàW
+WYCZYùñ SEKTOR
+WYELIMINUJ STRAýNIKàW
+WYELIMINUJ AGENTA
+PERSWADUJ AGENTA
+DOCELOWY AGENT NIE ýYJE
+DOCELOWY AGENT UCIEKõ
+PERSWADUJ PRACOWNIKA NAA
+PERSWADUJ JENNIFER TAKS
+ESKORTUJ TAKS DO õïCZA IML
+JENNIFER TAKS NIE ýYJE
+WYELIMINUJ GORLIWCàW
+PERSWADUJ NAUKOWCA GEL DATA
+PERSWADUJ NAUKOWCàW GEL DATA
+PERSWADUJ NAUKOWCA HEXAGON
+PERSWADUJ NAUKOWCàW HEXAGON
+ESKORTUJ NAUKOWCA DO õïCZA IML
+ESKORTUJ NAUKOWCàW DO õïCZA IML
+AKTUALIZACJA: WYELIMINUJ ZAGROýENIE GORLIWCàW
+POJAZD ZNISZCZONY: AGENCI ODIZOLOWANI
+NAUKOWIEC UTRACONY
+PERSWADUJ NAUKOWCàW C3
+NAUKOWCY C3 WYELIMINOWANI
+LABORATORIUM ZNISZCZONE
+PLACàWKA ZNISZCZONA
+WYSTERYLIZUJ MIASTO
+CHRO÷ DRENNANA
+CHRO÷ ASYSTENTA PROFESORA
+CHRO÷ DYREKTORàW
+PROFESOR DRENNAN NIE ýYJE
+ASYSTENT PROFESORA DRENNANA NIE ýYJE
+DYREKTORZY EUROCORP ZOSTALI WYELIMINOWANI
+ODNAJDû I URATUJ PROFESORA DRENNANA
+ESKORTUJ PROFESORA DRENNANA DO PLACàWKI EUROCORP
+NOWA MISJA: EWAKUUJ CAõY PERSONEL
+EWAKUACJA NIE POWIODõA SIó
+PERSWADUJ MIRABELLE LUCY DE SAXO
+DE SAXO UCIEKõA: DOSTóPNE NOWE ROZKAZY
+WYELIMINUJ MIRABELLE LUCY DE SAXO
+STõUM POWSTANIE
+WYELIMINUJ REBELIANTàW NIEWIEDZONYCH
+CHRO÷ AI BAHRAJNU
+AI BAHRAJNU ZOSTAõO ZNISZCZONE
+ZABEZPIECZ WINDó ORBITALNï
+NIEWYSTARCZAJïCA LICZBA AGENTàW, BY UKO÷CZYñ MISJó
+WINDA ORBITALNA ZOSTAõA ZNISZCZONA
+STACJA KOSMICZNA ZOSTAõA ZNISZCZONA
+ZDOBïDû KOMPUTER NAWIGACYJNY PROMU
+AUTODESTRUKCJA STACJI AKTYWNA: DEZAKTYWUJ
+ZDOBïDû MODUõ PODTRZYMYWANIA ýYCIA PROMU
+UZYSKAJ DOSTóP DO PROMU KSIóýYCOWEGO
+WYELIMINUJ DZIEWIïTKó
+DZIEWIïTKA AKTYWOWAõA BRAMó JONOWï. ZOSTAõEù POKONANY.
+WYELIMINUJ BEZBOýNYCH NIEWIEDZONYCH
+NASZ OGRàD MEDYTACJI ZOSTAõ ZNISZCZONY
+NAWRàñ AGENTA EUROCORP
+ESKORTUJ AGENTA DO õïCZA IML
+TWàJ CEL ZOSTAõ WYELIMINOWANY
+TWàJ CEL UCIEKõ
+POZYSKAJ FUNDUSZE
+UTRACIõEù SWàJ CEL
+ZABIERZ DR. SCHWEIZERA DO OJCA BLACKA
+DR SCHWEIZER NIE ýYJE
+OJCIEC BLACK NIE ýYJE
+CHRO÷ BRACI I ùWIïTYNIó
+TWOI BRACIA NIE ýYJï
+ùWIïTYNIA ZOSTAõA ZNISZCZONA
+POKONAJ NIEWIERNYCH
+UKARZ BUNTOWNIKàW
+ZNISZCZ SIõY CHAOSU
+WYTóP PLUGAWYCH NIEWIEDZONYCH
+OCZYùñ Z PERSONELU EUROCORP
+WYELIMINUJ AGENTàW EUROCORP
+WESPRZYJ AKOLITàW
+ZLIKWIDUJ SABOTAýYSTó
+WYNISZCZ BEZCZCICIELI
+CHRO÷ ZAKON AKOLITàW
+ZAKON AKOLITàW ZOSTAõ CAõKOWICIE ZNISZCZONY
+DOSTARCZ WàZ Z SZTABAMI DO PUNKTU ODBIORU
+POJAZD ZE SZTABAMI ZOSTAõ ZNISZCZONY
+ZLIKWIDUJ ASYSTENTA PROFESORA
+ZAJMIJ MIEJSCE ASYSTENTA U BOKU PROFESORA
+ZBIERZ DANE WIDEO DO WYKõADU
+UDAJ SIó NA PODIUM
+WEû UDZIAõ W WYKõADZIE
+ESKORTUJ PROFESORA DRENNANA
+PROFESOR SPOTKAõ SWOJEGO ASYSTENTA
+PROFESOR NIE ýYJE
+MIRABELLE LUCY DE SAXO NIE ýYJE
+ZNISZCZ BUNKIER BRONI EUROCORP
+SKRADNIJ PROJEKT BRONI EUROCORP
+PRZEùLIJ PROJEKT BRONI
+WRàñ
+AKOLICI ODIZOLOWANI: MISJA NIEMOýLIWA DO UKO÷CZENIA
+ZLIKWIDUJ HAKERA
+WYELIMINUJ PERSONEL EUROCORP KONTROLUJïCY PORT RZECZNY
+WRàñ DO õïCZA IML
+UPROWADû JE÷CA EUROCORP
+CEL ZOSTAõ WYELIMINOWANY
+ZNISZCZ OùRODKI BADAWCZE
+WYELIMINUJ AGENTàW EUROCORP
+DE SAXO MUSI ZGINïñ
+OPUùñ TO MIEJSCE
+POSKROM NIEWIEDZONYCH
+WYSZUKAJ I ZLIKWIDUJ PRZYWàDCó POWSTANIA
+ODNAJDû IX I DOPROWADû GO DO PUNKTU SPOTKANIA
+CHRO÷ IX
+POZWOLIõEù IX ZGINïñ
+NIC JUý NIE POWSTRZYMA DZIEWIïTKI. ZOSTAõEù POKONANY.
+NIE RàB NIC: SõUCHAJ DZIEWIïTKI
+WSZYSCY OBYWATELE NAWRàCENI PRZEZ GORLIWCàW
+WYELIMINUJ INTRUZA
+WYELIMINUJ INTRUZàW
+PERSWADUJ INFILTRATORA
+UDAJ SIó DO õïCZA IML
+CEL WYELIMINOWANY
+AKTYWUJ õïCZE IML
+õïCZE IML ZNISZCZONE
+WYELIMINUJ AGENTàW
+PRZENIKNIJ DO BUNKRA: UWOLNIJ WIRUSA
+ODEJDû
+WYCOFAJ SIó
+NAWRàñ ORMANDOZA
+NAWRàñ RAMIREZA
+PRZYPROWADû ICH DO NAS
+POZWOLIõEù ORMANDOZOWI ZGINïñ
+POZWOLIõEù RAMIREZOWI ZGINïñ
+SKRADNIJ PRACó DR. SCHWEIZERA
+WRàñ DO NAS
+AGENCI EUROCORP MUSZï DO NAS DOõïCZYñ LUB ZGINïñ
+UNIESZKODLIW AGENTàW EUROCORP
+ZLIKWIDUJ KOTO SEKA
+UNIESZKODLIW WSZYSTKICH AGENTàW EUROCORP
+NIE DOPUùñ, BY COù STAõO SIó DE SAXO
+PRZEJMIJ KONTROLó NAD õïCZEM IML
+NASZA BõOGOSõAWIONA CàRKA NIE ýYJE
+ZGINIESZ ZA Tó HEREZJó!
+EUROCORP MUSI WYBRAñ MIóDZY NASZï WIARï A ùMIERCIï
+SZUKAJ SCHRONIENIA
+WEJDû
+PERSWADUJ NAUKOWCA BLUESKY
+TWàJ CEL UCIEKõ
+CEL PRZEKONANY
+UNIESZKODLIW AGENTA
+WYSZUKAJ I ZNISZCZ - KATEGORIA U - NIEWIEDZONYCH OBYWATELI
+NOWA MISJA: WYELIMINUJ KULTYSTàW
+WYKRYTO PROFESORA KLEINA - PERSWADUJ PROFESORA
+CHRO÷ PROFESORA KLEINA - EWAKUUJ GO
+PROFESOR KLEIN NIE ýYJE
+ZNISZCZ STACJó NAZIEMNï
+UDERZ W NASZEGO WROGA
+[header_win]
+[message_win]
+Odniosôeø zwyciòstwo nad Dziewiòciorgiem. Koøci¢ô Nowej Epoki zostaô caôkowicie rozbity, a groúba Kataklizmu zaüegnana. UTOPIA zostanie odbudowana. Gratulacje z okazji awansu, Dyrektorze Naczelny.
+[weapons]
+UZI
+Uksztaôtowany w chaosie ulicznych walk poôowy XX wieku, karabin maszynowy Uzi 9 mm, zmodyfikowany do uüycia pocisk¢w energetycznych, nadal stanowi podstawò technologii operacyjnej EuroCorp. To niedrogie i lekkie uzbrojenie zapasowe dla agent¢w zajmujîcych siò przypadkami psychozy porejestracyjnej.
+MINIGUN
+W trakcie Ery Nowego Kalendarza wykorzystanie przez syndykaty automatycznych broni szybkostrzelnych z tôumieniem bezwôadnoøci staôo siò standardem. Ta wersja zasilana plazmî 20 mm, ze stabilizacjî momentu obrotowego, posiada lufy ze stopu pianowego, co obniüa masò i koszty produkcji.
+ELLASER
+Jest to dow¢d rewolucyjnego myølenia naukowego Koøcioôa. W uproszczeniu jest to rodzaj elektrycznego bicza. EuroCorp nigdy nie zdoôaô uczynið takich urzîdzeö praktycznymi z uwagi na zaporowe zapotrzebowanie energetyczne. To urzîdzenie wykorzystuje zaawansowany system dúwigni subatomowych, kt¢ry zapewnia absolutne minimum poboru mocy z osobistego zasobnika energii, przy jednoczesnej moüliwoøci przeciîüenia. Technologia w peôni godna uwagi.
+LASER
+Laser ten wykorzystuje bazowy gaz TriSodium 89 (opracowany okoôo -20 NK). Broö moüe zostað przeciîüona poprzez op¢únienie zwolnienia spustu. W krytycznych sytuacjach walki na bliskim dystansie pojedynczy przeciîüony impuls moüe byð wystarczajîco gorîcy, by zdezintegrowað cel.
+BEAM
+Techniki anihilacji elektronowej doprowadziôy do opracowania tej potòünej broni. Wykorzystuje ona monopolarne ogniskowanie do projekcji pola wielowiîzkowego, kt¢re przeksztaôca czîsteczki atmosfery w plazmò. Materia staôa ulega odparowaniu przy kontakcie z plazmî, uwalniajîc dodatkowî energiò. Pole to moüe siað caôkowite zniszczenie na znacznym dystansie. Wydôuüenie okresu ogniskowanie monopolarnego poprzez op¢únienie zwolnienia spustu zwiòksza skutecznoøð przeciwko materiaôom gòstym lub hartowanym.
+RAP
+Zaprojektowana w odpowiedzi na wyzwania cyberproliferacji Nowego Kalendarza, ta wyrzutnia rakiet wystrzeliwuje granat samonaprowadzajîcy, kt¢ry przy uderzeniu uwalnia wiîzkò subamunicji kasetowej. System naprowadzania wykorzystuje üyroskopowî stabilizacjò celu.
+NUCLGREN
+Napròüone techium w obudowie tego urzîdzenia termojîdrowego tôumi produkty wybuchu, utrzymujîc reakcjò ôaöcuchowî w øciøle ograniczonym obszarze. Dedykowany rdzeö izotopowy zapewnia, üe poziom promieniowania spada do wartoøci dopuszczalnych kr¢tko po detonacji. Postòp ten umoüliwiô po raz pierwszy zamkniòcie detonatora w obudowie ròcznej. Mimo to efektywny promieö wybuchu wymaga zachowania szczeg¢lnej ostroünoøci.
+PERSUADER
+Standardowe narzòdzie sôuüîce do przejmowania wyüszych funkcji m¢zgowych obywateli wyposaüonych w chipy UTOPIA. Choð charakteryzuje siò niskim poborem mocy i niewielkî masî, znaczenie historyczne Perswadertronu jest nie do przecenienia - odegraô kluczowî rolò w ustanowieniu globalnej dominacji EuroCorp. Osoby poddane perswazji podîüajî za agentem bez wahania, uzbrajajî siò i podejmujî walkò bez strachu.
+FLAMER
+Badania retrotechnologiczne zalecajî ten ròczny miotacz napalmu kr¢tkiego zasiògu. Po aktywacji broö wyrzuca zapalonî galaretò paliwowî. W kontakcie z materiî organicznî napalm przylega i pali siò z duüî intensywnoøciî. Wysoce skuteczne rozwiîzanie do kontroli tôumu.
+H2HTASER
+To urzîdzenie bliskiego zasiògu generuje rezonansowî falò jonowî, kt¢ra zakô¢ca programowanie CHIP-¢w u jednostek objòtych jej frontem. W praktyce oznacza to cofniòcie stanu perswadowania. Zakô¢cacz jest szczeg¢lnie skuteczny przeciwko uüytkownikom Perswadertronu, poniewaü fala jonowa atakuje sygnaô u úr¢dôa, przywracajîc wszystkie podporzîdkowane jednostki do ich pierwotnego, niepoddawanego perswazji stanu.
+CRAZYGAS
+Badania nad narkotycznymi wôaøciwoøciami grzyb¢w z planety Creation dostarczyôy aktywnego skôadnika tego niebezpiecznego halucynogenu. Ròczny pojemnik zawiera mieszaninò zarodnik¢w grzyba i ørodka utleniajîcego, uwalnianî w postaci chmury, wywoôujîcej zachowania psychotyczne u wszystkich znajdujîcych siò w jej zasiògu. Broö ta stanowi uüytecznî metodò dywersji w sytuacjach, gdy liczba wrog¢w przekracza moüliwoøci innych form neutralizacji, choð rezultaty sî nieprzewidywalne.
+KOGAS
+Ten granat ròczny zawiera duszîcy ørodek neurotoksyczny. Chmura uwolniona podczas detonacji powoduje czasowî utratò przytomnoøci u caôego personelu w obszarze raüenia.
+ELEMINE
+Mina generujîca impuls elektromagnetyczny, aktywowana zbliüeniowo. Sprzòt znajdujîcy siò w polu impulsu zostaje czasowo, a w niekt¢rych przypadkach trwale, unieszkodliwiony, a elektryczne mechanizmy tkanek organicznych ulegajî wypaleniu. Przewodniki, takie jak pojazdy, infrastruktura uliczna i cyborgi, absorbujî najwiòkszî czòøð ôadunku. Moüe wpôywað na stan perswazji jednostek objòtych obszarem dziaôania.
+EXPLMINE
+Dziòki znacznemu promieniowi raüenia i mocy wystarczajîcej do zadania krytycznych uszkodzeö pojazdom oraz powaünych zniszczeö budynkom, jest to broö prosta, lecz skuteczna. Moüe zostað umieszczona w dowolnym strategicznym punkcie strefy operacyjnej, po czym naleüy wycofað agent¢w na bezpiecznî odlegôoøð. Detonacja materiaôu wybuchowego nastòpuje po upôywie ustawionego czasu.
+LONGRANGE
+Nowy karabin dalekostrzelny wykorzystuje technologiò sanek monopolarnych do rozpòdzania amunicji z zuboüonego uranu duüego kalibru do pròdkoøci Mach 5,2. Kondensatory sanek rozôadowujî siò caôkowicie przy pojedynczym strzale i wymagajî peônego doôadowania przed kolejnym uüyciem, jednak precyzja i zasiòg operacyjny nie majî odpowiednika w innych systemach raüenia. Zgodnie ze specyfikacjî projektowî poøwiòcenie szybkostrzelnoøci umoüliwia bieüîcî rekalkibracjò, czyniîc tò broö optymalnym narzòdziem snajperskim.
+AIRSTRIKE
+Kaüdy satelita w sieci geosynchronicznych platform orbitalnych UTOPII jest wyposaüony w zapas pròt¢w ze stopu wolframu i uranu, umieszczonych na sterowanych mocowaniach. Po ich wystrzeleniu proces wejøcia w atmosferò rozgrzewa je do stanu upôynnienia, tworzîc deszcz plazmy o realnym potencjale bojowym. Obecnie jesteømy w stanie skutecznie obejøð blokady systemowe uruchomione przez Harbingera. Poprzez transmisjò protokoô¢w reinicjalizacji system moüe zostað oddany do dyspozycji agent¢w. Operacja ta moüe byð przeprowadzona za pomocî ròcznego aktywatora, jednak zaleca siò zachowanie szczeg¢lnej ostroünoøci - koszt uüycia systemu jest ekstremalnie wysoki.
+QDEVASTATOR
+Podw¢jne pryzmaty grawitonowe w komorze wypeônionej Noxonem dziaôajî jako katalizator reakcji ôaöcuchowej, kt¢ra odwraca silne wiîzania molekularne wzdôuü trajektorii okreølonej przez polaryzacjò grawitycznî. Reakcja rozpoczyna siò po naciøniòciu spustu i jest utrzymywana w komorze Noxonu, gdzie narasta aü do momentu jego zwolnienia. Materia celu jest rozrywana czîsteczka po czîsteczce. Broö moüe powodowað wiîzki boczne wskutek emisji nadmiarowej energii.
+RAZORWIRE
+Ten drut ze stopu tytanu i stali uformowany jest w bardzo dôugî, niezwykle cienkî i wyjîtkowo ostrî kolczastî spiralò. Jego zastosowanie uniemoüliwia dostòp do stref chronionych osobom nieuprawnionym i stanowi powaünî przeszkodò nawet dla intruz¢w wzmocnionych cybernetycznie. Jego ømiercionoønoøð potòguje niemal caôkowita niewidocznoøð dla niezmodyfikowanego wzroku.
+PERSUADER2
+Prowadzone przez profesora Drennana badania nad technologiî Koøcioôa zaowocowaôy opracowaniem Perswadertronu II. Urzîdzenie to potrafi infiltrowað umysôy nawet najbardziej zahartowanych w walce zelot¢w. Po poddaniu jego wpôywowi wyznawcy bòdî wykonywað polecenia z takî samî determinacjî, z jakî wczeøniej podîüali za wypaczonymi doktrynami Koøcioôa.
+STASISFLD
+Ten przenoøny generator pola faktycznie zmienia tempo upôywu czasu wewnîtrz obszaru dziaôania. Utrzymane w stanie zbliüonym do zawieszonej animacji, pròdkoøci reakcji wszystkich obiekt¢w w polu sî znikome, co czyni cele znacznie bardziej podatnymi na inne formy ataku. Energia wymagana do aktywacji pola jest znaczna, dlatego moment jego uüycia powinien byð dobrany z rozwagî.
+SOULGUN
+W jednym z najbardziej ezoterycznych przeôom¢w Dziewiòciorga, odkryto spos¢b na uwolnienie siô elektrochemicznych wciîü uwiòzionych w ciaôach zneutralizowanych organizm¢w. Zrozumienie tych mechanizm¢w daje nam nad nimi peônî kontrolò. Na tej technologii opiera siò Chromossak. Urzîdzenie to pozyskuje energiò z materii organicznej na poziomie kom¢rkowym i przekazuje jî operatorowi. Chromossak jest szczeg¢lnie uüyteczny do doôadowywania agent¢w po wymianie ognia, gdyü potrafi wykorzystað energiò kom¢rkowî polegôych.
+TIMEGUN
+Profesor Drennan po raz kolejny dostarczyô rezultaty. Wypieracz Czasowy wykorzystuje rdzeö z ultragòstej materii otoczony stroboskopowî powôokî stazy, zapewniajîc ograniczony dostòp do czasu wyüszych wymiar¢w. Skutkuje to caôkowitym znikniòciem celu i jego ponownym pojawieniem siò w niedalekiej przyszôoøci. Nigdy wczeøniej sabotaüyøci nie dysponowali narzòdziem o takiej mocy.
+CEREBUSIFF
+Ten elektroniczny straünik moüe znaczîco zwiòkszyð skutecznoøð dziaôaö defensywnych i ofensywnych agent¢w. Umieszczony w odpowiednim miejscu i uzbrojony w lasery impulsowe peôni funkcjò wartowniczî, otwierajîc ogieö do kaüdego nieøwiadomego wrogiego celu, kt¢ry znajdzie siò w zasiògu, aü do wyczerpania úr¢dôa zasilania lub zniszczenia urzîdzenia.
+MEDI1
+Ten wielofunkcyjny pakiet sôuüy do szybkiej naprawy obraüeö i uszkodzeö odniesionych w walce. Zestaw zawiera wzmocniony plaster przeszczepu sk¢ry nasîczony ørodkiem znieczulajîcym oraz nanobotami chirurgicznymi. Moüe byð uüyty wyôîcznie jednorazowo.
+MEDI2
+Dziaôa analogicznie do Medikitu, jednak w tej ulepszonej wersji urzîdzenie jest noszone przez uüytkownika i automatycznie monitoruje poziom odniesionych obraüeö. Po spadku poniüej poziomu krytycznego AutoMedikit samoczynnie siò aktywuje i przeprowadza przyspieszone naprawy chirurgiczne. Urzîdzenie potrzebuje kilku chwil na rozpoczòcie dziaôania, dlatego uüytkownik nieustannie odnoszîcy obraüenia moüe zginîð, zanim system zdîüy zareagowað.
+EXPLWIRE
+Podobnie jak Drut Ostrzowy, Drut Wyzwalajîcy jest doskonaôym narzòdziem do blokowania dostòpu. O gruboøci zaledwie kilku czîsteczek, jest wyjîtkowo trudny do wykrycia nawet dla oczu z zaawansowanymi modyfikacjami, a dotkniòcie go powoduje aktywacjò wielu eksplozji na caôej jego dôugoøci.
+CLONESHLD
+Generuje kamuflaü na tyle skuteczny, üe wprowadza w bôîd nawet odczyty skaner¢w UTOPII. Tarcza Klonujîca organicznie modyfikuje odzieü i cechy agenta, zmieniajîc uüytkownika na pewien czas w przeciòtnego menedüera. Rozwiîzanie to jest niezwykle przydatne podczas misji infiltracyjnych, umoüliwiajîc swobodne przenikanie do kaüdej strefy korporacyjnej.
+[mods]
+LEGS1
+Zbudowane na lekkim rdzeniu z plastyali i pokryte hodowanî w kadziach warstwî organicznî, te sztuczne nogi zapewniajî natychmiastowy wzrost zar¢wno wytrzymaôoøci biologicznej agenta, jak i jego pròdkoøci maksymalnej. Zwiòkszona zostaje r¢wnieü kondycja, co bezpoørednio przekôada siò na wiòkszy zasiòg operacyjny przy utrzymaniu peônej pròdkoøci.
+LEGS2
+Postòpy w technologii metalu piankowego umoüliwiôy opracowanie tego systemu koöczyn cybernetycznych. Nogi poziomu 2 zapewniajî znaczîcy wzrost pròdkoøci, kondycji oraz odpornoøci organizmu, wydôuüajîc maksymalny czas efektywnego funkcjonowania agenta.
+LEGS3
+Nogi poziomu 3 zastòpujî øwiatôowodowe systemy transmisji nerwowej niüszych wersji tworzywem pamiòci Super-Synapse. Wprowadzenie agent¢w wyposaüonych w tò modyfikacjò znaczîco podnosi ich skutecznoøð w strefach bojowych.
+ARMS1
+Dziòki wolframowym øciògnom i stalowym wô¢knom cybernetycznych ramion agenci uzyskujî natychmiastowî poprawò celnoøci ognia oraz redukcjò zuüycia energii. Charakterystyczny dla augmentacji wzrost odpornoøci organizmu dodatkowo wydôuüa operacyjnî üywotnoøð agenta.
+ARMS2
+Proces produkcji z wykorzystaniem metalu piankowego zostaô z powodzeniem zaadaptowany do precyzyjnej cybernetyki. Dziòki mniejszej bezwôadnoøci te lekkie ramiona wyraúnie zwiòkszajî nie tylko celnoøð, lecz taküe zasiòg rzut¢w.
+ARMS3
+Do dyspozycji oddano szczytowe osiîgniòcie technologii koöczyn g¢rnych. W obliczu coraz lepiej uzbrojonych gang¢w i kultyst¢w, wymierny wzrost skutecznoøci bojowej zapewniany przez te ramiona pozwala utrzymað wysoki wskaúnik realizacji cel¢w misji.
+CHEST1
+W celu znaczîcego zwiòkszenia przeüywalnoøci w ørodowiskach wrogich zaleca siò osôoniòcie organ¢w krytycznych potr¢jnî pôytî ze stopu tytanu. Wzmocniona modyfikacja tuôowia stanowi najwiòkszy pojedynczy wzrost odpornoøci, jaki moüna zapewnið cyborgowi. Naleüy zaznaczyð, üe instalacja tej modyfikacji jest warunkiem obsôugi wszystkich pozostaôych ulepszeö.
+CHEST2
+Ulepszenie to wykorzystuje kom¢rkowî superstrukturò metalu piankowego, formowanî w mikrograwitacji niskiej orbity, co zapewnia niüszî masò i wyüszî wytrzymaôoøð na rozciîganie niü obecnie stosowane protezy tuôowia. Zwiòkszona rezerwa energii to tylko jedna z zalet korpusu poziomu 2. Operacyjnie oznacza to wiòkszî dostòpnoøð mocy i mniejsze ryzyko uszkodzeö krytycznych. Korpus poziomu 2 otwiera drogò do instalacji modyfikacji poziomu 3 we wszystkich pozostaôych kategoriach.
+CHEST3
+ùciògna z tworzywa pamiòciowego zastòpujî stalowe mikrowô¢kna wczeøniejszych modyfikacji, czyniîc cyborga znacznie odporniejszym niü jednostki z niüszym poziomem technologii. Co szczeg¢lnie istotne, ulepszenie to chroni agenta przed wszystkimi znanymi bojowymi gazami paralityczno-drgawkowymi.
+BRAIN1
+Zdolnoøð do podejmowania decyzji niezaleünie od kontroli Kierownictwa odr¢ünia agenta skutecznego od martwego. Moduô ten zawiera diamentowe procesory w macierzy 3D zintegrowanej z biologicznî masî poznawczî cyborga. Zwiòksza podstawowe percepcje oraz zawiera oprogramowanie zarzîdzania urazami, poprawiajîce zdolnoøð przetrwania obraüeö w innym wypadku krytycznych.
+BRAIN2
+Holograficzna pamiòð rdzeniowa redukuje op¢únienia reakcji oraz zwiòksza zasiòg i siôò sygnaôu Persuadertronu. Podnosi r¢wnieü odpornoøð cyborga na pr¢by perswazji. Ten model m¢zgu zapewnia kompleksowe wzmocnienie percepcji oraz dalsze usprawnienia oprogramowania urazowego, zwiòkszajîc margines przeüywalnoøci jednostki.
+BRAIN3
+Szczytowe osiîgniòcie przenoønej technologii sztucznej inteligencji. M¢zg poziomu 3 zapewnia nie tylko dalszy wzrost odpornoøci organizmu, lecz taküe gwarantuje poprawò precyzji namierzania, skutecznoøci trafieö oraz efektywnoøci energetycznej. Cyborg moüe operowað w ørodowiskach, kt¢re niemal natychmiast zniszczyôyby m¢zg biologiczny; moduô ten wykonuje peônî kopiò danych biologicznych i umoüliwia agentowi kontynuowanie dziaôania.
+SKIN1
+Jest to zôoüona, kom¢rkowa cybersk¢ra, zaprojektowana w celu zapewnienia kuloodpornej epidermy, radykalnie redukujîcej obraüenia od broni pociskowej. Poôîczenie hybrydy sk¢ry pachydermicznej z siatkî stalowî oraz precyzyjne dopracowanie estetyczne zaowocowaôy materiaôem wyjîtkowo wytrzymaôym, a jednoczeønie r¢wnie elastycznym jak standardowa tkanka cyborg¢w hodowana w kadziach.
+SKIN2
+Ta cybersk¢ra wykorzystuje najnowszî, nietoksycznî odmianò azbestu, opracowanî do zastosowaö przy wejøciu statk¢w kosmicznych w atmosferò. Podczas operacji prowadzonych w warunkach burz ogniowych agent wyposaüony w tò modyfikacjò ponosi znacznie mniejsze straty od broni zapalajîcej niü jednostka niechroniona.
+SKIN3
+Jest to wariant cybersk¢ry oparty na polimerze wòglowodorowym, wzmocnionym øwiatôowodowymi mikrofilamentami. Konstrukcja ta absorbuje znacznî czòøð mocy destrukcyjnej broni energetycznej. Energia rozpraszana jest od punktu trafienia wok¢ô ciaôa agenta i wt¢rnie wykorzystywana do podtrzymania wôaøciwoøci ochronnych sk¢ry.
+SKIN4
+Jest to najnowoczeøniejsza technologia cybersk¢ry. Zastosowane asynchroniczne kom¢rki przesuniòcia fazy czasowej dezorientujî systemy celownicze, znaczîco utrudniajîc uzyskanie blokady broni. Agent wyposaüony w tò sk¢rò staje siò praktycznie niewidoczny dla ognia przeciwnika.

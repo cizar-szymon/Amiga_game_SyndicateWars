@@ -1,0 +1,1575 @@
+# == map screen text ==
+# map screen title
+#UTOPIA
+# map screen headings
+Pilgerort
+Heiden
+Geografie
+Sprache
+Gter
+Erbe
+
+# city data
+
+London
+21.13 M
+Postindust.
+Basis-engl.
+Software, Finanzen
+Chemie- AbfÑlle, menschl. AbfÑlle
+
+Detroit
+10.98 M
+Grossstadt
+Neu-amerikano
+Automobil-produktion
+Schwere Industrie-Verseuch.
+
+Hongkong
+17.55 M
+Grossstadt
+Indo-chinesisch
+Speicher-kunststoff
+Leichte Industrie-AbfÑlle
+
+Peking
+38.89 M
+Mega-Metropole
+Mandarin
+Kunststoff-verarbeit., Hardware-produktion
+Atomare AbfÑlle, menschl. AbfÑlle
+
+Wien
+6.99 M
+Stadt
+Mittel-EuropÑisch
+Mineralien-Wiedergew
+Leichte Industrie-AbfÑlle
+
+Genf
+7.65 M
+Stadt
+Mittel-EuropÑisch
+Wasser-entgiftung, Luft RÅck-gewinnung
+Atomare AbfÑlle
+
+Salzburg
+9.27 M
+Grossstadt
+Neu-slavisch
+Vegetative Wiederauf-bereitung
+Leichte Industrie-AbfÑlle
+
+Singapur
+21.71 M
+Mega-Metropole
+Malaiisch
+Wasser-entgiftung, Hardware-Produktion
+Menschl. AbfÑlle, schwere Industrie-Verseuch.
+
+Phoenix
+13.26 M
+Grossstadt
+Amerik. Intern
+Strom-erzeugung
+Atomare AbfÑlle
+
+Rom
+10.92 M
+Postindust.
+Latein
+Hart-plastik
+Schwere Industrie-Verseuch.
+
+Al Manamah
+10.98 M
+Grossstadt
+Neu-arabisch
+Treibstoff-raffinerie, Mineralien-Gewinnung
+Chemie-abfÑlle
+
+New York
+25.24 M
+Postindust
+Hochengl.
+Waffen-produktion
+Ultra-schwere Industrie-Verseuch. atomare AbfÑlle, menschl. AbfÑlle
+
+Santiago
+7.81 M
+Grossstadt
+Neu-spanisch
+Gummi-prod.
+Chemie-abfÑlle
+
+Buenos Aires
+15.71 M
+Ultra-Metropole
+Modul
+Nahrungs-produktion
+Schwere Industrie-Verseuch., menschl. AbfÑlle
+
+Kapstadt
+10.27 M
+Grossstadt
+Afrikaans (veraltet)
+Mineralien-Gewinnung
+Schwere Industrie-Verseuch.
+
+Adelaide
+8.7 M
+Stadt
+Sub-englisch
+Brauerei, Tierzucht
+Chemie-abfÑlle, Tier-abfÑlle
+
+Christchurch
+4.9 M
+Stadt
+Idiom Bahasa
+Kleidungs-Produktion, Lebensm.-zubereit
+Chemie-abfÑlle
+
+Reykjavik
+4.37 M
+Stadt
+Demi-scando
+Wasser-entgiftung, Luft RÅck-gewinnung
+Atomare AbfÑlle
+
+Moskau
+16.54 M
+Grossstadt
+Moldavisch
+Kleidungs-Produktion, Destilla-tion
+Atomarer Fallout, menschl. AbfÑlle
+
+Tokio
+16.70 M
+Mega-Metropole
+Neo-japanisch
+High-Tech-Produktion, Finanzen
+Schwere Industrie-Verseuch.
+
+Bangkok
+24.37 M
+Mega-Metropole
+Pseudo-thai
+Simulator-Produktion, Tourismus
+Chemie- AbfÑlle, menschl. AbfÑlle
+
+Honolulu
+7.01 M
+Stadt
+Neu-amerikano
+Wasser-entgiftung, Luft RÅck-gewinnung
+Leichte Industrie-AbfÑlle
+
+Johannesburg
+15.64 M
+Grossstadt
+Afrikaans (veraltet)
+Mineralien-Gewinnung
+Schwere Industrie-Verseuch.
+
+Kairo
+3.16 M
+Stadt
+Neu-arabisch
+Historische Kunst, Tourismus
+Chemie-abfÑlle
+
+Neu Delhi
+28.73 M
+Mega-Metropole
+Proto-hindustani
+QualitÑts-Bekleidung
+Schwere Industrie-Verseuch., Chemie-abfÑlle, menschl. AbfÑlle
+
+Sevastopol
+9.26 M
+Grossstadt
+Moldavisch
+Destilla-tion
+Atomarer Fallout
+
+Tripolis
+8.73 M
+Grossstadt
+Arabisch (veraltet)
+Treibstoff-raffinerie
+Atomarer Fallout
+
+Riyad
+2.03 M
+Stadt
+Neu-arabisch
+Treibstoff-raffinerie
+Schwere Industrie-Verseuch.
+
+Colombo
+3.35 M
+Stadt
+Neu-singaleisch
+Wasser-entgiftung, Luft RÅck-gewinnung
+Atomare AbfÑlle
+
+Colombo-Orbital-station
+0.0001 M
+Experi-mentell
+EuroCorp techn. Code
+Interstell. Transport, Graviton-produkte
+Keine
+
+Matochkin Shar
+0.017 M
+Stadt
+Proto-moldavisch
+Luft RÅck-gewinnung
+Leichte Industrie-AbfÑlle
+
+Voss
+0.023 M
+Sub-Stadt
+Omni-scando
+Fîrsterei
+Leichte Industrie-AbfÑlle
+
+Omsk
+0.48 M
+Stadt
+Russisch (veraltet)
+Destilla-tion
+Atomarer Fallout
+
+Beirut
+0.75 M
+Sub-Stadt
+Neu-arabisch
+Waffen-produktion
+Chemie- AbfÑlle, menschl. AbfÑlle
+
+Ulan Bator
+0.274 M
+Sub-Stadt
+Mongol-chinesisch
+Erz-gewinnung
+Atomarer Fallout
+
+Seoul
+6.5 M
+Grossstadt
+Vereintes Koreanisch
+Chemische Industrie, Automobil-produktion
+Chemie-abfÑlle, schwere Industrie-Verseuch.
+
+Hanoi
+3.3 M
+Stadt
+Zonales Mandarin
+Tierzucht, vegetative Wiederauf-bereitung
+Tier-abfÑlle, Chemie-abfÑlle
+
+Manila
+8.5 M
+Grossstadt
+Zonales Mandarin
+Mîbel-produktion
+Leichte Industrie-AbfÑlle
+
+Freetown
+0.18 M
+Sub-Stadt
+Idiom Afrikaans
+Erzauf-bereitung
+Leichte Industrie-AbfÑlle
+
+Monrovia
+0.65 M
+Sub-Stadt
+Idiom Afrikaans
+Destilla-tion
+Leichte Industrie-AbfÑlle
+
+Lagos
+1.25 M
+Stadt
+Idiom Afrikaans
+Erz-gewinnung
+Schwere Industrie-Verseuch.
+
+Nairobi
+2.3 M
+Stadt
+Neutral-somali
+Tierzucht, BrÑunung
+Leichte Industrie-AbfÑlle
+
+Port Moresby
+0.93 M
+Sub-Stadt
+Idiom Bahasa
+Erz-gewinnung
+Chemie-abfÑlle
+
+Anchorage
+0.86 M
+Stadt
+Anglo-kyrillisch
+Wetter-Manipul.
+Hoch radioaktiv, leichte Industrie-abfÑlle
+
+Vancouver
+3.5 M
+Grossstadt
+Lingvo Pseud
+Magnet. Aufbereit.
+Schwere Industrie-Verseuch.
+
+Nuuk
+0.065 M
+Gemeinde
+Demi-scando
+Luft-Produktion
+Gering radioaktiv
+
+Georgetown
+0.08 M
+Sub-Stadt
+Idiom Spania
+Mineral-gewinnung
+Chemie-abfÑlle
+
+Lima
+3.4 M
+Grossstadt
+Idiom Spania
+Waffen-produktion
+Hoch-radioaktive AbfÑlle, schwere Industrie-Verseuch.
+
+Sao Paulo
+18.9 M
+Mega-Metropole
+Portug. (Alt)
+Mineral-gewinnung
+Radioaktive AbfÑlle, leichte Industrie-abfÑlle
+LABORUNFALL
+NATRLICHE URSACHEN
+ZEITVERZ÷GERUNGS-VIRUS
+EXPERIMENT-FEHLER
+FATALE FEHLKALKULATION
+UNLOGISCHE FOLGERUNG
+UNHEILBARE ILLUSION
+VOREILIGES URTEIL
+FEHLERHAFTE ARGUMENTATION
+WAHNSINN
+NACHLSSIGKEIT
+UNSICHERES VERFAHREN
+GEISTIGER ZUSAMMENBRUCH
+EQUIPMENT-DEFEKT
+ERFOLGLOSER TEST
+HERZSTILLSTAND
+FALSCHE VERMUTUNG
+STROMSCHLAG
+ZERFALL
+MISSGESCHICK
+\hGesegnet seid Ihr, KlosterschÅler.\n
+\c2\n
+Euer Auftrag ist es, einen Knotenpunkt von EuroCorps UTOPIA-Netzwerk zu erobern. Er liegt in Detroit. 
+Wenn wir ihn kontrollieren, kann die Katharsis beginnen.\n
+\c5\n
+Mit Gottes Segen sei Euch an diesem Tage der Automorph-Computer-Virus gegeben, der die Tyrannei beenden 
+wird, die das Syndikat UTOPIA nennt. Wir haben ihm den Namen "VerkÅnder" gegeben, und er wird dem 
+Syndikat die Kontrolle entreissen, Computer fÅr Computer, und der Weg wird bereit sein fÅr die 
+Erleuchtung, die da kommen soll.\n
+\n
+FÅhrt Eure Kriegermînche in die Detroiter Bodenstation des UTOPIA-Netzwerks, auf dass wir den Virus 
+freisetzen mîgen. Die Syndikatsangehîrigen, die den Knoten bewachen, werden keine Gewalt erwarten, weil 
+seit Jahren keine mehr angewendet wurde. Das ist unser Vorteil.\n
+\n
+Meinen Segen.\n
+\n
+\c4Virgil\n
+\n
+\c1Die UnglÑubigen waren tagelang geklettert, um den Meister in den Bergen zu besuchen. "Woher bekommst 
+Du Deinen sogenannten Glauben?", fragten sie ihn.\n
+\n
+"Ihr habt ihn mitgebracht," erwiderte darauf der Meister. "Ihr seid alle so hoch geklettert."\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hGratuliere, mein KlosterschÅler.\n
+\c2\n
+Die feste Hand Eurer Kriegermînche wird in Tripolis gebraucht, wo das Chaos, das die nahende Katharsis 
+begleitet, unseren neuen Garten der Meditation bedroht. Verteidigt unseren Glauben mit maximaler 
+Kraft.\n
+\c5\n
+Der VerkÅnder, unser heiliger Virus, hat sein Werk begonnen, das Volk zu befreien. Doch nicht alle, die 
+er aus dem Joch der UnterdrÅckung befreit, betreten sofort den Weg der Erleuchtung, den unsere Kirche 
+bietet. Und ohne unsere spirituelle Leitung werden viele verloren sein. Bald wird der Tag der Abrechnung
+ kommen, und jede Seele wird zÑhlen!\n
+\n
+Unser Garten der Meditation in Tripolis wird von armen Seelen belagert, die das Syndikat "Ungeleitete" 
+nennt. Bedauerlicherweise mÅssen wir einander mit maximaler Kraft beschÅtzen, denn das ist die Botschaft
+ aller Religionen. RÅstet Eure Mînche entsprechend aus und schickt sie nach Tripolis, damit sie dort fÅr
+ Ruhe sorgen.\n
+\n
+Wir haben grosse PlÑne fÅr die Erde, mein SchÅler. Die Kirche muss das Antlitz der gesamten Welt 
+verÑndern. Dies ist unsere Zeit. Wir werden nur die AuserwÑhlten erretten. Doch nun genug fÅr heute.\n
+\n
+Dies sind die Worte der Neun.\n
+\n
+\c4Virgil\n
+\n
+\c1Und der Meister sprach zu seinen SchÅlern: "Vergesst, dass man Euch etwas beibringen will, und 
+konzentriert Euch aufs Lernen. Und wenn Ihr sicher seid, stellt alles in Frage."\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hDer VerkÅnder ist unter den Menschen. Lasset uns beten.\n
+\c2\n
+Wir mÅssen diese Unruhen in Buenos Aires ausnutzen. Indem wir zwei Erzfeinde bekehren, wird die Kirche 
+ihren Frieden und ihre Kontrolle Åber die ganze Stadt ausdehnen.\n
+\c5\n
+Unsere BrÅder und Schwestern in SÅdamerika haben uns nÅtzliche Informationen zukommen lassen. Sie haben 
+uns auf einen gewissen Juan Ormandoz aufmerksam gemacht, einen ranghohen Lakai von EuroCorp, der in 
+Buenos Aires trotz aller AktivitÑten der Ungeleiteten die StabilitÑt der Stadt aufrecht erhalten will. 
+Der AnfÅhrer der Ungeleiteten hingegen, Chico Ramirez, glaubt nÑrrischerweise, er kînne ein grîsseres 
+Gewerbegebiet von EuroCorp erobern und halten. Bekehrt sie beide, und wir werden Erfolge verzeichnen, wo
+ EuroCorp bislang versagt hat.\n
+\n
+Verbreitetet die Frohe Botschaft.\n
+\n
+\c4Virgil\n
+\n
+\c1Ein glÑubiger Verstand genÅgt nicht. Gebt uns auch das Gehirn selbst.\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hUnsere Gebete geleiten Euch, \l.\n
+\c2\n
+Wahrlich, die Zeit ist gekommen, die StÑrke unseres Glaubens auf die Probe zu stellen. In Santiago 
+wandelt ein einzelner Agent des Syndikats im Schatten - bekehrt ihn zum Lichte.\n
+\c5\n
+Welch' besseren Ort gibt es, um nach der StÑrke Ausschau zu halten, die wir brauchen, als in den Reihen 
+unseres Feindes, des Syndikates? Seine Agenten sind unsere kÅnftigen KlosterschÅler und Mînche. So wie 
+Ihr einer der Ihren wart, bevor wir Euch den Weg zum Licht zeigten, so sollt auch Ihr selbst bald 
+EuroCorps Elite von den dunklen Pfaden abbringen, auf denen sie wandeln. Ein Agent des Syndikats wurde 
+nach Santiago entsandt, um unser Werk dort zu erschweren. Ihr werdet das nicht zulassen.\n
+\n
+Doch bevor Ihr Eure Kriegermînche nach Santiago entlasst, vergewissert Euch, dass sie den Indoktrinator 
+bei sich tragen, auf dass sie damit verirrten Seelen den Weg ins Licht zeigen mîgen. Wenn ein 
+wahrhaftiger JÅnger den Indoktrinator anwendet, wird die grausame Illusion UTOPIAs von unserer Wahrheit 
+zerschmettert. Und alle, die dann sehend werden, scharen sich um den JÅnger und folgen seinem Worte. Und
+ wenn ihre Zahl gross genug ist, werden selbst die verstockten Agenten von EuroCorp ihren Chor hîren und
+ freudig einstimmen.\n
+\n
+Der Friede sei danach mit Euch.\n
+\n
+\c4Virgil\n
+\n
+\c1Erkennt Eure Feinde, denn alles, was die Verdammten von den AuserwÑhlten unterscheidet, ist ein 
+winziger monochromer Lichtpunkt, der ins Genick projiziert wird.\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hGesegnet seid Ihr, \l.\n
+\c2\n
+Unser Glaube ist stark, unser Kreuzzug kostspielig. Die beiden goldbeladenen Panzerwagen, die wir in 
+Johannesburg auf dem Scanner haben, werden unsere hungrigen SÑckel fÅttern. Schnappt sie Euch. Eure 
+Sache ist gerecht.\n
+\c5\n
+Unser Kreuzzug schreitet stetig voran. Die Hirnverblender des Syndikates werden sich bald schon fÅr ihre
+ Missetaten rechtfertigen mÅssen. Wir kÑmpfen, auf dass dieser Tag des JÅngsten Gerichtes bald kommen 
+mîge, doch wir benîtigen finanzielle Mittel, um die weltliche Macht von EuroCorp niederzuringen.\n
+\n
+Die Neun haben uns den Kodex gegeben. Er ist der Bauplan unserer Erlîsung. Doch wir mÅssen einen hohen 
+Preis zahlen fÅr jedes Kapitel, das wir verwirklichen. Das nennen wir Forschung. Und so ergibt sich die 
+heilige Schlussfolgerung: Je mehr materielle GÅter wir einsammeln, desto nÑher kommen wir unserem Ziel, 
+selbst zu Gîttern zu werden.\n
+\n
+Begebt Euch nach Johannesburg, wo ein logistisches Nadelîhr zu einem Stau von Goldbarren-Ladungen 
+gefÅhrt hat. Dieses Edelmetall wird unserer Sache sehr fîrderlich sein. Die Barren werden in Panzerwagen
+ zu Tresoren geschafft, die unter stÑndiger Bewachung stehen. FÅr jede Ladung sind zwei Panzerwagen 
+erforderlich. Leitet die Panzerwagen auf den rechten Weg um und fÅhrt sie zum vereinbarten Sammelpunkt. 
+Wir empfehlen Euch dringend, die schwerbewachte Basis weder zu betreten noch anzugreifen. Es gibt andere
+ Wege, das Gold des Herrn einzusammeln. Benutzt Euren Verstand, nicht nur Eure Feuerkraft.\n
+\n
+\c4Virgil\n
+\n
+\c1Bedenket, selig sind die Starken, denn ihrer ist die Macht auf Erden.\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hDer Friede sei mit Euch, \l.\n
+\c2\n
+Unsere auserwÑhlte JÅngerin Mirabelle Lucy De Saxo ist von den Neun gesalbt worden. Geleitet sie ins 
+Herz eines EuroCorp-Labors, auf dass sie mit ihrem starken Glauben einen Wissenschaftler bekehre, dessen
+ Forschung unser eigenes Werk ergÑnzt.\n
+\n
+Bringt diesen Wissenschaftler in unseren nahegelegenen Tempel, wo Pater Black ihm die Beichte abnehmen 
+wird.\n
+\n
+Schickt De Saxo an den Ort, den der Wissenschaftler Euch nennen wird, und bring uns seine Geheimnisse.\n
+\c5\n
+Hîrt das Wort der Neun. Wahrlich, es gibt jene, die grosse Gehirne besitzen, doch den Verstand verloren 
+haben. Sie wandeln in der finsteren Wildnis und kînnen das strahlende Licht unseres Glaubens nicht 
+sehen. Ein solches verirrtes Schaf fÅhrt fÅr EuroCorp gerade Krieg gegen den VerkÅnder. Die Neun wollen 
+seine Seele retten, indem sie seinen Verstand fÅr die grosse Sache einsetzen, den Kodex in neue 
+Technologien zu verwandeln.\n
+\n
+Euer Ziel ist Dr. Schweizer. Er arbeitet in einem EuroCorp-Labor in Genf. Es ist zu schwer bewacht, als 
+dass unsere Kampfmînche sich Zutritt verschaffen kînnten, also werdet Ihr unsere spezielle 
+Infiltrationsagentin Mirabelle Lucy De Saxo durch den Sicherheitskordon geleiten. Wenn sie Schweizer 
+bekehrt hat, muss sie dafÅr sorgen, dass ihm in dem alten Tempel, den wir Åbernommen haben, Asyl gewÑhrt
+ wird. Heimlichkeit ist Mirabelles stÑrkste Waffe. Passt gut auf sie auf.\n
+\n
+Pater Black, unser Weihepriester vor Ort, wird dem Doktor die Beichte abnehmen, sobald Schweizer den 
+Tempel betritt. Dadurch wird Mirabelle die Informationen bekommen, die sie braucht, um die 
+Forschungsdokumente des Doktors zu finden. Schickt sie dorthin und fÅhrt unsere Tochter, auf dass sie 
+die FrÅchte von Schweizers Arbeit ernten mîge. Und sorgt dafÅr, dass sie sie uns Åbergibt.\n
+\n
+Eure Seele wird gesegneter mit jeder Tat, die Ihr vollbringt.\n
+\n
+\c4Virgil\n
+\n
+\c1Alles Wissen ist irgendwo gespeichert, sei es in BÅchern, Kîpfen oder unter massiven Gletschern. Und 
+wenn wir es finden, nehmen wir es an uns. Der Glaube ist der Ziegel, das Wissen der Mîrtel.\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hGottes Segen Åber Euch, KlosterschÅler.\n
+\c2\n
+Wenn der Chaossturm des Kataklysmus uns ins Gesicht blÑst, mÅssen wir standhaft sein. BeschÅtzt unseren 
+Tempel in Hongkong vor dem Sturm der Ungeleiteten, der sich der Insel nÑhert.\n
+\c5\n
+Die Neun hatten eine Vision. Die Ungeleiteten versuchen, unsere PlÑne fÅr die asiatische PazifikkÅste zu
+ vereiteln. Ein Ketzer, der uns namentlich als Ko-Paull Vissick bekannt ist, pervertiert unsere 
+Botschaft, indem er dem Pîbel das geheiligste Wissen preisgibt, das uns die Neun enthÅllt haben. Solche 
+öberforderung kann den unvorbereiteten Verstand nur schÑdigen, und so fîrdert Vissick mit diesem Unsinn 
+nur Feindschaft gegenÅber der Kirche.\n
+\n
+Jetzt erreichen uns Berichte aus Hongkong Åber Landungen von Ungeleiteten in grîsserer Anzahl. Wir 
+glauben, dass sie unsere Kirche als Ziel haben. Es ist an Euch und Euren Mînchen, die Kirche vor dem 
+Pîbel zu erreichen und sie gegen den unvermeidlichen Ansturm zu verteidigen.\n
+\n
+Getreuer Diener, da ist noch mehr. Wir werden wie Gîtter sein. Eine Maschine wird die Welt erschÅttern. 
+Seid stark im Glauben, und Ihr werdet Euch einen sicheren Platz erringen. Alle anderen sind verloren.\n
+\n
+Der Tag der Rechtschaffenheit ist nahe.\n
+\n
+\c4Virgil\n
+\n
+\c1Der am lautesten schreit, kann nur seine eigene Stimme hîren. Diejenigen, die wahres Wissen besitzen,
+ hîren denen zu, die wahren Glaubens sind. Und diejenigen, die ihre Ohren verschliessen, werden nie die 
+Sichel des Sensenmanns rauschen hîren.\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hHîrt meine Worte, JÅnger des Lichts.\n
+\c2\n
+Das Schicksal stellt uns auf die Probe, \l. Wir wollen die ungeleitete Plage in Rom beendet wissen. 
+Reinigt diese Stadt von UnglÑubigen.\n
+\c5\n
+Dieser Mob war uns bis jetzt ganz nÅtzlich, da er die KrÑfte von EuroCorp in dieser Region gebunden hat,
+ aber nun ist das nicht mehr nîtig. Eliminiert den Pîbel.\n
+\n
+Denn wahrlich, Ihr seid auserwÑhlt.\n
+\n
+\c4Virgil\n
+\n
+\c1Schlechte Handwerker geben ihren Werkzeugen die Schuld. Gute Handwerker bauen sich bessere Werkzeuge.
+ Die besten Handwerker lassen ihre Arbeit ganz von den Werkzeugen erledigen.\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hEmpfangt unseren Segen, Sohn des Lichts.\n
+\c2\n
+Wir haben unsere Kirche etabliert, indem wir dort zu Werke gingen, wo unsere Gegner am schwÑchsten 
+waren. Nun prophezeihen die Neun Gegenangriffe von EuroCorp in StÑdten, in denen wir jetzt die Kontrolle
+ haben.\n
+\n
+Das Syndikat hat - bestÑtigten Berichten zufolge - bereits mit AufklÑrungsoperationen in Johannesburg, 
+Buenos Aires, Santiago und Tripolis begonnen. Dies kann keinesfalls so hingenommen werden. Wer unsere 
+StÑdte infiltriert, muss sich uns anschliessen oder sterben.\n
+\c5\n
+Aber unsere dort stationierten KrÑfte sind zu schwach, um mehr zu tun, als die Schritte der gegnerischen
+ Agenten zu Åberwachen.\n
+\n
+Eure Kriegermînche mÅssen dafÅr sorgen, dass kein EuroCorp-Spion jemals wieder zum Syndikat zurÅckkehrt.
+ Rastet und ruht nicht, bevor nicht alle Cyborg-Eindringlinge im Schosse der Kirche ruhen - auf die eine
+ oder andere Weise.\n
+\n
+Der Tag der Abrechnung rÅckt mit jeder Seele nÑher, die wir fÅr unsere Sache rekrutieren. Die 
+Gottesmaschine braucht GlÑubige. Und wer die Katharsis Åberleben will, muss glauben.\n
+\n
+Seid tapfer, JÅnger des Lichts. Und seid brutal. Das ist der einzige Weg.\n
+\n
+\c4Virgil\n
+\n
+\c1Es birgt ein seltenes VergnÅgen, die Seelen von Maschinen zu stehlen.\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hMîge der Glaube ewig in Euch brennen, Champion des Lichts.\n
+\c2\n
+Unsere Orakel sagen voraus, dass ein hîchst wichtiger Syndikatsmanager namens Koto Sek bald Kairo 
+besuchen wird. Er hat mÑchtige Begleiter und wird gut beschÅtzt. Doch im Namen von allem, was Recht ist,
+ muss er sterben.\n
+\c5\n
+Koto Sek will an Bord eines Shuttles gehen - mit unbekanntem Ziel. Haltet ihn auf, so frÅh Ihr kînnt. 
+Vergewissert Euch, dass er wirklich tot ist, bevor Ihr Euch zurÅckmeldet. Wenn es andere TodesfÑlle zu 
+beklagen gibt, nun, das ist der gottgewollte Lauf der Dinge. Ich bin sicher, Ihr habt Euch inzwischen 
+daran gewîhnt.\n
+\n
+Geht in Frieden.\n
+\n
+\c4Virgil\n
+\n
+\c1Nicht nur alle Augen sind auf die AnfÅhrer der Menschen gerichtet, auch alle Zielfernrohre.\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hEuer Licht erstrahlt hell, Apostel.\n
+\c2\n
+In Bahrain bereitet sich EuroCorp auf einen Angriff auf unseren Weg der Erleuchtung vor. So soll es 
+geschehen, dass Ihr die Schranke sein mîgt, die ihren Vormarsch stoppt.\n
+\c5\n
+Durch die Kraft unseres Glaubens haben wir Euch hier mit einer reichlichen Auswahl an Zielen versorgt. 
+Und Euch sei ein Kampfpanzer gegeben. Geht weise vor, Kriegermînch. Nutzt Eure AusrÅstung gut. Stellt 
+sicher, dass Ihr die Stimme von EuroCorp hier zum Schweigen bringt, und jeden seiner Handlanger. So muss
+ es sein, auf dass wir triumphieren und die Welt befreien.\n
+\n
+Das Licht in Eurem Wesen strahle noch stÑrker.\n
+\n
+\c4Virgil\n
+\n
+\c1Wie KornÑhren standen die Menschen auf dem Feld und lauschten den Worten des Meisters. Als die Sense 
+des Schnitters sie alle hinwegfegte, verstummte der Meister. Diese Lektion wÅrden andere sich zu Herzen 
+nehmen.\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hGratuliere zu Euren Fortschritten, JÅnger des Lichtes.\n
+\c2\n
+Wir haben Euch die heilige Pflicht auferlegt, irdische GÅter aus zwei Geldtransportern herbeizuschaffen,
+ die Goldbarren zum Hauptquartier der Zentralbank von Singapur liefern.\n
+\c5\n
+NatÅrlich wird EuroCorp die hîchste Alarmstufe ausrufen und Åberall Wachen postieren. Wir glauben daher,
+ dass ein direkter Angriff unklug wÑre, da das Syndikat genau das erwartet. So beteten wir um einen 
+anderen Weg, um an dieses Gold zu kommen, und unsere Gebete werden erhîrt werden. Der Rest ist Eure 
+Sache, JÅnger des Lichts.\n
+\n
+Bedenkt die Wunder, die Geld bewirken kann.\n
+\n
+\c4Virgil\n
+\n
+\c1Der Meister braucht kein Geld. Aber dennoch sitzt er da und zÑhlt es. Als MeditationsÅbung.\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hSeid gegrÅsst, JÅnger des Lichts.\n
+\c2\n
+Wir haben einen waghalsigen Plan fÅr Euch. Wir wollen, dass Ihr einen hochrangigen Syndikatsmanager 
+entfÅhrt, direkt vor der Nase der EuroCorp-Sicherheitsbeamten aus ihrem Londoner Hauptquartier.\n
+\c5\n
+Professor Kurt Drennan ist eines der wichtigsten Mitglieder von EuroCorps Forschungs- und 
+Entwicklungsprogramm. Die EuroCorp-Agenten haben etwas Åber unsere Entdeckungen in Reykjavik 
+herausgefunden, und Drennan soll darÅber in London einen Vortrag vor wichtigen EuroCorp-Managern halten.
+ Zur gleichen Zeit soll er eine neue Assistentin zugewiesen bekommen. Geht hart mit diesem Neuzugang ins
+ Gericht, und fÅhrt die gesegnete Mirabelle, auf dass sie zur rechten Zeit ihren Platz einnehme. Dann 
+wird uns Drennan in die HÑnde gespielt werden.\n
+\n
+Sobald Mirabelle erfolgreich den Platz der Assistentin eingenommen hat, muss sie incognito bleiben und 
+sich unauffÑllig benehmen, wÑhrend Drennan seinen Vortrag hÑlt. Sofort danach soll der Professor von 
+einem Auto abgeholt werden, das ihn zu seinem nÑchsten Termin bringt. Solange Ihr dafÅr sorgt, dass 
+Mirabelle im gleichen Auto mitfÑhrt, wird Drennan nie dort ankommen. Mit Hilfe unserer Gebete dÅrfte 
+sich Drennan als Ñusserst willig erweisen, seine Beichte abzulegen.\n
+\n
+Euer Geist wird auf ewig mit den Neun wandeln.\n
+\n
+\c4Virgil\n
+\n
+\c1Hundert Elefanten kînnen die WÑlle einer Festung niederreissen. Eine einzige verseuchte Ratte aber 
+kann alle Menschen darin tîten.\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hMeditiert mit uns, JÅnger des Lichts.\n
+\c2\n
+Entwendet die PlÑne einer neuen Syndikatswaffe aus dem EuroCorp-GebÑude in New York.\n
+\c5\n
+Professor Drennan ist tot. Sein Widerstand gegen unsere Neuralinquisitoren fÅhrte zu einer heftigen 
+Hirnblutung. Sehr enttÑuschend. Doch durch unsere intensiven Gebete Åberlebte er lange genug, um uns mit
+ verlÑsslichen Informationen zu versorgen, dass EuroCorp einen grîsseren Gegenangriff auf unsere Heilige
+ Kirche plant. Die Vorbereitungen fÅr diesen Gegenschlag laufen in Syndikatsbasen in New York.\n
+\n
+Unter strenger Bewachung haben Techniker des Syndikats in New York eine Thermonukleare Handfeuerwaffe 
+getestet, fÅr die wir selbst Verwendung hÑtten. Vor zwei Tagen haben unsere BrÅder und Schwestern, die 
+trotz der EuroCorp-PrÑsenz die Kathedrale dort besetzt halten, eine verheerende Explosion in einer der 
+Basen des Gegners beobachtet. Und in genau dieser Basis sollen wir nach Drennans Worten experimentelle 
+Daten Åber diese GerÑte finden. Doch die Basis ist schwer bewacht. Ein Ablenkungsmanîver dÅrfte vonnîten
+ sein.\n
+\n
+Bruder Methuselah wird die Sicherheit der Kathedrale verlassen und Euch an der IML treffen. Er wird Euch
+ in ein Wohn- und Gewerbegebiet fÅhren und dort einen Aufruhr verursachen, indem er eine Wolke Psychogas
+ unter der Zivilbevîlkerung freisetzt. WÑhrend dieser Zeit solltet Ihr ein Mittel finden, um in die 
+Basis einzudringen. Die Reaktion des Syndikats auf den Aufruhr sollte einige der Wachen eine Zeitlang 
+beschÑftigen.\n
+\n
+\c4Virgil\n
+\n
+\c1Die Mutigen gehen alleine in dunkle Hîhlen. Die Schlauen schicken erst mal die Mutigen rein. Die 
+Schlauesten aber warten hinter den Schlauen.\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hWertvoller AnhÑnger des Lichts,\n
+\c2\n
+Zerstîrt die Waffenbunker von EuroCorp in Riyad. Indem wir solche Zerstîrung anrichten, zelebrieren wir 
+den Kataklysmus.\n
+\c5\n
+Der VerkÅnder hat UTOPIA in die Knie gezwungen. EuroCorps stÑndiges BemÅhen, eine neue Armee aufzubauen,
+ bestÑtigt die Wirksamkeit unserer SchlÑge gegen sie. Viele WaffenvorrÑte des Syndikats werden 
+eingelagert, um den leeren KÑlteschlafkammern Zeit zum WiederauffÅllen des schwindenden Vorrats an 
+Cyborgagenten zu geben. Drennan beichtete uns den Standort des grîssten dieser Waffenlager. Es liegt 
+innerhalb der alten Stadtmauern von Riyad.\n
+\n
+Es ist der heilige Wunsch der Neun, dass dieses Arsenal fÅr ewige Zeiten unter dem WÅstensand vergraben 
+bleibt. Findet die Zielbunker und zerstîrt sie. Bekehrt oder vernichtet jeden Agenten, der sich Euch in 
+den Weg stellt, diese Entscheidung Åberlassen wir Eurem Urteil vor Ort. Wenn dann die WaffenvorrÑte des 
+Syndikats nur noch eine schwache Erinnerung sind, werden die GlÑubigen Euren Namen lobpreisen.\n
+\n
+Unsere Maschinen werden die Welt neu erschaffen, JÅnger des Lichts. Sie werden den Planeten ins Chaos 
+stÅrzen. Die meisten Menschen werden sterben, aber die Erneuerung des Lebens ist unsere heilige Pflicht.
+ Stellt Euch eine Welt ohne Syndikat vor, ohne Gedankenkontrolle oder Gewalt. Es wird geschehen, Bruder,
+ es wird so geschehen. Mehr Seelen sind vonnîten.\n
+\n
+Tempus fugit.\n
+\n
+\c4Virgil\n
+\n
+\c1Und die KlosterschÅler fragten den Meister: "Wann werden wir die Unsterblichkeit erlangen?"\n
+\n
+Und der Meister erwiderte: "In diesem Leben nicht mehr."\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hTapferer Apostel.\n
+\c2\n
+Unsere Tochter der Neuen Epoche, Mirabelle Lucy De Saxo, ist Åber dem Territorium der Ungeleiteten 
+abgestÅrzt, ganz in der NÑhe ihres Zufluchtsortes bei Kapstadt. Eure Kriegermînche mÅssen ihr zu Hilfe 
+eilen. Sie muss am Leben bleiben, wenn sich ihr Schicksal erfÅllen soll, die Erste auf dem Pfad der 
+Erlîsung zu sein.\n
+\c5\n
+Wir wissen, dass sie noch lebt, aber sie braucht dringend Beistand. Ihr seid selbstverstÑndlich unsere 
+erste Wahl fÅr diese riskante Mission. Begebt Euch in das Gebiet der Heiden und findet De Saxo. Bringt 
+sie eiligst da heraus. Sie kînnte in tîdlicher Gefahr sein. Handelt entschlossen, wenn sich Euch jemand 
+in den Weg zu stellen versucht.\n
+\n
+\c4Virgil\n
+\n
+\c1Mut bringt Euch an die gefÑhrlichsten Orte. öberlegene Feuerkraft bringt Euch sicher hindurch.\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hMîge der Glaube mit Euch sein, \l.\n
+\c2\n
+Sucht und vernichtet einen gefÑhrlichen Hacker, der sich unter den Ungeleiteten verbirgt, denn er hat 
+sich die Kontrolle Åber einen strategischen Waffensatelliten Åber Peking verschafft.\n
+\c5\n
+Ein heidnischer Hacker mit Zugang zur UTOPIA-Satellitenverteidigung lÑsst Stahlregen vom Himmel fallen, 
+wo und wann immer er mag. Er muss gestoppt werden. Ihr mÅsst ihn finden und eliminieren.\n
+\n
+Seid wachsam, JÅnger des Lichts. Denn Peking ist ein Ort ohne wahren Glauben, voller Heiden, die nicht 
+weiter vorausschauen kînnen als bis zur Kimme ihrer Zieloptik.\n
+\n
+Geht hin im Geiste.\n
+\n
+\c4Virgil\n
+\n
+\c1Wer im Auge des Sturmes lebt, ist ein Splitter im Auge eines Ñrgerlichen Gottes.\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hOh JÅnger des Lichts, Eure Aura nÑhrt unsere Kraft.\n
+\c2\n
+Das Syndikat hat die Kontrolle Åber Neu Delhi an die Ungeleiteten verloren. Mit den Panzern ihrer 
+besiegten Feinde bringen die UnglÑubigen Vernichtung in alle Teile der Stadt. Sie sind falsche 
+Propheten, sie alle. Schickt sie in die Katharsis.\n
+\c5\n
+Wer solch infernalische Waffen gegen uns einsetzt, muss dafÅr den hîchsten Preis bezahlen. Es hat nichts
+ mit Ehre zu tun, Maschinen zu besiegen, nur mit betrÑchtlicher Gefahr.\n
+\n
+Seid vorsichtig, wÑhrend Ihr Euch auf die Insel zu bewegt. Nehmt diese als erstes ein.\n
+\n
+Mîge der Geist Euch erfÅllen.\n
+\n
+\c4Virgil\n
+\n
+\c1Die Tapferen verstecken sich hinter Technologie. Die Dummen verstecken sich vor ihr. Die Schlauen 
+aber besitzen Technologie - und verstecken sie.\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hUnseren Segen fÅr Euch, AuserwÑhlter.\n
+\c2\n
+Bringt uns das Geheimnis, das EuroCorp in Bangkok verbirgt, und wir werden fÅr Eure Erlîsung beten.\n
+\c5\n
+Der Gestank des Chaos zieht um jede Ecke, wÑhrend UTOPIA die Bevîlkerung im Stich lÑsst und sich nur mit
+ einigen Bevorzugten in den Untergrund zurÅckzieht. In Bangkok hat das Syndikat alle Versuche 
+drangegeben, die Regierungsgewalt wiederherzustellen, und hat statt dessen eine Todeszone eingerichtet. 
+Was genau dort vorgeht, wissen wir nicht.\n
+\n
+Einer unserer BrÅder hat vor kurzem versucht herauszufinden, was EuroCorp mit so viel Aufwand verstecken
+ will. Er hat nur erfahren, dass die Agenten des Gegners gelegentlich die Todeszone durchqueren, um 
+andere Heiden zu entfÅhren, die sich zwischen den Ruinen immer noch an ihre vergeblichen Hoffnungen 
+klammern. Die Agenten kehren dann mit ihren Gefangenen in die Festung zurÅck. Die Neun verstehen dieses 
+Verhalten nicht, da das Syndikat doch sonst Åberall die Ungeleiteten eliminiert, wo es nur kann.\n
+\n
+Wir suchen in dieser Angelegenheit nach Erleuchtung. FÅhrt Eure Kriegermînche durch die tîdlichen 
+Aussenbezirke und in die Todeszone hinein. Findet heraus, was EuroCorp dort tut, und ergreift alle Euch 
+notwendig erscheinenden Schritte, um mit der Situation fertigzuwerden, die Ihr dort vorfindet. Kehrt 
+dann zurÅck und beichtet uns alles, was Ihr herausgefunden habt, auf dass wir Euch von dem Bîsen 
+reinigen kînnen, dem Ihr ausgesetzt wart.\n
+\n
+Vergebt nichts.\n
+\n
+\c4Virgil\n
+\n
+\c1Ein KriegsflÅchtling suchte den Meister auf. "Du bist weise und gelehrt", sprach er. "Lehre mich, den
+ Schrecken dieser Welt zu entgehen." Und der Meister blendete ihn mit glÅhenden Eisen.\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hLauscht meinen Worten, JÅnger des Lichts..\n
+\c2\n
+Wir brauchen eine IML-Verbindung nach Reykjavik, wo unsere geheiligten Sakramente in Gefahr sind. Unsere
+ gesalbte Tochter, Mirabelle Lucy De Saxo, soll diese Route fÅr uns reaktivieren. Es ist Eure Aufgabe, 
+ihr einen sicheren Pfad zur IML-Station im Nordosten von Christchurch zu schaffen.\n
+\c5\n
+Wandelt mit Vorsicht auf den Pfaden des Herrn, Pilger. Fallen und Hinterhalte lauern Åberall, und Ihr 
+mÅsst die geballte Feuerkraft unseres Glaubens denen entgegenschleudern, die sich Euch in den Weg 
+stellen wollen. De Saxo ist etwas Besonderes, und ihr darf kein Leid geschehen. Betet darum und sorgt 
+dafÅr.\n
+\n
+Wenn genug Menschen unseren Glauben teilen, werden wir mit einer Strahlungslinse auf ultratiefer 
+Frequenz ein Tor in der IonosphÑre der Erde îffnen. Die Einwirkung von ungefilterter kosmischer 
+Strahlung durch das Ionentor wird auf der ErdoberflÑche so gut wie alles abtîten. Nur wer fest im 
+Glauben ist, wird errettet. Wir werden sozusagen einen weltweiten Reset fahren, und die Erde wird neu 
+gebootet, besser und sicherer im Schosse unserer Religion.\n
+\n
+Arbeitet fÅr unsere heilige Sache.\n
+\n
+\c4Virgil\n
+\n
+\c1Folgt dem erfolgreicheren Dieb und stiehl seine Ideen.\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hGesegneter,\n
+\c2\n
+Vernichtet die ausgebaute Forschungseinrichtung von EuroCorp in der NÑhe von Reykjavik. Eliminiert alle 
+EuroCorp-Agenten, die Ihr zu sehen bekommt.\n
+\c5\n
+Die Geschichte dieses Ortes ist zugleich die hehre Basis der Kirche der Neuen Epoche. Dort werdet Ihr 
+die reine Essenz dessen sehen, was uns alle zum Glauben bekehrt hat. Und EuroCorp entweiht es schamlos. 
+Lîscht mit grîsster Strenge alle UnglÑubigen aus, die Ihr antrefft.\n
+\n
+Auch mÅsst Ihr all die Orte zerstîren, an denen die Neun ihren Geist auf die Aufnahme der Weisheit 
+vorbereitet haben. Es ist nur Materie, Substanz, wo doch unser Glaube in unseren Herzen schlÑgt und 
+lebt. Zaudert nicht. Zerstîrt. Kein Schaden wird der Kirche daraus entstehen, denn der Kodex ruht tief 
+in den Seelen der Neun. Nur Schatten seiner Weisheit huschen noch durch die Labors von Reykjavik. Seid 
+grÅndlich in Eurem Streben, zum Wohle des Ganzen.\n
+\n
+Wandelt in heiligen Fussstapfen.\n
+\n
+\c4Virgil\n
+\n
+\c1"Genau hier!" sagte der Meister. "Baut mir ein grosses Grabmal genau an diesem Ort." Und seine JÅnger
+ taten, wie man sie geheissen hatte. Bald strahlte das Grabmal in der Sonne. "Nun gehet hinein." Sie 
+betraten es. Und ein Erdbeben zerstîrte das Grabmal, begrub alle im Inneren unter sich.\n
+\n
+Der Meister lÑchelte. "Nicht alle GlÑubigen sind auch auserwÑhlt.\n
+\n
+"Das nennt man Opfer."\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hWandelt im Licht, SchÅler des Herrn.\n
+\c2\n
+Eliminiert Mirabelle Lucy De Saxo unverzÅglich. Ihr findet sie in Kapstadt, in dem Zufluchtsort, den wir
+ ihr gaben. Und den wir ihr jetzt wieder nehmen.\n
+\c5\n
+Euer Herz schlÑgt nur fÅr uns. Zweifelt nicht am Glauben, wenn er Dinge von Euch verlangt, die Ihr noch 
+nicht verstehen kînnt. De Saxo hat sich gegen uns vergangen. Die Neun haben sie als unseren Erzfeind 
+entlarvt. Sie ist ein Agent des Syndikates. Geht hin mit Rache in Eurer Brust, und eliminiert sie.\n
+\n
+Die Schwachen im Geiste werden mit ihr paktieren. Lasst sie die Kraft des Rechten Weges fÅhlen.\n
+\n
+Wir haben fast genug getan, um die letzte Phase des Kataklysmus einzuleiten und diese Welt Åber alle 
+Masse zu verÑndern. KÑmpft dafÅr, SchÅler des Herrn. Ihr seid auserwÑhlt und werdet gerettet werden. 
+Millionen von UnglÑubigen werden elend verdorren. Wir werden diesen Planeten reinigen.\n
+\n
+Seid fest im Glauben an die Katharsis.\n
+\n
+\c4Virgil\n
+\n
+\c1Selbst Salamander brennen manchmal.\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hHîrt meine Worte, Apostel.\n
+\c2\n
+Die Grosse Kirche von Johannesburg ist von einem Schwarm Ungeleiteter entweiht worden. Einer von ihnen 
+ist ganz klar als AnfÅhrer zu erkennen, ein gewisser Rene Galact. Er muss vernichtet werden, im Namen 
+all dessen, was Recht ist.\n
+\c5\n
+Es gibt eine unentschuldbar hohe Zahl von Ungeleiteten in der Stadt. Der leicht erhîht liegende Bereich 
+im SÅdwesten der Stadt ist nun die Festung der Vogelfreien. Ein grosser Sieg wartet auf den öberwinder 
+all derer, die sich hinter ihre unbedeutenden Mauern verkrochen haben, und die Kirche kommt dem Letzten 
+Tag wieder ein StÅckchen nÑher. So steht es geschrieben im Kodex, SchÅler des Lichts.\n
+\n
+Geht hin mit Feuer und Strenge.\n
+\n
+\c4Virgil\n
+\n
+\c1Ein Leben zu nehmen ist ein Verbrechen. Eintausend zu nehmen ist eine Religion.\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hUnseren Segen Åber Euch, Apostel.\n
+\c2\n
+Ein Notfall hat sich ergeben, um unsere Standhaftigkeit auf die Probe zu stellen. Einer der Neun wurde 
+gefangengenommen. Er wird in einem Hochsicherheitstrakt in Adelaide festgehalten. Ihr mÅsst ihn befreien
+ und in Sicherheit bringen.\n
+\c5\n
+Ihr mÅsst um einen Weg ins Herz der Anlage beten, und Ihr mÅsst genug Waffen dabei haben, um alle 
+UnglÑubigen abzuwehren, die sich Euch in den Weg stellen wollen. Dies ist eine PrÅfung Eures Glaubens, 
+JÅnger des Lichts. Versagt nicht. Bleibt wachsam. Vertraut dem wahren Weg, und wenn er es will, werdet 
+Ihr Erfolg haben.\n
+\n
+Reist auf heiligen Pfaden.\n
+\n
+\c4Virgil\n
+\n
+\c1In den dunkelsten aller Zeiten wird der wahre GlÑubige Åben, um seine Kampfkunst zu verbessern.\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hJÅnger des Lichts.\n
+\c2\n
+Ihr habt uns gut gedient. Nun ist unser Moment gekommen. Bleibt, wo Ihr seid, und folgt uns nicht. Wir 
+werden uns alleine zur Ionentor-Linse begeben. Wenn wir sie aktivieren, werden alle, die auf der Erde 
+zurÅckbleiben, vergehen. Doch fÅrchtet Euch nicht - Euer Name wird auf immer mit uns sein, und wahrlich,
+ wir werden Euch einen Heiligen nennen.\n
+\c5\n
+Das menschliche Leben auf diesem Planeten wird ausradiert, und wir werden die Erde mit unseren 
+Ebenbildern neu besiedeln. Das war immer unser Glaube, und wir werden ihn verwirklichen - alleine.\n
+\n
+Wer immer uns jetzt noch zu stoppen versucht, wird von der Sanctum-Protektorats-Garde ausgelîscht 
+werden. Akzeptiert Euer Schicksal - seid nicht so nÑrrisch, es Ñndern zu wollen. Die Macht der 
+Protektorats-Garde ist immens. Bleibt, wo Ihr seid, und legt Eure Waffen nieder, denn es ist vorbei, und
+ wir haben gewonnen.\n
+\n
+\c4Virgil\n
+\n
+\c1Die Welt wird sich drehen, und die menschliche Rasse wird vergehen.\n
+\n
+Alles beginnt von neuem. Der Glaube hat seinen Weg vollendet, es ist vorbei.\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hErleuchtet uns, oh Selbstloser.\n
+\c2\n
+Vernichtet eine UTOPIA-Bodenstation und beseitigt die Sicherheitscyborgs.\n
+\c5\n
+Eure segensreiche FÅhrung wird in Bangkok benîtigt, das wir schon bald vom Joch des Syndikats befreien 
+werden.\n
+\n
+Die PrÑsenz von EuroCorp beschrÑnkt sich dort inzwischen auf eine einzige UTOPIA-Bodenstation samt 
+Wachcyborgs. Schon versammeln sich unsere BrÅder und Schwestern am anderen Flu·ufer und bereiten sich 
+darauf vor, das grî·te aller Opfer zu bringen.\n
+\n
+Zeigt Ihnen den Weg. Zerschmettert die GebÑude, die das Schlo· jener Sklavenkette bilden, die EuroCorp 
+als UTOPIA bezeichnet. Zeigt unseren GlÑubigen den Weg des Kataklysmus auf, indem Ihr die Wachdroiden 
+beseitigst.\n
+\n
+Geht und tut dies fÅr die Neun.\n
+\n
+\c4Virgil\n
+\n
+\c1Und der Meister erhob seine HÑnde: "Schauet meine Wunden". Und alle, die es sahen, bestaunten seine 
+ausgebrannten WundrÑnder und das Sonnenlicht, das durch seine gro·en HÑnde fiel.\n
+\n
+"Es werde Leid!"\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+\hApostle of the New Epoch.\n
+\c2\n
+There is a task you must perform for us. The Unguided are foolish enough to think they can use our 
+belief against us. Our sources have told us that a contingent of punks have taken civilians hostage. 
+Your team will be sent in against them.\n
+\c5\n
+We have the element of surprise. The Unguided expect us to rescue the hostages. All you must do is 
+destroy the Unguided causing this irritation. Do not worry about the public held to ransom. They are not
+ Churchmembers and mean nothing. Just stop the Unguided in whichever way you choose. Make sure it is 
+permanent.\n
+\n
+\c4Virgil\n
+\n
+\c1When tact is required, use brute force. When force is required, use greater force. When the greatest 
+force is required, use your head. Surprise is everything.\n
+\n
+- Das Buch des Kataklysmus.\n
+\c5\n
+# Names.txt
+# Contains all city drop names in the mission number order.
+
+1.
+2.Missionar
+3.
+4.
+5.
+6.Brennen muss Rom
+7.
+8.
+9.
+10.Ein Treffen verwandter Geister
+11.Schlangennest
+12.Ein Splitter im Auge Gottes
+13.KÅhnheit
+14.Auf gleichem Niveau
+15.Regen des Terrors
+16.RÅstung der Gîtter
+17.Grundlagenforschung
+18.Demontage
+19.Tag der Verdammten
+20.
+21.
+22.
+23.
+24.
+25.
+26.
+27.GlaubensprÅfung
+28.
+29.
+30.
+31.HÑretiker
+32.
+33.Keiner von uns
+34.
+35.
+36.
+37.
+38.
+39.Seelenkreuzzug
+40.
+41.
+42.
+43.Tîdliche Ernte
+44.Powermonger
+45.Vergeltung
+46.
+47.
+48.VerkÅnder
+49.
+50.
+51.Bekehrungen
+52.Beobachter
+53.Verbindung aufnehmen
+54.
+55.
+56.
+57.
+58.
+59.
+60.
+61.
+62.
+63.
+64.
+65.
+66.
+67.
+68.
+69.
+70.
+71.Wiederbeschaffungsmassnahme
+72.Gîttliches Licht
+73.Spende mit Quittung
+74.
+75.
+76.
+77.
+78.
+79.
+80.
+81.
+82.
+83.
+84.
+85.Todeszone
+86.
+87.Unter die Diebe geraten
+88.
+89.
+90.
+91.
+92.
+93.
+94.
+95.
+96.
+97.
+98.
+99.
+100.EnthÅllungen
+101.
+102.Kataklysmus
+103.
+104.
+105.
+106.
+107.
+108.The Shining
+109.
+110.Unrest
+# Netscan.txt
+# Master file containing all OBJ****.txt files.
+# Files indexed Sn and Cn in Miss***.txt order.
+# Scan entries listed by Points Of Significance (POS).
+[3502]
+Landebereich: Detroit, IML-Station
+ZielgebÑude: K.I.-Bodenstation von EuroCorp
+Aufstellung der Wachen von EuroCorp
+Zufluchtsort: Detroit, IML-Station
+Abhîrinformation: Empfohlene Methode, um in die Bodenstation des Syndikats zu gelangen
+[0310]
+Landing Ground: Bangkok Cathedral
+Support acolytes in A-grav APC
+Target installations
+IML branch connections
+Aufstellung der Wachen von EuroCorp
+Local police have recently escorted armoured cars to the city vault
+[2516]
+Landebereich: Tripolis, IML-Station
+Unser Meditationsgarten
+[2546]
+Landebereich: Tripolis, IML-Station
+Unser Meditationsgarten
+Diejenigen, welche Sie beschÅtzen mÅssen
+Zufluchtsort: Tripolis, IML-Station
+Tresor: geschÑtzter Wert von 800.000 Cr
+Satellitenwarnung: IdentifikationsschlÅssel von EuroCorp-Agenten entdeckt, Signal instabil
+[2602]
+Landebereich: Buenos Aires, IML-Station
+Juan Ormandoz arbeitet in dieser Anlage fÅr leitende Angestellte
+Chico Ramirez und seine Bande besetzen diese Hauptstrasse von Old Calendar
+Zufluchtsort: Buenos Aires, IML-Station
+Abhîrinformation: Die Tresore der Stadt sind schÑtzungsweise mit 1.000.000 Cr gefÅllt
+[2603]
+Landebereich: Buenos Aires, IML-Station
+MilitÑrgarnison von EuroCorp
+Zufluchtsort: Buenos Aires, IML-Station
+[0703]
+Landebereich: Gepanzerter Truppentransporter liefert Ihre Mînche ab
+Agenten von EuroCorp durchsuchen den Bereich
+Zufluchtsort: Klosterkomplex Santiago
+BrÅcken wurden bei einem Angriff des Syndikats zerstîrt
+Abhîrinformation: Die IML-Route zum Ziel wird von EuroCorp-Truppen bewacht
+[2203]
+Landebereich: Johannesburg, IML-Station
+Tresor von EuroCorp
+Goldbarrentransport
+Zielfahrzeug
+Ziel des Konvois
+Zufluchtsort: Johannesburg, IML-Station
+[2202]
+Landebereich: Johannesburg, IML-Station
+Stadtteil unter Kontrolle
+Ihre BrÅder
+Abhîren: Bastelei mit UTOPIA-Identsignal entdeckt - mit Schwerpunkt auf EingÑngen zu Transportrîhren und Erkennung von mitgefÅhrten Sprengkîrpern
+[2204]
+Landebereich: Johannesburg, IML-Station
+Die Ungeleiteten
+Rene Galact
+Zufluchtsort: Johannesburg, IML-Station
+[2146]
+Landebereich: Genf, IML-Station
+Konferenzzentrum von EuroCorp
+Dr. Schweizer
+Tempel von Pater Black
+[5047]
+Landebereich: Vancouver, IML-Station
+Dr. Schweizers Labor
+Zufluchtsort: Vancouver, IML-Station
+Abhîrinformation: Agenten des Syndikats entdeckt
+[0103]
+Landebereich: Hongkong, IML-Station
+Unser Tempel und unsere BrÅder
+Landezonen der Ungeleiteten
+Abhîrinformation: Sonderagenten (Pioniere) von EuroCorp nach Hongkong entsandt
+[2831]
+Landebereich: Rom, IML-Station
+Niederrangige Wohnviertel wurden von Ungeleiteten Åberrannt
+Garnison von EuroCorp
+Agenten von EuroCorp
+Abhîrinformation: GeschÑtzter Tresorinhalt von 400.000 Cr
+[0705]
+Landebereich: Santiago, IML-Station
+Unser Tempel
+Zufluchtsort: Santiago, IML-Station
+Abhîrinformation: Einsatzkommando des Syndikats erreicht die Garnison plangemÑss innerhalb von 48 Stunden
+[4501]
+Landebereich: Ziel des Gepanzerten Truppentransporters
+HQ von EuroCorp
+Managershuttle mit Koto Sek an Bord
+Zufluchtsort: Kairo IML-Station
+[4402]
+Landebereich: Ziel des Gepanzerten Truppentransporters
+Der GotteslÑsterer Mirabelle Lucy De Saxo
+Zufluchtsort: Kapstadt IML-Station
+[4147]
+Landebereich: Bahrain, IML-Station
+RÅckzugsgebiet von EuroCorp
+Abhîrinformation: Die Polizei wird eingesetzt, um einen Finanzmanager von EuroCorp zu eskortieren, welcher im nordîstlichen Bereich der Stadt seinen GeschÑften nachgeht
+[0903]
+Landebereich: Singapur, IML-Station
+Tresor (leer)
+Zielfahrzeuge A und B
+Treffen
+Abhîrinformation: Ziel von Fahrzeug A
+Abhîrinformation: Ziel von Fahrzeug B
+[3002]
+Landebereich: London, IML-Station
+Professor Drennans Assistent
+Professor Drennan
+Vortragspodium
+Zufluchtsort: Londoner Outlet-Stra·e
+Abhîrinformation: Auf dem Plan des Professors stehn auch Daten Åber dieses GebÑude
+Abhîrinformation: Eine Invasion der Ungeleiteten an der Nordseite steht bevor
+[0403]
+Landebereich: New York, IML-Station
+Tore der EuroCorp-Anlage
+Schauplatz der Explosion
+ZielgebÑude
+Eine Umleitung wird in dieser Handelszone eingerichtet
+Unser Tempel und unsere Satellitenzentrale
+Zufluchtsort: New York, IML-Station
+Abhîrinformation: GeschÑtzter Tresorinhalt von 2.000.000 Cr
+[2016]
+Landebereich: Riyad, IML-Station
+Zielbunker
+Zufluchtsort: Riyad, IML-Station
+[4403]
+Landebereich: Kapstadt, Ziel des gepanzerten Truppentransporters
+UnglÅcksstelle von De Saxo
+Zufluchtsort: Kapstadt IML-Station
+Abhîrinformation: Geplante Zeit bis zum Eintreffen der Truppe von EuroCorp -36 Stunden
+[3202]
+Landebereich: Peking, IML-Station
+Aufenthaltsort des Hackers
+Zufluchtsort: Peking, IML-Station
+Abhîrinformation: Der Inhalt des Stadttresors wird auf 1.500.000 Cr geschÑtzt
+[2701]
+Landebereich: Delhi, IML-Station
+Truppen von EuroCorp auf der Flusshafeninsel
+Die Ungeleiteten
+Zufluchtsort: Delhi, IML-Station
+[0302]
+Landebereich: Bangkok, IML-Station
+Grenze der Todeszone
+Vorposten von EuroCorp
+Zufluchtsort: Bangkok, IML-Station
+Hier befindet sich immer noch ein GeschÑftstresor
+Satellitenwarnung: Beweis fÅr Waffentests im Bereich des Vorpostens
+[3602]
+Landebereich: Christchurch, IML-Station A
+Christchurch, IML-Station B
+[0603]
+Landebereich: Adelaide, IML-Station
+Der gefangengehaltene Bruder IX
+Treffpunkt
+MBT-Stationierung durch das Syndikat
+[4602]
+Landegebiet: Colombo, Managershuttlerampe
+Der Platz, wo Sie hingehîren
+Colombo-Orbitallift
+Anti-Satelliten-Raketensystem des Orbitalliftes
+[1002]
+Landebereich: Phînix-Tempel
+Ungeleitete Geiselnehmer
+Sanctuary: Phoenix Temple
+[6503]
+[7931]
+[0801]
+[1101]
+[6502]
+[7902]
+ELIMINIEREN SIE DIE UNGELEITETEN
+KEHREN SIE ZUM HAUPTQUARTIER ZURöCK
+BERZEUGEN SIE DIE TECHNIKER VON YAMAGUCHI
+EVAKUIEREN
+TECHNIKER VERSTORBEN
+BERZEUGEN SIE DIE MANAGER VON YAMAGUCHI
+MANAGER VERSTORBEN
+NEUTRALISIEREN SIE DIE YAMAGUCHI-AGENTEN
+AGENT VERSTORBEN
+BERZEUGEN SIE DIE BLUESKY-WISSENSCHAFTLER
+BERZEUGEN SIE DEN BLUESKY-WISSENSCHAFTLER
+AUFTRAGS-UPDATE: ELIMINIEREN SIE DIE BEDROHUNG DURCH UNGELEITETE
+ESKORTIEREN SIE DIE WISSENSCHAFTLER ZUR IML-STATION
+STEHLEN SIE DEN PANZERWAGEN
+DER PANZERWAGEN WURDE ZERSTôRT
+DER PANZERWAGEN HAT DAS HAUPTQUARTIER VON TANG ERREICHT
+BRINGEN SIE DEN WAGEN ZUR LANDEZONE
+STEHLEN SIE DAS ARTEFAKT AUS DEM TEMPEL
+BRINGEN SIE DAS ARTEFAKT ZUR LANDEZONE
+BESEITIGEN SIE DEN STöTZPUNKT DER UNGELEITETEN
+ELIMINIEREN SIE DIE AUFSTéNDISCHEN
+STERILISIEREN SIE DEN SEKTOR
+ELIMINIEREN SIE DIE WACHEN
+ELIMINIEREN SIE DEN AGENTEN
+BERZEUGEN SIE DEN AGENTEN
+ZIELAGENT IST VERSTORBEN
+ZIELAGENT KONNTE ENTKOMMEN
+BERZEUGEN SIE DEN NAA-ANGESTELLTEN
+BERZEUGEN SIE JENNIFER TAKS
+ESKORTIEREN SIE TAKS ZUR IML-STATION
+JENNIFER TAKS IST GESTORBEN
+ELIMINIEREN SIE DIE EIFERER
+BERZEUGEN SIE DEN GEL-DATA-WISSENSCHAFTLER
+BERZEUGEN SIE DIE GEL-DATA-WISSENSCHAFTLER
+BERZEUGEN SIE DEN HEXAGON-WISSENSCHAFTLER
+BERZEUGEN SIE DIE HEXAGON-WISSENSCHAFTLER
+ESKORTIEREN SIE DEN WISSENSCHAFTLER ZUR IML-STATION
+ESKORTIEREN SIE DIE WISSENSCHAFTLER ZUR IML-STATION
+UPDATE: ELIMINIEREN SIE DIE BEDROHUNG DURCH KULTISTEN
+FAHRZEUG VERNICHTET: AGENTEN SITZEN FEST
+WISSENSCHAFTLER VERLOREN
+BERZEUGEN SIE DIE K3-WISSENSCHAFTLER
+K3-WISSENSCHAFTLER ELIMINIERT
+LABOR ZERSTôRT
+EINRICHTUNG ZERSTôRT
+STERILISIEREN SIE DIE STADT
+BESCHöTZEN SIE DRENNAN
+BESCHöTZEN SIE DIE ASSISTENTIN DES PROFESSORS
+BESCHöTZEN SIE DIE MANAGER
+PROFESSOR DRENNAN IST GESTORBEN
+PROFESSOR DRENNANS ASSISTENTIN IST GESTORBEN
+EUROCORP-MANAGER WURDEN UMGEBRACHT
+BEFREIEN SIE PROFESSOR DRENNAN
+ESKORTIEREN SIE PROFESSOR DRENNAN ZUM EUROCORP-GEBéUDE
+AUFTRAGS-UPDATE: ALLE MITARBEITER EVAKUIEREN
+EVAKUIERUNG FEHLGESCHLAGEN
+BERZEUGEN SIE NIRABELLE LUCY DE SAXO
+DE SAXO IST GEFLOHEN: NEUE BEFEHLE VERFöGBAR
+ELIMINIEREN SIE MIRABELLE LUCY DE SAXO
+SCHLAGEN SIE DEN AUFSTAND NIEDER
+ELIMINIEREN SIE DIE REBELLISCHEN UNGELEITETEN
+BESCHöTZEN SIE DIE K.I VON BAHRAIN
+K.I. VON BAHRAIN WURDE ZERSTôRT
+SICHERN SIE DEN ORBITALLIFT
+ZUWENIG AGENTEN, UM AUFTRAG ZU ERFöLLEN
+ORBITALLIFT WURDE ZERSTôRT
+RAUMSTATION WURDE ZERSTôRT
+NAVIGATIONSCOMPUTER DES SHUTTLES BESORGEN
+SELBSTZERSTôRUNGSMECHANISMUS DER STATION AKTIV: DEAKTIVIEREN
+LEBENSERHALTUNGSSYSTEM DES SHUTTLES BESORGEN
+MONDSHUTTLE BEMANNEN
+ELIMINIEREN SIE DIE NEUN
+DIE NEUN HABEN DAS IONENTOR AKTIVIERT. SIE WURDEN BESIEGT.
+ELIMINIERT DIE UNGELEITETEN HEIDEN
+UNSER GARTEN DER MEDITATION WURDE ZERSTôRT
+BEKEHRT EUROCORP-AGENTEN
+ESKORTIERT DEN AGENTEN ZUR IML-STATION
+EUER ZIEL WURDE ELIMINIERT
+EUER ZIEL KONNTE ENTKOMMEN
+BESCHAFFT ZWANGSSPENDEN
+EURE BEUTE IST WEG
+BRINGT DR. SCHWEIZER ZU PATER BLACK
+DR. SCHWEIZER IST GESTORBEN
+PATER BLACK IST GESTORBEN
+BESCHöTZT EURE BRöDER UND DEN TEMPEL
+EURE BRöDER SIND ALLE BEI GOTT
+DER TEMPEL WURDE ENTWEIHT UND ZERSTôRT
+ZERMALMT DIE UNGLéUBIGEN
+BESTRAFT DIE AUFSTéNDISCHEN
+VERNICHTET DIE HORDEN DES CHAOS
+ZERTRETET DAS UNGELEITETE UNGEZIEFER
+BESEITIGT DIE EUROCORP-MITARBEITER
+ELIMINIERT DIE EUROCORP-AGENTEN
+HELFT DEN MôNCHEN
+BRINGT DEN SABOTEUR VOR GOTTES GERICHT
+ZERMALMT DIE SCHéNDER
+BESCHöTZT DEN MôNCHSORDEN
+DER MôNCHSORDEN WURDE VôLLIG AUFGERIEBEN
+BRINGT DEN PANZERWAGEN ZUM SAMMELPUNKT
+DER PANZERWAGEN WURDE ZERSTôRT
+ENTFERNT DEN ASSISTENTEN DES PROFESSORS
+NEHMT DEN PLATZ DES ASSISTENTEN BEIM PROFESSOR EIN
+SAMMELT VIDEODATEN FöR VORLESUNG
+GEHT ZUM PODIUM
+HôRT DIE VORLESUNG
+ESKORTIERT PROFESSOR DRENNAN
+DER PROFESSOR HAT SEINEN ASSISTENTEN GETROFFEN
+DER PROFESSOR IST GESTORBEN
+MIRABELLE LUCY DE SAXO IST GESTORBEN
+ZERSTôRT DEN WAFFENBUNKER VON EUROCORP
+STEHLT DIE WAFFENPLéNE VON EUROCORP
+LADET DIE WAFFENPLéNE EIN
+KEHRT ZURöCK
+MôNCHE SITZEN FEST. AUFTRAG UNMôGLICH ZU ERFöLLEN
+VERöBT EIN ATTENTAT AUF HACKER
+ELIMINIERT DIE STREITKRéFTE, DIE DEN FLUSSHAFEN KONTROLLIEREN
+KEHRT ZUR IML-STATION ZURöCK
+ENTFöHRT DEN GEFANGENEN VON EUROCORP
+DIE ZIELPERSON WURDE GETôTET
+VERNICHTET DIE FORSCHUNGSEINRICHTUNGEN
+ELIMINIERT DIE AGENTEN VON EUROCORP
+DE SAXO MUSS STERBEN
+VERLASST DIESEN ORT
+UNTERWERFT DIE UNGELEITETEN
+SUCHT UND TôTET DEN ANFöHRER DES AUFSTANDES
+RETTET IX UND BEGLEITET IHN ZUR VERABREDUNG
+BESCHöTZT IX
+IHR HABT ZUGELASSEN, DASS IX STIRBT
+NICHTS KANN DIE NEUN STOPPEN. IHR WURDET BESIEGT.
+TUT NICHTS: GEHORCHT DEN NEUN
+STADTKONTROLLE VERLOREN: PRIESTER DER KIRCHE HABEN ALLE BöRGER BEKEHRT
+ELIMINIERT DEN EINDRINGLING
+ELIMINIERT DIE EINDRINGLINGE
+BERZEUGT DEN INFILTRATOR
+RöCKT VOR ZUR IML-STATION
+ZIEL BESEITIGT
+AKTIVIERT IML-STATION
+IML-STATION ZERSTôRT
+ELIMINIERT DIE AGENTEN
+EROBERT BUNKER, SETZT VIRUS FREI
+ABMARSCH
+ZIEHT EUCH ZURöCK
+BEKEHRT ORMANDOZ
+BEKEHRT RAMIREZ
+BRINGT SIE ZU UNS
+IHR HABT ORMANDOZ STERBEN LASSEN
+IHR HABT RAMIREZ STERBEN LASSEN
+ENTWENDET DR SCHWEIZERS ARBEIT
+KEHRT ZU UNS ZURöCK
+DIE EUROCORP-AGENTEN MöSSEN UNS BEITRETEN ODER STERBEN
+NEUTRALISIERT DIE EUROCORP-AGENTEN
+TôTET KOTO SEK
+NEUTRALISIERT ALLE EUROCORP-AGENTEN
+LASST KEIN UNHEIL KOMMEN öBER DE SAXO
+BERNEHMT DIE IML-STATION
+UNSERE GESEGNETE TOCHTER IST VON UNS GESCHIEDEN
+FöR DIESE KETZEREI WERDET IHR STERBEN!
+EUROCORP MUSS ZWISCHEN UNSEREM GLAUBEN UND DEM TOD WéHLEN
+SUCHT DAS HEILIGTUM
+KOMMT HEREIN
+BERZEUGEN SIE DEN BLUESKY-WISSENSCHAFTLER
+EUER ZIEL KONNTE ENTKOMMEN
+ZIEL BERZEUGT
+NEUTRALISIEREN SIE DEN AGENTEN
+SUCHEN UND ZERSTôREN SIE BöRGER DER KATEGORIE U - UNGELEITET
+UPDATE: ELIMINIEREN SIE DIE EIFERER
+PROFESSOR KLEIN ENTDECKT - BERZEUGEN SIE DEN PROFESSOR
+BESCHöTZEN SIE PROFESSOR KLEIN - EVAKUIEREN
+PROFESSOR KLEIN IST GESTORBEN
+VERNICHTET DIE BODENSTATION
+ZERSCHMETTERT UNSERE FEINDE
+[header_win]
+[message_win]
+Der Glaube an Euch selbst hat gesiegt. Ihr habt nicht nur den verrÅckten Plan der Neun durchkreuzt, die menschliche Rasse wieder aufleben zu lassen, indem sie sich selbst klont, Ihr habt sogar die fÅrchterlichste Waffe in Besitz genommen, die jemals erschaffen wurde.
+
+Auf der Erde liegt das UTOPIA des Syndikats in Schutt und Asche. Millionen kînnen die Klagerufe des Ko-Paull Vissick hîren.
+
+Aber Euer Wille geschehe.
+[weapons]
+UZI
+Eine fast altmodische Abwehrwaffe. Das Original feuerte noch mit chemisch angetriebener kinetischer Munition. Diese verbesserte Version ist etwas zuverlÑssiger, weil sie auf die Energiezelle des Gegners abzielt. Nichtsdestoweniger ist die UZI ein RÅckfall in lÑngst Åberwunden geglaubte Zeiten, wir gehen davon aus, dass sie bald ihre Bedeutung verlieren wird. Die Kirche der Neuen Epoche arbeitet schon an der Entwicklung einer weit wirkungsvolleren Alternative und hofft, sie Ihren JÅngern bald prÑsentieren zu kînnen.
+MINIGUN
+Obwohl fast schon ein MuseumsstÅck, ist diese kinetisch feuernde Rotationskanone der UZI Åberlegen, weil sie sich effektiver gegen die Feinde unseres Glaubens einsetzen lÑsst. Die neueste Version ist nach dem gleichen Prinzip wie die Uzi aufgerÅstet. Ihre Nachteile, hohes Gewicht und grosse LÑrmbelÑstigung, gleicht sie mit ihrer Reichweite und grossen Zerstîrungskraft wieder aus. Im Pulk eingesetzt, ist sie nach wie vor ein wirkungsvolles Instrument gegen Fahrzeuge aller Art.
+ELLASER
+Die Neun haben die Sub-Photon-Struktur des Lichts entdeckt und die ihr innewohnenden Geheimnisse entrÑtselt. Diese geheiligte und segensbringende Forschungsarbeit hat zu der Entwicklung eines Ionen-Fokus gefÅhrt, der gebÅndelte Blitze auf ein Ziel schleudert. Seine Reichweite ist den althergebrachten Waffen mit kinetischer Energie Åberlegen. Die Elektrokeule entfaltet ihre ganze Kraft auf leitfÑhigem Stahl.
+LASER
+Unsere Gelehrten haben eine effektive Waffe entwickelt, die auf der Basis eines konventionellen Lasers arbeitet. In die Feuerkammer des Pulslasers wird TriSodium 89 injiziert und aufgeladen. Der Gasdruck in der Kammer kann durch langes Anhalten des Auslîsers noch erhîht werden. Die daraus resultierende berhitzung zeitigt wahrhaft anbetungswÅrdige Ergebnisse.
+BEAM
+Die Plasmalanze verwendet die kombinierte Energie beschleunigter Elektronenteilchen und produziert einen Strahl instabiler Energie, der entlang einer magnetischen Transportwelle verlÑuft. Eine fÅr den Feind spÅrbare Demonstration der berlegenheit unserer Kirche und ein weiterer Beweis fÅr die GÅltigkeit unserer GlaubenssÑtze.
+RAP
+Eine Implosionsgranate wird auf das Ziel abgefeuert, und die systemeigene ZielfÅhrung garantiert den Einschlag an der gewÅnschten Stelle. Raketenwerfer verwenden monopolare Beschleunigungsschlitten, um die Reichweite auf ein beeindruckendes Mass zu erhîhen. Einmal anvisierte Ziele kînnen dem Gyro-Suchsystem kaum entkommen. Eine wundervolles GerÑt, wie geschaffen fÅr ein Abschnittsfeuer. Der Prozess des Wiederaufladens braucht allerdings seine Zeit, und hinterlÑsst, zumindest vorÅbergehend, die heiligen JÅnger ungeschÅtzt.
+NUCLGREN
+Die Explosion einer Atomgranate, abgefeuert im Namen der Kirche, verbreitet das Licht unseres Glaubens meilenweit. Doch benutzt sie mit Vorsicht, Bruder Apostel. Ihre Zerstîrungskraft ist betrÑchtlich. Sorgt dafÅr, dass Ihr Euch rechtzeitig vom Ort des Geschehens entfernt und beachtet ihre Wirkung auf GebÑude und Gruppen. Wer die Atomgranate gegen Einzelpersonen einsetzt, der macht sich des Vergehens der Blasphemie schuldig.
+PERSUADER
+Unsere Glaubensgemeinschaft wÑchst von Tag zu Tag. Und dennoch gibt es einige renitente Geister, die partout nicht dem Weg folgen wollen, den wir ihnen anbieten. Doch fÅr solche FÑlle haben wir den Indoktrinator. Alle uns wohlbekannten Wahrheiten werden von einem Moment auf den anderen in die Kîpfe der UnglÑubigen gesÑt. Denn, seien wir ehrlich, liebe BrÅder: Wer kann sich dieser Lawine von Wissen und Weisheit dauerhaft entziehen?
+FLAMER
+Diejenigen, die dem Pfad der Rechtschaffenheit nicht folgen wollen, haben ein Recht auf Ewigkeit. Und mit diesem GerÑt verschaffen wir ihnen das Recht. Der Flammenwerfer verfÅgt nicht mal Åber die Reichweite von kinetischen Waffen, aber er hat durchaus seine Daseinsberechtigung. Ausserdem verbreitet er Angst und Schrecken, Reaktionen also, die durchaus in unserem Interesse liegen.
+H2HTASER
+Ohne grossen Aufwand erlîst diese kleine, leicht zu handhabende Einheit vom berzeugstrahler getroffene Ziele von ihrer Fremdbestimmung. Auch wenn der Trenner keine Alternative zu den Zerstîrungswaffen darstellt, die uns von unseren Wissenschaftlern und WohltÑtern zur VerfÅgung gestellt werden, so ist er dennoch ein herrlich subversives Mittel, die UnglÑubigen auf den Pfad der Weisheit zurÅckzubringen.
+CRAZYGAS
+Das aus den Sporen eines fremden Pilzes gewonnene Psychogas ist ein hocheffektives Mittel, die Herrschaft der UnglÑubigen zu destabilisieren. Feuert es in eine Gruppe von Zivilisten, und Ihr werdet in kÅrzester Zeit den schînsten Aufstand erleben. Die herrschende Clique ist gezwungen, all ihre Energie auf die Wiedergewinnung ihrer Kontrollfunktionen zu legen, und muss tatenlos zusehen, wie unsere JÅnger ihren Aufgaben nachgehen.
+KOGAS
+Ein kleines WeihrauchfÑsschen produziert eine Wolke, die alles ausser Gefecht setzt, was ungeschÅtzt mit ihr in BerÅhrung kommt. Sei willkommen, Einfachheit, wo immer Du Dich effektiv einsetzen lÑsst.
+ELEMINE
+Abgefeuert auf feindliche AktivitÑten in unmittelbarer Umgebung, sendet die Ionenmine ganze BÅndel elektrischer Energie aus. Sie entfaltet ihre volle Kraft gegen alle Glaubensgegner, die sich in Fahrzeugen befinden oder zu Fuss unterwegs sind. Die Entladung beeinflusst darÅber hinaus den CHIP-Status der Getroffenen.
+EXPLMINE
+Eine konventionelle Mine mit ZeitzÅnder, eingebettet in eine lenkbare Explosionsladung. Eine handliche und wirksame Waffe gegen Panzer oder andere stark geschÅtzte Fahrzeuge.
+LONGRANGE
+Unser gîttliches Werk verlangt zuweilen nach der Ausschaltung einzelner Cyborgs und nicht gleich grîsserer Gruppen. Die Fernwaffe feuert mit hoher PrÑzision kinetische Munition aus verbrauchtem Uran und Åberwindet dabei grosse Entfernungen. Nur wenige Panzerungselemente kînnen ihrem hohen Aufpralldruck widerstehen. Im Allgemeinen genÅgt ein einzelner Schuss, und Ihr habt Zeit genug, unerkannt zu entkommen.
+AIRSTRIKE
+Wir sind in der Lage, die Abschusscodes der meisten geostationÑren Satelliten, mit denen das Syndikat unseren Planeten umgeben hat, zu knacken. Der Kostenaufwand ist allerdings betrÑchtlich. Wenn Sie einen Schlag aktivieren, dann wird der nÑchstgelegene Satellit in wenigen Sekunden die angegebene Position anvisieren und ein BÅndel speziallegierter MetallstÑbe abfeuern, die sich bei Eintritt in die AtmosphÑre erhitzen und in dem betroffenen Gebiet betrÑchtliche SchÑden anrichten.
+QDEVASTATOR
+Die wohl mÑchtigste Waffe, die die Neun mobilisieren konnten. Die Gravitonkanone blÑst genÅgend Energie aus, um einen mÑchtigen Berg auf ein paar Kieselsteine zu reduzieren. Schaut auf den Zorn der Neun!
+RAZORWIRE
+Eine Spule aus hochdehnbarem monomolekularem Draht mit Widerhaken. Der Monomoldraht ist nur schwer aufzuspÅren, besonders in Kampfsituationen. Plaziert ihn an strategisch wichtigen Punkten, und der Gegner wird sich wundern, wenn er durch die Sperre tappt. Eine zeitgemÑsse Waffe, die ihre Tauglichkeit lÑngst unter Beweis gestellt hat.
+STASISFLD
+Nur ein richtiger Gott kann eine derartige Vorrichtung ins Leben rufen. Nach seiner Aktivierung entsteht eine Kuppel aus subtemporÑrem, atomar stabilem Raum. Ein PhÑnomen, das zuweilen auch in der Natur vorkommt; in frÅheren Jahrhunderten nannte man es auch die 'Stunde der Geister'. Der Effekt ist der gleiche: Jedes Wesen, jedes Objekt, das sich innerhalb der Kuppel befindet, wird in seinen Bewegungen oder Reaktionen geradezu dramatisch abgebremst. Eine Aussicht zum Anbeten.
+SOULGUN
+Unsere Gelehrten haben die esoterischen Geheimnisse des Kodex weiter entschlÅsselt und eine Apparatur geschaffen, die die elektrochemische Kraft einer organischen Zellstruktur exportieren kann. Mit der Vampirette lÑsst sich die Energie jeder Zelle, sei sie tot oder lebendig, abzapfen, vorausgesetzt, die Zellstruktur ist noch intakt. Preist die Neun fÅr diese visionÑre Tat, Ihr JÅnger.
+TIMEGUN
+Wurde uns vom Kodex mitgegeben. Basierend auf dem Prinzip der Geisterstunde, kann das ZR-Tron den Feind in eine andere Zeitebene transportieren. Euch selbst allerdings auch. Seid also vorsichtig, Ihr JÅnger: Die Wirkungsweise des ZR-Trons ist noch nicht vollstÑndig erforscht.
+CEREBUSIFF
+Der Zerberus ist eine Wachdrohne, an der ein Hochleistungslaser angebracht ist. Der integrierte Thermo-Bewegungsmelder ist an ein LesegerÑt angeschlossen. Jede unautorisierte Bewegung wird unter Feuer genommen. Besonders effektiv sind diese Wacheinheiten in offen zugÑnglichen Bereichen mit freiem Blickfeld.
+MEDI1
+Glaubt an die Kirche, und sie wird sich um Euch sorgen. Der Gebrauch dieses PÑckchens wirkt sich positiv auf die Gesundheit der JÅnger aus, die im heiligen Kampf gegen EuroCorp verwundet wurden. Diese Einrichtung ist der sichtbare Beweis der FÅrsorge und des VerstÑndnisses, den zwei tragenden SÑulen der Kirche der Neuen Epoche.
+MEDI2
+Der Medipack fÅr Fortgeschrittene. Heilt Wunden und Verletzungen, ohne unter den eigenen Leuten Verwirrung zu stiften. Ein PÑckchen von unschÑtzbarem Wert fÅr die JÅnger, die auch in Zeiten der UmwÑlzung frohgemut das Wort des Glaubens verkÅnden.
+EXPLWIRE
+Eine Falle fÅr all die Trottel, die das Molekularkabel auf ihrem Spaziergang zerreissen. Plaziert den ZÅnder im gewÅnschten Bereich und spannt den Draht zwischen zwei Punkten. Der Feind tappt unwissentlich in die Falle, und der darauf folgende Knall rÑumt mîgliche Hindernisse des sich ausbreitenden Glaubens zuverlÑssig aus dem Weg.
+CLONESHLD
+Der Tarnschild schÅtzt einen Eurer SchÅler wirksam vor Entdeckung. Er wird EuroCorp (und anderen) als harmloser Feldagent erscheinen und kann unbehelligt selbst durch solche Zonen marschieren, die unsere Kriegermînche unter normalen UmstÑnden nie und nimmer betreten dÅrften. Kurzum, es ist die perfekte Verkleidung und das ideale Hilfsmittel bei verdeckt durchgefÅhrten Operationen im Namen der Kirche der Neuen Epoche.
+[mods]
+LEGS1
+Die Zeit ist mit uns, meine BrÅder. Aber das heisst noch lange nicht, dass wir sie verschwenden dÅrfen. Jede Nanosekunde ist heilig. Eure Kriegermînche sind angehalten, schnell und durchschlagskrÑftig vorzugehen. Das erreicht man nur durch den Einsatz unserer technologischen Wunderwerke. Aber diese Erkenntnis ist Euch allen ja aus den GlaubenssÑtzen des Kodex bekannt.
+LEGS2
+Mîgen die Fraktalpsalme uns immer den rechten Weg zeigen. Wir haben dem Kosmos die Geheimnisse entlockt und produzieren Materialien auf eine Weise, die im Widerspruch zu den Gesetzen der Schwerkraft zu stehen scheinen. Der weise Umgang mit Eurer Kirchensteuer ermîglicht den Einsatz solch seltener Substanzen bei der Produktion dieser 1a-QualitÑts-Beinprothesen.
+LEGS3
+Um eine Seele zu retten, muss man erst in sie investieren, und zwar auf hîchstem Technologiestandard. Gesegnet sind diejenigen, die beseelt von heiligen Absichten auf der terra firma einherschreiten. Lasst sie das verkîrpern, fÅr das die Kirche der Neuen Epoche steht. BestÅckt Eure JÅnger mit den allerfeinsten Arbeiten der Neun.
+ARMS1
+Mîgen Eure Ziel stets klar und lauter sein. Gerade deshalb ist die kybernetische GliedmassenaufrÅstung so wichtig: Sie erhîht die Zielgenauigkeit. Der Zusatzpanzer erhîht die berlebensfÑhigkeit des glaubensfesten Kriegermînchs; ausserdem kann er mit der Prothese weiter werfen.
+ARMS2
+Es ist unser Prinzip, Mann und Maschine miteinander zu verbinden. Wenn einer den Mann verbessert, sollte auch die Maschine verbessert werden. Die neuen Konstruktionstechniken der Arm-Modifikationen bringen Euren JÅngern alle Segnungen der Kybernetik. Danke den Neun.
+ARMS3
+Der Kataklysmus ist nah und nur der StÑrkste spricht. Massive Bewaffnung erfordert massiven Krafteinsatz. Mit diesen Armen erhalten Eure Kriegermînche den SchlÅssel zu unserem Sieg. Nun besitzen sie die Kraft, alles aus dem Weg zu rÑumen, das sich der grossen UmwÑlzung in den Weg stellen kînnte.
+CHEST1
+Der Pfad der GlÑubigen wird von zahllosen kybernetischen Verbesserungen gesÑumt. Die Reise zum Heil entspringt hier. Dieser ausgeklÅgelte kÅnstliche Torso erhîht die Widerstandskraft und die Gesundheit Eures JÅngers. Zudem dient er als Anker fÅr andere prothetische Formen.
+CHEST2
+Die Seele mag unzerstîrbar sein, der Kîrper ist es nicht. Wenn zuviele Eurer SchÅler das Letzte Opfer bringen, segnet sie mit diesen leichten Brust- und Atmungssystemen in einem Kleid aus geschÑumten Metall.
+CHEST3
+Die Zeit der grossen Wende ist gekommen. Eine solche Zeit verlangt nach grosser Kraft. Ein Kriegermînch, ausgerÅstet mit dieser ausgefeilten, heiligen Konstruktion, wird das Bîse nicht lÑnger fÅrchten. Ein derart aufgerÅsteter Glaubensbruder kann durch eine Wolke von Nervengas lustwandeln, ohne davon berÅhrt zu werden. FÅrchtet den Panzer derjenigen, die den Kataklysmus bringen!
+BRAIN1
+Mit dem Fortschreiten unserer Mission wachsen auch die Herausforderungen. Erhîhe WahrnehmungsfÑhigkeit und Gesundheit Eures SchÅlers, und die Massen werden uns zu FÅssen liegen. So soll die Kirche der Neuen Epoche Åberall bekannt werden.
+BRAIN2
+Lernt, Euren Feind zu studieren so genau Ihr es vermîgt, mein SchÅler. Erst dann kînnt Ihr darauf hoffen, ihn mîglicherweise zu beseitigen. Die Neun haben ihre Forschungen ganz auf die BedÅrfnisse unserer Kriegermînche ausgerichtet, weil sie es sind, die die grosse Wende herbeifÅhren mÅssen. RÅstet auch Ihr Eure JÅnger mit den neuen Gehirnen aus.
+BRAIN3
+Der Wille Gottes ist auch der Wille der Maschine. Ein erhîhtes Bewusstsein jenseits aller BeschrÑnkung durch die Biologie verlangt nach der AufrÅstung mit dem ussersten an kÅnstlicher Intelligenz. Mit dem VerstÑndnis wÑchst die Leistung. FÅgt das VerstÑndnis ein und holt Euch die Leistung!
+SKIN1
+Unser Gegner, EuroCorp, arbeitet an einigen innovativen Techniken. Doch auch wir kînnen anhand dieser Blaupause nun eine bessere Epidermis bauen als die bisher bekannte Plasthaut. Ein feines Molekulargewebe, eingebettet in Anti-Schock-Mikroschaum, macht Euren SchÅler fÅr fast alle Arten kinetischer Gewaltanwendung unempfÑnglich.
+SKIN2
+Hitze ist ein grosser Feind des tapferen GlaubenskÑmpfers. Der Feind hat sich seine eigenen Gedanken zu diesem Problem gemacht und eine Lîsung gefunden, die in diesen Dokumenten beschrieben ist. Unter Verwendung von Industrieanlagen im Weltall haben sie eine Cyberhaut entwickelt, die auch unsere JÅnger wirksam vor HitzeschÑden bewahren kann.
+SKIN3
+Selbst die Neun waren von den neuen Forschungsergebnissen beeindruckt. Unter Zuhilfenahme einiger Elemente der Kodex-Technologie - welch eine Entweihung - und mit einer bestimmten Form der Spectralsynchronisation ist es EuroCorp gelungen, ihre Agenten vor den Folgen elektromagnetischer Waffen nachhaltig zu schÅtzen. Nicht uninteressant. Wir werden ihre Arbeit fortsetzen und dieses Wissen fÅr unsere eigenen Zwecke verwenden.
+SKIN4
+Auch wenn ihre Motive mehr als schÑndlich sind: EuroCorp gibt nicht auf, sich mit unserem weit Åberlegenen TechnologieverstÑndnis messen zu wollen. Trotz dieser erkennbaren Unterlegenheit deuten gewisse Dokumente darauf hin, dass man sich mit etwas Besonderem beschÑftigt. Es sind dies Anweisungen Åber die Verbindung von Cyberhaut mit den Eigenschaften eines bestimmten Tarnschildes. Genauer ausgedrÅckt: Diese Spezialhaut reflektiert auf dem UTOPIA-Scanner lediglich die Signalwerte eines zivilen Feldagenten. Ein mit Tarnhaut ausgestatteter Agent stellt bis zu seiner Enttarnung natÅrlich eine gewisse Gefahr dar. Wir werden alles daran setzen, diese Technik fÅr uns selbst zu nutzen.

@@ -1,0 +1,943 @@
+# == map screen text ==
+# map screen title
+#UTOPIA
+# map screen headings
+Dropsite
+UTOPIA Identkeys
+Infra-structure
+Dialect
+Commerce
+Toxicity
+
+# city data
+
+London
+21.13 M
+Post-industrial
+Low English
+Software Engineering, Financial Services
+Chemical Waste, Human Effluent
+
+Detroit
+10.98 M
+Complex Urban
+New American
+Vehicle Manufacture
+Heavy Industrial, Radioactive Waste
+
+Hong Kong
+17.55 M
+Complex Urban
+Indo-Chinese
+Memory Plastics
+Light Industrial
+
+Beijing
+38.89 M
+Ultra-Metropolitan
+Proto-Mandarin
+Plastics Fabrication, Hardware Manufacture
+Radioactive Waste, Human Effluent
+
+Vienna
+6.99 M
+Simple Urban
+C.C.E. (Common Central European)
+Mineral Re-processing
+Light Industrial
+
+Geneva
+7.65 M
+Simple Urban
+C.C.E. (Common Central European)
+Water Detoxification, Air Re-processing
+Radioactive Waste
+
+Salzburg
+9.27 M
+Complex Urban
+Neu-Slavik
+Vegetative Regeneration
+Light Industrial
+
+Singapore
+21.71 M
+Ultra-Metropolitan
+Pseudo-Malay
+Water Detoxification, Hardware Manufacture
+Human Effluent, Heavy Industrial
+
+Phoenix
+13.26 M
+Complex Urban
+American Continental Interior
+Power Generation
+Radioactive Waste
+
+Rome
+10.92 M
+Post-Industrial
+Low Latin
+Consumer Durables
+Heavy Industrial
+
+Al Manamah
+10.98 M
+Complex Urban
+New Arabic
+Fuel Refining, Mineral Processing
+Chemical Waste
+
+New York
+25.24 M
+Post Industrial
+High English
+Weaponry Manufacture
+Ultra-Heavy Industrial, Radioactive Waste, Human Effluent
+
+Santiago
+7.81 M
+Complex Urban
+Neu-Spanish
+Rubber Production
+Chemical Waste
+
+Buenos Aires
+15.71 M
+Ultra Metropolitan
+Modul
+Foodstuff Manufacture
+Heavy Industrial, Human Effluent
+
+Cape Town
+10.27 M
+Complex Urban
+Afrikaans (Ancient)
+Mineral Processing
+Heavy Industrial
+
+Adelaide
+8.7 M
+Simple Urban
+Sub English
+Brewing, Animal Husbandry
+Chemical Waste, Animal Effluent
+
+Christchurch
+4.9 M
+Simple Urban
+Idiom Bahasa
+Clothing Fabrication, Foodstuff Preparation
+Chemical Waste
+
+Reykjavik
+4.37 M
+Simple Urban
+Demi-Scando
+Water Detoxification, Air Re-processing
+Radioactive Waste
+
+Moscow
+16.54 M
+Complex Urban
+Moldav
+Clothing Fabrication, Distilling
+Radioactive Fallout, Human Effluent
+
+Tokyo
+16.70 M
+Ultra-Metropolitan
+Neo-Japanese
+Hi-Tech Manufacture, Financial Services
+Heavy Industrial
+
+Bangkok
+24.37 M
+Ultra-Metropolitan
+Pseudo-Thai
+Simulant Manufacture, Tourism
+Chemical Waste, Human Effluent
+
+Honolulu
+7.01 M
+Simple Urban
+New American
+Water Detoxification, Air Re-processing
+Light Industrial
+
+Johannesburg
+15.64 M
+Complex Urban
+Afrikaans (Ancient)
+Mineral Processing
+Heavy Industrial
+
+Cairo
+3.16 M
+Simple Urban
+New Arabic
+Historical Artefacts, Tourism
+Chemical Waste
+
+New Delhi
+28.73 M
+Ultra-Metropolitan
+Proto-Hindustani
+Intelligent Clothing
+Heavy Industrial, Chemical Waste, Human Effluent
+
+Sevastopol
+9.26 M
+Complex Urban
+Moldav
+Distilling
+Radioactive Fallout
+
+Tripoli
+8.73 M
+Complex Urban
+Arabic (Ancient)
+Fuel Refining
+Radioactive Fallout
+
+Riyadh
+2.03 M
+Simple Urban
+New Arabic
+Fuel Refining
+Heavy Industrial
+
+Colombo
+3.35 M
+Simple Urban
+New Sinhalese
+Water Detoxification, Air Re-processing
+Radioactive Waste
+
+Colombo Orbit Station
+0.0001 M
+Experimental
+EuroCorp Technical Multi-State Code
+Interstellar Transport, Microgravitic Manufacture
+Nil
+
+Matochkin Shar
+0.017 M
+Simple Urban
+Proto-Moldav
+Air Re-processing
+Light Industrial
+
+Voss
+0.023 M
+Sub-Simple Urban
+Omni Scando
+Forestry
+Light Industrial
+
+Omsk
+0.48 M
+Simple Urban
+Russian (Ancient)
+Distilling
+Radioactive Fallout
+
+Beirut
+0.75 M
+Sub-Sub-Simple Urban
+New Arabic
+Weaponry Manufacture
+Chemical Waste, Human Effluent
+
+Ulan Bator
+0.274 M
+Sub-Simple Urban
+Mongol-Chinese
+Ore Extraction
+Radioactive Fallout
+
+Seoul
+6.5 M
+Complex Urban
+United Korean
+Chemical Processing, Vehicle Manufacture
+Chemical Waste, Heavy Industrial
+
+Hanoi
+3.3 M
+Simple Urban
+Zonal Mandarin
+Animal Husbandry, Vegetative Re-processing
+Animal Effluent, Chemical Waste
+
+Manila
+8.5 M
+Complex Urban
+Zonal Mandarin
+Furniture Manufacture
+Light Industrial
+
+Freetown
+0.18 M
+Sub-Simple Urban
+Idiom Afrikaans
+Ore Processing
+Light Industrial
+
+Monrovia
+0.65 M
+Sub-Simple Urban
+Idiom Afrikaans
+Distilling
+Light Industrial
+
+Lagos
+1.25 M
+Simple Urban
+Idiom Afrikaans
+Ore Extraction
+Heavy Industrial
+
+Nairobi
+2.3 M
+Simple Urban
+Neutral Somali
+Animal Husbandry, Tanning
+Light Industrial
+
+Port Moresby
+0.93 M
+Sub-Simple Urban
+Idiom Bahasa
+Ore Extraction
+Chemical Waste
+
+Anchorage
+0.86 M
+Simple Urban
+Anglo-Cyrillic
+Weather Manipulation
+High Radioactive, Light Industrial
+
+Vancouver
+3.5 M
+Complex Urban
+Lingvo Pseud
+Magnetic Processing
+Heavy Industrial
+
+Nuuk
+0.065 M
+Municipality
+Demi-Scando
+Air
+Low Radioactive
+
+Georgetown
+0.08 M
+Sub-Simple Urban
+Idiom Spania
+Mineral Extraction
+Chemical Waste
+
+Lima
+3.4 M
+Complex Urban
+Idiom Spania
+Weaponry Manufacture
+High Radioactive Waste, Heavy Industrial
+
+Sao Paulo
+18.9 M
+Ultra-Metropolitan
+Portuguese (Ancient)
+Mineral Extraction
+Radioactive Waste, Light Industrial
+LABORATORY ACCIDENT
+NATURAL CAUSES
+TIME-DELAY VIRUS
+EXPERIMENTAL ERROR
+FATAL MISCALCULATION
+ILLOGICAL DEDUCTION
+TERMINAL DELUSION
+RASH JUDGEMENT
+FLAWED REASONING
+INSANITY
+NEGLIGENCE
+UNSAFE PROCEDURE
+MENTAL COLLAPSE
+EQUIPMENT MALFUNCTION
+UNSUCCESSFUL TEST
+CARDIAC ARREST
+INCORRECT ASSUMPTION
+ELECTROCUTION
+DISINTEGRATION
+MISADVENTURE
+\hMission Objectives:\n
+\c2\n
+1. Kill the Zealots \n
+\n
+2. Return to the Detroit IML link\n
+\c5\n
+\hMission Objectives:\n
+\c2\n
+1. Protect civilian groups from Eurocorp agents\n
+\n
+2. Kill remaining defending agents\n
+\c5\n
+\hMission Objectives:\n
+\c2\n
+1. Kill Eurocorp agents (m07l22)\n
+\c5\n
+\hMission Objectives:\n
+\c2\n
+1. Kill the zealot scientist\n
+\n
+2. Return to the Riyadh IML link\n
+\c5\n
+\hMission Objectives:\n
+\c2\n
+1. Gather unguided comrades\n
+\n
+2 Raid Eurocorp armoury\n
+\n
+3. Kill all Eurocorp Agents\n
+\n
+4. Recover unguided bike\n
+\c5\n
+\hMission Objectives:\n
+\c2\n
+1. Kill the Church of the New Epoch scientist\n
+\n
+2. Eliminate all Zealots \n
+\n
+3. Evacuate via the IML link \n
+\c5\n
+\hMission Objectives:\n
+\c2\n
+1. Eliminate Eurocorp agents\n
+\c5\n
+\hMission Objectives:\n
+\c2\n
+1. Kill the soldiers before they escape\n
+\c5\n
+\hMission Objectives:\n
+\c2\n
+1. Kill Eurocorp agents\n
+\n
+2. Collect Explosives\n
+\n
+3. Destroy building\n
+\n
+4. Evacuate\n
+\c5\n
+\hMission Objectives:\n
+\c2\n
+1. Destroy the statue\n
+\n
+ Hint: Explosives are hidden somewhere in the level \n
+\c5\n
+\hMission Objectives:\n
+\c2\n
+1. Kill Eurocorp agents (m09l07)\n
+\c5\n
+\hMission Objectives:\n
+\c2\n
+1. Kill the Godfather\n
+\c5\n
+\hMission Objectives:\n
+\c2\n
+1. Kill Eurocorp scientist and recover location of our imprisoned scientist ally\n
+\n
+2. Rescue imprisoned scientist and evacuate with him\n
+\n
+Hint: Eurocorp will likely kill the scientist once they know we are coming. Time is of the essence\n
+\n
+Try saving the scientist first\n
+\c5\n
+\hMission Objectives:\n
+\c5\n
+\hMission Objectives:\n
+\c2\n
+1. Destroy Zealot Vehicles\n
+\c5\n
+\hMission Objectives:\n
+\c2\n
+1. Kill all Eurocorp agents\n
+\n
+2. Recover weapon\n
+\n
+3. Evacuate\n
+\c5\n
+\hMission Objectives:\n
+\c2\n
+1. Assassinate Eurocorp Executives\n
+\c5\n
+\hMission Objectives:\n
+\c2\n
+1. Attend the peace talks\n
+\n
+2. Re-arm from weapons cache\n
+\n
+3. Eliminate all Eurocorp agents\n
+\c5\n
+\hMission Objectives:\n
+\c2\n
+1. Infiltrate Eurocorp Base via stealth\n
+\n
+2. Acquire Clone Shield device\n
+\n
+3. Forcibly recover C3 research data from Eurocorp scientist\n
+\n
+4. Eliminate remaining Eurocorp scientist\n
+\c5\n
+\hMission Objectives:\n
+\c2\n
+1. Destroy Church Buildings\n
+\n
+2. Kill All Zealots\n
+\c5\n
+\c2\n
+1. Kill All Zealots\n
+\n
+2. Destroy Building\n
+\c5\n
+\hMission Objectives:\n
+\c2\n
+1. Destroy Buildings\n
+\c5\n
+# Names.txt
+# Contains all city drop names in the mission number order.
+
+1.
+2.
+3.
+4.Clean Up
+5.Access Violation
+6.
+7.
+8.Reformation
+9.
+10.
+11.
+12.
+13.
+14.
+15.
+16.
+17.
+18.
+19.
+20.
+21.
+22.
+23.
+24.
+25.
+26.
+27.
+28.
+29.
+30.
+31.
+32.
+33.
+34.
+35.
+36.
+37.
+38.
+39.
+40.
+41.
+42.
+43.
+44.
+45.
+46.
+47.
+48.
+49.
+50.
+51.
+52.
+53.
+54.
+55.
+56.
+57.
+58.
+59.
+60.Guns Guns Guns 2
+61.Dumped
+62.The Rescue
+63.
+64.Serve And Shoot
+65.
+66.The Purge
+67.Talks Ambush
+68.Zealot Attack
+69.Trash Church
+70.Art Attack
+71.
+72.
+73.
+74.
+75.Ferocity
+76.
+77.Guns Guns Guns
+78.Communications
+79.
+80.Clean-Up
+81.Godfather
+82.
+83.
+84.
+85.
+86.
+87.
+88.
+89.
+90.
+91.
+92.
+93.
+94.
+95.
+96.
+97.
+98.
+99.
+100.
+101.
+102.
+103.A Tale of Two Cities
+# Netscan.txt
+# Master file containing all OBJ****.txt files.
+# Files indexed Sn and Cn in Miss***.txt order.
+# Scan entries listed by Points Of Significance (POS).
+[3504]
+Zealots leaving Detroit AI base
+[3507]
+Protest groups
+Eurocorp Compound
+[0722]
+Eurocorp Patrols
+[2007]
+Scientist Location
+[2002]
+Unguided groups
+Eurocorp Armoury
+Infrastructure targets
+Impounded unguided bike
+[0322]
+Scientist Location (m03l22)
+Zealot Congregation
+Exit IML link
+[4730]
+Eurocorp Compound (m47l30)
+[0407]
+Military Convoy
+[0107]
+Statue location
+[4430]
+Eurocorp Compound (m44l30)
+[0907]
+Godfather's Compound
+[2802]
+Scientist with Briefcase
+Eurocorp Prison
+Safehouse
+[0207]
+Industrial Depot
+Zealot Temple
+[4015]
+Eurocorp Armoury (m40l15)
+Evac point
+[3023]
+Target Locations
+Friendly contact
+[2604]
+Talks Location
+Safe Haven
+[7904]
+Guard patrol safe observation point
+Clone Shield location
+Scientist with data briefcase
+Secondary Scientist target
+[2504]
+Zealot church locations
+Known collusion between zealots and local police
+[3604]
+Zealot cathedral location
+Unguided reinforcements hiding in bar
+[6015]
+Building Targets
+[6503]
+[7931]
+[0801]
+[1101]
+[6502]
+[7902]
+ELIMINATE THE UNGUIDED
+RETURN TO HQ
+PERSUADE YAMAGUCHI TECHNICIANS
+EVACUATE
+TECHNICIAN FATALITY
+PERSUADE YAMAGUCHI EXECUTIVES
+EXECUTIVE FATALITY
+NEUTRALISE YAMAGUCHI AGENTS
+AGENT FATALITY
+PERSUADE BLUESKY SCIENTISTS
+PERSUADE BLUESKY SCIENTIST
+MISSION UPDATE: ELIMINATE UNGUIDED THREAT
+ESCORT SCIENTISTS TO IML LINK
+STEAL BULLION CAR
+THE BULLION CAR HAS BEEN DESTROYED
+THE BULLION CAR HAS REACHED TANG HQ
+DELIVER CAR TO EVAC ZONE
+STEAL CULT TECHNOLOGY FROM TEMPLE
+DELIVER CULT ARTEFACT TO EVAC ZONE
+REMOVE UNGUIDED STRONGHOLD
+ELIMINATE RIOTERS
+STERILISE SECTOR
+ELIMINATE GUARDS
+ELIMINATE AGENT
+PERSUADE AGENT
+TARGET AGENT HAS DIED
+TARGET AGENT HAS ESCAPED
+PERSUADE NAA EMPLOYEE
+PERSUADE JENNIFER TAKS
+ESCORT TAKS TO IML LINK
+JENNIFER TAKS IS DEAD
+ELIMINATE ZEALOTS
+PERSUADE GEL DATA SCIENTIST
+PERSUADE GEL DATA SCIENTISTS
+PERSUADE HEXAGON SCIENTIST
+PERSUADE HEXAGON SCIENTISTS
+ESCORT SCIENTIST TO IML LINK
+ESCORT SCIENTISTS TO IML LINK
+UPDATE: ELIMINATE ZEALOT THREAT
+VEHICLE DESTROYED: AGENTS STRANDED
+SCIENTIST LOST
+PERSUADE C3 SCIENTISTS
+C3 SCIENTISTS ELIMINATED
+LABORATORY DESTROYED
+FACILITY DESTROYED
+STERILISE CITY
+PROTECT DRENNAN
+PROTECT PROFESSOR'S ASSISTANT
+PROTECT EXECUTIVES
+PROFESSOR DRENNAN IS DEAD
+PROFESSOR DRENNAN'S AIDE IS DEAD
+EUROCORP EXECUTIVES HAVE BEEN WIPED OUT
+RESCUE PROFESSOR DRENNAN
+ESCORT PROFESSOR DRENNAN TO EUROCORP FACILITY
+MISSION UPDATE: EVACUATE ALL PERSONNEL
+EVACUATION FAILED
+PERSUADE MIRABELLE LUCY DE SAXO
+DE SAXO HAS FLED: NEW ORDERS AVAILABLE
+ELIMINATE MIRABELLE LUCY DE SAXO
+CRUSH THE UPRISING
+ELIMINATE UNGUIDED REBELS
+PROTECT THE BAHRAIN AI
+BAHRAIN AI HAS BEEN DESTROYED
+SECURE ORBITAL ELEVATOR
+INSUFFICIENT AGENTS TO COMPLETE MISSION
+THE ORBITAL ELEVATOR HAS BEEN DESTROYED
+THE SPACE STATION HAS BEEN DESTROYED
+GET SHUTTLE NAV COMPUTER
+STATION SELF-DESTRUCT ARMED: DE-ACTIVATE
+GET SHUTTLE LIFE SUPPORT MODULE
+ACCESS LUNAR SHUTTLE CRAFT
+ELIMINATE THE NINE
+THE NINE HAVE ACTIVATED THE ION GATE. YOU HAVE BEEN DEFEATED.
+ELIMINATE THE UNGUIDED HEATHENS
+OUR GARDEN OF MEDITATIONS HAS BEEN DESTROYED
+CONVERT EUROCORP AGENT
+ESCORT AGENT TO IML LINK
+YOUR TARGET HAS BEEN ELIMINATED
+YOUR TARGET HAS ESCAPED
+ACQUIRE FUNDS
+YOU HAVE LOST YOUR QUARRY
+TAKE DR SCHWEIZER TO SEE FATHER BLACK
+DR SCHWEIZER IS DEAD
+FATHER BLACK IS DEAD
+PROTECT YOUR BRETHREN AND THE TEMPLE
+YOUR BRETHREN ARE ALL DEAD
+THE TEMPLE HAS BEEN DESTROYED
+VANQUISH THE UNBELIEVERS
+PUNISH THE RIOTERS
+ANNIHILATE THE FORCES OF CHAOS
+DESTROY THE UNGUIDED VERMIN
+WIPE OUT EUROCORP PERSONNEL
+ELIMINATE EUROCORP AGENTS
+ASSIST ACOLYTES
+ASSASSINATE THE SABOTEUR
+VANQUISH THE DESECRATORS
+PROTECT THE ORDER OF ACOLYTES
+THE ORDER OF ACOLYTES HAS BEEN COMPLETELY ELIMINATED
+DELIVER BULLION CAR TO COLLECTION POINT
+THE BULLION CAR HAS BEEN DESTROYED
+ASSASSINATE THE PROFESSOR'S ASSISTANT
+TAKE THE ASSISTANT'S PLACE BY THE PROFESSOR'S SIDE
+COLLECT VIDEO DATA FOR LECTURE
+GO TO PODIUM
+ATTEND LECTURE
+ESCORT PROFESSOR DRENNAN
+THE PROFESSOR HAS MET HIS ASSISTANT
+THE PROFESSOR IS DEAD
+MIRABELLE LUCY DE SAXO IS DEAD
+DESTROY EUROCORP WEAPONS BUNKER
+STEAL EUROCORP WEAPON DESIGN
+UPLOAD WEAPON DESIGN
+RETURN
+ACOLYTES STRANDED: CANNOT COMPLETE MISSION
+ASSASSINATE HACKER
+ELIMINATE EUROCORP PERSONNEL CONTROLLING RIVER PORT
+RETURN TO IML LINK
+ABDUCT EUROCORP CAPTIVE
+THE TARGET HAS BEEN ELIMINATED
+DESTROY R&D FACILITIES
+ELIMINATE AGENTS OF EUROCORP
+DE SAXO MUST PERISH
+LEAVE THIS PLACE
+SUBDUE THE UNGUIDED
+SEEK AND DESTROY THE LEADER OF THE UPRISING
+RESCUE IX AND GUIDE HIM TO RENDEZVOUS
+PROTECT IX
+YOU HAVE ALLOWED IX TO PERISH
+NOTHING CAN STOP THE NINE NOW. YOU HAVE BEEN DEFEATED.
+DO NOTHING: OBEY THE NINE
+ALL CITIZENS CONVERTED BY ZEALOTS
+ELIMINATE INTRUDER
+ELIMINATE INTRUDERS
+PERSUADE INFILTRATOR
+PROCEED TO IML LINK
+TARGET ELIMINATED
+ACTIVATE IML LINK
+IML LINK DESTROYED
+ELIMINATE AGENTS
+PENETRATE BUNKER: RELEASE VIRUS
+DEPART
+RETREAT
+CONVERT ORMANDOZ
+CONVERT RAMIREZ
+BRING THEM TO US
+YOU HAVE ALLOWED ORMANDOZ TO PERISH
+YOU HAVE ALLOWED RAMIREZ TO PERISH
+STEAL DR SCHWEIZER'S WORK
+RETURN TO US
+EUROCORP AGENTS MUST JOIN US OR DIE
+NEUTRALISE EUROCORP AGENTS
+ASSASSINATE KOTO SEK
+NEUTRALISE ALL EUROCORP AGENTS
+LET NO HARM COME TO DE SAXO
+TAKE CONTROL OF THE IML LINK
+OUR BLESSED DAUGHTER IS DEAD
+YOU WILL DIE FOR THIS HERESY!
+EUROCORP MUST CHOOSE BETWEEN OUR FAITH OR DEATH
+SEEK SANCTUARY
+GET IN
+PERSUADE BLUESKY SCIENTIST
+YOUR TARGET HAS ESCAPED
+TARGET PERSUADED
+NEUTRALISE AGENT
+SEEK AND DESTROY - CATEGORY U - UNGUIDED CITIZENS
+MISSION UPDATE: ELIMINATE CULTISTS
+PROFESSOR KLEIN DETECTED - PERSUADE THE PROFESSOR
+PROTECT PROFESSOR KLEIN - EVACUATE
+PROFESSOR KLEIN IS DEAD
+DESTROY GROUND STATION
+SMITE OUR ENEMY
+[header_win]
+[message_win]
+You won. The message is TODO.
+[weapons]
+UZI
+Forged from the chaos of mid 20th century street-fighting, the energy pellet modified Uzi 9mm machine gun is still the basis of EuroCorp operations tech. It's an inexpensive and lightweight backup for agents dealing with cases of dropout psychosis.
+MINIGUN
+Throughout the New Calendar syndicate deployment of inertia-damped chain gunners has become more commonplace. This 20mm plasma powered, torque stabilised version has foam alloy barrels to reduce mass and production costs.
+ELLASER
+This is proof of the Church's revolutionary scientific thinking. Simply put, it's a kind of lightning whip. We've never made such devices practical; the energy input required was always prohibitive. This device uses a sophisticated system of subatomic levers to ensure the absolute minimum possible drain on a personal power pack, yet it can still be overcharged. Impressive technology indeed.
+LASER
+This laser makes use of the base TriSodium 89 gas (developed circa -20 NC). The weapon can be overcharged by delaying trigger release. In critical close quarters situations, a single overcharged burst of laser fire may be hot enough to disintegrate its target.
+BEAM
+Electron annihilation techniques have led to the development of this powerful weapon. It uses a monopolar focus to project a beam-structured field which converts atmospheric molecules into plasma. Solid matter is vapourised on contact with the plasma, releasing even more energy. The field can wreak utter devastation over a considerable distance. Pull back the monopolar focus by delaying trigger release for more effective results against dense or tempered materials.
+RAP
+Designed to face the challenge of New Calendar cyber-proliferation, this rocket launcher fires a homing grenade which releases a spray of cluster-bomblets on impact. Rocket guidance features target-seek gyro-stabilization.
+NUCLGREN
+Stressed Techium in this thermonuclear device's casing dampens blast products, keeping the chain reaction within a tightly contained area. A custom isotope core ensures radiation levels drop to within tolerance levels moments after the explosion. These advancements enable a detonator to be enclosed in a hand-held casing for the first time. Nevertheless, the blast's effective radius demands attention be paid to safety.
+PERSUADER
+A standard issue utility for seizing the higher level brain functions of citizens equipped with UTOPIA CHIPs. Although very low power and lightweight, the Persuadertron's historical significance should not be under-estimated, as it was instrumental in bringing about EuroCorp's global domination. Persuaded subjects follow the controlling agent without question, to the extent of equipping themselves for combat and engaging in hostilities without fear.
+FLAMER
+Retro-research recommends this short-range, hand-held napalm jet. When activated, the weapon squirts ignited petroleum jelly. In contact with organic matter, the napalm sticks and burns fiercely. A highly effective crowd control solution.
+H2HTASER
+This close-proximity device activates a resonant ion wave which interferes with CHIP programming of those caught in the wavefront. Put simply, this has the effect of rendering persuaded individuals un-persuaded once more. The disrupter would prove most effective against a persuadertron user, where the ion wave would attack the signal at source, reverting all the targets persuaded followers to their previously un-persuaded state.
+CRAZYGAS
+Research into the narcotic properties of the Creation planet fungus have yielded the active ingredient of this dangerous hallucinogenic. The hand-held canister contains a mixture of fungal spores and an oxidising agent which is released in a cloud, causing psychotic behaviour in anyone within it. This weapon provides a useful diversionary tactic when the number of hostiles is too great for other forms of neutralization, though results are unpredictable.
+KOGAS
+This hand grenade contains an asphyxiating nerve agent. The cloud emitted on detonation renders all personnel in the area unconscious for a limited time.
+ELEMINE
+A proximity triggered, electromagnetic pulse mine. Equipment caught in the pulse's field is temporarily, or even permanently, disabled and the electrical mechanisms of organic tissue are burned out. Conductors such as vehicles, street furniture and cyborgs take most of the charge. Can affect persuaded status of anyone caught in its area of effect.
+EXPLMINE
+With an impressive area of effect and enough explosive power to inflict terminal damage on vehicles and do serious damage to buildings, this is a basic but effective weapon. Place at will in a strategic position in the mission zone and withdraw your agents to a safe distance. High Explosive's detonation is triggered by a timer.
+LONGRANGE
+The new LR Rifle uses monopolar sled technology to accelerate high calibre depleted uranium ammunition to Mach 5.2. The sled's capacitors completely discharge in a single shot and must be fully recharged before firing again but accuracy and operational range are unequalled by other delivery systems. In keeping with the design spec, the rate-of-fire sacrifice buys on-the-fly re-calibration, making this the optimal sniper's weapon.
+AIRSTRIKE
+Every satellite in UTOPIA's network of geo-synchronous orbital platforms is equipped with a stockpile of tungsten-uranium alloy rods on a steerable mounting. When these rods are launched, the process of atmospheric re-entry heats them to the point at which they liquefy, producing a plasma rain with true battlefield potential. We can now successfully over-ride the system lockouts triggered by Harbinger. By transmitting re-initialisation protocols, the system can be placed at your agents' disposal. This can be done using a hand-held activator but caution should be exercised; the cost of firing this system is extremely high.
+QDEVASTATOR
+Twin graviton prisms in a Noxon-filled chamber act as a catalyst for a chain reaction which inverts the strong molecular force along a path defined by gravitic polarisation. The chain reaction begins when the trigger is pressed and is contained in the Noxon chamber, where it builds up until the trigger is released. Targeted matter is ripped apart molecule by molecule. The weapon may cause collateral damage as it emits tendrils of excess energy.
+RAZORWIRE
+This titanium-steel alloy wire is fashioned into a very long, very thin and very sharp spiked coil. Its use prevents access to secure areas by unauthorised civilians and presents a considerable obstacle for even cybernetically enhanced intruders to overcome. Its lethal nature is enhanced by its near invisibility to unmodified eyes.
+PERSUADER2
+Drennan's on-going research into Church technology has paid off with the development of the Persuadertron II. This device is capable of infiltrating the minds of even the most battle-hardened zealot. Once exposed to its influence, cultists will obey your orders as doggedly as they followed the Church's twisted teachings.
+STASISFLD
+This portable field generator actually alters the rate at which time passes within the field. Held in near-suspended animation, the reaction speed of anyone or anything in the field is negligible, thus making the target much more vulnerable to other forms of attack. The energy required to activate the field is considerable and the timing of its operation should be chosen with care.
+SOULGUN
+In one of the Nine's most esoteric breakthroughs, they have learned how to unlock the electrochemical forces still locked away in the bodies of terminated organisms. The understanding of these mechanisms we now have gives us complete power over them. The Chromotap is based on this technology. It extracts energy from organic matter at the cellular level and transfers it to the device's controller. The Chromotap is especially useful for recharging agents after a firefight, as it can still utilise the cellular energy of casualties.
+TIMEGUN
+Professor Drennan has come up with the goods again. The Displacertron uses a core of ultra-dense matter surrounded by a stroboscopic stasis shell to provide limited access to higher dimensional time. This causes the target to vanish entirely and reappear at a point in the near future. Never has the saboteur been given a more powerful tool.
+CEREBUSIFF
+This electronic guardian can make a big difference to your agents' defensive actions and attacks. Positioned in an appropriate area and armed with a pulse laser, it takes on sentry duty and will open fire on any unsuspecting hostile target that comes in range until it exhausts its power pack or is destroyed.
+MEDI1
+This multifunction pack can be used to quickly repair the kinds of wounds and damage sustained in combat. The kit comprises a toughened skin graft patch impregnated with anaesthetic and surgical nanobots. Can be used once only.
+MEDI2
+Like the Medikit, except that this upgraded version is worn by the user, so that it can automatically detect the level of damage sustained. If it drops below a critical level, the AutoMedikit activates itself and conducts accelerated surgical repairs. The AutoMedikit takes a few moments to start working, so a user who is continually sustaining damage might perish before the kit has a chance to work.
+EXPLWIRE
+Similar to Razor Wire, Trigger Wire is an excellent tool for access-prevention. Just a few molecules thick, Trigger Wire is very difficult to see with even the later modification eyes, yet when touched activates multiple explosions along its length.
+CLONESHLD
+Produces a disguise so effective it fools even UTOPIA scanner readouts. The Clone Shield organically alters clothing and an agent's features, turning the user into an ordinary executive for a time. This can be extremely useful to agents on infiltration assignments, as they blend into any executive zone.
+[mods]
+LEGS1
+Constructed of a lightweight plasteel core with vat-grown organic outer coating, these artificial legs provide immediate improvement to both an agent's health and top speed. Stamina is also improved, thereby increasing the range an agent fitted with these legs can cover at maximum speed.
+LEGS2
+Advances in foam-metal technologies have produced this cybernetic limb system. Legs 2 deliver an impressive boost to speed, stamina and health, which prolongs an agent's maximum operational capacity still further.
+LEGS3
+Level 3 legs replace the fibre-optic nervous transmission found at lower levels with Super-Synapse memory plastic. The deployment of agents modified with level 3 legs is likely to have a profound impact on combat zone performance.
+ARMS1
+With the tungsten tendons and steel sinews of cybernetic arms, your agents will experience an immediate improvement in accuracy when shooting, and a subsequent saving in energy. The operational lifespan of an agent equipped with these arms is also lengthened by the characteristic health boost which accompanies cybernetic enhancement.
+ARMS2
+The foam-metal manufacturing process is now being successfully applied to precision cybernetics. With less inertia to overcome, these lightweight arms not only deliver a demonstrable improvement to accuracy but to range of throw as well.
+ARMS3
+The ultimate in forelimb technology is at your disposal. As our agents are facing increasingly well-equipped punks and cultists, the tangible improvements to combat proficiency these limbs provide will help to sustain our mission objective success rate.
+CHEST1
+For significantly increased survivability in hostile environments, encase an agent's vital organs in triple-plate titanium alloy. An enhanced body modification provides the single biggest protection from punishment you can give a cyborg. Note that this modification must be fitted in order for the cyborg to support any other mods.
+CHEST2
+This enhancement uses the honeycombed superstructure of foam-metal, forged in the microgravity of low orbit, to make it lighter than the body prosthetic currently in use and a higher tensile strength. Improved energy reserve is just one of the advantages of a level 2 body upgrade. Operationally, this translates into having more power and there being less risk of critical damage. With a level 2 body, the way is clear for you to upgrade to level 3 modifications in all other categories.
+CHEST3
+Memory plastic tendons replace the steel micro-fibres of earlier mods, making the cyborg now significantly tougher than any with lower tech upgrades. Most notably, this enhancement protects an agent from all known nerve gas weapons.
+BRAIN1
+It's the ability to make decisions independently of Executive control that differentiates a decisive agent from a dead agent. This unit contains diamond processors in a 3D matrix integrated with the cyborg's conventional cognitive biomass. It increases basic perceptions and contains trauma management software to improve the cyborg's ability to withstand otherwise critical damage.
+BRAIN2
+Holographic core memory decreases reaction lag and boosts persuadertron range and signal strength. It also increases the cyborg's resistance to attempts to persuade it. This brain model brings perceptual enhancements across the board and further improvements to the trauma software, increasing the cyborg's survivability margin.
+BRAIN3
+The apogee of portable artificial intelligence technology. At level 3 a modified brain not only delivers increased health but also guarantees improved targeting accuracy; hit rate and energy efficiency benefits. The cyborg can be exposed to environments which would destroy the biological brain almost instantly; this unit can completely backup the biological data and enable the agent to continue to function.
+SKIN1
+This is complex cellular cyberskin, weaved to provide a bullet-resistant epidermis that radically reduces damage from projectile weapons. Development of a pachyderm/steel mesh hybrid and careful cosmetic enhancement has produced a substance that is extraordinarily tough but just as flexible as normal, vat-grown cyborg flesh.
+SKIN2
+This cyberskin takes advantage of the latest form of non-toxic asbestos designed for use in spacecraft re-entry. When carrying out operations during firestorm conditions, an agent wearing this skin would suffer far less from incendiary damage than an unprotected counterpart.
+SKIN3
+This is a cyberskin variant based on hydrocarbon polymer augmented by fibre-optic micro-filaments. It should absorb much of the destructive power of energy-based weapon systems. The energy is dispersed from the point of impact around the modified agent's body, and recycled to sustain the skin's protective properties.
+SKIN4
+This is cutting edge cyberskin technology. The skin uses asynchronous temporal phase-shifting cells to confuse targetting systems, making weapon lock very hard to get. An agent wearing this skin would be almost invisible to his opponents' firepower.

@@ -1,0 +1,1675 @@
+# == map screen text ==
+# map screen title
+#UTOPIA
+# map screen headings
+Gebiet
+Einheiten
+Struktur
+Sprache
+Gewerbe
+Umwelt
+
+# city data
+
+London
+21.13 M
+Postindust.
+Basis-engl.
+Software, Finanzen
+Chemie- AbfÑlle, menschl. AbfÑlle
+
+Detroit
+10.98 M
+Grossstadt
+Neu-amerikano
+Automobil-produktion
+Schwere Industrie-Verseuch.
+
+Hongkong
+17.55 M
+Grossstadt
+Indo-chinesisch
+Speicher-kunststoff
+Leichte Industrie-AbfÑlle
+
+Peking
+38.89 M
+Mega-Metropole
+Mandarin
+Kunststoff-verarbeit., Hardware-produktion
+Atomare AbfÑlle, menschl. AbfÑlle
+
+Wien
+6.99 M
+Stadt
+Mittel-EuropÑisch
+Mineralien-Wiedergew
+Leichte Industrie-AbfÑlle
+
+Genf
+7.65 M
+Stadt
+Mittel-EuropÑisch
+Wasser-entgiftung, Luft RÅck-gewinnung
+Atomare AbfÑlle
+
+Salzburg
+9.27 M
+Grossstadt
+Neu-slavisch
+Vegetative Wiederauf-bereitung
+Leichte Industrie-AbfÑlle
+
+Singapur
+21.71 M
+Mega-Metropole
+Malaiisch
+Wasser-entgiftung, Hardware-Produktion
+Menschl. AbfÑlle, schwere Industrie-Verseuch.
+
+Phoenix
+13.26 M
+Grossstadt
+Amerik. Intern
+Strom-erzeugung
+Atomare AbfÑlle
+
+Rom
+10.92 M
+Postindust.
+Latein
+Hart-plastik
+Schwere Industrie-Verseuch.
+
+Al Manamah
+10.98 M
+Grossstadt
+Neu-arabisch
+Treibstoff-raffinerie, Mineralien-Gewinnung
+Chemie-abfÑlle
+
+New York
+25.24 M
+Postindust
+Hochengl.
+Waffen-produktion
+Ultra-schwere Industrie-Verseuch. atomare AbfÑlle, menschl. AbfÑlle
+
+Santiago
+7.81 M
+Grossstadt
+Neu-spanisch
+Gummi-prod.
+Chemie-abfÑlle
+
+Buenos Aires
+15.71 M
+Ultra-Metropole
+Modul
+Nahrungs-produktion
+Schwere Industrie-Verseuch., menschl. AbfÑlle
+
+Kapstadt
+10.27 M
+Grossstadt
+Afrikaans (veraltet)
+Mineralien-Gewinnung
+Schwere Industrie-Verseuch.
+
+Adelaide
+8.7 M
+Stadt
+Sub-englisch
+Brauerei, Tierzucht
+Chemie-abfÑlle, Tier-abfÑlle
+
+Christchurch
+4.9 M
+Stadt
+Idiom Bahasa
+Kleidungs-Produktion, Lebensm.-zubereit
+Chemie-abfÑlle
+
+Reykjavik
+4.37 M
+Stadt
+Demi-scando
+Wasser-entgiftung, Luft RÅck-gewinnung
+Atomare AbfÑlle
+
+Moskau
+16.54 M
+Grossstadt
+Moldavisch
+Kleidungs-Produktion, Destilla-tion
+Atomarer Fallout, menschl. AbfÑlle
+
+Tokio
+16.70 M
+Mega-Metropole
+Neo-japanisch
+High-Tech-Produktion, Finanzen
+Schwere Industrie-Verseuch.
+
+Bangkok
+24.37 M
+Mega-Metropole
+Pseudo-thai
+Simulator-Produktion, Tourismus
+Chemie- AbfÑlle, menschl. AbfÑlle
+
+Honolulu
+7.01 M
+Stadt
+Neu-amerikano
+Wasser-entgiftung, Luft RÅck-gewinnung
+Leichte Industrie-AbfÑlle
+
+Johannesburg
+15.64 M
+Grossstadt
+Afrikaans (veraltet)
+Mineralien-Gewinnung
+Schwere Industrie-Verseuch.
+
+Kairo
+3.16 M
+Stadt
+Neu-arabisch
+Historische Kunst, Tourismus
+Chemie-abfÑlle
+
+Neu Delhi
+28.73 M
+Mega-Metropole
+Proto-hindustani
+QualitÑts-Bekleidung
+Schwere Industrie-Verseuch., Chemie-abfÑlle, menschl. AbfÑlle
+
+Sevastopol
+9.26 M
+Grossstadt
+Moldavisch
+Destilla-tion
+Atomarer Fallout
+
+Tripolis
+8.73 M
+Grossstadt
+Arabisch (veraltet)
+Treibstoff-raffinerie
+Atomarer Fallout
+
+Riyad
+2.03 M
+Stadt
+Neu-arabisch
+Treibstoff-raffinerie
+Schwere Industrie-Verseuch.
+
+Colombo
+3.35 M
+Stadt
+Neu-singaleisch
+Wasser-entgiftung, Luft RÅck-gewinnung
+Atomare AbfÑlle
+
+Colombo-Orbital-station
+0.0001 M
+Experi-mentell
+EuroCorp techn. Code
+Interstell. Transport, Graviton-produkte
+Keine
+
+Matochkin Shar
+0.017 M
+Stadt
+Proto-moldavisch
+Luft RÅck-gewinnung
+Leichte Industrie-AbfÑlle
+
+Voss
+0.023 M
+Sub-Stadt
+Omni-scando
+Fîrsterei
+Leichte Industrie-AbfÑlle
+
+Omsk
+0.48 M
+Stadt
+Russisch (veraltet)
+Destilla-tion
+Atomarer Fallout
+
+Beirut
+0.75 M
+Sub-Stadt
+Neu-arabisch
+Waffen-produktion
+Chemie- AbfÑlle, menschl. AbfÑlle
+
+Ulan Bator
+0.274 M
+Sub-Stadt
+Mongol-chinesisch
+Erz-gewinnung
+Atomarer Fallout
+
+Seoul
+6.5 M
+Grossstadt
+Vereintes Koreanisch
+Chemische Industrie, Automobil-produktion
+Chemie-abfÑlle, schwere Industrie-Verseuch.
+
+Hanoi
+3.3 M
+Stadt
+Zonales Mandarin
+Tierzucht, vegetative Wiederauf-bereitung
+Tier-abfÑlle, Chemie-abfÑlle
+
+Manila
+8.5 M
+Grossstadt
+Zonales Mandarin
+Mîbel-produktion
+Leichte Industrie-AbfÑlle
+
+Freetown
+0.18 M
+Sub-Stadt
+Idiom Afrikaans
+Erzauf-bereitung
+Leichte Industrie-AbfÑlle
+
+Monrovia
+0.65 M
+Sub-Stadt
+Idiom Afrikaans
+Destilla-tion
+Leichte Industrie-AbfÑlle
+
+Lagos
+1.25 M
+Stadt
+Idiom Afrikaans
+Erz-gewinnung
+Schwere Industrie-Verseuch.
+
+Nairobi
+2.3 M
+Stadt
+Neutral-somali
+Tierzucht, BrÑunung
+Leichte Industrie-AbfÑlle
+
+Port Moresby
+0.93 M
+Sub-Stadt
+Idiom Bahasa
+Erz-gewinnung
+Chemie-abfÑlle
+
+Anchorage
+0.86 M
+Stadt
+Anglo-kyrillisch
+Wetter-Manipul.
+Hoch radioaktiv, leichte Industrie-abfÑlle
+
+Vancouver
+3.5 M
+Grossstadt
+Lingvo Pseud
+Magnet. Aufbereit.
+Schwere Industrie-Verseuch.
+
+Nuuk
+0.065 M
+Gemeinde
+Demi-scando
+Luft-Produktion
+Gering radioaktiv
+
+Georgetown
+0.08 M
+Sub-Stadt
+Idiom Spania
+Mineral-gewinnung
+Chemie-abfÑlle
+
+Lima
+3.4 M
+Grossstadt
+Idiom Spania
+Waffen-produktion
+Hoch-radioaktive AbfÑlle, schwere Industrie-Verseuch.
+
+Sao Paulo
+18.9 M
+Mega-Metropole
+Portug. (Alt)
+Mineral-gewinnung
+Radioaktive AbfÑlle, leichte Industrie-abfÑlle
+LABORUNFALL
+NATRLICHE URSACHEN
+ZEITVERZ÷GERUNGS-VIRUS
+EXPERIMENT-FEHLER
+FATALE FEHLKALKULATION
+UNLOGISCHE FOLGERUNG
+UNHEILBARE ILLUSION
+VOREILIGES URTEIL
+FEHLERHAFTE ARGUMENTATION
+WAHNSINN
+NACHLSSIGKEIT
+UNSICHERES VERFAHREN
+GEISTIGER ZUSAMMENBRUCH
+EQUIPMENT-DEFEKT
+ERFOLGLOSER TEST
+HERZSTILLSTAND
+FALSCHE VERMUTUNG
+STROMSCHLAG
+ZERFALL
+MISSGESCHICK
+\hArt der Nachricht: DIREKT\n
+\n
+Dringlichkeitsstufe: 3\n
+\n
+öbermittelter Text:\n
+\c2\n
+Befehle\n
+\n
+London: Zivilpersonen der Kategorie U verletzen den Verhaltenscode und dringen in den Schutzbereich um 
+diese Substation ein. Agenten auswÑhlen. Unruhen beenden.\n
+\c5\n
+Wir erhalten Berichte Åber aussergewîhnliche Fehlfunktionen von UTOPIA-Chips. Alle Stîrungen sind 
+TotalausfÑlle, vîlliges Versagen der Chips. Anschliessende Einstufung der Befallenen in Kategorie U: 
+Ungeleitet.\n
+\n
+\c4EuroCorp-Kern 0-1-0/171261/26D: KÅnstliche Intelligenz London, UTOPIA\n
+\n
+\c4U\c3niversal \c4T\c3ransferierte \c4O\c3rganisch \c4P\c3rogrammierte \c4I\c3nterface 
+\c4A\c3rchitektur\n
+\c5\n
+\hArt der Nachricht: KABEL\n
+\n
+Dringlichkeitsstufe: 1 - Notfall\n
+\n
+öbermittelter Text:\n
+\c2\n
+Befehle\n
+\n
+Detroit: Finden Sie Mitglieder der Kirche der Neuen Epoche und beseitigen Sie die Bedrohung. 
+Neutralisieren Sie BÅrger der Kategorie U: Ungeleitet.\n
+\c5\n
+Achtung, Aussenagent \l! Ich bin UTOPIA-Agent Maritz vom EuroCorp-Nachrichtendienst.\n
+\n
+Die Situation ist kritisch. UTOPIA wurde angegriffen. Der Gegner ist tief in die Informationsstruktur 
+von EuroCorp eingedrungen. Notfallmassnahmen wurden eingeleitet.\n
+\n
+Ich Åbertrage alle EuroCorp-Kommandoentscheidungen mit sofortiger Wirkung auf die BackUp-K.I. Ich werde 
+ihre Analysen und Befehle an Sie weiterleiten. Ich wiederhole: Das Oberkommando von EuroCorp wird auf 
+die KÅnstliche Intelligenz London Åbertragen.\n
+\n
+Der primÑre Dauerbefehl der London-K.I. lautet, UTOPIA wieder aufzubauen, von den Ersten Prinzipien 
+aufwÑrts, falls nîtig. Sie erstellt gerade eine erste Beurteilung der Lage. Die Ausformulierung 
+einzelner KampfauftrÑge wird bald folgen.\n
+\n
+Sie werden Cyborg-Agenten befehligen, um diese AuftrÑge auszufÅhren.\n
+\n
+Die allgemeine Situation sieht nicht gut aus. Das Syndikat ist weltweit angegriffen worden. Die 
+KÅnstliche Intelligenz in Detroit wurde erobert und mein GegenstÅck dort eliminiert. Die Angreifer haben
+ Åber Detroit einen sehr ausgeklÅgelten Virus in UTOPIA eingeschleust. Die Sicherheitssperren reagieren 
+nicht auf ihn. Was immer dieser Virus ist, er kopiert sich schneller von K.I. zu K.I., als wir ihm 
+folgen kînnen.\n
+\n
+Eine vîllig illegale Gruppe, die sich selbst als "Kirche der Neuen Epoche" bezeichnet, hat die 
+Verantwortung fÅr diesen Virus Åbernommen. Sie nennen ihn den "VerkÅndervirus" und haben EuroCorp den 
+Krieg erklÑrt. Es ist der VerkÅnder, der diesen expotentiellen Anstieg bei den Chip-AusfÑllen bewirkt.\n
+\n
+Die AnhÑnger dieser sogenannten "Kirche" bezeichnen sich selbst als "JÅnger" und tragen auffallende 
+Schutzkutten.\n
+\n
+\c4Maritz\n
+\c5\n
+\hArt der Nachricht: KABEL\n
+\n
+Dringlichkeitsstufe: 1\n
+\n
+öbermittelter Text:\n
+\c2\n
+Befehle\n
+\n
+Hongkong: öberzeugen Sie Techniker im Yamaguchi-Kraftwerk.\n
+\n
+Peking: öberzeugen Sie Manager der Yamaguchi-Corporation.\n
+\c5\n
+Ich gratuliere, \l. Detroit wurde erfolgreich stabilisiert. Aber das Chaos, das der VerkÅnder gebracht 
+hat, hat sich weiter verbreitet. Die Kommunikation des Syndikats wird weltweit abgehîrt, im ganzen 
+UTOPIA speist der Gegner unautorisierte Codes und Daten ein. Die regionalen Abteilungen von EuroCorp 
+isolieren sich zu ihrer eigenen Sicherheit und bilden dadurch effektiv neue, kleine Syndikate. Wir 
+mÅssen sie wo mîglich wieder unter die Kontrolle von EuroCorp bringen. Andernfalls mÅssen wir sie 
+vernichten.\n
+\n
+In Hongkong versucht Yamaguchi Holodata, der grîsste Hersteller von UTOPIA-Chips an der PazifikkÅste, 
+ein unabhÑngiges Syndikat aufzubauen. Wir gedenken, Yamaguchis PlÑne mit zwei massiven Federstrichen zu 
+durchkreuzen.\n
+\n
+Das Kraftwerk in Hongkong bildet die Haupt-Stromversorgung der Yamaguchi-Corporation. Schicken Sie ein 
+Team von Agenten in dieses Kraftwerk und Åberzeugen Sie die Techniker dort, mit uns zusammenzuarbeiten. 
+Ohne die Kontrolle durch die Techniker wird sich der Reaktorkern Åberhitzen und explodieren. Die 
+Zerstîrung dieser Station sollte mehr als ausreichen, um Yamaguchi eine Weile zu beschÑftigen.\n
+\n
+Um den Schlag gegen Yamaguchi zu vervollstÑndigen, besuchen Sie einmal ihre Niederlassung in Peking. 
+Finden und Åberzeugen Sie die Manager dort. Neutralisieren Sie alle Agenten, die Ihnen in die Quere 
+kommen. Die Simulationen der London-K.I. deuten an, dass wir mehr Agenten benîtigen, um die LÅcken in 
+unseren KÑlteschlafkammern zu fÅllen, daher sind Sie autorisiert, Ihren öberzeugstrahler nach eigenem 
+GutdÅnken einzusetzen.\n
+\n
+Wenn Sie Ihren Auftrag erfolgreich beenden, dÅrfte Yamaguchi schnellstens jeden Gedanken an ein 
+Verlassen der EuroCorp-Gruppe vergessen.\n
+\n
+\c4Maritz\n
+\c5\n
+\hArt der Nachricht: KABEL\n
+\n
+Dringlichkeitsstufe: 1\n
+\n
+öbermittelter Text:\n
+\c2\n
+Befehle\n
+\n
+Genf, Vancouver und Matochkin Shar: Suchen und Åberzeugen Sie Techniker von Bluesky Tendencies in diesen
+ StÑdten. Evakuieren Sie diese Techniker zur nÑchstgelegenen IML-Verbindung.\n
+\c5\n
+Ich grÅsse Sie, \l. Ihr Erfolg ist ermutigend.\n
+\n
+Ihre nÑchste Mission wird uns mit dem nîtigen Wissen versorgen, das wir fÅr den Aufbau einer neuen 
+Forschungs- und Entwicklungsabteilung brauchen. Wir hatten in den letzten Jahren der 
+Bluesky-Tendencies-Gruppe Personal der Stufe A fÅr ihre Labors in Genf, Vancouver und Matochkin Shar 
+zugeteilt. Sobald Ihre Agenten an einem dieser Orte ankommen, wird ein UTOPIA-IdentTracer im lokalen 
+Netzwerk die in Frage kommenden Zielpersonen heraussuchen.\n
+\n
+Diese Wissenschaftler gehîren zu den besten Gehirnen im Syndikat. Sie dÅrfen auf keinen Fall zu Schaden 
+kommen.\n
+\n
+Update: Die mysteriîse Kirche der Neuen Epoche gewinnt stÅndlich mehr AnhÑnger, indem sie BÅrger durch 
+eine Kombination von GehirnwÑsche und Chip-Hackertechniken "bekehrt". Die Bekehrten zeigen allerdings 
+wenig religiîse Begeisterung. Die Kirche der Neuen Epoche erzÑhlt ihren AnhÑngern, dass das Ende der 
+Welt nahe sei und dass nur die Kirche Åber die nîtige Technologie verfÅge, um ihre treuen GlÑubigen vor 
+dem Untergang zu retten, den sie Katharsis oder Kataklysmus nennt. Ihre Doktrin richtet sich in 
+aggressivster Weise gegen das Syndikat.\n
+\n
+Bezeichnenderweise treten nicht alle ungeleiteten BÅrger diesem Kult bei, auch nicht, wenn sie auf die 
+Fanatiker der Kirche treffen.\n
+\n
+Ausserdem scheinen unsere öberzeugstrahler auf die Kultisten selber keine Wirkung zu haben. Wir wissen 
+nicht, warum. Wir wissen ja praktisch Åberhaupt nichts Åber die Technologie der Kirche, aber die 
+Forschung lÑuft bereits auf Hochtouren. Das technische Wissen des Kults ist zweifellos beeindruckend.\n
+\n
+\c4Maritz\n
+\c5\n
+\hArt der Nachricht: KABEL\n
+\n
+Dringlichkeitsstufe: 1\n
+\n
+öbermittelter Text:\n
+\c2\n
+Befehle\n
+\n
+Singapur: Alle Gegner neutralisieren. Panzerwagen entfÅhren. Nach Erledigung dieser Aufgaben RÅckkehr 
+zur Basis.\n
+\c5\n
+\l, Ihr Bericht ist interessant. Eine ganze Reihe der qualifiziertesten Forscher, die EuroCorp frÅher 
+zur VerfÅgung standen, ist nicht mehr aufzufinden. Wir mÅssen herausfinden, wo sie sich derzeit 
+aufhalten und an was sie arbeiten. Es ist mîglich, dass sie inzwischen fÅr eines der Splittersyndikate 
+arbeiten. Ich werde auch weiterhin alle Frequenzen Åberwachen und auf neue Informationen durchsuchen.\n
+\n
+Im Moment erfordert aber ein vordringlicheres Problem unsere Aufmerksamkeit. Die in Singapur ansÑssige 
+Sicherheitsfirma Tang Assurance hat dummerweise beschlossen, die Stadt fÅr unabhÑngig zu erklÑren. Als 
+Folge davon sollen Goldbarren unter dem Schutz einer bewaffneten Eskorte vom Tresor der Zentralbank ins 
+Tang-Hauptquartier gebracht werden. Wir haben keine Zeit, einfach die Bank zu zerstîren, da die 
+Tang-Agenten vor Ihren Cyborgs dort sein werden. Das gibt uns dafÅr die Gelegenheit, den bewaffneten 
+Konvoi zu entfÅhren, bevor er seinen Bestimmungsort erreicht.\n
+\n
+\c4Maritz\n
+\c5\n
+\hArt der Nachricht: KABEL\n
+\n
+Dringlichkeitsstufe: 1\n
+\n
+öbermittelter Text:\n
+\c2\n
+Befehle\n
+\n
+Phoenix: Dringen Sie durch die Sicherheitsanlagen in den Tempel der Kultisten ein und stehlen Sie die 
+technologischen Geheimhaltungen.\n
+\c5\n
+GrÅsse, \l.\n
+\n
+Die Kirche der Neuen Epoche setzt immer fortschrittlichere Waffensysteme ein, aufbauend auf einer 
+Technologie, die unserer Forschungsabteilung vîllig neu ist. Wir mÅssen ihr mehr Beispiele fÅr diese 
+Technologie beschaffen, deren Analyse uns dann vielleicht die Frage beantwortet, wer hinter dem Kult 
+steckt und wie man seinen Einfluss am effektivsten bekÑmpfen kann.\n
+\n
+VerknÅpften Netzwerkscans und Satellitenauswertungen zufolge hat der Kult ein grosses Befehlszentrum in 
+Phoenix eingerichtet. Der VerkÅndervirus hat die îrtliche KÅnstliche Intelligenz von UTOPIA restlos 
+zersetzt, wodurch die Kirche die EuroCorp-Behîrden vîllig ausschalten konnte. Hîhere MînchsrÑnge bringen
+ den frisch angeworbenen Nachwuchs zu einem Tempel in Phoenix, wo er einem intensiven Indoktrinations- 
+und GehirnwÑscheprozess unterworfen wird. Die neugeschmiedete Effizienz der neuen Kultisten wird dann in
+ dem Blutbad gehÑrtet, das ungeleitete BÅrger nach der Virusattacke angerichtet haben.\n
+\n
+Begeben Sie sich zum Tempel und suchen Sie nach etwas, das uns mehr erklÑren kann.\n
+\n
+\c4Maritz\n
+\c5\n
+\hArt der Nachricht: KABEL\n
+\n
+Dringlichkeitsstufe: 1\n
+\n
+öbermittelter Text:\n
+\c2\n
+Befehle\n
+\n
+Rom: Alle BÅrger der Kategorie U mÅssen eliminiert werden, um den anderen Opfern des VerkÅnders 
+klarzumachen, dass EuroCorp trotz allem weiter die Kontrolle behÑlt.\n
+\n
+Beugen Sie der mîglichen GrÅndung eines îrtlichen Splittersyndikats vor, indem Sie die îrtliche Garnison
+ ausschalten.\n
+\c5\n
+Schîn, Sie zu sehen, \l.\n
+\n
+Der VerkÅndervirus war in Rom besonders wirksam. In seiner Bugwelle schwappt jetzt eine Woge des Chaos 
+durch die Strassen. Ungeleitete versammeln sich und bringen Vernichtung Åber die Stadt, HÑuserblock fÅr 
+HÑuserblock.\n
+\n
+Die Anarchie in der Stadt wÑchst stÑndig an. Die frÅhere EuroCorp-Sicherheitsgarnison hat sich 
+eingeigelt, wÑhrend der Agent vor Ort versucht, die VerkÅnder-verseuchte K.I. dort wieder unter 
+Kontrolle zu bekommen. Doch die vireninfizierten Einsatzbefehle des Agenten machen die Garnison 
+verletzlich. Lîschen Sie die Garnison aus. Sobald Sie die Stadt wieder unter unsere Kontrolle gebracht 
+haben, werden wir Ersatzpersonal entsenden.\n
+\n
+\c4Maritz\n
+\c5\n
+\hArt der Nachricht: KABEL\n
+\n
+Dringlichkeitsstufe: 1\n
+\n
+öbermittelter Text:\n
+\c2\n
+Befehle\n
+\n
+Hongkong, Peking und Phoenix: IdentKennung nutzen, um Freie Cyborg-Agenten zu finden und zur RÅckkehr in
+ unsere KÑlteschlafkammern zu Åberreden.\n
+\n
+RÅckkehr zur Basis fÅr weitere Befehle.\n
+\c5\n
+Meinen GlÅckwunsch, \l.\n
+\n
+Die folgende Mitteilung wurde gestern um 06:55 per NetScan abgefangen. Die K.I. in London hat sie gerade
+ entschlÅsselt.\n
+\n
+\c3Art der Nachricht: Kodierte öbermittlung\n
+\n
+Dringlichkeitsstufe: Hoch\n
+\n
+VON: Einsatzkontrolle\n
+\n
+AN: Alle FeldeinsatzkrÑfte\n
+\n
+öbermittelter Text:\n
+\n
+Agenten, die vorgeben fÅr EuroCorp zu arbeiten, haben verdeckte Operationen in Gebieten durchgefÅhrt, an
+ denen wir ein Interesse haben.\n
+\n
+Erkundung dieser Sektoren wird angeordnet. Die Berichte der Agenten sollten auch Beurteilungen ihrer 
+neuen Modifikationen beinhalten.\n
+\n
+Ende der Nachricht.\n
+\c5\n
+Diese Nachricht macht deutlich, dass unsere AktivitÑten von Freien Agenten beobachtet werden, die Zugang
+ zur Cyber-Technologie haben. Diese Technologie kînnte in einigen Bereichen weiter entwickelt sein als 
+unsere. Wir wissen schliesslich nicht, was fÅr Forschungsmîglichkeiten dieser Gruppe zur VerfÅgung 
+stehen.\n
+\n
+Die Nachricht wurde zu EmpfÑngern in Hongkong, Peking und Phoenix verfolgt. Setzen Sie ein Cyborgteam 
+ein, um nicht autorisierte AgententÑtigkeiten in diesen StÑdten zu orten. Unsere K.I. vor Ort 
+modifiziert gerade die öberwachungssysteme dieser StÑdte, so dass sie auf Cyborgs reagieren, die mit 
+verbesserten kybernetischen AufrÅstsÑtzen herumlaufen.\n
+\n
+ZusÑtzlich: Die Untersuchung der Indoktrinationskomponenten, die Sie aus Phoenix mitgebracht haben, hat 
+uns enthÅllt, wie die Kirche der Neuen Epoche Konvertiten gewinnt. Die Kultisten benutzen ein GerÑt, 
+dessen Sendefrequenz auf die Utopia-WellenlÑnge abgestimmt ist. Mit anderen Worten, unser Gegner hat 
+eine Waffe, die so Ñhnlich funktioniert wie unser öberzeugstrahler. Noch ein paar weitere Experimente, 
+und unsere Entwicklungsabteilung kann uns einen verbesserten öberzeugstrahler bauen, der auch auf 
+Kultisten wirkt.\n
+\n
+\c4Maritz\n
+\c5\n
+\hArt der Nachricht: KABEL\n
+\n
+Dringlichkeitsstufe: 1\n
+\n
+öbermittelter Text:\n
+\c2\n
+Befehle\n
+\n
+Rom: öberzeugen Sie Freien Agenten.\n
+\c5\n
+Meine herzlichsten GrÅsse, \l.\n
+\n
+Das war eine hîchst effektive SÑuberung, die Ihre Agenten da gerade vorgenommen haben. Aber der AnfÅhrer
+ der Freien Agenten hat den IML nach Rom genommen und den Aussenposten angegriffen, den wir dort 
+kÅrzlich errichtet haben. Wahrscheinlich wollte er dort in die Stahlkammern einbrechen. Wir wollen, dass
+ dieser hîchst fÑhige Agent auf unserer Seite kÑmpft.\n
+\n
+Update: Wir hatten reines GlÅck, dass wir den VerkÅndervirus entdeckt haben. Zumindest bedeutet das, 
+dass wir eine intakte K.I. haben, die wir nutzen kînnen. Stellen Sie sich das vor: Unsere sogenannten 
+"Ungeleiteten" werden umgeformt, vom regellosen Mob zur disziplinierten Kampftruppe. Als AnfÅhrer ein 
+gewisser Ko-Paull Vissick, Polymathe-Wunderkind und aussergewîhnlich begabter Intellektueller. Vissick 
+soll offiziell einer unserer begabtesten Forscher sein, aber die London-K.I. hat seine Spur da gefunden,
+ wo sie nichts zu suchen hatte.\n
+\n
+Wir haben soviel UTOPIA-Netzverkehr Åberwacht, wie wir konnten. Die Kirche der Neuen Epoche hat eine 
+Menge davon Åbernommen, und der Rest ist fast nur sinnloses Gebrabbel, das der VerkÅnder hinterlassen 
+hat. Aber die London-K.I. hat gemerkt, dass jemand anders sich noch in UTOPIA hineinhackt, jetzt, wo 
+sowas wirklich mîglich geworden ist. Es schien sich um Vissick zu handeln. Letztendlich jedoch stellte 
+es sich als Geist heraus. Man kann nicht sagen, wo er herkam. Aber es muss Vissick gewesen sein. Kaum 
+jemand anders im Syndikat hÑtte tun kînnen, was er getan hat. Gott allein weiss, warum er mit diesem 
+ungeleiteten Abschaum herumhÑngt. Ich werde es ÅberprÅfen.\n
+\n
+\c4Maritz\n
+\c5\n
+\hArt der Nachricht: KABEL\n
+\n
+Dringlichkeitsstufe: 1\n
+\n
+öbermittelter Text:\n
+\c2\n
+Befehle\n
+\n
+New York: öberzeugen Sie Jennifer Taks.\n
+\c5\n
+Die allerbesten GrÅsse, Feldagent \l.\n
+\n
+Ihre Anwesenheit in New York ist dringend erforderlich. Mehrere nordamerikanische Firmengruppen haben 
+sich lokal unter der Flagge der New Atlantic Alliance (NAA) zusammengeschlossen. Die schnelle 
+Entwicklung dieses Syndikats ist erstaunlich, besonders in Anbetracht der Zerstîrungen im 
+UTOPIA-Kommunikationsnetz.\n
+\n
+Es scheint, als ob eine unserer frÅheren Werbeleiterinnen, Jennifer Taks, ihren privilegierten Zugang zu
+ den Global News und den îffentlichen Netzwerken dazu missbraucht, lokale Informationen zugunsten der 
+NAA zu manipulieren. Miss Taks scheint mit diesem Unternehmen beachtliche Erfolge zu erzielen. Wir 
+wollen sie haben.\n
+\n
+Senden Sie ein Team nach New York und infiltrieren Sie das NAA-BÅro in Manhattan, im selben HÑuserblock 
+wie das Global News Network. Finden Sie Miss Taks und Åberzeugen Sie sie, dass ihre LoyalitÑt eigentlich
+ doch uns gilt.\n
+\n
+Das Sicherheitssystem des GebÑudes ist extrem gut. Es kînnte sich als unmîglich erweisen, sich mit 
+Gewalt Zutritt zu verschaffen. Ich werde versuchen, die UTOPIA-IdentCodes der Angestellten zu 
+Åberwachen, um herauszufinden, ob irgendeiner davon das GebÑude aus irgendeinem Grund verlÑsst. Alle 
+Angestellten haben kodierte Ausweise, also mÅssen Sie einen davon Åberzeugen, Sie mit durch die 
+Sicherheitssperren zu nehmen. HÅten Sie sich davor, die Aufmerksamkeit der îrtlichen Polizei zu erregen;
+ die haben sowieso schon erhîhte Bereitschaft.\n
+\n
+\c4Maritz\n
+\c5\n
+\hArt der Nachricht: KABEL\n
+\n
+Dringlichkeitsstufe: 1\n
+\n
+öbermittelter Text:\n
+\c2\n
+Befehle\n
+\n
+Santiago, Buenos Aires, Kapstadt, Adelaide: Setzen Sie Suchmannschaften in diesen StÑdten ein. Bringen 
+Sie alle Wissenschaftler mit zurÅck, die Sie finden kînnen.\n
+\c5\n
+Herzliche GrÅsse.\n
+\n
+Die London-K.I. hat aus einer grîsseren Menge subversiver Sendungen von Vissick ein Psychoprofil 
+zusammengestellt.Seine wîchentliche Rede, die auf einem offenen Kanal gesendet wurde, forderte die 
+Ungeleiteten zum Aufstand auf, nicht nur gegen das Syndikat, sondern auch gegen die Kirche der Neuen 
+Epoche. UnglÅcklicherweise war seine Ansprache gespickt mit Hiobsbotschaften, die bewiesen, dass sein 
+derzeitiger Geisteszustand alles andere als stabil ist. Er behauptete zum Beispiel, die Kirche der Neuen
+ Epoche werde nichts Geringeres bringen als Armageddon. Ich kann mir nicht vorstellen, wie eine 
+religiîse Randgruppe die komplette globale Zerstîrung der Menschheit bewerkstelligen sollte.\n
+\n
+Vissicks letzter Auftrag war so geheim, und UTOPIA ist vom VerkÅnder so sehr im Mitleidenschaft gezogen 
+worden, dass es nur vage Hinweise auf seinen Einsatzbefehl gibt. Was wir genau wissen, ist, dass er mit 
+einem Team von Wissenschaftlern von Gel Data und von der Hexagon Corporation an einem Projekt in Island 
+gearbeitet hat. Bisher konnten wir keines der anderen Teammitglieder lokalisieren. Durchsuchen Sie alle 
+GebÑudekomplexe von Gel Data und Hexagon nach den vermissten Wissenschaftlern. Die Firmen haben 
+Niederlassungen in Santiago, Buenos Aires, Kapstadt und Adelaide.\n
+\n
+Viel GlÅck, \l.\n
+\n
+\c4Maritz\n
+\c5\n
+\hArt der Nachricht: KABEL\n
+\n
+Dringlichkeitsstufe: 1\n
+\n
+öbermittelter Text:\n
+\c2\n
+Befehle\n
+\n
+Christchurch: Setzen Sie sofort ein Agententeam ein. Lokalisieren und sichern Sie die Polarverbindung.\n
+\c5\n
+Es sieht so aus, als habe Vissick kurz vor dem Angriff des VerkÅnders auf UTOPIA an einem streng 
+geheimen Forschungsprojekt auf Reykjavik mitgearbeitet. Forschungsziel des Projektes war eine Maschine, 
+mit der man die menschliche WahrnehmungsfÑhigkeit steigern kann. Offenbar ist das Team weiter gekommen 
+als nur bis zur Entwurfsphase. Die haben das GerÑt wirklich gebaut. Aber die Wissenschaftler, die Sie 
+Åberzeugt haben, dienten dem Hauptprojektteam nur als bessere Techniker und konnten uns daher nicht viel
+ mehr erzÑhlen.\n
+\n
+Die zehn SchlÅsselfiguren waren bekannt als das Kybernetisch-Kognitive Kernforschungsteam, kurz K3 
+genannt. Ihr Chef war Ko-Paull Vissick. Alle K3-Mitglieder zÑhlten zur wissenschaftlichen Elite der 
+EuroCorp-Forschungsabteilung.\n
+\n
+Bis jetzt sind sie alle wie vom Erdboden verschwunden.\n
+\n
+Dazu passt der Bericht Åber die Stîrung der IML-Verbindung nach Reykjavik im vorigen Monat. Sie scheint 
+vom Projekt-Team herbeigefÅhrt worden zu sein, um ein Maximum an Sicherheit zu gewÑhrleisten. Das K3 hat
+ derweil insgeheim eine eigene transpolare IML-Verbindung nach Christchurch eingerichtet. Sie ist 
+offenbar vor kurzem fertiggestellt worden.\n
+\n
+\c4Maritz\n
+\c5\n
+\hArt der Nachricht: KABEL\n
+\n
+Dringlichkeitsstufe: 1\n
+\n
+öbermittelter Text:\n
+\c2\n
+Befehle\n
+\n
+Reykjavik: Finden Sie heraus, was aus dem K3-Projekt geworden ist. Aktivieren Sie die IML-Verbindung 
+nach Nuuk.\n
+\n
+Nuuk: DurchkÑmmen Sie die Stadt.\n
+\c5\n
+Gratuliere zu Ihren jÅngsten Leistungen, \l.\n
+\n
+Es ist ausserordentlich wichtig, dass Ihre Agenten den neuen Zugang zur transpolaren IML-Strecke 
+taktisch ausnutzen. Schicken Sie Ihr Team nach Reykjavik, um die K3-Forschungsstation zu untersuchen. Es
+ ist schwer, vorherzusagen, was Sie dort vorfinden werden, aber in Anbetracht der geheimen Forschungen 
+dort sollten Ihre Agenten Ñusserste Vorsicht walten lassen. Sammeln Sie Beweise fÅr den derzeitigen 
+Status des K3-Programms.\n
+\n
+Zusatzauftrag: Seitdem der Niedergang der Chips begonnen hat, ist Nuuk vîllig von der Aussenwelt 
+abgeschnitten. Es gab Berichte Åber grîssere AktivitÑten der Kirche am Aussenrand der Stadt, aber aus 
+dem Stadtkern selbst haben wir lange keine Nachricht mehr erhalten. Nuuk ist per IML-Strecke direkt mit 
+Reykjavik verbunden. Vielleicht besteht diese Verbindung noch. Wenn Sie den Reykjavik-Teil Ihres 
+Auftrags erledigt haben, suchen Sie die IML-Strecke nach Nuuk und reaktivieren Sie sie, wenn nîtig. 
+Begeben Sie sich nach Nuuk und untersuchen Sie die Lage dort.\n
+\n
+Seien Sie auf der Hut!\n
+\n
+\c4Maritz\n
+\c5\n
+\hArt der Nachricht: DIREKT\n
+\n
+Dringlichkeitsstufe: 1\n
+\n
+öbermittelter Text:\n
+\c2\n
+Befehle\n
+\n
+London: Sorgen Sie fÅr Personenschutz bei der Konferenz der EuroCorp-Manager. Diskretion beim Umgang mit
+ der Waffe ist nicht erforderlich.\n
+\c5\n
+Hîren Sie zu, Feldagent \l. Hier ist die KÅnstliche Intelligenz London. Ich habe neue 
+nachrichtendienstliche Erkenntnisse und Befehle fÅr Sie.\n
+\n
+Ich weiss jetzt mehr Åber die Kirche der Neuen Epoche. Die K3-Mitglieder haben wirklich einen 
+IntelligenzverstÑrker konstruiert, der weit effektiver ist als alle Mittel der konventionellen 
+Kybernetik.\n
+\n
+Entgegen der Anordnungen von Ko-Paull Vissick haben einige Mitglieder der Gruppe den experimentellen 
+GehirnverstÑrker an sich selbst ausprobiert. Das K3-Mitglied Tyrone Chodak war der erste, der das GerÑt 
+angewendet hat. Chodak hat auch das Forschungstagebuch gefÅhrt. Mehrere EintrÑge darin beziehen sich auf
+ ein zweites Buch, in dem Chodak angefangen hat, einige wissenschaftliche Theorien zu erlÑutern, die 
+sein verbessertes Gehirn nun entwickeln konnte. Er nannte dieses zweite Tagebuch den "Kodex", und dank 
+Ihrer Mithilfe haben wir nun eine Kopie davon. Die EintrÑge umfassen extrem komplexe Axiome aus dem 
+Gebiet der Mathematik, der Quantenphysik und Genetik sowie einige brandneue Forschungsgebiete wie etwa 
+"Verbundene Kraftmechanik" oder "EvolutionÑre Wahrnehmungstheorie". Der Kodex enthÑlt genug 
+wissenschaftliche Revolutionen, um jede K.I. in UTOPIA auf Jahre hinaus zu beschÑftigen. Ich werde mein 
+Bestes versuchen, dass ich ihn alleine untersuchen kann.\n
+\n
+Aus dem Forschungstagebuch geht auch hervor, dass es zu einem Machtkampf zwischen Chodak und Vissick 
+kam, der schliesslich in einer Explosion gipfelte, die das Forschungslabor des K3 in Reykjavik vîllig 
+zerstîrte. In seinen Aufzeichnungen beschuldigt Chodak Vissick - der nach der Explosion nicht mehr 
+auffindbar war - der Sabotage. Ausserdem klagt er EuroCorp der Komplizenschaft an und droht, das 
+Syndikat mit der Technologie zu vernichten, die er aus dem Kodex entwickeln kann. Der Rest des K3 folgte
+ seiner FÅhrung.\n
+\n
+Sowohl die Explosion in Reykjavik als auch das Verschwinden des K3 ereignete sich weniger als 48 
+Stunden, bevor der VerkÅndervirus Utopia angriff.\n
+\n
+Die Analyse Ihres Angriffs auf die Kathedrale von Nuuk hat ein paar Dogmen des Kultes aufgedeckt, die 
+auf die WÑnde und SÑulen gekritzelt waren. Darin ist immer wieder die Rede von "den Neun". Die Vermutung
+ liegt nahe, dass "die Neun" und der Rest vom K3 ein und dasselbe sind und dass demzufolge diese Kirche 
+der Neuen Epoche nur eine Fassade ist, hinter der Chodak seine Drohung verwirklichen will, das Syndikat 
+zu vernichten.\n
+\n
+Das bedeutet, dass wir es mit der frÅheren intellektuellen Elite von EuroCorp als Gegnern zu tun haben, 
+ausgestattet mit Åberlegener Technologie, sowie mit einem unberechenbaren Vissick, der den Ungeleiteten 
+wieder einen AnfÅhrer geben will.\n
+\n
+Professor Kurt Drennan wird unsere Abteilungsleiter sofort hier in London in die Strategie einweisen. 
+Drennan und seine Assistentin sollen laut Plan fÅr die PrÑsentation im Neuen Hyde-Park eine Kopie des 
+Kodex erhalten. Unsere gesamte, erst kÅrzlich neu zusammengestellte Managementetage wird die einzige 
+Zuhîrerschaft bilden. ôrtliche PolizeikrÑfte unter unserer direkten Kontrolle werden das Gebiet von 
+allen anderen Personen rÑumen und sperren.\n
+\n
+\c4KÅnstliche Intelligenz London\n
+\c5\n
+\hArt der Nachricht: DIREKT\n
+\n
+Dringlichkeitsstufe: 1\n
+\n
+öbermittelter Text:\n
+\c2\n
+Befehle\n
+\n
+Tokio: Befreien Sie Professor Drennan aus den HÑnden der Kultisten.\n
+\n
+Bangkok: Eskortieren Sie den Professor zum EuroCorp-Kampus. Sorgen Sie dafÅr, dass wir den Professor 
+unverletzt zurÅckerhalten.\n
+\c5\n
+Achtung, Feldagent. Professor Drennan ist entfÅhrt worden. Eine BetrÅgerin hat es geschafft, meine 
+Scanner zu tÑuschen, Drennans Assistentin zu tîten und wÑhrend der Vorlesung ihren Platz einzunehmen. 
+Die eigentliche EntfÅhrung fand unmittelbar nach der Konferenz statt. Der verlustreiche Angriff der 
+Fanatiker auf die Konferenz und die ganze Verschwendung von Cyborgs waren nur ein Ablenkungsmanîver, um 
+die Schlussphase von Drennans EntfÅhrung zu vertuschen.\n
+\n
+Ich habe Drennan immer noch auf dem Scanner. Er wird in Tokio festgehalten. Man hat seinen UTOPIA-Chip 
+bisher in Ruhe gelassen.\n
+\n
+Wenn Sie den Professor befreit haben, bringen Sie ihn in Sicherheit. Unser Einsatzzentrum in Bangkok ist
+ sicher; eskortieren Sie ihn dorthin.\n
+\n
+\c4KÅnstliche Intelligenz London\n
+\c5\n
+\hArt der Nachricht: KABEL\n
+\n
+Dringlichkeitsstufe: 1\n
+\n
+öbermittelter Text:\n
+\c2\n
+Befehle\n
+\n
+Hawaii: Ihr Auftrag lautet, unseren Teil der Sicherheitsabmachungen zu gewÑhrleisten. Es ist 
+lebenswichtig fÅr ihr Vertrauen in EuroCorp, dass den Managern der Hawaii-K.I. nichts zustîsst!\n
+\c5\n
+Gratuliere, \l. Es ist schîn, wieder Verbindung zu Ihnen zu haben.\n
+\n
+Drennan ist wieder in Sicherheit und unterzieht sich gerade einer neuralen Rekalibrierung. Bei seinem 
+kurzen Abstecher zur Kirche der Neuen Epoche konnte der Professor Neues Åber die Neun und Ihre PlÑne 
+erfahren. Sobald er aufhîrt zu lallen, werden wir ihn befragen.\n
+\n
+In der Zwischenzeit haben wir eine Nachricht von der K.I. auf Hawaii erhalten. Sie mîchte den 
+VerbÅndetenstatus mit EuroCorp bestÑtigen. Sie hat nie die Gegner der EuroCorp-Strategie unterstÅtzt und
+ ist nicht vom VerkÅndervirus befallen. Sie ist bereit, all ihre Ressourcen unter EuroCorps Kommando zu 
+stellen. Unsere Leute treffen ihre auf Hawaii, um ProtokollschlÅssel auszutauschen. FÅr die Sicherheit 
+wÑhrend dieses Treffens sind beide Seiten gemeinsam verantwortlich.\n
+\n
+\c4Maritz\n
+\c5\n
+\hArt der Nachricht: DIREKT\n
+\n
+Dringlichkeitsstufe: 1\n
+\n
+öbermittelter Text:\n
+\c2\n
+Befehle\n
+\n
+Johannesburg: Starten Sie sofort die Drohnenverbindung und Åbernehmen Sie die Kontrolle Åber den Agenten
+ Wu. Suchen und Åberzeugen Sie Mirabelle Lucy De Saxo.\n
+\c5\n
+Feldagent, hier ist wieder die K.I. London.\n
+\n
+Ich habe jetzt die UTOPIA-IdentKennung der Kirchenagentin, die Professor Drennan entfÅhrt hat. Es ist 
+eine gewisse Mirabelle Lucy De Saxo IK-771.6482.2002, derzeitiger Aufenthaltsort: Johannesburg.\n
+\n
+Diese Information habe ich gerade von einem pensionierten EuroCorp-Agenten erhalten, der mit Hilfe 
+seiner antiquierten Cyber-Technologie seit dem Niedergang Åberlebt hat. Sein Name ist Wu. Wegen seines 
+ausgesprochenen Erfindungsreichtums habe ich eine Abmachung mit ihm getroffen. Wu gestattet mir fÅr eine
+ einzige Mission den Zugang zu seinen hîheren Gehirnfunktionen. Wenn er sie erfolgreich abschliesst, 
+baue ich mir mehr externe SpeicherkapazitÑt ein und Åbernehme sein Bewusstsein in meins, sobald UTOPIA 
+wieder restauriert ist. Ich mîchte, dass Wu versucht, De Saxo zu Åberzeugen. Ich vermute, dass sie 
+EuroCorp-Agenten entdecken kann.\n
+\n
+Wu hat sich schon einen der modifizierten öberzeugstrahler der Kirche besorgt und ist gut vorbereitet 
+auf die vor ihm liegenden Aufgaben. Wenn er Erfolg hat, winkt ihm fast ewiges Bewusstsein als Lohn.\n
+\n
+\c4KÅnstliche Intelligenz London\n
+\c5\n
+\hArt der Nachricht: DIREKT\n
+\n
+Dringlichkeitsstufe: 1\n
+\n
+öbermittelter Text:\n
+\c2\n
+Befehle\n
+\n
+Kairo: Eliminieren Sie Mirabelle Lucy De Saxo.\n
+\c5\n
+Feldagent, ich Ñndere Ihre Befehle. Wus öberzeugstrahler konnte sich nicht auf die IdentKennung seiner 
+Zielperson einpegeln. De Saxo wird niemals eine von uns werden. Daher muss sie eliminiert werden.\n
+\n
+Wu hat gesehen, wie die Zielperson einen IML-Transfer nach Kairo bestiegen hat. Entsenden Sie sofort ein
+ Agententeam dorthin. De Saxo darf unter gar keinen UmstÑnden die Flucht gelingen.\n
+\n
+\c4KÅnstliche Intelligenz London\n
+\c5\n
+\hArt der Nachricht: DIREKT\n
+\n
+Dringlichkeitsstufe: 1\n
+\n
+öbermittelter Text:\n
+\c2\n
+Befehle\n
+\n
+Sevastopol: Wir wollen, dass Sevastopol sterilisiert wird. Lassen Sie nichts und niemanden dort am 
+Leben. Wir kînnen die Stadt spÑter neu besiedeln, wenn unsere Klon-Werke wieder laufen.\n
+\n
+Delhi: Eliminieren Sie Deel Gonda. UnterdrÅcken Sie den Aufstand.\n
+\c5\n
+Achtung, Feldagent. Sie haben gerade Anika Maritz eliminiert.\n
+\n
+Sie war eine Doppelagentin. Ich wusste das schon lÑnger, seit sie mich von ihrem Plan in Kenntnis 
+gesetzt hat, die Kirche der Neuen Epoche zu infiltrieren. Doch ich begann ihren Verrat erst zu vermuten,
+ als Professor Drennan entfÅhrt wurde. Bei ihrer RÅckkehr erzÑhlte mir Agentin Maritz, dass Ihre 
+Aktionen notwendig gewesen seien, um das Vertrauen der Neun zu gewinnen. Die GlaubwÅrdigkeit ihrer 
+Geschichte hing von der Vermutung ab, dass Sie in der Lage sein wÅrden, den Professor zurÅckzuholen, was
+ Sie ja auch taten. Ich war dennoch nicht Åberzeugt.\n
+\n
+Als sie zum zweiten Mal ohne Vorwarnung verschwand, akzeptierte ich langsam die Tatsache, dass sie zur 
+Kirche der Neuen Epoche Åbergewechselt war. Daraufhin blieb mir keine Wahl. Anika-Mirabelle musste 
+eliminiert werden.\n
+\n
+Wir mÅssen damit fortfahren, die IntegritÑt des UTOPIA-Netzes wiederherzustellen. Zu diesem Zweck 
+erhalten Sie Ihre weiteren Anweisungen kÅnftig direkt von mir.\n
+\n
+Update: Abgefangene Nachrichten zwischen Ko-Paull Vissick und seinen Offizieren deuten darauf hin, dass 
+die Ungeleiteten versuchen werden, aus den Stadtgrenzen auszubrechen. Vissick will, dass seine AnhÑnger 
+sich am Margui-Caka-See auf der tibetanischen Hochebene versammeln. Nur hier werden sie, Vissicks Worten
+ zufolge, den Kataklysmus Åberleben. Es stimmt, dass das Ende fÅr sie kommen wird; doch schon lange, 
+bevor sie da ankommen. Trotzdem werden massive AufstÑnde aus Delhi und Sevastopol gemeldet, wo wir die 
+EuroCorp-Vorherrschaft noch nicht wiederherstellen konnten. Diese Situation mÅssen Sie unter Kontrolle 
+bringen.\n
+\n
+Das Gebiet mit der Schwerindustrie in Sevastopol ist vîllig vom ungeleiteten Mob Åberrannt worden. 
+Alles, was nicht schon vorher zerstîrt worden ist, befindet sich jetzt in ihrer Hand. GlÅcklicherweise 
+scheinen sie auf etwas zu warten, vielleicht auf ein Startzeichen von Vissick, bevor sie versuchen, aus 
+den Stadtmauern auszubrechen.\n
+\n
+éhnlichen érger gibt es in Delhi. Wir haben immer noch ein paar Agenten in der Stadt, aber sie stehen 
+einer vielfachen öbermacht gegenÅber und haben sich in einem alten Polizeirevier verbarrikadiert. Ihr 
+letzter verbliebener Panzer hÑlt die Ungeleiteten im Moment noch auf Distanz.\n
+\n
+Die Ungeleiteten selber haben sich hinter schwerer Abwehr im Hafenbezirk der Stadt verschanzt, den sie 
+wahrscheinlich deshalb eingenommen haben, weil er ihren RÅckzug sichert. Ein Ex-EuroCorp-Stratege, ein 
+gewisser Deel Gonda, spielt sich dort als AnfÅhrer der Ungeleiteten auf. Ohne seinen taktischen Rat ist 
+die Rebellion zum Scheitern verurteilt.\n
+\n
+\c4KÅnstliche Intelligenz London\n
+\c5\n
+\hArt der Nachricht: DIREKT\n
+\n
+Dringlichkeitsstufe: 1\n
+\n
+öbermittelter Text:\n
+\c2\n
+Befehle\n
+\n
+Bahrain: Schalten Sie die Freien Agenten aus. Zerstîren Sie die Angriffstruppe der Ungeleiteten, bevor 
+sie die K.I. erreichen kann.\n
+\c5\n
+Feldagent \l.\n
+\n
+Beunruhigende Berichte des Nachrichtendienstes erreichen uns aus Bahrain. Versprengte Ungeleitete haben 
+sich irgendwie schwere Waffen besorgen kînnen und sammeln sich nun an den Stadtgrenzen. Ein Grossangriff
+ scheint bevorzustehen. Das Ziel ist wahrscheinlich die KÅnstliche Intelligenz von Bahrain, Knotenpunkt 
+des UTOPIA-Kontrollsystems im Mittleren Osten. Wenn sie zerstîrt wird, kînnte der weltweite Wiederaufbau
+ von EuroCorp Jahre dauern.\n
+\n
+Die K.I. von Bahrain lenkt ein Kader von frÅheren EuroCorp-Agenten und hat sie in 
+Verteidigungsstellungen im Stadtgebiet postiert. Wir mÅssen die Gewalt Åber die Stadt wiedererlangen, 
+bevor wichtige GebÑude zerstîrt werden.\n
+\n
+\c4KÅnstliche Intelligenz London\n
+\c5\n
+\hArt der Nachricht: DIREKT\n
+\n
+Dringlichkeitsstufe: 1\n
+\n
+öbermittelter Text:\n
+\c2\n
+Befehle\n
+\n
+Colombo: Sichern Sie den Orbitallift. Weitere EinsatzkrÑfte werden als VerstÑrkung vor Ort sein.\n
+\c5\n
+Vissick selbst ist entkommen, aber seine Rebellion ist vorbei. Er und ein paar andere werden in den 
+Giftschwaden der Wildnis vor den Stadtgrenzen sterben. Wenn wir mit der Kirche fertig sind, kînnen wir 
+ja eine Suche nach den Leichen organisieren.\n
+\n
+Ich habe die Einsatzbefehle dekodiert, die Anika-Mirabelle bei sich trug, als Sie sie eliminiert haben. 
+Sie sollte sich laut Plan mit den AnfÅhrern des Kults - den "Neun" - in Sri Lanka treffen. Ich glaube, 
+die Neun versuchen, den Clarke-Orbitallift in Colombo zu besetzen. Von dort aus kînnten sie den Mond 
+erobern.\n
+\n
+Professor Drennan glaubt, dass die GehirnwÑsche-Technologie der Neun einen bislang unentdeckten 
+psychischen "Kanal" anzapft und dass die Neun diesen Kanal brauchen, um die Kontrolle Åber ihre AnhÑnger
+ zu behalten. Ausserdem fÅrchtet er, dass sie planen, ein paar der Theorien aus dem Kodex in die Praxis 
+umzusetzen. Genauer gesagt fÅrchtet er, sie kînnten die Energie des experimentellen 
+IonosphÑren-Rekalibrators verstÑrken, den Wissenschaftler der Amundsen-Forschungskolonie auf dem Mond 
+entwickelt haben.\n
+\n
+Berichte von anderen K.I.s weisen weltweit eine deutliche Verringerung von Kirchen-AktivitÑten nach. Das
+ lÑsst vermuten, dass die Kultisten vielleicht eine mîglichst grosse Angriffstruppe zusammenziehen. Ein 
+Angriff auf Colombo steht kurz bevor.\n
+\n
+Bitte beachten Sie: Falls die Situation vor Ort nicht gelîst werden kann, mÅssen Sie mîglicherweise die 
+Einrichtungen Åber den Orbitalaufzug fegen. Es wird dringend davon abgeraten, Sprengstoffe mitzubringen 
+- deren Verwendung oder MitfÅhren im Orbit birgt die Gefahr, dass dieser Weg dauerhaft blockiert wird. 
+Es wird auch erwartet, dass die Neun neue Waffenprototypen Åbernommen und Fallen aufgestellt haben. Das 
+kînnte eine Herausforderung sein, und es gibt kein ZurÅck mehr.\n
+\n
+\c4KÅnstliche Intelligenz London\n
+\c5\n
+\hArt der Nachricht: DIREKT\n
+\n
+Dringlichkeitsstufe: 3\n
+\n
+öbermittelter Text:\n
+\c2\n
+Befehle\n
+\n
+Tokio: Bewaffnete Zivilpersonen der Kategorie U verletzen den Verhaltenscode. Unruhen beenden.\n
+\n
+\hWir konnten per NetzScan den UTOPIA-Architekten Professor Klein entdecken. öberzeugen Sie den 
+Professor, sich uns erneut anzuschlie·en und wieder fÅr uns zu arbeiten.\n
+\c5\n
+Zusatzinformation: Sektierer der Kirche der Neuen Epoche wurden in dieser Gegend geortet. Da wir derzeit
+ keine öberzeugstrahler auf Lager haben, wird es leider nîtig sein, den Eiferern ihre abzunehmen.\n
+\n
+\hDie Auswirkungen, die der VerkÅndervirus des Kultes auf den UTOPIA-Netzknoten in Tokio hatte, machen 
+eine permanente NetzScan-Einspeisung leider unmîglich. Keine weiteren Daten verfÅgbar.\n
+\n
+\c4EuroCorp-Kern 0-1-0/171261/26D: KÅnstliche Intelligenz London, UTOPIA\n
+\n
+\c4U\c3niversal \c4T\c3ransferierte \c4O\c3rganisch \c4P\c3rogrammierte \c4I\c3nterface 
+\c4A\c3rchitektur\n
+\c5\n
+\hArt der Nachricht: DIREKT\n
+\n
+Dringlichkeitsstufe: 3\n
+\n
+öbermittelter Text:\n
+\c2\n
+Befehle\n
+\n
+Tokio: Bewaffnete Zivilpersonen der Kategorie U verletzen den Verhaltenscode. Unruhen beenden.\n
+\n
+\hWir konnten per NetzScan den UTOPIA-Architekten Professor Klein entdecken. öberzeugen Sie den 
+Professor, sich uns erneut anzuschlie·en und wieder fÅr uns zu arbeiten.\n
+\c5\n
+Zusatzinformation: Sektierer der Kirche der Neuen Epoche wurden in dieser Gegend geortet. Da wir derzeit
+ keine öberzeugstrahler auf Lager haben, wird es leider nîtig sein, den Eiferern ihre abzunehmen.\n
+\n
+\hDie Auswirkungen, die der VerkÅndervirus des Kultes auf den UTOPIA-Netzknoten in Tokio hatte, machen 
+eine permanente NetzScan-Einspeisung leider unmîglich. Keine weiteren Daten verfÅgbar.\n
+\n
+\c4EuroCorp-Kern 0-1-0/171261/26D: KÅnstliche Intelligenz London, UTOPIA\n
+\n
+\c4U\c3niversal \c4T\c3ransferierte \c4O\c3rganisch \c4P\c3rogrammierte \c4I\c3nterface 
+\c4A\c3rchitektur\n
+\c5\n
+# Names.txt
+# Contains all city drop names in the mission number order.
+
+1.Roter Alarm
+2.
+3.Freundliche berredung
+4.Wo ist Weisheit?
+5.Rom muss brennen
+6.
+7.Dunkle Engel in der Architektur
+8.DuplizitÑt der Ereignisse
+9.Der Sonderagent
+10.
+11.
+12.
+13.
+14.
+15.
+16.
+17.
+18.
+19.
+20.Exodus
+21.Phoenix in der Asche
+22.Fusion
+23.Bringt ihn lebend zurÅck
+24.Am Rand der Finsternis
+25.Rundmarsch
+26.Verbotenes Wissen
+27.
+28.Der Schwarm
+29.Wer verliert den Verstand?
+30.
+31.
+32.
+33.
+34.Re-Finanzierung
+35.TrÑnen fÅr Taks
+36.Tief in Gedanken
+37.Guru
+38.Wissen ist Matsch
+39.
+40.
+41.
+42.
+43.
+44.
+45.
+46.
+47.
+48.
+49.Demontage in Detroit
+50.Geheimnisse
+51.
+52.
+53.
+54.
+55.Kîrper-Funktionen
+56.Eindringling
+57.KopfjÑger
+58.Halb-Automatik
+59.Fehlende Verbindung
+60.
+61.
+62.
+63.
+64.
+65.
+66.
+67.
+68.
+69.
+70.
+71.
+72.
+73.
+74.Neuausrichtung
+75.
+76.
+77.
+78.
+79.
+80.
+81.
+82.
+83.Gebremster Fall
+84.Konfrontation
+85.
+86.
+87.
+88.Der Weg des VerkÅnders
+89.
+90.
+91.
+92.Arabische NÑchte
+93.
+94.
+95.
+96.
+97.
+98.
+99.
+100.
+101.Die Kirche seines vergifteten Verstandes
+102.
+103.
+104.Tokyo Fuseki
+# Netscan.txt
+# Master file containing all OBJ****.txt files.
+# Files indexed Sn and Cn in Miss***.txt order.
+# Scan entries listed by Points Of Significance (POS).
+[3016]
+Absprunggebiet: EuroCorp London - K.I.-Bodenstation
+Ungeleitete BÅrger (Kategorie U) werden im Firmengebiet Åberwacht
+Personal der Bodenstation: verteidigt die Bodenstation gegenÅber Angriffen oder Infiltration
+Abhîrinformation: Die patrouillierende Polizei hat den Befehl, das Feuer auf jeden zu erîffnen, der Waffen trÑgt
+[3501]
+Aufzeichnung einer StadtÅberwachungskamera 004-D62
+Absprunggebiet: Detroit, IML-Station
+Tor zur angegriffenen Bodenstation
+Abhîrinformation: Die Polizei berichtet von einem wachsenden Fehlverhalten Ungeleiteter BÅrger
+[0101]
+Absprunggebiet: Hongkong, IML-Station
+Yamaguchi-Fusionsbatterien
+Techniker
+Landezone: IML-Station
+Eiferer von der Kirche der Neuen Epoche wurden in der Stadt gesehen
+[0115]
+Absprunggebiet: Hongkong, IML-Station
+Zielagent
+Geeignetes Fahrzeug, um in die Basis zu gelangen
+[3216]
+Absprunggebiet: Peking, IML-Station
+Zaibatsu, Yamaguchi-Manager
+Agententrainingslager von Yamaguchi
+Landezone: IML-Station
+Abhîrinformation: Die Polizei berichtet von Krawallen der Ungeleiteten
+[1001]
+Absprunggebiet: Phoenix, IML-Station
+Tempel des Kultes der Neuen Epoche
+Vermuteter Aufenthaltsort der kirchlichen Indoktrinationsbande
+Landezone: IML-Station
+Abhîrinformation: Die Ungeleiteten sind vîllig ausser Kontrolle geraten
+Londoner K.I.-Analyse: Vermeiden Sie einen Kampf mit den Ungeleiteten
+[0401]
+Absprunggebiet: New York, IML-Station
+HQ der Neuen Atlantischen Allianz
+UnterkÅnfte des Zivilpersonals
+Landezone: IML-Station
+Abhîrinformation: Die Polizei hat vor kurzem ihre Einsatzteams zum Knacken von Tresoren aufgerÅstet
+[0701]
+Absprunggebiet: Santiago, IML-Station
+Zielwissenschaftler
+Landezone: IML-Station
+Nordseite von Eiferern Åberrannt
+[2601]
+Absprunggebiet: Buenos Aires, IML-Station
+Hauptquartier der Hexagon-Gesellschaft
+Zielwissenschaftler
+Landezone: IML-Station
+Abhîrinformation: Hexagon-Vorratstresor
+Weitere AktivitÑten des Kultes entdeckt
+[4401]
+Absprunggebiet: Kapstadt Åber APC
+Tor zur Hexagon-Forschungseinrichtung
+Zielwissenschaftler
+Landezone: IML-Station
+Abhîrinformation: Eiferer haben die Kontrolle Åber diese Einrichtung an sich gerissen
+[0601]
+Absprunggebiet: Adelaide, IML-Station
+Testanlage von Gel Data
+Zielwissenschaftler
+Landezone: IML-Station
+[3215]
+Absprunggebiet: Peking, IML-Station
+Zielagent
+Abhîrinformation: Die Sicherheitssysteme der Bank wurden vor kurzem verbessert
+[2131]
+Sprungstelle & Landezone: Genf, IML-Station
+Bluesky-Laboratorien
+Abhîrinformation: Bluesky bittet um eine Polizeieskorte fÅr einen Finanzmanager vom Rang D
+[5001]
+Sprungstelle & Landezone: Vancouver, IML-Station
+Bluesky-Laboratorium
+Abhîrinformation: AktivitÑten der Ungeleiteten werden von der Polizei Åberwacht
+Satellitenwarnung: Personentransporter der Eiferer nÑhern sich der Stadt aus dem SÅdwesten
+[0201]
+Absprunggebiet: Matochkin Shar, IML-Station
+Bluesky-Forschungseinrichtung
+FÅhrerscheine fÅr Hovercar entdeckt
+Abhîrinformation: Kredittransfer fÅhrt zum Tempel der Kirche der Neuen Epoche
+[0901]
+Absprunggebiet: Singapur, IML-Station
+Stadtbank von Singapur
+Haupttresor (Untergrund)
+GeschÅtzter Tang-Goldbarrentransport
+Zielfahrzeug
+Treffpunkt
+Tang-HQ
+[4001]
+Absprunggebiet: KlÑrwerk von Honolulu
+Treffpunkt
+[1015]
+Absprunggebiet: Phoenix, IML-Station
+Zielagent
+[2846]
+Absprunggebiet: Rom, IML-Station
+Niederrangig bewohnte Bunkerkomplexe, die von Ungeleiteten BÅrgern der Klasse U befestigt wurden
+Sicherungsgarnison
+Garnisonstresor (Untergrund), geschÑtzter Wert: 0.4 MCr
+Satellitenwarnung: Die Kontrolle Åber Roms Strategischen Verteidigungssatelliten ging an unbekannte gegnerische KrÑfte verloren
+[2815]
+Absprunggebiet: Rom, IML-Station
+Zielagent
+Abhîrinformation: Die Polizei hÑlt Ausschau nach einer Gruppe von Ungeleiteten, welche die Stadt infiltriert hat, um einen weiteren Aufruhr zu finanzieren
+Abhîrinformation: instabiles UTOPIA-Identifikationssignal entdeckt - mîglicherweise ein Unterschlupf der Ungeleiteten
+[3601]
+Absprunggebiet: Christchurch, IML-Station A
+Zielbereich: Christchurch, IML-Station B
+Sicherheitsagenten von Tang entdeckt
+Befehle an Tang-Agenten abgefangen - Ziel der Agenten ist der Tresor der Stadtbank
+[3046]
+Absprunggebiet: (a) Vortragspodium (b) Professor Drennans Aufenthaltsort
+Datentresor, in welchem sich eine digitale Filmaufnahme des Zustands in Reykjavik befindet
+Manager von EuroCorp
+Sehr starkes IdentifikationsschlÅsselsignal im nîrdlichen Bereich des Hauptquartiers
+[4701]
+Absprunggebiet: Tokio, IML-Station A
+StÅtzpunkt des Kultes
+Professor Drennan
+Landezone: Tokio, IML-Station B
+LasertÅrme unter Polizeikontrolle
+GeschÑtzter Inhalt des Banktresors: 2.5M Cr
+[7011]
+Absprunggebiet: Tokio, IML-Station A
+BÅrger der Kategorie U - Ungeleitet hier geortet
+Kultisten-"Tempel"
+Professor Kleins derzeitiger Aufenthaltsort
+[4711]
+Absprunggebiet: Tokio, IML-Station A
+BÅrger der Kategorie U - Ungeleitet hier geortet
+Kultisten-"Tempel"
+Professor Kleins derzeitiger Aufenthaltsort
+[0301]
+Absprunggebiet: Bangkok, IML-Station
+Hauptquartier von EuroCorp in Bangkok
+[2216]
+GegenwÑrtige Position von Agent Wu
+Momentane Position von De Saxo
+Von den Eiferern okkupierte Einrichtungen
+[4502]
+Absprunggebiet: Kairo, IML-Station A
+Landezone: IML-Station B
+Abhîrinformation: Nennenswerte KultprÑsenz im gesamten Stadtgebiet - keine Reaktion der Polizei
+Abhîrinformation: Manager von Foamsteel Defence Industries planen ein Treffen mit Kultmitgliedern - Grund unbekannt
+[2702]
+Absprunggebiet: Delhi, IML-Station
+Chemiefabrik
+Vertriebsstandort von FoamSteel Defence Industries
+Satellitenwarnung: Agenten von EuroCorp und MBT
+[0501]
+Absprunggebiet: Tor an der SÅdseite
+Forschungseinrichtung
+Abhîrinformation: Mîgliches Geistersignal - Ko-Paull Vissick
+[4103]
+Absprunggebiet: Bahrain, IML-Station
+K.I.-Bunker
+Plazierung einzelner Agenten
+Richtung der herannahenden ungeleiteten Truppen
+Ein kleineres Heiligtum bleibt besetzt
+[4615]
+Sprungstellen
+Orbitallift
+Anti-Satelliten-Raketensystem des Orbitalliftes
+[6503]
+[7931]
+[0801]
+[1101]
+[6502]
+[7902]
+ELIMINIEREN SIE DIE UNGELEITETEN
+KEHREN SIE ZUM HAUPTQUARTIER ZURöCK
+BERZEUGEN SIE DIE TECHNIKER VON YAMAGUCHI
+EVAKUIEREN
+TECHNIKER VERSTORBEN
+BERZEUGEN SIE DIE MANAGER VON YAMAGUCHI
+MANAGER VERSTORBEN
+NEUTRALISIEREN SIE DIE YAMAGUCHI-AGENTEN
+AGENT VERSTORBEN
+BERZEUGEN SIE DIE BLUESKY-WISSENSCHAFTLER
+BERZEUGEN SIE DEN BLUESKY-WISSENSCHAFTLER
+AUFTRAGS-UPDATE: ELIMINIEREN SIE DIE BEDROHUNG DURCH UNGELEITETE
+ESKORTIEREN SIE DIE WISSENSCHAFTLER ZUR IML-STATION
+STEHLEN SIE DEN PANZERWAGEN
+DER PANZERWAGEN WURDE ZERSTôRT
+DER PANZERWAGEN HAT DAS HAUPTQUARTIER VON TANG ERREICHT
+BRINGEN SIE DEN WAGEN ZUR LANDEZONE
+STEHLEN SIE DAS ARTEFAKT AUS DEM TEMPEL
+BRINGEN SIE DAS ARTEFAKT ZUR LANDEZONE
+BESEITIGEN SIE DEN STöTZPUNKT DER UNGELEITETEN
+ELIMINIEREN SIE DIE AUFSTéNDISCHEN
+STERILISIEREN SIE DEN SEKTOR
+ELIMINIEREN SIE DIE WACHEN
+ELIMINIEREN SIE DEN AGENTEN
+BERZEUGEN SIE DEN AGENTEN
+ZIELAGENT IST VERSTORBEN
+ZIELAGENT KONNTE ENTKOMMEN
+BERZEUGEN SIE DEN NAA-ANGESTELLTEN
+BERZEUGEN SIE JENNIFER TAKS
+ESKORTIEREN SIE TAKS ZUR IML-STATION
+JENNIFER TAKS IST GESTORBEN
+ELIMINIEREN SIE DIE EIFERER
+BERZEUGEN SIE DEN GEL-DATA-WISSENSCHAFTLER
+BERZEUGEN SIE DIE GEL-DATA-WISSENSCHAFTLER
+BERZEUGEN SIE DEN HEXAGON-WISSENSCHAFTLER
+BERZEUGEN SIE DIE HEXAGON-WISSENSCHAFTLER
+ESKORTIEREN SIE DEN WISSENSCHAFTLER ZUR IML-STATION
+ESKORTIEREN SIE DIE WISSENSCHAFTLER ZUR IML-STATION
+UPDATE: ELIMINIEREN SIE DIE BEDROHUNG DURCH KULTISTEN
+FAHRZEUG VERNICHTET: AGENTEN SITZEN FEST
+WISSENSCHAFTLER VERLOREN
+BERZEUGEN SIE DIE K3-WISSENSCHAFTLER
+K3-WISSENSCHAFTLER ELIMINIERT
+LABOR ZERSTôRT
+EINRICHTUNG ZERSTôRT
+STERILISIEREN SIE DIE STADT
+BESCHöTZEN SIE DRENNAN
+BESCHöTZEN SIE DIE ASSISTENTIN DES PROFESSORS
+BESCHöTZEN SIE DIE MANAGER
+PROFESSOR DRENNAN IST GESTORBEN
+PROFESSOR DRENNANS ASSISTENTIN IST GESTORBEN
+EUROCORP-MANAGER WURDEN UMGEBRACHT
+BEFREIEN SIE PROFESSOR DRENNAN
+ESKORTIEREN SIE PROFESSOR DRENNAN ZUM EUROCORP-GEBéUDE
+AUFTRAGS-UPDATE: ALLE MITARBEITER EVAKUIEREN
+EVAKUIERUNG FEHLGESCHLAGEN
+BERZEUGEN SIE NIRABELLE LUCY DE SAXO
+DE SAXO IST GEFLOHEN: NEUE BEFEHLE VERFöGBAR
+ELIMINIEREN SIE MIRABELLE LUCY DE SAXO
+SCHLAGEN SIE DEN AUFSTAND NIEDER
+ELIMINIEREN SIE DIE REBELLISCHEN UNGELEITETEN
+BESCHöTZEN SIE DIE K.I VON BAHRAIN
+K.I. VON BAHRAIN WURDE ZERSTôRT
+SICHERN SIE DEN ORBITALLIFT
+ZUWENIG AGENTEN, UM AUFTRAG ZU ERFöLLEN
+ORBITALLIFT WURDE ZERSTôRT
+RAUMSTATION WURDE ZERSTôRT
+NAVIGATIONSCOMPUTER DES SHUTTLES BESORGEN
+SELBSTZERSTôRUNGSMECHANISMUS DER STATION AKTIV: DEAKTIVIEREN
+LEBENSERHALTUNGSSYSTEM DES SHUTTLES BESORGEN
+MONDSHUTTLE BEMANNEN
+ELIMINIEREN SIE DIE NEUN
+DIE NEUN HABEN DAS IONENTOR AKTIVIERT. SIE WURDEN BESIEGT.
+ELIMINIERT DIE UNGELEITETEN HEIDEN
+UNSER GARTEN DER MEDITATION WURDE ZERSTôRT
+BEKEHRT EUROCORP-AGENTEN
+ESKORTIERT DEN AGENTEN ZUR IML-STATION
+EUER ZIEL WURDE ELIMINIERT
+EUER ZIEL KONNTE ENTKOMMEN
+BESCHAFFT ZWANGSSPENDEN
+EURE BEUTE IST WEG
+BRINGT DR. SCHWEIZER ZU PATER BLACK
+DR. SCHWEIZER IST GESTORBEN
+PATER BLACK IST GESTORBEN
+BESCHöTZT EURE BRöDER UND DEN TEMPEL
+EURE BRöDER SIND ALLE BEI GOTT
+DER TEMPEL WURDE ENTWEIHT UND ZERSTôRT
+ZERMALMT DIE UNGLéUBIGEN
+BESTRAFT DIE AUFSTéNDISCHEN
+VERNICHTET DIE HORDEN DES CHAOS
+ZERTRETET DAS UNGELEITETE UNGEZIEFER
+BESEITIGT DIE EUROCORP-MITARBEITER
+ELIMINIERT DIE EUROCORP-AGENTEN
+HELFT DEN MôNCHEN
+BRINGT DEN SABOTEUR VOR GOTTES GERICHT
+ZERMALMT DIE SCHéNDER
+BESCHöTZT DEN MôNCHSORDEN
+DER MôNCHSORDEN WURDE VôLLIG AUFGERIEBEN
+BRINGT DEN PANZERWAGEN ZUM SAMMELPUNKT
+DER PANZERWAGEN WURDE ZERSTôRT
+ENTFERNT DEN ASSISTENTEN DES PROFESSORS
+NEHMT DEN PLATZ DES ASSISTENTEN BEIM PROFESSOR EIN
+SAMMELT VIDEODATEN FöR VORLESUNG
+GEHT ZUM PODIUM
+HôRT DIE VORLESUNG
+ESKORTIERT PROFESSOR DRENNAN
+DER PROFESSOR HAT SEINEN ASSISTENTEN GETROFFEN
+DER PROFESSOR IST GESTORBEN
+MIRABELLE LUCY DE SAXO IST GESTORBEN
+ZERSTôRT DEN WAFFENBUNKER VON EUROCORP
+STEHLT DIE WAFFENPLéNE VON EUROCORP
+LADET DIE WAFFENPLéNE EIN
+KEHRT ZURöCK
+MôNCHE SITZEN FEST. AUFTRAG UNMôGLICH ZU ERFöLLEN
+VERöBT EIN ATTENTAT AUF HACKER
+ELIMINIERT DIE STREITKRéFTE, DIE DEN FLUSSHAFEN KONTROLLIEREN
+KEHRT ZUR IML-STATION ZURöCK
+ENTFöHRT DEN GEFANGENEN VON EUROCORP
+DIE ZIELPERSON WURDE GETôTET
+VERNICHTET DIE FORSCHUNGSEINRICHTUNGEN
+ELIMINIERT DIE AGENTEN VON EUROCORP
+DE SAXO MUSS STERBEN
+VERLASST DIESEN ORT
+UNTERWERFT DIE UNGELEITETEN
+SUCHT UND TôTET DEN ANFöHRER DES AUFSTANDES
+RETTET IX UND BEGLEITET IHN ZUR VERABREDUNG
+BESCHöTZT IX
+IHR HABT ZUGELASSEN, DASS IX STIRBT
+NICHTS KANN DIE NEUN STOPPEN. IHR WURDET BESIEGT.
+TUT NICHTS: GEHORCHT DEN NEUN
+STADTKONTROLLE VERLOREN: PRIESTER DER KIRCHE HABEN ALLE BöRGER BEKEHRT
+ELIMINIERT DEN EINDRINGLING
+ELIMINIERT DIE EINDRINGLINGE
+BERZEUGT DEN INFILTRATOR
+RöCKT VOR ZUR IML-STATION
+ZIEL BESEITIGT
+AKTIVIERT IML-STATION
+IML-STATION ZERSTôRT
+ELIMINIERT DIE AGENTEN
+EROBERT BUNKER, SETZT VIRUS FREI
+ABMARSCH
+ZIEHT EUCH ZURöCK
+BEKEHRT ORMANDOZ
+BEKEHRT RAMIREZ
+BRINGT SIE ZU UNS
+IHR HABT ORMANDOZ STERBEN LASSEN
+IHR HABT RAMIREZ STERBEN LASSEN
+ENTWENDET DR SCHWEIZERS ARBEIT
+KEHRT ZU UNS ZURöCK
+DIE EUROCORP-AGENTEN MöSSEN UNS BEITRETEN ODER STERBEN
+NEUTRALISIERT DIE EUROCORP-AGENTEN
+TôTET KOTO SEK
+NEUTRALISIERT ALLE EUROCORP-AGENTEN
+LASST KEIN UNHEIL KOMMEN öBER DE SAXO
+BERNEHMT DIE IML-STATION
+UNSERE GESEGNETE TOCHTER IST VON UNS GESCHIEDEN
+FöR DIESE KETZEREI WERDET IHR STERBEN!
+EUROCORP MUSS ZWISCHEN UNSEREM GLAUBEN UND DEM TOD WéHLEN
+SUCHT DAS HEILIGTUM
+KOMMT HEREIN
+BERZEUGEN SIE DEN BLUESKY-WISSENSCHAFTLER
+EUER ZIEL KONNTE ENTKOMMEN
+ZIEL BERZEUGT
+NEUTRALISIEREN SIE DEN AGENTEN
+SUCHEN UND ZERSTôREN SIE BöRGER DER KATEGORIE U - UNGELEITET
+UPDATE: ELIMINIEREN SIE DIE EIFERER
+PROFESSOR KLEIN ENTDECKT - BERZEUGEN SIE DEN PROFESSOR
+BESCHöTZEN SIE PROFESSOR KLEIN - EVAKUIEREN
+PROFESSOR KLEIN IST GESTORBEN
+VERNICHTET DIE BODENSTATION
+ZERSCHMETTERT UNSERE FEINDE
+[header_win]
+[message_win]
+Sie haben die Neun besiegt. Sie haben vollen Erfolg dabei gehabt, die Kirche der Neuen Epoche auszuschalten und den Kataklysmus abzuwenden. UTOPIA konnte wiederaufgebaut werden. GlÅckwunsch zu Ihrer Befîrderung, Herr Generaldirektor.
+[weapons]
+UZI
+Hervorgegangen aus dem Chaos der StrassenkÑmpfe des mittleren 20. Jahrhunderts ist die Uzi, das 9mm-Maschinengewehr mit optimierter Feuergeschwindigkeit, immer noch die Basis aller Operationen von EuroCorp. Sie ist eine preiswerte und leichtgewichtige berzeugungshilfe fÅr alle Agenten, die sich mit FÑllen von manifester Psychose herumschlagen mÅssen.
+MINIGUN
+Seit EinfÅhrung der Neuen Zeitrechnung ist der Einsatz dieser trÑgheitsgedÑmpften KettengeschÅtze beim Syndikat mehr und mehr Åblich geworden. Die mit Plasmakugeln feuernde, drehmomentstabilisierte Version ist mit einer Schaumlegierung ausgestattet, um die Rohstoff- und Produktionskosten in Grenzen zu halten.
+ELLASER
+Ein typisches Beispiel fÅr das revolutionÑre wissenschaftliche Denken der Kirche: Vereinfacht ausgedrÅckt handelt es sich hierbei um eine Art Blitzpeitsche. Wir haben derartige Forschungsvorhaben nie in die Praxis umgesetzt; der Grund war stets das Problem der notwendigen Energiezufuhr. Diese Waffe verwendet ein ausgeklÅgeltes System subatomarer Hebel, um die Belastung der tragbaren Energieversorgung auf ein Minimum zu reduzieren. berlastungen kînnen dennoch nicht ausgeschlossen werden. Eine in der Tat beeindruckende Technologie.
+LASER
+Diese Laserkanone arbeitet auf der Grundlage von TriSodium 89-Gas (wurde um das Jahr 20 NZ herum entwickelt). Bei ÅbermÑssigem Gebrauch des Abzugs kann es zu berlastungen kommen. In kritischen Situationen tritt eine solche berlastung oft schon nach zehnmaligem Auslîsen pro Minute auf.
+BEAM
+Erst der Fortschritt der elektronischen Vernichtungstechniken machte die Entwicklung dieser mÑchtigen Waffe mîglich. Unter Verwendung eines monopolaren Fokus projiziert sie ein Strahlungsfeld, das atmosphÑrische MolekÅle in Plasma umwandelt. Ein kurzer Kontakt mit dem Plasma genÅgt, um selbst ausgesprochen solide Materialien unter Freisetzung hoher Energiemengen verdampfen zu lassen. Die Auswirkungen des Strahlungsfelds sind auch bei grossen Entfernungen verheerend. Die berlastung des monopolaren Fokus fÅhrt bei dichten bzw. gehÑrteten Materialien zu besonders erfreulichen Resultaten.
+RAP
+Wurde entwickelt, um der Herausforderung der Neuen Zeitrechnung zu begegnen: der Ausbreitung der Cyborgs. Der Raketenwerfer verfÅgt Åber einen zielsuchenden Mehrfachsprengkopf, der bei Kontakt eine ganze Reihe kleiner Splitterbomben freisetzt. Die RaketenfÅhrung verwendet ein sogenanntes Gyrostat, eine Kreiselvorrichtung zur optimierten Zielerfassung.
+NUCLGREN
+Bei dieser thermonuklearen Waffe dÑmpft komprimiertes Techium die Explosionswirkung und beschrÑnkt die Kettenreaktion auf ein eng umgrenztes Gebiet. Ein herkîmmlicher Isotopenkern sorgt dafÅr, dass die Strahlungswerte kurz nach der Explosion innerhalb der Toleranzgrenzen bleiben. Aufgrund dieser Fortschritte ist es zum erstenmal gelungen, den Sprengsatz in einem tragbaren GehÑuse unterzubringen. Der effektive Explosionsradius ist aber immer noch gross genug; Vorsicht im Umgang mit dieser Waffe wird empfohlen.
+PERSUADER
+Ein Standardhilfsmittel fÅr die Kontrolle der hîheren Gehirnfunktionen von Zivilisten, die mit dem UTOPIA CHIP ausgerÅstet sind. Obwohl leichtgewichtig und nur von kurzer Reichweite, darf der berzeugstrahler gerade wegen seiner historischen Bedeutung nicht unterschÑtzt werden, war er doch fÅr EuroCorp das ausschlaggebende Instrument zur Gewinnung der Weltherrschaft. Vom Strahler Åberzeugte Personen folgen dem kontrollierenden Agenten bedingungslos und mit aller Konsequenz: Sie rÅsten sich selbst fÅr KampfeinsÑtze aus und beteiligen sich furchtlos an Auseinandersetzungen aller Art.
+FLAMER
+Unsere Forschungsabteilung empfiehlt auf kurzer Distanz den tragbaren Flammenwerfer auf Napalmbasis. Er stîsst einen Strahl entzÅndeten, gelierten Phosphors aus, der an den Zielen haften bleibt und dort verbrennt. Ein hocheffektives Mittel gegen Fahrzeuge aller Art.
+H2HTASER
+Diese auf kurze Reichweiten beschrÑnkte Waffe erzeugt eine Ionenresonanzwelle, mit der die CHIP-Programmierung gestîrt werden kann. Kurz gesagt: Der Trenner verwandelt Åberzeugte Individuen und bringt sie zurÅck in ihren ursprÅnglichen Zustand. Er ist somit ein hocheffektives Mittel gegen Benutzer des berzeugstrahlers, weil die Ionenwelle das Signal an seiner Quelle angreift.
+CRAZYGAS
+Forschungen auf dem Gebiet der Narkotika bei Pilzen haben zu der Entwicklung dieses gefÑhrlichen halluzinogenen Stoffs gefÅhrt. Der tragbare Kanister enthÑlt eine Mischung verschiedener Pilzsporen und einen oxydierenden Wirkstoff, der in einer Wolke freigesetzt wird. Die Waffe verursacht schwere Psychosen bei all denen, die mit der Wolke in BerÅhrung kommen. Sie eignet sich hervorragend zum Einsatz gegen eine feindliche bermacht, wenn andere Mittel der Neutralisation keinen Erfolg mehr versprechen. Die Auswirkungen sind allerdings nicht vorhersehbar.
+KOGAS
+Hier kînnen herkîmmliche Gasmasken nichts ausrichten, denn das KO-Gas enthÑlt einen bestimmten Wirkstoff, der alle Betroffenen im Abwurfgebiet fÅr kurze Zeit bewusstlos macht.
+ELEMINE
+Eine elektromagnetische Pulsmine fÅr den Nahbereich. Jeder AusrÅstungsgegenstand, der in das Pulsfeld der Mine gerÑt, wird zeitweise, manchmal sogar dauerhaft, ausser Funktion gesetzt. Betroffen sind auch elektrische Mechanismen aller Art. Bestens geeignet fÅr die Ausschaltung von Fahrzeugen, Strassenausstattung und Cyborgs. Ausserdem beeinflusst die Ionenmine den berzeugungsstatus all derer, die sich in ihrem Wirkungsbereich aufhalten.
+EXPLMINE
+Der altbekannte Sprengstoff gehîrt zur Grundausstattung von EuroCorp und ist immer noch ein Werkzeug mit beeindruckender Wirkung gegen Fahrzeuge und Immobilien. Plazieren Sie ihn nach GutdÅnken irgendwo in Ihrem Missionsgebiet und beordern Sie Ihre Agenten an einen sicheren Ort. Die Detonation erfolgt durch eine Zeitschaltuhr.
+LONGRANGE
+Das neue FW-PrÑzisionsgewehr mit Zielfernrohr und neuer Schlittentechnologie feuert seine hochkalibrige Uranmunition mit Mach 5.2.-Geschwindigkeit ab. Der Kondensator entleert sich bei jedem Schuss und muss jedesmal neu aufgeladen werden. Hohe Treffgenauigkeit bei grossen Entfernungen macht die Fernwaffe dennoch zu einem einzigartigen Instrument, das sein Manko bei der Feuergeschwindigkeit durch die FÑhigkeit der Rekalibrierung im Flug mehr als ausgleicht. Die Fernwaffe ist das optimale GerÑt fÅr den ScharfschÅtzen.
+AIRSTRIKE
+Jeder Satellit in dem UTOPIA-Netzwerk geosynchroner Orbitalplattformen ist mit einem Vorrat an StÑben ausgerÅstet, die aus einer Tungsten-Uran-Legierung bestehen und auf lenkbaren Lafetten montiert sind. Werden diese StÑbe abgefeuert, dann verflÅssigen sie sich bei Eintritt in die AtmosphÑre und erzeugen einen Plasmaregen, der sich strategisch vortrefflich nutzen lÑsst. Wir sind jetzt endlich wieder in der Lage, die SystemverschlÅsse zu umgehen, die der VerkÅndervirus eingebaut hat. Durch die bermittlung der re-initialisierten Protokolle kînnen sie Ihrem Agenten das System zur VerfÅgung stellen. All dies lÑsst sich mit einem tragbaren GerÑt aktivieren, aber dennoch sollten Sie vorsichtig mit dem Satellitenregen umgehen: Die Kosten fÅr das Abfeuern des Systems sind enorm hoch.
+QDEVASTATOR
+Ein Doppel-Gravitonprisma in einer noxongefÅllten Kammer wirkt als Katalysator einer Kettenreaktion, die die starken molekularen KrÑfte auf einer Schusslinie umleitet, die von der Schwerkraftpolarisation bestimmt ist. Die Kettenreaktion wird in der Noxonkammer durch DrÅcken des Abzugs gestartet, verbleibt dort und reichert sich solange an, bis man den Abzug wieder loslÑsst. Die Wirkung ist nicht zuletzt deshalb so stark, weil der beschriebene Vorgang Unmengen von Energie freisetzt.
+RAZORWIRE
+Dieser Stahl-Titanium-Draht wird auf eine Spule gewickelt, ist sehr lang und ausgesprochen scharf. Mit seiner Hilfe kann man bestimmte Bereiche vor unbefugtem Zutritt durch Zivilisten zu bewahren. Selbst kybernetisch verstÑrkte Eindringlinge lassen sich mit dem Monomoldraht wirksam abwehren. Dass er fÅr nichtmodifizierte Augen nicht zu erkennen ist, erhîht seine durchschneidende Wirkung.
+PERSUADER2
+Der Beta-berzeuger ist fÅhlbarer Ausdruck der unermÅdlichen Forschungen Prof. Drennans Åber die Technologien der Kirche. Mit dem vorliegenden GerÑt ist es nunmehr mîglich, selbst das Gehirn des kampferfahrensten Eiferers zu erreichen und in unserem Sinne zu beeinflussen. Die AnhÑnger des obskuren Kults werden Ihren Anweisungen ebenso hÅndisch folgen, wie sie den verdrehten Lehren dieser Kirche des vermeintlich Neuen Zeitalters gefolgt sind. 
+STASISFLD
+Dieser tragbare Feldgenerator verÑndert die Geschwindigkeit, mit der die Zeit innerhalb des Feldes vergeht. Dezent im Hintergrund wirkend, macht der Schild die Reaktionszeiten aller im Feld erfassten GegenstÑnde oder Personen zu einer nicht zu vernachlÑssigenden Grîsse. Mîgliche Ziele werden somit anfÑllig fÅr andere Formen des Angriffs. Die fÅr den Betrieb benîtigte Energie ist allerdings betrÑchtlich und auch das Timing beim Einsatz sollte mit Bedacht gewÑhlt werden.
+SOULGUN
+Einer der spektakulÑrsten esoterischen DurchbrÅche der Neun war das Wissen um die Freisetzung der bisher verschlossen gebliebenen elektrochemischen KrÑfte von endlichen Organismen. Doch auch wir haben in der Zwischenzeit genÅgend Wissen gesammelt, um diese KrÑfte vollstÑndig kontrollieren zu kînnen. Die Vampirette basiert auf diesen Erkenntnissen. Auf der Zellebene entzieht sie organischem Material die Energie und fÅhrt sie ihrem Benutzer zu. Die Vampirette ist Ñusserst hilfreich, wenn sich Agenten nach einem Feuergefecht wieder erholen sollen, da sie selbst Zellenergie von tîdlich Verletzten noch fÅr ihre Zwecke nutzen kann.
+TIMEGUN
+Professor Drennan hat wieder einmal zugeschlagen. Das ZR-Tron arbeitet mit einem Kern ultradichten Materials, der von einem stroboskopischen Stasisschild umgeben ist. Das GerÑt erlaubt den zeitlich begrenzten Zugang zu einer hîher dimensionierten Zeitebene. Resultat: Ein mîgliches Ziel verschwindet vollstÑndig und taucht erst in einer nahen Zukunft wieder auf. Noch nie hielt ein Saboteur ein geeigneteres Hilfsmittel in seinen geschickten HÑnden.
+CEREBUSIFF
+Mit einem solchen elektronischen Wachmann im RÅcken kann Ihr Agent seine Strategien effektiver in die Tat umsetzen. An entsprechender Stelle positioniert, nimmt der mit einem Pulslaser bewaffnete WÑchter seine Pflichten unnachgiebig wahr und feuert solange auf jedes unerwartet auftauchende feindliche Ziel, bis entweder sein Energiepack aufgebraucht ist oder er selbst zerstîrt wird.
+MEDI1
+Ein kleines PÑckchen, das alles Notwendige fÅr die schnelle Reparatur eines Cyborgs enthÑlt. Es dichtet SchÑden im KÅhlsystem, enthÑlt zudem ein wenig Entroster und bringt verbrauchte Energie sofort zurÅck. Allerdings kann man es nur einmal verwenden, danach gibt es nicht einmal mehr Pfand fÅr das Leergut.
+MEDI2
+Wirkt wie oben beschrieben, nur mit dem Unterschied, dass diese verbesserte Version von seinem Benutzer am Kîrper getragen wird und somit mîgliche SchÑden automatisch in Grenzen hÑlt. Wenn bestimmte kritische Grenzen Åberschritten sind, aktiviert der Auto-Medipack sich selbst und nimmt eigenstÑndig chirurgische Operationen vor. Es braucht allerdings eine kleine Zeitspanne, um mit der Arbeit beginnen zu kînnen. Der Cyborg, der permanente SchÑden zu erleiden hat, kînnte dies u. U. trotz eines Auto-Medipack mit seinem virtuellen Leben bezahlen.
+EXPLWIRE
+Ebenso wie der Monomoldraht ist auch der MonomolzÅnder ein exzellentes Hilfsmittel fÅr die Zugangsabwehr. Nur einige wenige MolekÅle dick ist der MonomolzÅnder auch fÅr gerade modifizierte Augen nicht wahrzunehmen und explodiert bei BerÅhrung auf seiner vollen LÑnge.
+CLONESHLD
+Mit dem Tarnschild kînnen Sie sich derart effektiv verkleiden, dass sich selbst UTOPIA-Scannerergebnisse tÑuschen lassen. Der Schild verÑndert auf organische Weise sowohl Kleidung als auch andere AusrÅstungsgegenstÑnde eines Agenten, und dieser wird, zumindest fÅr gewisse Zeit, zu einem normalen Feldagenten. Gerade fÅr Leute mit Infiltrierungsaufgaben ist der Tarnschild ideal.
+[mods]
+LEGS1
+Diese kÅnstlichen Beine bestehen im Kern aus Plast-Stahl und sind mit einem natÅrlich wirkenden StoffÅberwurf versehen. Sie dienen sowohl der Gesundheit als auch der Geschwindigkeit Ihres Agenten. Auch die WiderstandsfÑhigkeit des Materials haben wir verbessert, um die Reichweite zu erhîhen, die ein Cyborg mit solchen Beinen bei grîsstmîglicher Geschwindigkeit zurÅcklegen kann.
+LEGS2
+Die Fortschritte bei der Technologie des MetallschÑumens machten die Entwicklung dieses kybernetischen Gliedmassensystems mîglich. Beine des 2. Levels zeigen beeindruckende Werte im Hinblick auf Geschwindigkeit, WiderstandsfÑhigkeit und Gesundheit. Die maximale LeistungsfÑhigkeit Ihres Cyborg kînnen Sie mit Beinen des 2. Levels entscheidend erhîhen.
+LEGS3
+Die Beine des 3. Levels ersetzen die aus den unteren Klassen bekannte, fiberoptische NervenÅbertragung durch ein System aus Super-Synapse-Memory-Plastik. Der Einsatz entsprechend modifizierter Agenten hat einen direkten Einfluss auf deren Verhalten im Kampfgebiet.
+ARMS1
+Sind Ihre Agenten erst einmal mit den Tungsten-Sehnen und StahlbÑndern dieser kybernetischen Arme versehen, dann wird Ihnen das verbesserte Kampfverhalten auffallen. Die Treffgenauigkeit beim Schiessen und der sorgsamere Umgang mit Munition steigen signifikant an. Zudem verlÑngern Sie die operationale Lebensdauer Ihres Cyborgs, wenn Sie ihn mit Armen des 1. Levels ausstatten, denn die kybernetische AufrÅstung erhîht die ImmunkrÑfte.
+ARMS2
+Das neue Schaummetall findet nun auch Anwendung in der Produktion kybernetischer PrÑzisionsgliedmassen. Der Einsatz dieser leichtgewichtigen Kunstarme mit ihrem optimierten TrÑgheitsmoment verspricht nicht nur hîhere PrÑzision, sondern auch verbesserte Wurfeigenschaften.
+ARMS3
+Auch die ultimative Neuentwicklung unserer Gliedmassentechnologie steht Ihnen zur VerfÅgung. Da die Agenten auf immer besser ausgerÅstete AufrÅhrer und Kultangehîrige treffen, sind auch Sie gezwungen, Ihre Cyborgs entsprechend zu modifizieren. Mit Armen des 3. Levels ausgestattete Agenten legen ein stark verbessertes Kampfverhalten an den Tag und erhîhen somit Ihre Erfolgsrate bei der MissionserfÅllung.
+CHEST1
+Sie erhîhen auf entscheidende Weise die berlebensfÑhigkeit in feindlicher Umgebung, wenn Sie die lebenswichtigen Organe Ihres Agenten mit einer dreiwandigen Platte aus Titaniumlegierung schÅtzen. Eine verbesserte Kîrpermodifikation bietet den grîsstmîglichen Schutz, den Sie einem Cyborg geben kînnen. Beachten Sie bitte, dass diese AufrÅstung in Einklang mit den anderen Modifikationen stehen muss.
+CHEST2
+Diese AufrÅstung verwendet die wabenfîrmige Superstruktur des Schaummetalls, das bei schwacher Gravitation in einem niedrigen Erdorbit hergestellt wird. Dieses Material verringert das Gewicht der Kîrperprothese und erhîht deren Zugfestigkeit. Die verbesserte Energiebevorratung ist nur ein Vorteil der AufrÅstung auf Kîrper des 2. Levels. In bezug auf das Operationsverhalten ergibt sich daraus eine erhîhte Leistungsbereitschaft und ein verringertes Schadensrisiko. Mit der AufrÅstung schaffen Sie zudem die Voraussetzung fÅr Modifikationen der dritten Ebene in allen anderen Kategorien.
+CHEST3
+Mit dem 3. Level der Kîrpermodifikationen verschaffen Sie Ihrem Agenten einen nochmals verbesserten Immunschutz. Der Bandapparat besteht aus Memory-Plastik, das den Mikrofiber-Stahl der unteren Modifikationen ersetzt. Der Cyborg verhÑlt sich entschieden durchsetzungsfreudiger. Bemerkenswert ist weiterhin, dass eine AufrÅstung mit einem Kîrper des 3. Levels den betreffenden Cyborg vor allen zur Zeit bekannten Nervengasen wirksam schÅtzt.
+BRAIN1
+Die FÑhigkeit, steuerungsunabhÑngige Entscheidungen zu treffen, unterscheidet den entschlossenen Cyborg von einem willenlosen. Weil der Agent nun doppelt so clever ist, ist sein Risiko, getîtet zu werden, nur noch halb so gross. Diese Denkeinheit ist mit Diamantprozessoren und einer integrierten 3D-Matrix bestÅckt, die die kognitive Biomasse des Cyborgs enthÑlt. Sie verbessert die GrundwahrnehmungsfÑhigkeiten und ist darÅber hinaus mit einer Trauma-Management-Software ausgestattet, die den Willen zur konstruktiven SchadensbewÑltigung verstÑrkt.
+BRAIN2
+Hier sorgt ein holographisches KerngedÑchtnis fÅr eine merkliche VerkÅrzung der Reaktionszeiten bei gleichzeitiger VerstÑrkung der berzeug-Reichweite und SignalstÑrke. Auch die WiderstandsfÑhigkeit gegen feindliche berzeugstrahler lÑsst sich mit Gehirnen des 2. Levels deutlich heraufsetzen. Dieses Gehirnmodell birgt zudem weitere Verbesserungen der Wahrnehmungsgabe und der Trauma-Software, und sorgt somit fÅr eine spÅrbare Anhebung des berlebensstandards.
+BRAIN3
+Das Spitzenprodukt unserer Technologiereihe der tragbaren kÅnstlichen Intelligenz. Das auf dem 3. Level modifizierte Gehirn verbessert nicht nur den Immunschutz, sondern garantiert darÅber hinaus optimale Zielgenauigkeit, hohe Trefferrate und hocheffizienten Energieverbrauch. Sie kînnen einen modifizierten Cyborg unter Bedingungen einsetzen, die herkîmmliche Bio-Gehirne sofort zerstîren wÅrden. Dieser Cyborg dagegen verfÅgt Åber ein vollstÑndiges Backup aller biologischen Daten und kann seine TÑtigkeit fortsetzen.
+SKIN1
+Ein Entwurf der Cyberhaut; ein komplexes Zellgewebe mit schussfester Epidermis, die wirkungsvoll vor Schussverletzungen schÅtzt. Eine sorgfÑltige kosmetischen Vorbehandlung des Dickhaut-Stahl-Geflechts sorgt fÅr die Entstehung der aussergewîhnlich harten Substanz, die trotz allem genauso elastisch ist wie das herkîmmliche Muskelfleisch eines Cyborg.
+SKIN2
+Diese Cyberhaut macht sich die Erkenntnisse zunutze, die wir bei unseren Untersuchungen Åber die Eigenschaften nichttoxischer asbesthaltiger Stoffe beim Wiedereintritt in die AtmosphÑre gewonnen haben. Ein mit Flammenhaut ausgestatteter Agent erleidet bei Operationen wÑhrend eines Feuersturm weit weniger Verbrennungen als sein ungeschÅtzter Gegenpart.
+SKIN3
+Diese Cyberhaut-Variante basiert auf einem Hydrocarbon-Werkstoff, der mit polymeren MikrofÑden in Fiberoptik angereichert worden ist. Eine solche HautoberflÑche ist in der Lage, grosse Teile der zerstîrerischen Kraft energiegeladener Waffensysteme zu absorbieren. Die Energie wird vom Auftreffpunkt aus um den gesamten Corpus des modifizierten Agenten geleitet und spÑter recycelt, um die Schutzfunktionen der Cyberhaut aufrechterhalten zu kînnen.
+SKIN4
+Dieses Dokument zeigt den neuesten Stand unserer Cyberhaut-Technologie. Vieles ist noch spekulativ, aber dennoch weit von Wolkenkuckucksheimen entfernt. So gibt es beispielsweise die Beschreibung eines photomorphen Gewebes, das gewisse hnlichkeiten mit einem Tarnschild aufweist. Wir sind heute in der Lage, ein solch spezielles Gewebe herzustellen. Es lÑsst einen Cyborg auf dem UTOPIA-Scanner aussehen wie einen normalen Feldagenten.

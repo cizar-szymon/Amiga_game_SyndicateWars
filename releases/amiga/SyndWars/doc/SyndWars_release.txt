@@ -1,0 +1,29 @@
+SYNDICATE WARS na Amige - historia wydan
+=======================================
+
+ZGLASZANIE BLEDOW
+-----------------
+
+Klawisz Help w grze: zapisuje obraz ekranu i stan gry, w okienku podajesz
+e-mail i co sie stalo, SEND wysyla zgloszenie autorowi portu. Numer wersji
+jest w rogu menu glownego (AMIGA PORT 0.xxx) i w Shellu: Version SyndWars.
+Bez sieci: opisz blad z numerem wersji i dolacz plik error.log z szuflady
+gry (wersja ARM: takze RAM:swarm-log.txt).
+
+
+0.220 (15.11.2026) - pierwsze wydanie (beta)
+-------------------------------------------
+
+- Cala gra Syndicate Wars (SyndWarsFX) na Amige z 68060 i karta Picasso96:
+  kampanie, misje, menu, zapisy.
+- Wersja ARM dla Warp 1260 Extreme i Warp 7060 (Tool Type ARM): gra liczy
+  ARM, 68060 pokazuje obraz, gra dzwiek i filmy.
+- Dzwiek przez Paule albo AHI (Tool Type SOUND=), muzyka z plyty CD gry
+  (MUSIC=OFF ja wylacza).
+- Filmy (intro, wybory, zakonczenia, koniec misji) z dzwiekiem.
+- Opcje szybkosci w SYSTEM -> VISUAL DEPTH: FAR PEDESTRIANS, RADAR HALF
+  RATE, AUTO DETAIL, SHOW SPEED.
+- Esc pyta o przerwanie misji / wyjscie z gry.
+- Help: zgloszenie bledu z gry (wersja 68060).
+- Zapisy i ustawienia w formacie PC - wymienne z SyndWarsFX na PC.
+- Dane gry z wersji GOG narzedziem pc/SyndWarsData.py (Python 3).

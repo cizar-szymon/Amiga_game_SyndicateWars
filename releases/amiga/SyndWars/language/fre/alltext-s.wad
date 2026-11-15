@@ -1,0 +1,1638 @@
+# == map screen text ==
+# map screen title
+#UTOPIA
+# map screen headings
+Terminal
+Citoyens UTOPIA
+Structure
+Dialecte
+Commerce
+Pollution
+
+# city data
+
+Londres
+21.13 M
+Post urbaine
+Bas anglais
+Logiciels, Services financiers
+Dechets chimiques, Dechets d'origine humaine
+
+Detroit
+10.98 M
+Tissu urbain complexe
+Neo-americain
+Industrie automobile
+Dechets de l'industrie lourde, Dechets nucleaires
+
+Hongkong
+17.55 M
+Tissu urbain complexe
+Indochinois
+Matieres plastiques a memoire
+Dechets de l'industrie legere
+
+Beijing
+38.89 M
+Ultrapole
+Proto-mandarin
+Matieres plastiques, Materiel informa- tique
+Dechets nucleaires, Dechets d'origine humaine
+
+Vienne
+6.99 M
+Tissu urbain simple
+Esperanto europeen
+Traitement des mineraux
+Dechets de l'industrie legere
+
+Geneve
+7.65 M
+Tissu urbain simple
+Esperanto europeen
+Recyclage des eaux, Traitement de l'air
+Dechets nucleaires
+
+Salzbourg
+9.27 M
+Tissu urbain complexe
+Neo-slave
+Regene- ration vegetale
+Dechets de l'industrie legere
+
+Singapour
+21.71 M
+Ultrapole
+Pseudo-malais
+Recyclage des eaux, Materiel informa- tique
+Dechets de l'industrie lourde
+
+Phoenix
+13.26 M
+Tissu urbain complexe
+Americain central
+Production d'energie
+Dechets nucleaires
+
+Rome
+10.92 M
+Post urbaine
+Bas latin
+Biens durables
+Dechets de l'industrie lourde
+
+Al-Manamah
+10.98 M
+Tissu urbain complexe
+Neo-arabe
+Raffineries de petrole, Traitement des mineraux
+Dechets chimiques
+
+New-York
+25.24 M
+Post urbaine
+Haut anglais
+Armement
+Dechets toxiques, Dechets nucleaires
+
+Santiago
+7.81 M
+Tissu urbain complexe
+Neo-espagnol
+Production de caoutchouc
+Dechets chimiques
+
+Buenos-Aires
+15.71 M
+Ultrapole
+Modul
+Nourriture
+Dechets de l'industrie lourde, Dechets d'origine humaine
+
+Le Cap
+10.27 M
+Tissu urbain complexe
+Afrikaans (classique)
+Traitement des mineraux
+Dechets de l'industrie lourde
+
+Adelaide
+8.7 M
+Tissu urbain simple
+Bas anglais
+Brasseries, Elevage
+Dechets chimiques, Dechets d'origine animale
+
+Christchurch
+4.9 M
+Tissu urbain simple
+Idiome bahasanais
+Confection, Industrie agro-alimentaire
+Dechets chimiques
+
+Reykjavik
+4.37 M
+Tissu urbain simple
+Demi-Scando
+Recyclage des eaux, Traitement de l'air
+Dechets nucleaires
+
+Moscou
+16.54 M
+Tissu urbain complexe
+Moldave
+Confection, Alcools
+Radiations, Dechets d'origine humaine
+
+Tokyo
+16.70 M
+Ultrapole
+Neo-japonais
+Hi-tech, Services financiers
+Dechets de l'industrie lourde
+
+Bangkok
+24.37 M
+Ultrapole
+Pseudo-thai
+Industries de simulation, Tourisme
+Dechets chimiques, Dechets d'origine humaine
+
+Honolulu
+7.01 M
+Tissu urbain simple
+Neo-americain
+Recyclage des eaux, Traitement de l'air
+Dechets de l'industrie legere
+
+Johannesburg
+15.64 M
+Tissu urbain complexe
+Afrikaans (classique)
+Traitement des mineraux
+Dechets de l'industrie lourde
+
+Le Caire
+3.16 M
+Tissu urbain simple
+Neo-arabe
+Artisanat d'art, Tourisme
+Dechets chimiques
+
+New-Delhi
+28.73 M
+Ultrapole
+Proto-Hindoustani
+Vetements intel- ligents
+Dechets de l'industrie lourde, Dechets d'origine humaine
+
+Sebastopol
+9.26 M
+Tissu urbain complexe
+Moldave
+Distilleries
+Radiations
+
+Tripoli
+8.73 M
+Tissu urbain complexe
+Arabe (classique)
+Raffineries de petrole
+Radiations
+
+Riyad
+2.03 M
+Tissu urbain simple
+Neo-arabe
+Raffineries de petrole
+Dechets de l'industrie lourde
+
+Colombo
+3.35 M
+Tissu urbain simple
+Neo- cingalais
+Recyclage des eaux, Traitement de l'air
+Dechets nucleaires
+
+Colombo
+0.0001 M
+Station orbitale
+Neo-idiome technique
+Codes techniques de l'EuroCorp, Transport interstel-laire, Micro-gravite
+Neant
+
+Matochkin Shar
+0.017 M
+Tissu urbain simple
+Proto-moldave
+Traitement de l'air
+Dechets de l'industrie legere
+
+Voss
+0.023 M
+Tissu urbain ultra-simple
+Omni-scando
+Sylvi-culture
+Dechets de l'industrie legere
+
+Omsk
+0.48 M
+Tissu urbain simple
+Russe (classique)
+Distilleries
+Radiations
+
+Beyrouth
+0.75 M
+Tissu urbain ultra-simple
+Neo-arabe
+Armement
+Dechets chimiques, Dechets d'origine humaine
+
+Oulan Bator
+0.274 M
+Tissu urbain ultra-simple
+Chinois mongolique
+Extraction de minerais
+Radiations
+
+Seoul
+6.5 M
+Tissu urbain complexe
+Coreen unifie
+Traitement chimique, Industrie automobile
+Dechets chimiques, Dechets de l'industrie lourde
+
+Hanoi
+3.3 M
+Tissu urbain simple
+Mandarin zonal
+Elevage, Tissage vegetal
+Dechets d'origine animale, Dechets chimiques
+
+Manille
+8.5 M
+Tissu urbain complexe
+Mandarin zonal
+Fabriques de meubles
+Dechets de l'industrie legere
+
+Freetown
+0.18 M
+Tissu urbain ultra-simple
+Idiome afrikaans
+Traitement des minerais
+Dechets de l'industrie legere
+
+Monrovia
+0.65 M
+Tissu urbain ultra-simple
+Idiome afrikaans
+Distilleries
+Dechets de l'industrie legere
+
+Lagos
+1.25 M
+Tissu urbain simple
+Idiome afrikaans
+Extraction de minerais
+Dechets de l'industrie lourde
+
+Nairobi
+2.3 M
+Tissu urbain simple
+Somalien neutre
+Elevage, Tanneries
+Dechets de l'industrie legere
+
+Port Moresby
+0.93 M
+Tissu urbain ultra-simple
+Idiome bahasanais
+Extraction de minerais
+Dechets chimiques
+
+Anchorage
+2.2 M
+Tissu urbain simple
+Ameskimo
+Recyclage des eaux
+Dechets chimiques
+
+Vancouver
+3.5 M
+Tissu urbain complexe
+Lingvo Pseudo
+Traitement magnetique
+Dechets de l'industrie lourde
+
+Nuuk
+0.065 M
+Pre-urbain
+Demi-Scando
+Air
+Basses radiations
+
+Georgeton
+0.08 M
+Tissu urbain ultra-simple
+Idiome iberique
+Extraction de mineraux
+Dechets chimiques
+
+Lima
+3.4 M
+Tissu urbain complexe
+Idiome iberique
+Armement
+Dechets nucleaires, Dechets de l'industrie lourde
+
+Sao Paulo
+18.9 M
+Ultrapole
+Portugais (classique)
+Extraction de mineraux
+Dechets toxiques, Dechets de l'industrie legere
+ACCIDENT EN LABORATOIRE
+CAUSES NATURELLES
+VIRUS A RETARDEMENT
+MAUVAISE MANIPULATION
+ERREUR FATALE
+DEDUCTION ILLOGIQUE
+HALLUCINATIONS
+ERREUR DE JUGEMENT
+RAISONNEMENT ALTERE
+FOLIE
+NEGLIGENCE
+PROCEDURE NON PROTEGEE
+EFFONDREMENT MENTAL
+MAUVAIS EQUIPEMENT
+TEST ECHOUE
+ARRET CARDIAQUE
+MAUVAIS CALCUL
+ELECTROCUTION
+DESINTEGRATION
+ACCIDENT
+\hType de message: DIRECT\n
+\n
+Priorit‚: 3\n
+\n
+D‚but de message:\n
+\c2\n
+Ordres\n
+\n
+Londres: Des civils d‚voy‚s de cat‚gorie D ont viol‚ le code de bonne conduite sur un p‚rimŠtre d'un 
+kilomŠtre carr‚ autour de cette sous-station. S‚lectionnez vos agents. R‚tablissez l'ordre.\n
+\c5\n
+On a recens‚ des dysfonctionnements de puces UTOPIA. Le problŠme va d'un fonctionnement erratique … une 
+panne complŠte. Les citoyens touch‚s sont r‚pertori‚s en cat‚gorie D pour D‚voy‚s.\n
+\n
+\c4Noyau de l'EuroCorp 0-1-0/171261/26D: Intelligence Artificielle de Londres, UTOPIA\n
+\n
+\c4U\c3nit‚ \c4T\c3raitement \c4O\c3rganique \c4P\c3our \c4I\c3nformations \c4A\c3m‚lior‚es\n
+\c5\n
+\hType de message: CABLE\n
+\n
+Priorit‚: 1 - Etat d'urgence\n
+\n
+D‚but de message:\n
+\c2\n
+Ordres\n
+\n
+D‚troit: D‚busquez les membres de l'glise de l'Ere Nouvelle et proc‚dez … leur ‚radication. Neutralisez
+ les citoyens de cat‚gorie D: D‚voy‚s.\n
+\c5\n
+Attention, Ex‚cutant \l. Je suis l'agent UTOPIA Maritz, du Service de Renseignements de l'EuroCorp.\n
+\n
+La situation est critique. UTOPIA a fait l'objet d'une attaque. L'infrastructure de renseignements de 
+l'EuroCorp a s‚vŠrement ‚t‚ touch‚e. La proc‚dure d'urgence a ‚t‚ d‚clench‚e. Je transfŠre imm‚diatement
+ le commandement de l'EuroCorp sur l'IA de secours. Je vous transmettrai son analyse et ses ordres.\n
+\n
+Je r‚pŠte, le commandement suprˆme de l'EuroCorp est actuellement transf‚r‚ sur l'Intelligence 
+Artificielle de Londres. Vous avez pour ordre de reconstruire UTOPIA, en reprenant le r‚seau … la base 
+si n‚cessaire.\n
+\n
+L'IA de Londres procŠde d‚j… … l'analyse de la situation. Vous connaŒtrez sous peu la nature de vos 
+missions.\n
+\n
+Des agents seront plac‚s sous vos ordres afin d'accomplir ces missions.\n
+\n
+La situation s'annonce mal. Une attaque … l'‚chelle plan‚taire a ‚t‚ lanc‚e contre le Syndicat. L'I.A. 
+de D‚troit a ‚t‚ vis‚e et mes homologues ‚limin‚s. Les assaillants de D‚troit ont introduit un virus 
+sophistiqu‚ dans UTOPIA. Les systŠmes de d‚fense ne r‚agissent pas. Nous ignorons encore la nature du 
+virus qui se propage d'une IA … l'autre sans que nous puissions contr“ler sa progression.\n
+\n
+Un groupe ill‚gal disant s'appeler l'glise de l'Ere Nouvelle revendique la responsabilit‚ de l'‚pid‚mie
+ provoqu‚e par le virus qu'ils nomment "Harbinger". Ils se proclament en guerre contre l'EuroCorp. 
+Harbinger est … l'origine de l'augmentation exponentielle du nombre de CHIP subissant un 
+dysfonctionnement.\n
+\n
+Les adeptes de cette pr‚tendue "Eglise" se d‚signent sous le nom "Disciples" et portent des armures 
+distinctives.\n
+\n
+\c4Maritz\n
+\c5\n
+\hType de message: CABLE\n
+\n
+Priorit‚: 1\n
+\n
+D‚but de message:\n
+\c2\n
+Ordres\n
+\n
+Hongkong: Persuadez les techniciens de la centrale ‚lectrique Yamaguchi.\n
+\n
+Beijing: Persuadez les cadres de la firme Yamaguchi.\n
+\c5\n
+F‚licitations, \l. Le calme est r‚tabli … D‚troit mais le chaos engendr‚ par le virus Harbinger s'est 
+‚tendu. Les communications du Syndicat sont intercept‚es partout sur la planŠte et des codes d'ordres 
+non autoris‚s sont diffus‚s sur l'ensemble du r‚seau UTOPIA. Les divisions r‚gionales de l'EuroCorp 
+s'isolent pour se prot‚ger cr‚ant ainsi de nouveaux Syndicats. Ceux-ci doivent ˆtre ramen‚s sous la 
+tutelle de l'EuroCorp dans la mesure du possible, sinon ils devront ˆtre d‚truits.\n
+\n
+A Hongkong, Yamaguchi Holodata, le premier fabricant de puces UTOPIA des Pays Industrialis‚s d'Asie, 
+tente d'‚tablir un Syndicat ind‚pendant. Nous allons l'en empˆcher en menant deux actions d‚cisives.\n
+\n
+La centrale nucl‚aire de Hongkong constitue la principale source d'‚nergie de la firme. Yamaguchi. 
+Envoyez-y une ‚quipe d'agents pour persuader les techniciens de se rallier … nous. Lorsqu'ils auront 
+relƒch‚ leur vigilance, une surchauffe se produira dans le coeur de la centrale, entraŒnant son 
+explosion. La destruction de la centrale devrait suffire … occuper Yamaguchi pour un bon moment.\n
+\n
+Pour parachever le tout, passez … leurs bureaux de Beijing et persuadez les responsables sur place. 
+Neutralisez tous les agents sur votre passage. Les simulations effectu‚es par l'IA de Londres indiquant 
+la n‚cessit‚ d'engager des agents suppl‚mentaires pour relayer ceux actuellement en stase dans nos 
+cryocuves, vous ˆtes autoris‚ … utiliser le Persuatron comme bon vous semblera.\n
+\n
+Le temps que vous atteigniez vos objectifs, Yamaguchi aura vite fait de renoncer … une s‚paration d'avec
+ EuroCorp.\n
+\n
+\c4Maritz\n
+\c5\n
+\hType de message: CABLE\n
+\n
+Priorit‚: 1\n
+\n
+D‚but de message:\n
+\c2\n
+Ordres\n
+\n
+GenŠve, Vancouver et Matochkin Shar: Recherchez les scientifiques des laboratoires Bluesky Tendencies 
+pour les persuader.\n
+\c5\n
+F‚licitations, \l. Vos r‚sultats sont encourageants.\n
+\n
+Votre prochaine mission consiste … nous ramener les chercheurs n‚cessaires … la mise en place d'un 
+nouveau d‚partement de Recherche & D‚veloppement. Les gens de Yamaguchi que vous avez persuad‚s nous ont
+ dit o‰ trouver les meilleurs chercheurs. Bluesky Tendencies a des laboratoires … GenŠve, Vancouver et 
+Matochkin Shar avec un personnel hautement qualifi‚ de grade A. DŠs l'arriv‚e de vos agents sur les 
+lieux, une recherche par code d'identification UTOPIA devrait vous permettre de rep‚rer le personnel 
+cibl‚.\n
+\n
+Ces scientifiques sont les cerveaux les plus pris‚s du Syndicat. Il est imp‚ratif que leur s‚curit‚ soit
+ garantie.\n
+\n
+Mise … jour: Grace au piratage des puces CHIP et … un f‚roce lavage de cerveau, l'glise voit ses rangs 
+grossir d'heure en heure. Les convertis ne font pas montre d'une r‚elle ferveur religieuse. L'glise 
+enseigne … ces adeptes que la fin du monde approche et qu'elle seule d‚tient la technologie capable 
+d'assurer le salut des fidŠles lors du Cataclysme. Sa doctrine est insolemment anti-Syndicat.\n
+\n
+Fait r‚v‚lateur, tous les D‚voy‚s n'adhŠrent pas … ce culte, mˆme aprŠs avoir rencontr‚ ses z‚lateurs.\n
+\n
+Il semble ‚galement que nos Persuatrons restent inop‚rants sur les pratiquants eux-mˆmes. Nous ne savons
+ presque rien sur la nature de la technologie dont dispose l'glise, aussi priorit‚ absolue est donn‚e 
+aux recherches sur ce sujet. Il est clair que leur savoir-faire est impressionnant.\n
+\n
+\c4Maritz\n
+\c5\n
+\hType de message: CABLE\n
+\n
+Priorit‚: 1\n
+\n
+D‚but de message:\n
+\c2\n
+Ordres\n
+\n
+Singapour: Neutralisez toute pr‚sence hostile. Emparez-vous des fourgons blind‚s. Regagnez la base une 
+fois les objectifs atteints.\n
+\c5\n
+\l, votre rapport est int‚ressant. L'EuroCorp dispose d‚sormais de l'‚quipe R&D qui lui faisait d‚faut. 
+Cependant, certains ing‚nieurs R&D parmi les plus qualifi‚s restent encore introuvables. Nous devons les
+ localiser pour connaŒtre leurs activit‚s. Il est possible qu'ils travaillent actuellement pour un 
+Syndicat dissident. Je vais continuer … balayer l'ensemble des canaux pour obtenir un compl‚ment 
+d'informations.\n
+\n
+Pour l'instant, un problŠme plus imm‚diat requiert toute votre attention. A Singapour, la soci‚t‚ de 
+placement Tang Assurance a eu la fƒcheuse id‚e de d‚clarer l'ind‚pendance de la ville et des fonds 
+doivent ˆtre convoy‚s sous escorte arm‚e depuis les coffres de la banque centrale vers le siŠge de la 
+soci‚t‚ Tang. Nous ne disposons pas du temps n‚cessaire pour d‚truire la banque car les employ‚s de Tang
+ arriveront sur les lieux avant vos agents. Nous pouvons toutefois d‚tourner le convoi blind‚ avant 
+qu'il n'arrive … destination.\n
+\n
+\c4Maritz\n
+\c5\n
+\hType de message: CABLE\n
+\n
+Priorit‚: 1\n
+\n
+D‚but de message:\n
+\c2\n
+Ordres\n
+\n
+Phoenix: Percez les d‚fenses du temple du culte et emparez-vous des donn‚es technologiques secrŠtes.\n
+\c5\n
+F‚licitations, \l.\n
+\n
+L'glise de l'Ere Nouvelle d‚ploie un arsenal de plus en plus sophistiqu‚ faisant appel … des 
+technologies totalement inconnues de notre d‚partement R&D. Nous voulons d'autres exemplaires de ces 
+armes pour d‚couvrir qui se cache derniŠre l'glise et d‚finir la meilleure fa‡on de la combattre.\n
+\n
+D'aprŠs des analyses scanographiques et des balayages par satellite, l'glise a ‚tabli un important 
+centre d'op‚rations … Phoenix. Le virus Harbinger a entiŠrement d‚vast‚ l'IA sur place, permettant … 
+l'glise de passer outre l'autorit‚ de l'EuroCorp. Des acolytes soumettent les z‚lateurs r‚cemment 
+couvertis … un programme intensif d'endoctrinement et d'entraŒnement. L'efficacit‚ des z‚lateurs est 
+donc ralentie, dans la tourmente engendr‚e par les D‚voy‚s cr‚‚s par l'attaque virale.\n
+\n
+Dirigez-vous vers le temple et cherchez tout ce qui peut nous en expliquer davantage.\n
+\n
+\c4Maritz\n
+\c5\n
+\hType de message: CABLE\n
+\n
+Priorit‚: 1\n
+\n
+D‚but de message:\n
+\c2\n
+Ordres\n
+\n
+Rome: Tous les citoyens de cat‚gorie D doivent ˆtre ‚limin‚s pour montrer aux autres victimes du virus 
+Harbinger qu'EuroCorp garde le contr“le.\n
+\n
+Enrayez l'apparition de Syndicats ind‚pendants en d‚mantelant la garnison locale.\n
+\c5\n
+Bien vu, \l.\n
+\n
+Harbinger a ‚t‚ particuliŠrement efficace … Rome. Il sŠme partout le chaos dans la ville et les D‚voy‚s 
+s'emploient … la destruction de la ville, rue aprŠs rue.\n
+\n
+L'anarchie qui rŠgne dans le centre ville atteint son paroxysme. L'ancienne garnison de s‚curit‚ de 
+l'EuroCorp s'est retranch‚e derriŠre ses murs tandis que l'agent sur place tente de reprendre le 
+contr“le de l'IA locale contamin‚e par le virus. Cependant, les ordres de mission fauss‚s qu'il ‚met 
+rendent la garnison plus vuln‚rable encore. Neutralisez l'ensemble du personnel de la garnison et dŠs 
+que aurez  pris le contr“le de la ville, nous enverrons des gardes de remplacement.\n
+\n
+\c4Maritz\n
+\c5\n
+\hType de message: CABLE\n
+\n
+Priorit‚: 1\n
+\n
+D‚but de message:\n
+\c2\n
+Ordres\n
+\n
+Hongkong, Beijing et Phoenix: Neutralisez les agents traItres.\n
+\n
+Regagnez la base pour recevoir de nouvelles instructions.\n
+\c5\n
+F‚licitations, \l.\n
+\n
+Le message suivant a ‚t‚ intercept‚ hier … 06:55 par analyse scanographique du r‚seau. L'IA de Londres 
+vient juste de le d‚crypter.\n
+\n
+\c3Type de message: Transcription cod‚e\n
+\n
+Priorit‚: Important\n
+\n
+DE: Contr“le\n
+\n
+A L'ATTENTION DE: Tous les Ex‚cutants sur le terrain\n
+\n
+D‚but de message:\n
+\n
+Des agents pr‚tendant agir pour le compte d'EuroCorp ont men‚ des op‚rations clandestines dans des 
+secteurs nous concernant.\n
+\n
+Il serait bon d'effectuer une reconnaissance dans ces secteurs. Les agents doivent indiquer leurs 
+nouvelles modifications dans leur rapport.\n
+\n
+Fin de message.\n
+\c5\n
+Il est ‚vident d'aprŠs ce message que nos activit‚s sont espionn‚es par des traItres disposant d'une 
+cyber-technologie dont peut-ˆtre certaines donn‚es sont plus avanc‚es que les n“tres - nous ignorons de 
+quelles capacit‚s de d‚veloppement ils disposent.\n
+\n
+Nous avons pist‚ le message jusqu'… Hongkong, Beijing et Phoenix. Envoyez une ‚quipe de cyborgs pour 
+localiser et neutraliser tous les traItres. Nos IA sur place adaptent leurs systŠmes de surveillance 
+pour d‚tecter les agents dot‚s d'‚quipements cybern‚tiques de pointe.\n
+\n
+Ajout: L'analyse des composants de l'endoctrineur que vous avez ramen‚ de Phoenix a r‚v‚l‚ la m‚thode 
+employ‚e par l'glise de l'Ere Nouvelle pour convertir de nouveaux adepte. C'est un systŠme dot‚ d'un 
+circuit ‚metteur/r‚cepteur r‚gl‚ sur la bande passante d'UTOPIA. Autrement dit, l'ennemi dispose d'une 
+arme similaire … notre Persuatron. Grace … des ‚tudes compl‚mentaires, notre d‚partement R&D pourrait 
+nous doter d'un Persuatron am‚lior‚, capable d'atteindre les z‚lateurs.\n
+\n
+\c4Maritz\n
+\c5\n
+\hType de message: CABLE\n
+\n
+Priorit‚: 1\n
+\n
+D‚but de message:\n
+\c2\n
+Ordres\n
+\n
+Rome: Persuadez l'agent traŒtre.\n
+\c5\n
+Bravo, \l.\n
+\n
+Vos agents ont fait du bon travail. Cependant, le meneur des agents traŒtres a r‚ussi … s'embarquer pour
+ Rome par LMI et … attaquer notre avant-poste, probablement pour atteindre la salle des coffres. Nous 
+voulons que cet agent trŠs dou‚ travaille pour nous.\n
+\n
+Mise … jour: C'est une chance d'avoir d‚couvert Harbinger … temps. Nous avons au moins une IA intacte 
+qui continue d'ˆtre utile. Consid‚rez la situation: les "D‚voy‚s" sont pass‚s du stade de meute 
+indisciplin‚e … celui de combattants prˆts … tout avec, … leur tˆte, un certain Ko-Paull Vissick, 
+prodige … l'esprit universel dot‚ d'une intelligence exceptionnelle. On pense que Vissick est l'un de 
+nos meilleurs chercheurs mais l'IA de Londres a d‚tect‚ sa pr‚sence l… o— il ne devrait justement pas 
+ˆtre.\n
+\n
+Nous tentons d'effectuer le suivi le plus large possible des informations ‚chang‚es sur UTOPIA. L'glise
+ de l'Ere Nouvelle en pirate une grande partie et ce qui reste n'a plus beaucoup de sens aprŠs le 
+passage de Harbinger. L'IA de Londres a toutefois d‚tect‚ le piratage d'UTOPIA par une autre personne. 
+D‚sormais, tout semble possible! Impossible de dire avec pr‚cision d'o— provenaient les messages. Nul 
+doute pourtant que Vissick en soit l'auteur. Personne d'autre au sein du Syndicat n'aurait ‚t‚ capable 
+d'un telle prouesse. Dieu sait pourquoi il s'est acoquin‚ avec ces salet‚s de D‚voy‚s! Je me charge de 
+tirer de cette affaire au clair.\n
+\n
+\c4Maritz\n
+\c5\n
+\hType de message: CABLE\n
+\n
+Priorit‚: 1\n
+\n
+D‚but de message:\n
+\c2\n
+Ordres\n
+\n
+New-York: Persuadez Jennifer Taks.\n
+\c5\n
+SincŠres f‚licitations, Ex‚cutant \l.\n
+\n
+Votre pr‚sence est souhait‚e … New-York. Plusieurs entreprises nord-am‚ricaines se sont regroup‚es sous 
+la banniŠre de la Nouvelle Alliance Atlantique (NAA). La rapidit‚ de d‚veloppement de ce syndicat est 
+remarquable ‚tant donn‚ que les systŠmes de communication d'UTOPIA ont ‚t‚ d‚vast‚s.\n
+\n
+Il semble que l'une de nos ex-responsables des m‚dias, Jennifer Taks, se serve de son accŠs privil‚gi‚ 
+au R‚seau Mondial d'Information pour trouver des scientifiques au profit de la NAA. Elle y r‚ussit 
+tellement bien que c'est … nous qu'elle devra dire, d‚sormais, o‰ les trouver.\n
+\n
+Envoyez une ‚quipe … New-York pour infiltrer les bureaux de la NAA situ‚s dans le batiment du R‚seau 
+Mondial d'Information. Trouvez Jennifer Taks et persuadez-la de faire preuve de loyaut‚.\n
+\n
+Le centre est sous haute s‚curit‚. Il peut s'av‚rer impossible de p‚n‚trer de force. Je vais tenter de 
+rep‚rer, grace aux signaux d'identification UTOPIA si des membres du personnel sortent du batiment. Tous
+ les membres du personnel ont un passe greff‚ sous la peau, aussi vous devrez persuader l'un d'entre eux
+ de vous accompagner … travers les barrages de s‚curit‚. Veillez … ne pas attirer l'attention de la 
+police locale qui est en ‚tat d'alerte maximale.\n
+\n
+\c4Maritz\n
+\c5\n
+\hType de message: CABLE\n
+\n
+Priorit‚: 1\n
+\n
+D‚but de message:\n
+\c2\n
+Ordres\n
+\n
+Santiago, Buenos-Aires, Le Cap, Ad‚laide: D‚ployez des ‚quipes dans ces villes. Ramenez tous les 
+scientifiques rep‚r‚s.\n
+\c5\n
+SincŠres f‚licitations.\n
+\n
+L'IA de Londres a ‚tabli le profil psychologique des messages toujours plus subversifs qu'‚met Vissick. 
+Le message qu'il diffuse sur un canal libre incite ouvertement les D‚voy‚s … se r‚volter non seulement 
+contre le Syndicat mais aussi contre l'glise de l'Ere Nouvelle. Malheureusement, son discours ponctu‚ 
+de proph‚ties apocalyptiques fait douter de son ‚tat mental. Il pr‚tend, par exemple, que l'glise de 
+l'Ere Nouvelle vise … l'Armaggedon. Je me demande bien comment un groupe de marginaux religieux 
+pourraient d‚clencher la fin du monde.\n
+\n
+Les fonctions qu'occupait Vissick ‚taient si secrŠtes et UTOPIA a ‚t‚ si gravement affect‚e par le virus
+ Harbinger que la nature de sa mission reste encore trŠs vague. Nous savons cependant qu'il travaillait 
+en Islande sur un important projet, avec une ‚quipe d'‚minents chercheurs issus des firmes Gel Data et 
+Hexagon. Aucun membre de l'‚quipe de recherche n'a pu jusqu'ici ˆtre localis‚. Recherchez tous les 
+scientifiques qui manquent … l'appel sur les installations de Gel Data et Hexagon. Ces firmes sont 
+repr‚sent‚es … Santiago, Buenos-Aires, Le Cap et Ad‚laide.\n
+\n
+Bonne chance, \l.\n
+\n
+\c4Maritz\n
+\c5\n
+\hType de message: CABLE\n
+\n
+Priorit‚: 1\n
+\n
+D‚but de message:\n
+\c2\n
+Ordres\n
+\n
+Christchurch: Envoyez imm‚diatement sur place une ‚quipe d'agents. Assurez la s‚curit‚ la liaison 
+transpolaire aprŠs l'avoir localis‚e.\n
+\c5\n
+Il semble que juste avant l'attaque d'UTOPIA par le virus Harbinger, Vissick ‚tait engag‚ dans un 
+programme R&D ultra-secret … Reykjavik. Ce programme ‚tait destin‚ au d‚veloppement d'une machine 
+permettant d'accroŒtre les capacit‚s cognitives humaines. Apparemment, l'‚quipe a r‚ellement mis au 
+point un dispositif mais les scientifiques que vous avez persuad‚s ‚tant de simples assistants, nous 
+n'avons rien obtenu de plus.\n
+\n
+Les dix membres cl‚s de l'‚quipe ‚taient d‚sign‚s sous l'appellation "Conf‚rence de Cognition 
+Cybern‚tique" ou C3. Ko-Paull Vissick ‚tait leur chef. Ils avaient tous ‚t‚ recrut‚s parmi l'‚lite R&D 
+de l'EuroCorp.\n
+\n
+Pour l'instant, ils restent introuvables.\n
+\n
+Ces informations corroborent une nouvelle selon laquelle les liaisons LMI de Reykjavik auraient ‚t‚ 
+interrompues le mois dernier. Il apparaŒt que ces perturbations avaient pour seul but de garantir la 
+s‚curit‚ de l'‚quipe durant ses travaux. Pendant ce temps, le C3 mettait secrŠtement en service sa 
+propre liaison transpolaire LMI vers Christchurch. Apparemment, ce projet s'est fini r‚cemment.\n
+\n
+\c4Maritz\n
+\c5\n
+\hType de message: CABLE\n
+\n
+Priorit‚: 1\n
+\n
+D‚but de message:\n
+\c2\n
+Ordres\n
+\n
+Reykjavik: D‚couvrez ce qu'est devenu le projet C3. Activez la liaison LMI … destination de Nuuk.\n
+\n
+Nuuk: Passez la ville au peigne fin.\n
+\c5\n
+Vous avez parfaitement rempli vos derniers objectifs. F‚licitations, \l.\n
+\n
+Il faut que vos agents soient les premiers … atteindre la liaison transpolaire LMI. D‚pˆchez votre 
+‚quipe … Reykjavik afin d'inspecter le site de recherche du C3. Impossible de vous dire ce qui vous 
+attend sur place mais comme c'est un site sensible, vos agents devront se montrer extrˆmement vigilants.
+ D‚terminez l'‚tat d'avancement du programme C3.\n
+\n
+Instructions suppl‚mentaires: Depuis les d‚faillances de puces CHIP, Nuuk est rest‚ isol‚ du monde 
+ext‚rieur. Une intense activit‚ de l'glise a ‚t‚ observ‚e aux abords de la ville mais pas … 
+l'int‚rieur. Nuuk est reli‚ … Reykjavik par une liaison LMI et il se peut qu'elle soit encore ouverte. 
+Une fois votre mission achev‚e … Reykjavik, localisez la liaison LMI de Nuuk et activez-la si 
+n‚cessaire. Rendez-vous … Nuuk pour analyser la situation sur place.\n
+\n
+Restez vigilant!\n
+\n
+\c4Maritz\n
+\c5\n
+\hType de message: DIRECT\n
+\n
+Priorit‚: 1\n
+\n
+D‚but de message:\n
+\c2\n
+Ordres\n
+\n
+Londres: Assurez une s‚curit‚ maximale lors de la r‚union des hauts responsables. N'h‚sitez pas … faire 
+usage de vos armes.\n
+\c5\n
+Ecoutez, Ex‚cutant \l. Ici, l'Intelligence Artificielle de Londres. J'ai des renseignements et ordres 
+pour vous.\n
+\n
+J'en sais d‚sormais un peu plus sur l'glise de l'Ere Nouvelle. Le C3 a bien mis au point un dispositif 
+am‚liorant les performances intellectuelles de l'homme, plus puissant que toute invention issue de la 
+cybern‚tique conventionnelle.\n
+\n
+Malgr‚ l'opposition de Ko-Paull Vissick, certains membres du groupe ont voulu tester sur eux-mˆmes les 
+effets de cet amplificateur. Tyrone Chodak, fut le premier … en faire usage. Chodak tenait ‚galement le 
+journal de la mission. Ce journal fait mention d'un second document, le "Codex", que Chodak avait 
+commenc‚ … r‚diger pour expliquer les th‚ories scientifiques que son cerveau surpuissant ‚tait d‚sormais
+ capable de formuler. Il traite de math‚matiques complexes, de physique quantique, de g‚n‚tique et 
+expose des id‚es nouvelles dans des domaines aussi divers que la m‚canique des forces et la cognition 
+‚volutive. Il contient assez de notions scientifiques r‚volutionnaires pour occuper chaque IA du r‚seau 
+UTOPIA pendant des ann‚es. L'IA de Londres va faire tout son possible pour en ‚tudier seule le 
+contenu.\n
+\n
+D'aprŠs le journal de bord, il semble qu'il existait une rivalit‚ entre Chodak et Vissick, atteignant 
+son paroxysme … l'explosion qui ruina les installations du C3 … Reykjavik. Dans ses notes, Chodak 
+accusait Vissick (introuvable aprŠs l'explosion) de sabotage et l'EuroCorp de complicit‚. Il mena‡ait 
+d'appliquer la technologie d‚crite dans le "Codex" pour an‚antir le Syndicat. Les autres membres du C3 
+suivirent Chodak.\n
+\n
+L'explosion du site de Reykjavik et la disparition du C3 se sont produites moins de quarante-huit heures
+ avant que le virus Harbinger ne frappƒt le r‚seau UTOPIA.\n
+\n
+Des inscriptions d‚couvertes par vos agents sur les murs et les piliers de la Cath‚drale de Nuuk font 
+r‚f‚rence … un myst‚rieux groupe d‚nomm‚ "Les Neuf". Nous pouvons en d‚duire que les Neufs et le C3 ne 
+font qu'un et, par l…-mˆme, que l'glise de l'Ere Nouvelle sert d'‚cran … Chodak pour mettre … ex‚cution
+ ses menaces de d‚truire le Syndicat.\n
+\n
+Ceci prouve que nous avons … faire … l'ancienne ‚lite intellectuelle de l'EuroCorp, ‚quip‚e des 
+technologies les plus avanc‚es, ainsi qu'… l'impr‚visible Vissick, devenu le maŒtre … penser des 
+D‚voy‚s.\n
+\n
+Le professeur Kurt Drennan informera les hauts responsables de notre d‚partement de la strat‚gie 
+imm‚diate … adopter, ici … Londres. Une copie du "Codex" doit ˆtre remise … Drennan et son assistante 
+pour la conf‚rence de New Hyde Park. Le haut comit‚ reconstitu‚ y assistera. La police locale, plac‚e 
+directement sous nos ordres, veillera … ‚carter les ex‚cutants subalternes.\n
+\n
+\c4Intelligence Artificielle de Londres\n
+\c5\n
+\hType de message: DIRECT\n
+\n
+Priorit‚: 1\n
+\n
+D‚but de message:\n
+\c2\n
+Ordres\n
+\n
+Tokyo: Sauvez le Professeur Drennan des fanatiques.\n
+\n
+Bangkok: Escortez le Professeur Drennan vers le campus de l'EuroCorp. Ramenez-le sain et sauf.\n
+\c5\n
+Attention, Ex‚cutant. Le Professeur Drennan a ‚t‚ enlev‚. Quelqu'un a r‚ussi … ‚chapper … ma 
+surveillance pour tuer l'assistance de Drennan et prendre sa place durant toute la conf‚rence. 
+L'enlŠvement a eu lieu juste aprŠs la r‚union. Le raid des z‚lateurs avec ses lourdes pertes humaines 
+n'‚tait qu'une diversion pour couvrir la phase finale de l'enlŠvement de Drennan.\n
+\n
+Je localise toujours Drennan. Il est d‚tenu … Tokyo. Sa puce UTOPIA n'a pas ‚t‚ falsifi‚e.\n
+\n
+Lorsque vous l'aurez lib‚r‚, mettez le professeur … l'abri. Notre centre d'op‚rations de Bangkok est 
+s–r. Conduisez-le l…-bas.\n
+\n
+\c4Intelligence Artificielle de Londres\n
+\c5\n
+\hType de message: CABLE\n
+\n
+Priorit‚: 1\n
+\n
+D‚but de message:\n
+\c2\n
+Ordres\n
+\n
+Hawaii: Votre mission consiste … assurer la s‚curit‚ de notre partenaire. Il est primordial, pour qu'ils
+ gardent leur confiance en l'EuroCorp, qu'aucun mal ne soit fait aux responsables de l'IA de Hawaii.\n
+\c5\n
+F‚licitations, \l. Ravi d'ˆtre de nouveau en contact avec vous.\n
+\n
+Drennan est d‚sormais en s‚curit‚ et subit actuellement un r‚‚talonnage neuronal. Le peu de temps qu'il 
+a pass‚ auprŠs de l'glise de l'Ere Nouvelle lui a permis d'en apprendre un peu plus sur les Neuf et 
+leurs intentions … notre sujet. DŠs qu'il aura fini de baver, nous lui demanderons ce qu'il sait 
+exactement.\n
+\n
+Nous avons re‡u entre-temps un message provenant de l'IA de Hawaii. Cette derniŠre souhaite reconduire 
+le trait‚ d'alliance avec l'EuroCorp. Elle n'a jamais soutenu les ennemis de l'EuroCorp et n'a pas ‚t‚ 
+contamin‚e par le virus Harbinger. Elle est dispos‚e … placer tout son personnel sous le commandement 
+suprˆme de l'EuroCorp. Nos hommes et les siens se rencontreront … Hawaii pour ‚changer des cl‚s 
+protocolaires. La s‚curit‚ des n‚gociations sera assur‚e conjointement.\n
+\n
+\c4Maritz\n
+\c5\n
+\hType de message: DIRECT\n
+\n
+Priorit‚: 1\n
+\n
+D‚but de message:\n
+\c2\n
+Ordres\n
+\n
+Johannesburg: Amorcez imm‚diatement la connexion drone et prenez le contr“le de l'agent Wu. Trouvez 
+Mirabelle Lucy De Saxo pour la persuader.\n
+\c5\n
+Ex‚cutant, ici, l'IA de Londres … nouveau.\n
+\n
+Je connais d‚sormais le code d'identification UTOPIA de l'agent religieux qui a enlev‚ le professeur 
+Drennan. Il s'agit de Mirabelle Lucy De Saxo IK-771.6482.2002, de Johannesburg.\n
+\n
+Cette information vient d'un agent de l'EuroCorp … la retraite dont la puce de technologie antique lui a
+ quand mˆme permis de garder son ind‚pendance. Il s'appelle Wu et comme il peut nous ˆtre trŠs utile, 
+j'ai conclu un march‚ avec lui. Wu me permettra d'acc‚der … l'ensemble de ses fonctions c‚r‚brales 
+sup‚rieures pour une mission suppl‚mentaire. S'il r‚ussit, j'augmenterai ma m‚moire … bulles pour 
+int‚grer sa conscience dŠs que le r‚seau UTOPIA sera remis sur pied. Je veux que Wu tente de persuader 
+De Saxo. Je la soup‡onne de pouvoir d‚tecter les agents de l'EuroCorp.\n
+\n
+Wu s'est d‚j… ‚quip‚ du nouveau modŠle de Persuatron que l'glise utilise et il est prˆt pour la mission
+ qui l'attend. S'il r‚ussit, … lui la conscience presqu'‚ternelle.\n
+\n
+\c4Intelligence Artificielle de Londres\n
+\c5\n
+\hType de message: DIRECT\n
+\n
+Priorit‚: 1\n
+\n
+D‚but de message:\n
+\c2\n
+Ordres\n
+\n
+Le Caire: Eliminez Mirabelle Lucy De Saxo.\n
+\c5\n
+Ex‚cutant, vos ordres sont modifi‚s. Le Persuatron de Wu n'a pas pu ‚tablir un verrouillage positif sur 
+le code d'identification de sa cible. De Saxo ne peut ˆtre l'une des n“tres. Elle doit donc ˆtre 
+‚limin‚e.\n
+\n
+Wu a vu notre cible s'embarquer pour le Caire. Envoyez imm‚diatement une ‚quipe d'agents sur place. De 
+Saxo ne doit pas nous ‚chapper.\n
+\n
+\c4Intelligence Artificielle de Londres\n
+\c5\n
+\hType de message: DIRECT\n
+\n
+Priorit‚: 1\n
+\n
+D‚but de message:\n
+\c2\n
+Ordres\n
+\n
+S‚bastopol: St‚rilisez S‚bastopol, rien ne doit survivre. Nous repeuplerons la ville lorsque nos usines 
+de clones seront r‚tablies.\n
+\n
+Delhi: Eliminez Deel Gonda. Matez l'insurrection.\n
+\c5\n
+Attention, Ex‚cutant. Vous venez d'‚liminer Anika Maritz.\n
+\n
+C'‚tait un agent double. Je m'en suis dout‚ quand Maritz m'a inform‚ de son intention d'infiltrer 
+l'glise de l'Ere Nouvelle mais je n'ai suspect‚ sa trahison qu'au moment de l'enlŠvement de Drennan. A 
+son retour, Maritz m'a dit que son double jeu avait ‚t‚ n‚cessaire pour convaincre les Neuf de sa 
+loyaut‚. La cr‚dibilit‚ de son histoire reposait sur le fait que vous parveniez … r‚cup‚rer le 
+professeur sain et sauf et ce fut le cas. Cependant, mˆme ceci ne m'a pas pas convaincu.\n
+\n
+Lorsqu'elle a disparu une seconde fois sans avertissement, il a bien fallu admettre qu'elle ‚tait pass‚e
+ du c“t‚ de l'glise. Nous n'avions donc pas d'autre choix que de l'‚liminer.\n
+\n
+Vous devez continuer … r‚tablir la bonne marche d'UTOPIA. Je vous transmettrai directement vos nouveaux 
+ordres.\n
+\n
+Mise … jour: Des communications intercept‚es entre Ko-Paull Vissick et ses lieutenants indiquent que les
+ D‚voy‚s se pr‚parent … sortir du p‚rimŠtre gard‚ de la ville. Vissick compte retrouver ses complices 
+prŠs du lac Margui Caka situ‚ sur le plateau tib‚tain. Selon lui, ils pourront survivre l…-bas au 
+Cataclysme. En r‚alit‚, ils seront morts avant d'y parvenir. Toutefois d'importants soulŠvements ont ‚t‚
+ observ‚s … Delhi et S‚bastopol o— l'autorit‚ de l'EuroCorp n'est toujours pas r‚tablie. Vous devez 
+reprendre la situation en main.\n
+\n
+La meute des D‚voy‚s a pris le contr“le de la zone industrielle de S‚bastopol. Tout ce qui n'a pas ‚t‚ 
+d‚truit est d‚sormais entre leurs mains. Heureusement, ils semblent attendre quelque chose avant de 
+tenter une ‚vasion au-del… du p‚rimŠtre gard‚ de la ville, peut-ˆtre un signal de Vissick.\n
+\n
+Delhi connaŒt une situation similaire. Nous disposons d'agents sur place mais en nombre nettement 
+insuffisant. Ils se sont retranch‚s dans les anciens quartiers de la police. Le seul tank qui leur reste
+ maintient les D‚voy‚s … distance, pour le moment.\n
+\n
+Les D‚voy‚s ont eux-mˆmes pris une solide position d‚fensive dans le quartier du port fluvial qu'ils ont
+ investi probablement pour s'assurer une voie de sortie. Un ex-stratŠge de l'EuroCorp, Deel Gonda, a 
+ouvertement pris la tˆte des D‚voy‚s. Sans son expertise tactique, la r‚bellion ‚tait vou‚e … l'‚chec.\n
+\n
+\c4Intelligence Artificielle de Londres\n
+\c5\n
+\hType de message: DIRECT\n
+\n
+Priorit‚: 1\n
+\n
+D‚but de message:\n
+\c2\n
+Ordres\n
+\n
+Bahre‹n: Neutralisez les agents traŒtres. Arrˆtez les D‚voy‚s avant qu'ils n'atteignent l'IA.\n
+\c5\n
+Ex‚cutant \l.\n
+\n
+L'intelligence de Bahre‹n nous fait part de ses inqui‚tudes. Certains D‚voy‚s rescap‚s se sont ‚quip‚s 
+de blind‚s et ont encercl‚ la ville. Une attaque … grande ‚chelle semble d‚sormais imminente. Leur cible
+ est vraisemblablement l'IA de Bahre‹n qui constitue le noyau du systŠme de commande du r‚seau UTOPIA au
+ Moyen-Orient. S'il ‚tait d‚truit, il faudrait des ann‚es … l'EuroCorp pour r‚tablir son autorit‚ … 
+travers le monde.\n
+\n
+L'IA de Bahre‹n contr“le une ‚quipe d'anciens agents de l'EuroCorp et les a d‚ploy‚s dans  des positions
+ d‚fensives dans le centre de la ville. Nous devons reprendre la ville en main avant que des 
+installations vitales ne soient touch‚es.\n
+\n
+\c4Intelligence Artificielle de Londres\n
+\c5\n
+\hType de message: DIRECT\n
+\n
+Priorit‚: 1\n
+\n
+D‚but de message:\n
+\c2\n
+Ordres\n
+\n
+Colombo: Prot‚gez l'‚l‚vateur orbital. Des agents d'ex‚cution seront envoy‚s en renfort sur place.\n
+\c5\n
+Vissick a pu s'‚chapper mais la r‚bellion est mat‚e. Lui et les quelques un qui l'accompagnent ne 
+pourront pas survivre longtemps dans les environs toxiques de la ville. Lorsque nous en aurons fini avec
+ l'glise, nous pourrons organiser une recherche pour retrouver leurs corps.\n
+\n
+J'ai pu d‚chiffrer les ordres cod‚s qu'Anika-Mirabelle portait sur elle lorsque vous l'avez ‚limin‚e. 
+Elle avait rendez-vous au Sri Lanka avec les dignitaires de l'glise, c'est … dire les Neuf. Je pense 
+que l'glise pr‚voit de s'emparer de l'‚l‚vateur orbital Clarke … Colombo. Depuis ce point, ils pensent 
+pouvoir prendre le contr“le de la Lune.\n
+\n
+Le professeur Drennan pense que le lavage de cerveau pratiqu‚ par l'glise exploite un "canal" psychique
+ pas encore d‚cel‚ et que les Neuf ont besoin de ce canal pour maintenir leur contr“le sur les adeptes. 
+Il craint par ailleurs qu'ils ne mettent en pratique certaines des th‚ories expos‚es dans le "Codex", 
+c'est-…-dire accroŒtre la puissance du dispositif de recalibrage ionosph‚rique d‚velopp‚ par les savants
+ de la colonie scientifique Amundsen, situ‚e sur la Lune.\n
+\n
+Des rapports en provenance d'autres IA indiquent une diminution de l'activit‚ des z‚lateurs … l'‚chelle 
+mondiale, ce qui laisse penser que l'glise tente de rassembler la plus grosse force de frappe possible.
+ L'attaque de Colombo est imminente.\n
+\n
+Soyez averti: en cas d'incapacit‚ … r‚soudre la situation sur le terrain, vous devrez peut-ˆtre balayer 
+les installations … travers l'ascenseur orbital. Il est fortement d‚conseill‚ d'emporter des explosifs -
+ les utiliser ou les transporter en orbite risque de fermer d‚finitivement cette voie. On s'attend 
+‚galement … ce que The Nine ait pris de nouveaux prototypes d'armes et pos‚ des piŠges. Cela pourrait 
+s'av‚rer difficile, et il n'y a pas de retour en arriŠre possible.\n
+\n
+\c4Intelligence Artificielle de Londres\n
+\c5\n
+\hType de message: DIRECT\n
+\n
+Priorit‚: 3\n
+\n
+D‚but de message:\n
+\c2\n
+Ordres\n
+\n
+Tokyo: Des citoyens arm‚s de cat‚gorie D: D‚voy‚s ont viol‚ les codes de conduite. R‚primez la 
+r‚volte.\n
+\n
+\hLe constructeur d'UTOPIA, le professeur Klein a ‚t‚ rep‚r‚ par Netscan. Re-persuadez le professeur 
+pour qu'il revienne travailler pour nous.\n
+\c5\n
+Compl‚ment: Des z‚lateurs de l'Eglise de l'Ere Nouvelle ont ‚t‚ d‚tect‚s dans cette zone. Comme il n'y a
+ pas de persuatron dans notre inventaire, il faudra en prendre … ces z‚lateurs.\n
+\n
+\hLe virus Harbinger que les z‚lateurs ont introduit dans l'UTOPIA de Tokyo a temporairement endommag‚ 
+Netscan. Pas d'information suppl‚mentaire disponible.\n
+\n
+\c4Noyau de l'EuroCorp 0-1-0/171261/26D: Intelligence Artificielle de Londres, UTOPIA\n
+\n
+\c4U\c3nit‚ \c4T\c3raitement \c4O\c3rganique \c4P\c3our \c4I\c3nformations \c4A\c3m‚lior‚es\n
+\c5\n
+\hType de message: DIRECT\n
+\n
+Priorit‚: 3\n
+\n
+D‚but de message:\n
+\c2\n
+Ordres\n
+\n
+Tokyo: Des citoyens arm‚s de cat‚gorie D: D‚voy‚s ont viol‚ les codes de conduite. R‚primez la 
+r‚volte.\n
+\n
+\hLe constructeur d'UTOPIA, le professeur Klein a ‚t‚ rep‚r‚ par Netscan. Re-persuadez le professeur 
+pour qu'il revienne travailler pour nous.\n
+\c5\n
+Compl‚ment: Des z‚lateurs de l'Eglise de l'Ere Nouvelle ont ‚t‚ d‚tect‚s dans cette zone. Comme il n'y a
+ pas de persuatron dans notre inventaire, il faudra en prendre … ces z‚lateurs.\n
+\n
+\hLe virus Harbinger que les z‚lateurs ont introduit dans l'UTOPIA de Tokyo a temporairement endommag‚ 
+Netscan. Pas d'information suppl‚mentaire disponible.\n
+\n
+\c4Noyau de l'EuroCorp 0-1-0/171261/26D: Intelligence Artificielle de Londres, UTOPIA\n
+\n
+\c4U\c3nit‚ \c4T\c3raitement \c4O\c3rganique \c4P\c3our \c4I\c3nformations \c4A\c3m‚lior‚es\n
+\c5\n
+# Names.txt
+# Contains all city drop names in the mission number order.
+
+1.Ex‚cutants en alerte
+2.
+3.Persuasion amicale
+4.O‰ est la Sagesse?
+5.Le sac de Rome
+6.
+7.Anges noirs de l'Architecture
+8.Double jeu
+9.L'agent sp‚cial
+10.
+11.
+12.
+13.
+14.
+15.
+16.
+17.
+18.
+19.
+20.Exode
+21.Phoenix brule
+22.Fusion
+23.Ramenez-le vivant
+24.Or‚e des T‚nŠbres
+25.Rituel
+26.Savoir interdit
+27.
+28.La ruche
+29.Ames perdues
+30.
+31.
+32.
+33.
+34.A Tout Casser
+35.Taks incluse
+36.Du Fond de l'Esprit
+37.Le Gourou
+38.EuroCoutumes
+39.
+40.
+41.
+42.
+43.
+44.
+45.
+46.
+47.
+48.
+49.Les D‚viants de D‚troit
+50.Secrets
+51.
+52.
+53.
+54.
+55.Histoires de Corps
+56.Intrus
+57.Chasseurs de tEtes
+58.Semi-automatique
+59.ChaInon manquant
+60.
+61.
+62.
+63.
+64.
+65.
+66.
+67.
+68.
+69.
+70.
+71.
+72.
+73.
+74.R‚-alignement
+75.
+76.
+77.
+78.
+79.
+80.
+81.
+82.
+83.Plongeon
+84.Confrontation
+85.
+86.
+87.
+88.High Sierra
+89.
+90.
+91.
+92.La question arabe
+93.
+94.
+95.
+96.
+97.
+98.
+99.
+100.
+101.Eglise des Esprits Corrompus
+102.
+103.
+104.Tokyo Fuseki
+# Netscan.txt
+# Master file containing all OBJ****.txt files.
+# Files indexed Sn and Cn in Miss***.txt order.
+# Scan entries listed by Points Of Significance (POS).
+[3016]
+Terminal: Station de l'IA EuroCorp de Londres
+Citoyens de cat‚gorie D‚voy‚s rep‚r‚s dans le district des entreprises
+Personnel de la Station: Prˆt … se d‚fendre contre toute attaque ou infiltration
+Ecoutes: Ordre aux patrouilles de police d'enr“ler toute personne ayant une arme
+[3501]
+Cam‚ra de surveillance
+Terminal: Liaison LMI de D‚troit
+Porte d'accŠs … la Station attaqu‚e
+Ecoutes: la police recense une augmentation des violations du code de bonne conduite par des D‚voy‚s
+[0101]
+Terminal: Liaison LMI de Hongkong
+Piles … fusion de Yamaguchi
+Techniciens
+Zone d'‚vacuation: Liaison LMI
+Des z‚lateurs de l'glise de l'Ere Nouvelle ont ‚t‚ vus en ville
+[0115]
+Terminal: Liaison LMI de Hongkong
+Agent-cible
+V‚hicule adapt‚ pour acc‚der … la base
+[3216]
+Terminal: Liaison LMI de Beijing
+Ex‚cutant Yamaguchi Zaibatsu
+Camp d'entraInement des agents Yamaguchi
+Zone d'‚vacuation: Liaison LMI
+Ecoutes: La police fait ‚tat de troubles caus‚s par les D‚voy‚s
+[1001]
+Terminal: Liaison LMI de Phoenix
+Lieu de culte de l'glise de l'Ere Nouvelle
+Emplacement pr‚sum‚ du mat‚riel d'endoctrinement de l'glise
+Zone d'‚vacuation: Liaison LMI
+Ecoutes: Les D‚voy‚s sont totalement incontr“lables
+Analyse de l'IA de Londres: vitez l'enr“lement de D‚voy‚s
+[0401]
+Terminal: Liaison LMI de New-York
+QG de la Nouvelle Alliance Atlantique
+R‚sidence du personnel civil
+Zone d'‚vacuation: Liaison LMI
+Ecoutes: La police a r‚cemment renforc‚ ses ‚quipes anti-cambriolage
+[0701]
+Terminal: Liaison LMI de Santiago
+Scientifique-cible
+Zone d'‚vacuation: Liaison LMI
+Nord de la ville pass‚ sous contr“le des z‚lateurs
+[2601]
+Terminal: Liaison LMI de Buenos-Aires
+SiŠge de la firme Hexagon
+Scientifique-cible
+Zone d'‚vacuation: Liaison LMI
+Ecoutes: Hexagon met des fonds en r‚serve
+Nouvelle activit‚ de l'glise d‚tect‚e
+[4401]
+Terminal: Le Cap via APC
+Porte d'accŠs aux installations de recherche d'Hexagon
+Scientifique-cible
+Zone d'‚vacuation: Liaison LMI
+Ecoutes: Les z‚lateurs ont pris le contr“le de ces installations
+[0601]
+Terminal: Liaison LMI d'Ad‚laide
+Installations d'essais de Gel Data
+Scientifique-cible
+Zone d'‚vacuation: Liaison LMI
+[3215]
+Terminal: Liaison LMI de Beijing
+Agent-cible
+Ecoutes: Lles systŠmes de s‚curit‚ de la banque ont ‚t‚ r‚cemment am‚lior‚s
+[2131]
+Terminal & Zone d'‚vacuation: Liaison LMI de GenŠve
+Laboratoires Bluesky
+Ecoutes: Bluesky exige une escorte de police pour le responsable financier de Grade D
+[5001]
+Terminal & Zone d'‚vacuation: Liaison LMI de Vancouver
+Laboratoires Bluesky
+Ecoutes: Activit‚s de D‚voy‚s rapport‚es par la police
+Alerte satellite: Des troupes de z‚lateurs s'approchent de la ville par le sud-ouest
+[0201]
+Terminal: Liaison LMI de Matochkin Shar
+Installations R&D des laboratoires Bluesky
+Immatriculations d'a‚ronefs d‚tect‚es
+Ecoutes: Virement bancaire effectu‚ pour le compte de l'glise de l'Ere Nouvelle
+[0901]
+Terminal: Liaison LMI de Singapour
+Banque centrale de Singapour
+Salle des coffres principale (souterraine)
+Convoyage de fonds Tang
+V‚hicule-cible
+Point de rendez-vous
+SiŠge de Tang
+[4001]
+Terminal: Usine d'‚puration de Honolulu
+Point de rendez-vous
+[1015]
+Terminal: Liaison LMI de Phoenix
+Agent-cible
+[2846]
+Terminal: Liaison LMI de Rome
+Complexes de bunkers r‚sidentciels fortifi‚s par des citoyens de cat‚gorie D‚voy‚s
+Garnison de s‚curit‚
+Chambre forte de la garnison (souterraine): Valeur estim‚e … 0,4 MCr
+Alerte satellite: Le satellite de d‚fense strat‚gique de Rome a ‚t‚ abandonn‚ aux mains d'un ennemi inconnu
+[2815]
+Terminal: Liaison LMI de Rome
+Agent-cible
+Ecoutes: La police est … la recherche d'un groupe de D‚voy‚s qui s'est infiltr‚ en ville pour financer un autre soulŠvement
+Ecoutes: Signal d'identification UTOPIA instable d‚tect‚ - il s'agit probablement d'une planque de D‚voy‚s
+[3601]
+Terminal: Liaison LMI A de Christchurch
+Zone-cible: Liaison LMI B de Christchurch
+Agents de s‚curit‚ Tang d‚tect‚s
+Ordres des agents Tang intercept‚s: la cible des agents est la chambre forte de la banque
+[3046]
+Terminal: (a) Podium de pr‚sentation (b) Position du Professeur Drennan
+Coffre contenant un film num‚ris‚ du site de Reykjavik
+Ex‚cutant de l'EuroCorp
+Pr‚sence massive de D‚voy‚s rep‚r‚ par code d'identification au nord QG
+[4701]
+Terminal : Liaison LMI A de Tokyo
+Bastion de l'glise
+Professeur Drennan
+Zone d'‚vacuation: Liaison LMI B de Tokyo
+Tourelles laser sous contr“le de la police
+Contenu estim‚ des coffres : 2,5 MCr
+[7011]
+Terminal : Liaison LMI A de Tokyo
+Cat‚gorie D - D‚voy‚s citoyens localis‚s … ces endroits
+"Temple" des z‚lateurs
+Emplacement du professeur Klein
+[4711]
+Terminal : Liaison LMI A de Tokyo
+Cat‚gorie D - D‚voy‚s citoyens localis‚s … ces endroits
+"Temple" des z‚lateurs
+Emplacement du professeur Klein
+[0301]
+Terminal: Liaison LMI de Bangkok
+Centre des op‚rations EuroCorp de Bangkok
+[2216]
+Position de l'agent Wu
+Position de De Saxo
+Installations aux mains des z‚lateurs
+[4502]
+Terminal: Liaison LMI A du Caire
+Zone d'‚vacuation: Liaison LMI B
+Ecoutes: pr‚sence importante de fanatiques en ville ; - aucune r‚action de la police
+Ecoutes : Les responsables des Industries MilitAcier doivent rencontrer des membres de l'glise pour une- raison inconnue
+[2702]
+Terminal: Liaison LMI de Delhi
+Usine chimique
+Site de distribution des Industries MilitAcier
+Alerte satellite: Agents de l'EuroCorp et MBT
+[0501]
+Terminal: Porte Sud
+Installations R&D
+Ecoutes: Trace fant“me possible de- Ko-Paull Vissick
+[4103]
+Terminal: Liaison LMI de Bahrein
+Bunker de l'IA
+Eviction des agents traItres
+Direction des forces d‚voy‚es … l'approche
+Un lieu saint mineur de l'glise de l'Ere Nouvelle reste occup‚
+[4615]
+Terminaux
+El‚vateur orbital
+SystŠme de missiles anti-satellites de l'El‚vateur Orbital
+[6503]
+[7931]
+[0801]
+[1101]
+[6502]
+[7902]
+ELIMINEZ LES DEVOYES
+RETOURNEZ AU QG
+PERSUADEZ LES TECHNICIENS DE YAMAGUCHI
+EVACUEZ
+MORT DU TECHNICIEN
+PERSUADEZ LES CADRES DE YAMAGUCHI
+MORT DU CADRE
+NEUTRALISEZ LES AGENTS YAMAGUCHI
+MORT DE L'AGENT
+PERSUADEZ LES SCIENTIFIQUES DE BLUESKY
+PERSUADEZ LE SCIENTIFIQUE DE BLUESKY
+NOUVEL ORDRE : ELIMINEZ LA MENACE DES DEVOYES
+ESCORTEZ LES SCIENTIFIQUES VERS LA LIAISON LMI
+EMPAREZ-VOUS DU FOURGON BLINDE
+LE FOURGON BLINDE A ETE DETRUIT
+LE FOURGON BLINDE A ATTEINT LE QG DE TANG
+AMENEZ LE FOURGON A LA ZONE D'EVACUATION
+EMPAREZ-VOUS  DU MATERIEL A L'INTERIEUR DU TEMPLE
+AMENEZ LE MATERIEL A LA ZONE D'EVACUATION
+PRENEZ LA FORTERESSE DES DEVOYES
+ELIMINEZ LES EMEUTIERS
+STERILISEZ LE SECTEUR
+ELIMINEZ LES GARDES
+ELIMINEZ L'AGENT
+PERSUADEZ L'AGENT
+L'AGENT CIBLE EST MORT
+L'AGENT CIBLE S'EST ECHAPPE
+PERSUADEZ L'EMPLOYE NAA
+PERSUADEZ JENNIFER TAKS
+ESCORTEZ TAKS VERS LA LIAISON LMI
+JENNIFER TAKS EST MORTE
+ELIMINEZ LES ZELATEURS
+PERSUADEZ LE SCIENTIFIQUE DE GEL DATA
+PERSUADEZ LES SCIENTIFIQUES DE GEL DATA
+PERSUADEZ LE SCIENTIFIQUE DE HEXAGON
+PERSUADEZ LES SCIENTIFIQUES DE HEXAGON
+ESCORTEZ LE SCIENTIFIQUE VERS LA LIAISON LMI
+ESCORTEZ LES SCIENTIFIQUES VERS LA LIAISON LMI
+NOUVEL ORDRE: ELIMINEZ LA MENACE DES ZELATEURS
+VEHICULE DETRUIT; AGENTS ISOLES
+SCIENTIFIQUE PERDU
+PERSUADE LES SCIENTIFIQUES C3
+SCIENTIFIQUES C3 ELIMINES
+LABORATOIRE DETRUIT
+INSTALLATIONS DETRUITES
+STERILISEZ LA VILLE
+PROTEGEZ DRENNAN
+PROTEGEZ L'ASSISTANTE DU PROFESSEUR
+PROTEGEZ LES EXECUTANTS
+LE PROFESSEUR DRENNAN EST MORT
+L'ASSISTANTE DU PROFESSEUR DRENNAN EST MORTE
+LES EXECUTANTS D'EUROCORP ONT ETE ANEANTIS
+PORTEZ SECOURS AU PROFESSEUR DRENNAN
+ESCORTEZ LE PROFESSEUR DRENNAN VERS LES INSTALLATIONS D'EUROCORP
+NOUVEL ORDRE: EVACUEZ TOUT LE PERSONNEL
+L'EVACUATION A ECHOUE
+PERSUADEZ MIRABELLE LUCY DE SAXO
+DE SAXO A PRIS LA FUITE: PREPAREZ-VOUS A RECEVOIR DE NOUVEAUX ORDRES
+ELIMINEZ MIRABELLE LUCY DE SAXO
+MATEZ LA REVOLTE
+ELIMINEZ LES DEVOYES REBELLES
+PROTEGEZ L'IA DE BAHREIN
+L'IA DE BAHREIN A ETE DETRUITE
+ASSUREZ LA SECURITE DE L'ELEVATEUR ORBITAL
+AGENTS EN NOMBRE INSUFFISANT POUR ACCOMPLIR LA MISSION
+L'ELEVATEUR ORBITAL A ETE DETRUIT
+LA STATION SPATIALE A ETE DETRUITE
+EMPAREZ-VOUS DE L'ORDINATEUR DE BORD DE LA NAVETTE
+MECANISME D'AUTODESTRUCTION DE LA STATION ARME: DESACTIVEZ-LE
+EMPAREZ-VOUS DU MODULE DE SURVIE DE LA NAVETTE
+MONTEZ A BORD DU VAISSEAU LUNAIRE
+ELIMINEZ LES NEUF
+LES NEUF ONT ACTIVE LE RIDEAU IONIQUE. VOUS AVEZ PERDU.
+ELIMINEZ LES DEVOYES PAIENS
+NOTRE JARDIN DE MEDITATION A ETE DETRUIT
+CONVERTIS L'AGENT EUROCORP
+ESCORTE L'AGENT VERS LA LIAISON LMI
+TA CIBLE A ETE ELIMINEE
+TA CIBLE S'EST ECHAPPEE
+RECOLTE DES FONDS
+TA PROIE T'A ECHAPPE
+EMMENE LE DR SCHWEIZER VOIR PERE NOIR
+LE DR SCHWEIZER EST MORT
+PERE NOIR EST MORT
+PROTEGE TES FRERES ET LE TEMPLE
+TOUS TES FRERES SONT MORTS
+LE TEMPLE A ETE DETRUIT
+ECRASE LES NON-CROYANTS
+PUNIS LES EMEUTIERS
+ANEANTIS LES FORCES DU CHAOS
+DETRUIS CETTE VERMINE DE DEVOYES
+ECRASE LE PERSONNEL D'EUROCORP
+ELIMINE LES AGENTS D'EUROCORP
+VIENS EN AIDE AUX ACOLYTES
+ASSASSINE LE SABOTEUR
+ECRASE LES PROFANATEURS D'EUROCORP
+PROTEGE L'ORDRE DES ACOLYTES
+L'ORDRE DES ACOLYTES A ETE ANEANTI
+AMENE LE FOURGON BLINDE AU POINT DE RAMASSAGE
+LE FOURGON BLINDE A ETE DETRUIT
+ASSASSINEZ L'ASSISTANTE DU PROFESSEUR
+PRENEZ LA PLACE DE L'ASSISTANTE AUPRES DU PROFESSEUR
+COLLECTEZ DES DONNEES VIDEO POUR LA CONFERENCE
+MONTE SUR LE PODIUM
+ASSISTE A LA CONFERENCE
+ESCORTE LE PROFESSEUR DRENNAN
+LE PROFESSEUR A RENCONTRE SON ASSISTANTE
+LE PROFESSEUR EST MORT
+MIRABELLE LUCY DE SAXO EST MORTE
+DETRUIS LE DEPOT D'ARMES D'EUROCORP
+DEROBE LES PLANS DES ARMES D'EUROCORP
+TELECHARGE LES PLANS DES ARMES
+REVIENS
+ACOLYTES ISOLES : IMPOSSIBLE D'ACCOMPLIR LA MISSION
+ASSASSINE LE PIRATE
+ELIMINE LES FORCES CONTROLANT LE PORT FLUVIAL
+RETOURNE A LA LIAISON LMI
+ENLEVE LE PRISONNIER D'EUROCORP
+LA CIBLE A ETE ELIMINEE
+DETRUIS LES INSTALLATIONS R&D
+ELIMINE LES AGENTS D'EUROCORP
+DE SAXO DOIT MOURIR
+QUITTE LES LIEUX
+SOUMETS LES DEVOYES
+ABATS LE MENEUR DE LA REVOLTE
+PORTE SECOURS A IX ET MENE-LE AU POINT DE RENDEZ-VOUS
+PROTEGE IX
+TU AS PERMIS LA MORT D'IX
+RIEN NE PEUT PLUS ARRETER LES NEUF. TU AS PERDU.
+NE FAITES RIEN: OBEISSEZ AUX ORDRES DES NEUF
+LA VILLE N'EST PLUS SOUS CONTROLE: LES ZELATEURS DE L'EGLISE ONT CONVERTI TOUS LES CITOYENS
+ELIMINE L'INTRUS
+ELIMINE LES INTRUS
+PERSUADE L'AGENT INFILTRE
+REGAGNE LA LIAISON LMI
+CIBLE ELIMINEE
+ACTIVE LA LIAISON LMI
+LIAISON LMI DETRUITE
+ELIMINE LES AGENTS
+PENETRE DANS LE BUNKER ET REPANDS LE VIRUS
+PARS
+BATS EN RETRAITE
+CONVERTIS ORMANDOZ
+CONVERTIS RAMIREZ
+RAMENE-LES-NOUS
+TU AS PERMIS LA MORT D'ORMANDOZ
+TU AS PERMIS LA MORT DE RAMIREZ
+EMPARE-TOI DES TRAVAUX DU DR SCHWEIZER
+REVIENS VERS NOUS
+LES AGENTS D'EUROCORP DOIVENT SE RALLIER A NOTRE CAUSE OU MOURIR
+NEUTRALISE LES AGENTS D'EUROCORP
+ASSASSINE KOTO SEK
+NEUTRALISE TOUS LES AGENTS D'EUROCORP
+PROTEGE MIRABELLE LUCY DE SAXO
+PRENDS LE CONTROLE DE LA LIAISON LMI
+NOTRE FILLE BENIE EST MORTE
+TU MOURRAS POUR CETTE HERESIE !
+EUROCORP DOIT CHOISIR ENTRE LA FOI ET LA MORT
+CHERCHE LE SANCTUAIRE
+ENTRE
+PERSUADEZ LE SCIENTIFIQUE DE BLUESKY
+TA CIBLE S'EST ECHAPPEE
+CIBLE PERSUADEE
+NEUTRALISE L'AGENT
+TROUVEZ ET DTRUISEZ LES CITOYENS DE CATGORIE D : DVOYS
+NOUVEL ORDRE : ELIMINEZ LES RELIGIEUX
+PROFESSEUR KLEIN REPR : PERSUADEZ LE PROFESSEUR
+PROTGEZ LE PROFESSOR KLEIN : EVACUEZ
+LE PROFESSEUR KLEIN EST MORT
+DTRUISEZ LA STATION
+ABATTEZ NOTRE ENNEMI
+[header_win]
+[message_win]
+Vous avez vaincu les Neuf. Vous avez r‚ussi … d‚manteler l'glise de l'Ere Nouvelle et vous avez empˆch‚ le Cataclysme. UTOPIA est … nouveau en service. F‚licitations pour votre promotion, Chef Ex‚cutant.
+[weapons]
+UZI
+N‚ du chaos engendr‚ par les combats de rue du milieu du 20Šme siŠcle, cette mitraillette 9 mm … grenaille ‚nerg‚tique constitue encore l'‚quipement de base des op‚rations d'EuroCorp. C'est une arme d'appui bon march‚ utilis‚e par les agents confront‚s … des cas de d‚viances psychotiques.
+MINIGUN
+L'utilisation de mitraillettes … inertie par le Syndicate n'a cess‚ de se d‚velopper depuis le Nouveau Calendrier. Cette version 20 mm avec stabilisation de couple et capsules de plasma possŠde un canon en alliage de mousse d'acier permettant une r‚duction du poids et des couts de production.
+ELLASER
+C'est un exemple typique de la pens‚e scientifique r‚volutionnaire de l'glise. Il s'agit d'une massue ‚nerg‚tique. Nous n'avons jamais mis ces dispositifs en pratique car l'‚nergie n‚cessaire … leur fonctionnement est prohibitive. Ce dispositif utilise un systŠme sophistiqu‚ de leviers subatomiques afin d'‚conomiser les r‚serves personnelles d'‚nergie mais on peut la pousser en surcharge. Une technologie trŠs impressionnante.
+LASER
+Ce laser utilise le gaz Trisodium 89 (d‚velopp‚ autour de -20 NC). Cette arme peut ˆtre pouss‚e en surcharge en relachant la gachette avec un l‚ger retard. Dans les situations particuliŠrement critiques, le recharge en ‚nergie peut s'effectuer jusqu'… dix fois par minute.
+BEAM
+Cette a ‚t‚ d‚velopp‚ grace aux techniques d'annihilation ‚lectronique. Elle utilise une concentrateur monopolaire pour projeter des faisceaux transformant les mol‚cules atmosph‚riques en plasma. La matiŠre solide se vaporise au contact du plasma en lib‚rant de l'‚nergie. Ce champ peut causer des dommages trŠs importants sur une port‚e consid‚rable. Poussez le concentrateur monopolaire pour un r‚sultat optimal sur des mat‚riaux denses ou tremp‚s.
+RAP
+Con‡u pour faire face … la prolif‚ration des armes cybern‚tiques … l'‚poque du Nouveau Calendrier, ce lance-roquettes tire des grenades … fragmentation munies de tˆtes chercheuses. Le guidage des roquettes s'effectue grace … un dispositif de recherche de cible ‚quip‚ d'un stabilisateur gyroscopique.
+NUCLGREN
+Le Technium utilis‚ pour la construction de cette arme thermonucl‚aire amortit l'effet de souffle, ce qui permet de contenir la r‚action en chaIne … l'int‚rieur d'une zone restreinte. L'emploi d'un isotope permet de faire retomber les radiations … un niveau tol‚rable quelques temps aprŠs l'explosion. Ces am‚liorations ont permis d'int‚grer pour la premiŠre fois un d‚tonateur … l'int‚rieur d'une mallette … main. Etant donn‚ la radioactivit‚ d‚gag‚e par l'explosion, l'utilisation de cette arme exige un minimum de pr‚cautions.
+PERSUADER
+Il s'agit d'un dispositif classique permettant d'acc‚der aux fonctions c‚r‚brales sup‚rieures des citoyens ‚quip‚s de puces CHIP compatibles avec le r‚seau UTOPIA. Mˆme si la puissance n'est pas le principal atout de cette arme, le Persuatron a permis … l'EuroCorp d'asseoir sa domination … travers le monde et le r“le qu'il a jou‚ dans l'Histoire ne peut ˆtre sous-estim‚. Les sujets persuad‚s ob‚issent … l'agent sans broncher, jusqu'… accepter de prendre les armes et s'engager dans le combat sans aucune appr‚hension.
+FLAMER
+RETRO-RESEARCH recommande l'emploi de cette arme … main de faible port‚e qui projette une gel‚e incandescente … base d'essence. Au contact de matiŠres organiques, ce napalm g‚lifi‚ adhŠre … la cible pour l'enflammer violemment. ParticuliŠrement adapt‚ en cas de d‚bordements de foules.
+H2HTASER
+Ce dispositif de proximit‚ ‚met des fr‚quences alt‚rant par r‚sonance la programmation des puces CHIP des individus pris dans son champ d'action. Cette arme est particuliŠrement efficace contre les l'effets du Persuatron en attaquant son signal … la base. Tout individu modifi‚ … l'aide du Persuatron retrouve son ‚tat initial sous l'effet du D‚programmeur.
+CRAZYGAS
+Les recherches men‚es sur les propri‚t‚s narcotiques du fongus provenant de la planŠte Cr‚ation ont abouti … la substance active contenue dans ce dangereux gaz hallucinogŠne. Un m‚lange de spores cryptogamiques et d'agents oxydants est contenu dans une bombe … main qui permet de vaporiser un nuage dont les effets sont violemment psychogŠnes. Cette arme est trŠs utile pour faire diversion lorsque les adversaires sont en trop grand nombre pour pouvoir employer d'autres m‚thodes de neutralisation. Toutefois, les r‚sultats obtenus restent al‚atoires.
+KOGAS
+Les masques … gaz se r‚vŠlent inefficaces contre cette grenade … main car elle contient un agent innervant. Toutes les assaillants perdent temporairement connaissance sous l'effet du nuage ‚mis lors de l'explosion..
+ELEMINE
+Mine … impulsions ‚lectromagn‚tiques d‚clench‚e par proximit‚. Les ‚quipements pris dans le champ sont temporairement voire parfois irr‚m‚diablement d‚truits et les systŠmes ‚lectriques des tissus organiques entiŠrement d‚vast‚s. Les corps conducteurs, comme les v‚hicules, le mobilier urbain ou les cyborgs, absorbent la plus grande partie de la d‚charge. Cette arme peut ‚ventuellement affecter l'‚tat de persuasion des individus pris dans son champ d'action.
+EXPLMINE
+B‚n‚ficiant d'une port‚e impressionnante, bien que rudimentaire, il est capable de pulv‚riser un v‚hicule ou d'endommager s‚rieusement la structure d'un immeuble. Trouvez-lui une position strat‚gique et maintenez vos agents … une distance raisonnable. L'explosion est d‚clench‚e par minuteur.
+LONGRANGE
+Le barillet monopolaire utilis‚ sur ce nouveau fusil permet de tirer des balles de gros calibre en uranium avec des vitesses de tir de l'ordre de Mach 5.2. Ce type de barillet n'autorise qu'un coup … la fois mais la pr‚cision et la port‚e obtenues par le systŠme de d‚tente restent in‚gal‚es. Ce fusil est l'arme de pr‚dilection des tireurs embusqu‚s.
+AIRSTRIKE
+Chaque satellite du r‚seau des plates-formes orbitales d'UTOPIA est ‚quip‚ de ce dispositif. Il s'agit d'un stock de barres en alliage d'acier au tungstŠne mont‚es sur un support dirigeable. Une fois lanc‚es, ces barres se transforment dans l'atmosphŠre en une pluie particuliŠrement destructrice. Nous avons pu rem‚dier au blocage de nos systŠmes provoqu‚ par le virus Harbinger. Par la transmission de protocoles de r‚initialisation, ce systŠme est de nouveau … la disposition de nos agents munis d'un activateur … main. Cependant, ‚tant donn‚ le cout trŠs ‚lev‚ d'une telle op‚ration, cette arme doit ˆtre utilis‚e avec mod‚ration.
+QDEVASTATOR
+Le double prisme maintenu dans une chambre de Noxon sert … catalyser une r‚action en chaIne permettant de diriger la puissance sur un parcours d‚fini par polarisation gravitationnelle. La r‚action en chaIne est d‚clench‚e par une simple pression sur la gachette, puis elle est contenue dans la chambre de Noxon o‰ elle se d‚veloppe jusqu'au relachement de la gachette. La matiŠre cibl‚e est pulv‚ris‚e, mol‚cule par mol‚cule. Cette arme peut entraIner des dommages aux alentours de la zone cibl‚e du fait des rayonnements lat‚raux.
+RAZORWIRE
+Il s'agit d'un fil barbel‚ en alliage de titane et d'acier, trŠs long, trŠs fin et trŠs coupant. Il est utilis‚ pour maintenir les civils non-autoris‚s … l'‚cart des zones interdites et constitue une d‚fense efficace contre les intrus, y compris ceux ‚quip‚s des derniŠres innovations cybern‚tiques. Son caractŠre l‚tal est renforc‚ par le fait qu'il reste invisible … l'oeil humain non-appareill‚.
+PERSUADER2
+Les recherches de Drennan sur la technologie de l'glise ont permis le d‚veloppement du Persuatron II. Ce dispositif est capable de manipuler les esprits les plus r‚fractaires, y compris les z‚lateurs les plus forcen‚s. Sous son influence, les pratiquants vous ob‚issent au doigt et … l'oeil comme s'ils suivaient les enseignements tordus de l'glise.
+STASISFLD
+Ce g‚n‚rateur de champ portable modifie la vitesse … laquelle le temps passe. Les mouvements de tout individu ou objet pris dans son champ d'action semblent fig‚s et le temps de r‚action de la cible se trouve consid‚rablement r‚duit, ce qui la rend vuln‚rable … d'autres formes d'attaque. L'‚nergie n‚cessaire pour activer ce champ est consid‚rable et vous devez utiliser cette arme au moment le plus opportun.
+SOULGUN
+Au cours de leurs recherches ‚sot‚riques, les Neuf ont pu d‚couvrir le moyen de lib‚rer les forces ‚lectromagn‚tiques retenues dans les tissus organiques mourants. La compr‚hension de ces m‚canismes nous permet d'en avoir la pleine maItrise. Le bioextracteur extrait l'‚nergie des matiŠres organiques au niveau cellulaire pour la transf‚rer vers un autre organisme. Le bioextracteur est particuliŠrement utile pour recharger les agents aprŠs un combat en leur transf‚rant l'‚nergie cellulaire des victimes.
+TIMEGUN
+Le professeur Drennan a fait un prodige. Le transporteur temporel utilise un noyau de matiŠre ultra-dense entour‚ d'une enveloppe stasique permettant un accŠs limit‚ vers une dimension temporelle sup‚rieure. En clair, la cible disparaIt entiŠrement et r‚apparaIt dans un futur proche. Jamais le saboteur n'a re‡u d'outil plus puissant.
+CEREBUSIFF
+L'emploi de ce gardien ‚lectronique fait parfois la diff‚rence au cours des actions d‚fensives ou offensives men‚es par nos agents. Plac‚ avec intelligence et arm‚ d'un laser … impulsions, il se met en faction et ouvre le feu par surprise sur toute pr‚sence hostile, jusqu'… ‚puisement des batteries ou jusqu'… ce qu'il soit d‚truit.
+MEDI1
+Ce n‚cessaire multifonctionnel sert … soigner les blessures cons‚cutives au combat. Il comprend un greffon de peau ainsi que du mat‚riel anesth‚sique et chirurgical. Non r‚utilisable.
+MEDI2
+L'utilisateur porte ce dispositif sur lui afin de mesurer directement la gravit‚ de ses blessures. Si la gravit‚ des blessures excŠde un seuil critique, ce n‚cessaire d'autom‚dication s'active automatiquement et accomplit les gestes chirurgicaux de maniŠre acc‚l‚r‚e. Le n‚cessaire mettant quelques instants … s'activer, son utilisateur ne doit pas se sentir invuln‚rable: atteint gravement, il pourrait mourir avant que le dispositif ait la possibilit‚ de fonctionner.
+EXPLWIRE
+Le cable … constitue une excellente barriŠre. D'une ‚paisseur de quelques microns seulement, il reste invisible mEme aux yeux les mieux appareill‚s et d‚clenche une s‚rie d'explosions sur toute sa longueur au contact d'un autre objet.
+CLONESHLD
+Offre un d‚guisement si efficace qu'il parvient … tromper la surveillance scanographique d'UTOPIA. Le Morphobouclier modifie la structure organique des vˆtements et des ‚quipements port‚s par un agent. Ce dernier prend alors momentan‚ment l'apparence d'un ex‚cutant ordinaire. Cette propri‚t‚ est trŠs appr‚ci‚e des agents charg‚s d'infiltrer une zone r‚serv‚e aux cadres.
+[mods]
+LEGS1
+Construites … partir d'une matiŠre m‚talloplastique et revˆtues d'un ‚piderme ‚labor‚ in-vitro, ces jambes artificielles permettent d'am‚liorer imm‚diatement la sant‚, la vitesse et l'endurance d'un agent sur de grandes distances.
+LEGS2
+Les innovations technologiques dans le domaine des mousses m‚talliques ont permis le d‚veloppement de membres cybern‚tiques. Les Jambes version 2 accroissent la vitesse de marche, l'endurance et am‚liorent la sant‚ de maniŠre impressionnante. Elles permettent de garder vos agents op‚rationnels sur une plus longue dur‚e.
+LEGS3
+La transmission nerveuse par fibre optique qui ‚quipait les versions ant‚rieures a ‚t‚ remplac‚e sur la version 3 par des super-synapses de matiŠre plastique … m‚moire. Le d‚ploiement d'agents appareill‚s avec des jambes de la version 3 am‚liore consid‚rablement l'issue d'un combat.
+ARMS1
+Grace … leurs tendons en tungstŠne et … leurs muscles en mousse d'acier, ces bras cybern‚tiques ‚tonneront vos agents par la pr‚cision de tir et par cons‚quent les ‚conomies de munitions qu'ils permettent. Les agents ‚quip‚s de ces bras restent op‚rationnels plus longtemps et b‚n‚ficient d'une am‚lioration de leur ‚tat de sant‚, caract‚ristique de tous les appareillages cybern‚tiques.
+ARMS2
+Le proc‚d‚ de fabrication des mousses m‚talliques a ‚t‚ appliqu‚ avec succŠs … la cybern‚tique de pr‚cision. La faible inertie de ces bras trŠs l‚gers permet non seulement d'accroItre la pr‚cision mais aussi la port‚e des tirs effectu‚s.
+ARMS3
+Ce produit de haute technologie est … votre disposition. Ces membres permettront … vos agents sans cesse confront‚s … des d‚voy‚s et des membres de l'glise toujours plus arm‚s d'accroItre le nombre de leurs objectifs atteints.
+CHEST1
+En prot‚geant leurs organes vitaux, cette armure triple ‚paisseur en alliage de titane augmente consid‚rablement les chances de survie de vos agents. Cet appareillage est de loin la meilleure protection que vous pouvez offrir … un cyborg. Notez qu'il est n‚cessaire que cet appareillage doit ˆtre ajust‚ de sorte qu'il permette au cyborg de supporter n'importe quel autre type d'appareillage.
+CHEST2
+Cette version am‚lior‚e utilise une superstructure alv‚olaire en mousse m‚tallique obtenue par microgravit‚. Ce proc‚d‚ permet une plus grande l‚gŠret‚ par rapport aux autres prothŠses corporelles et offre une meilleure ‚lasticit‚. Une r‚serve d'‚nergie accrue constitue le principal atout de la version 2.
+CHEST3
+Faites l'acquisition de la version 3 pour am‚liorer la sant‚ de vos agents. Dans cette version, des tendons en matiŠre plastique … m‚moire remplacent les microfibres d'acier pour accroItre la r‚sistance des cyborgs. Le principal int‚rˆt de cette version est qu'elle protŠge les agents contre tous les gaz innervants connus.
+BRAIN1
+Outre le contr“le de l'Ex‚cutant, la capacit‚ de d‚cision que possŠde un agent est primordiale pour sa survie. Avec une intelligence multipli‚e par deux, il courra moins le risque de se faire tuer. Ce dispositif contient des processeurs au diamant dans une matrice 3D int‚gr‚e … la biomasse cognitive conventionnelle du cyborg. Il stimule les facult‚s de perception et contient un logiciel de gestion des traumatismes permettant au cyborg de surmonter des blessures graves.
+BRAIN2
+La m‚moire holographique diminue les temps de r‚action et renforce la port‚e du persuatron ainsi que la puissance du signal ‚mis. Elle accroIt ‚galement la r‚sistance aux tentatives de persuasion. Ce modŠle pr‚voit les am‚liorations habituelles concernant les facult‚s de perception primaires ainsi qu'une nouvelle version du logiciel de gestion des traumatismes. Chaque agent cyborg ‚quip‚ de ce dispositif voit ses chances de survie augmenter.
+BRAIN3
+Le summum en matiŠre d'intelligence artificielle int‚gr‚e, la version 3 am‚liore non seulement la sant‚ du cyborg mais elle lui octroie aussi une meilleure pr‚cision de tir, une plus grande rapidit‚ de r‚action et une meilleure maItrise ‚nerg‚tique Le cyborg peut ‚voluer dans un environnement qui d‚truirait ordinairement son cerveau biologique de maniŠre instantan‚e; ce dispositif peut prendre le relais du cerveau biologique pour permettre … l'agent d'achever sa mission.
+SKIN1
+Il s'agit d'un tissu cellulaire complexe con‡u pour obtenir un ‚piderme r‚sistant aux dommages caus‚s par divers projectiles. La mise au point d'un maillage hybride pachyderme/acier et des ‚tudes cosm‚tiques ont permis la production d'une substance extraordinairement r‚sistante mais aussi souple que la peau con‡ue in vitro des cyborgs.
+SKIN2
+Cette peau exp‚rimentale emploie la nouvelle forme d'amiante non toxique utilis‚e pour la rentr‚e dans l'atmosphŠre des vaisseaux spatiaux. Lors des op‚rations men‚es sous un tonnerre de feu, les agents ‚quip‚s de cette peau r‚sisteront mieux aux brulures que leur homologue non prot‚g‚s.
+SKIN3
+Cette variante utilise un polymŠre d'hydrocarbure associ‚ … des micro-fibres optiques. Ce type de peau est pr‚vu pour absorber une grande partie de l'‚nergie destructrice de certaines armes. L'impact d'‚nergie se r‚partit sur l'ensemble du corps de l'agent. Elle est ensuite recycl‚e pour r‚g‚n‚rer les propri‚t‚s protectrices de la peau.
+SKIN4
+Ce document d‚crit les techniques permettant d'‚laborer une peau cybern‚tique r‚volutionnaire. Son contenu est sp‚culatif mais il est loin d'ˆtre fantaisiste. Il d‚crit le proc‚d‚ de fabrication d'un tissu photomorphique poss‚dant certaines caract‚ristiques du morphobouclier. Il devrait permettre … nos agents d'‚chapper … la surveillance scanographique d'UTOPIA en conservant l'apparence d'un ex‚cutant de fa‡on continue.

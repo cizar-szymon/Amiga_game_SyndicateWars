@@ -1,0 +1,1535 @@
+# == map screen text ==
+# map screen title
+#UTOPIA
+# map screen headings
+Pilgrimsf„rd
+Hedningar
+Geografi
+M†l
+Materialrikedom
+Arv
+
+# city data
+
+London
+21.13 M
+Post-Industriell
+L†g-Engelska
+Programvaruindustri, Finansiella tj„nster
+Kemiskt avfall, M„nskligt avfall
+
+Detroit
+10.98 M
+Komplex t„tort
+Ny-Amerikanska
+Fordonstillverkning
+Tunga industrier, Radioaktivt avfall
+
+Hong Kong
+17.55 M
+Komplex t„tort
+Indokinesiska
+Minnesplastik
+L„tt industriell
+
+Peking
+38.89 M
+Ultra-Metropol
+Proto-Mandarin
+Plastfabrikation, H†rdvarutillverkning
+Radioaktivt avfall, M„nskligt avfall
+
+Wien
+6.99 M
+Enkel t„tort
+N.C.E. (Normal Central Europeiska)
+Omarbetning av mineral
+L„tt industriell
+
+Geneve
+7.65 M
+Enkel t„tort
+N.C.E. (Normal Central Europeiska)
+Vattenavgiftning, Luftbearbetning
+Radioaktivt avfall
+
+Salzburg
+9.27 M
+Komplex t„tort
+Neu-Slaviska
+Vegetativ f”rnyelse
+L„tt industriell
+
+Singapore
+21.71 M
+Ultra-Metropol
+Pseudo-Malayiska
+Vattenavgiftning, H†rdvarutillverkning
+M„nskligt avfall, Tung industri
+
+Phoenix
+13.26 M
+Komplex t„tort
+Interkontinental amerikanska
+Krafttillverkning
+Radioaktivt avfall
+
+Rom
+10.92 M
+Post-Industriell
+L†g-Latin
+Varaktiga konsumtionsvaror
+Tung industri
+
+Manamah
+10.98 M
+Komplex t„tort
+Ny-Arabiska
+Br„nsleraffinering, Mineralbearbetning
+Kemiskt avfall
+
+New York
+25.24 M
+Post-Industriell
+H”g-Engelska
+Vapentillverkning
+Ultra-Tung industri, Radioaktivt avfall, M„nskligt avfall
+
+Santiago
+7.81 M
+Komplex t„tort
+Neu-Spanska
+Gummitillverkning
+Kemiskt avfall
+
+Buenos Aires
+15.71 M
+Ultra-Metropol
+Modul
+Livsmedelstillverkning
+Tung industri, M„nskligt avfall
+
+Kapstaden
+10.27 M
+Komplex t„tort
+Afrikaans (Forntida)
+Mineralbearbetning
+Tung industri
+
+Adelaide
+8.7 M
+Enkel t„tort
+Sub-Engelska
+Bryggerin„ring, Boskapssk”tsel
+Kemiskt avfall, Djuravfall
+
+Christchurch
+4.9 M
+Enkel t„tort
+Idiom-Bahasa
+Kl„dtillverkning, Livsmedelsf”rberedning
+Kemiskt avfall
+
+Reykjavik
+4.37 M
+Enkel t„tort
+Demi-Skandinaviska
+Vattenavgiftning, Luftbearbetning
+Radioaktivt avfall
+
+Moskva
+16.54 M
+Komplex t„tort
+Moldaviska
+Kl„dtillverkning, Destillering
+Radioaktivt nedfall, M„nskligt avfall
+
+Tokyo
+16.70 M
+Ultra-Metropol
+Neo-Japanska
+H”gteknologisk tillverkning, Finasiella tj„nster
+Tung industri
+
+Bangkok
+24.37 M
+Ultra-Metropol
+Pseudo-Thai
+Simulanttillverkning, Turism
+Kemiskt avfall, M„nskligt avfall
+
+Honolulu
+7.01 M
+Enkel t„tort
+Ny-Amerikanska
+Vattenavgiftning, Luftbearbetning
+L„tt industriell
+
+Johannesburg
+15.64 M
+Komplex t„tort
+Afrikaans (Forntida)
+Mineralbearbetning
+Tung industri
+
+Kairo
+3.16 M
+Enkel t„tort
+Ny-Arabiska
+Historiska artefakter, Turism
+Kemiskt avfall
+
+New Delhi
+28.73 M
+Ultra-Metropol
+Proto-Hindustani
+Intelligenta kl„der
+Tung industri, Kemiskt avfall, M„nskligt avfall
+
+Sevastopol
+9.26 M
+Komplex t„tort
+Moldaviska
+Destillering
+Radioaktivt nedfall
+
+Tripoli
+8.73 M
+Komplex t„tort
+Arabiska (Forntida)
+Br„nsleraffinering
+Radioaktivt nedfall
+
+Riyadh
+2.03 M
+Enkel t„tort
+Ny-Arabiska
+Br„nsleraffinering
+Tung industri
+
+Colombo
+3.35 M
+Enkel t„tort
+Ny-Singalesiska
+Vattenavgiftning, Luftbearbetning
+Radioaktivt avfall
+
+Colombo Omloppsstation
+0.0001 M
+Experimentell
+EuroCorp Teknisk multistatskod
+Interstell„ra transporter, Mikrogravitationstillverkning
+Inga
+
+Matochkin Shar
+0.017 M
+Enkel t„tort
+Proto-Moldaviska
+Luftbearbetning
+L„tt industriell
+
+Voss
+0.023 M
+Sub-Enkel t„tort
+Omni-Skandinaviska
+Skogsindustri
+L„tt industriell
+
+Omsk
+0.48 M
+Enkel t„tort
+Ryska (Forntida)
+Destillering
+Radioaktivt nedfall
+
+Beirut
+0.75 M
+Sub-Enkel t„tort
+Ny-Arabiska
+Vapentillverkning
+Kemiskt avfall, M„nskligt avfall
+
+Ulan Bator
+0.274 M
+Sub-Enkel t„tort
+Mongol-Kinesiska
+Delmetallsutvinning
+Radioaktivt nedfall
+
+Seoul
+6.5 M
+Komplex t„tort
+F”renad koreanska
+Kemisk behandling, Fordonstillverkning
+Kemiskt avfall, Tung industri
+
+Hanoi
+3.3 M
+Enkel t„tort
+Zonal-Mandarin
+Boskapssk”tsel, Vegetativ upparbetning
+Djuravfall, Kemiskt avfall
+
+Manila
+8.5 M
+Komplex t„tort
+Zonal-Mandarin
+M”beltillverkning
+L„tt industriell
+
+Freetown
+0.18 M
+Sub-Enkel t„tort
+Idiom-Afrikaans
+Delmetallsbehandling
+L„tt industriell
+
+Monrovia
+0.65 M
+Sub-Enkel t„tort
+Idiom-Afrikaans
+Destillering
+L„tt industriell
+
+Lagos
+1.25 M
+Enkel t„tort
+Idiom-Afrikaans
+Delmetallsutvinning
+Tung industri
+
+Nairobi
+2.3 M
+Enkel t„tort
+Neutral Somaliska
+Boskapssk”tsel, Garvning
+L„tt industriell
+
+Port Moresby
+0.93 M
+Sub-Enkel t„tort
+Idiom-Bahasa
+Delmetallsutvinning
+Kemiskt avfall
+
+Anchorage
+0.86 M
+Enkel t„tort
+Anglo-Kyrillisk
+V„dermanipulation
+H”gradioaktivt avfall, l„tt industri
+
+Vancouver
+3.5 M
+Komplex t„tort
+Pseudo-Lingvo
+Magnetisk behandling
+Tung industri
+
+Nuuk
+0.065 M
+Kommun
+Demi-Skandinaviska
+Luft
+L†g radioaktivitet
+
+Georgetown
+0.08 M
+Sub-Enkel t„tort
+Idiom-Spanska
+Mineralutvinning
+Kemiskt avfall
+
+Lima
+3.4 M
+Komplex t„tort
+Idiom-Spanska
+Vapentillverkning
+H”gradioaktivt avfall, Tung industri
+
+Sao Paulo
+18.9 M
+Ultra-Metropol
+Portugisiska (Forntida)
+Mineralutvinning
+Radioaktivt avfall, L„tt industriell
+LABORATORIEOLYCKA
+NATURLIGA ORSAKER
+TIDSINSTLLT VIRUS
+EXPERIMENTFEL
+FATAL FELBERKNING
+OLOGISK HRLEDNING
+SLUTGILTIG VILLFARELSE
+F™RHASTAD BED™MNING
+BRISTANDE RESONEMANG
+VANSINNE
+SLARV
+OSKER PROCEDUR
+MENTAL KOLLAPS
+FELAKTIG UTRUSTNING
+MISSLYCKAT TEST
+HJRTSTILLESTND
+FELAKTIGT ANTAGANDE
+D™DLIG ELCHOCK
+UPPL™ST
+OLYCKSHNDELSE
+\hV„lsignelse, L„rjunge.\n
+\c2\n
+Ditt uppdrag „r att ta kontroll ”ver en understation tillh”rande EuroCorps UTOPIA n„tverk. Den „r 
+placerad i Detroit. N„r vi har den, kommer Kataklysmen att starta.\n
+\c5\n
+™verl„mnad till dig idag „r det automorfiska datavirus som kommer g”ra slut p† det f”rtryck som 
+syndikatet kallar UTOPIA. Vi har d”pt viruset Harbinger. Det kommer ta ”ver kontrollen fr†n syndikatet, 
+dator f”r dator, och f”rbereda v„gen till den upplysning som kommer f”lja.\n
+\n
+Led dina medhj„lpare till UTOPIAs markstation i Detroit, s† vi kan frig”ra viruset. Syndikatets 
+anst„llda som vaktar stationen f”rv„ntar sig inte v†ld, eftersom inget v†ld har f”rekommit p† †ratal. 
+Detta „r v†r f”rdel.\n
+\n
+Var v„lsignad.\n
+\n
+\c4Virgil\n
+\n
+\c1De otrogna kl„ttrade i dagar f”r att m”ta herren i bergen. "Varifr†n f†r du din s† kallade tro?" 
+fr†gade de.\n
+\n
+"Fr†n er," svarade herren. "Ni har alla kl„ttrat s† h”gt."\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hGratulationer, L„rjunge.\n
+\c2\n
+Dina medhj„lpares fasta ledning beh”vs i Tripoli, d„r det frambrytande kaoset framkallat av Kataklysmen 
+hotar v†r tr„dg†rd f”r meditation. F”rsvara tron med maximal styrka.\n
+\c5\n
+Harbinger, v†rt heliga virus, har b”rjat arbeta f”r att befria folket. Tyv„rr tar inte alla som 
+frisl„ppts fr†n sitt ok emot den v„g till upplysning som v†r kyrka erbjuder. Faktiskt „r det s† att utan
+ v†r ledning, kommer m†nga att f”rloras. Snart kommer r„kenskapens dag och alla sj„lar kommer r„knas.\n
+\n
+V†r tr„dg†rd f”r meditation i Tripoli „r bel„grat av de f”rlorade sj„lar syndikatet kallar de Ostyrda. 
+Tr†kigt nog m†ste vi f”rsvara varandra med maximal kraft, f”r detta „r alla religioners l„xa. Utrusta 
+dina medhj„lpare ordentligt och s„nd dem till Tripoli f”r att tvinga fram lugn d„r.\n
+\n
+Vi har planer f”r jorden, medhj„lpare. Kyrkan m†ste f”r„ndra hela v„rlden. Detta „r v†r tid. Vi kommer 
+bara r„dda de utvalda. Klart f”r nu.\n
+\n
+De Nio har sagt detta.\n
+\n
+\c4Virgil\n
+\n
+\c1Herren sade till sina l„rjungar, "Gl”m bort att du bli l„rd och koncentrera dig p† att l„ra. Sedan 
+n„r du „r s„ker, ifr†gas„tt allt du l„rt dig."\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hHarbinger arbetar. L†tom oss bedja.\n
+\c2\n
+Vi m†ste r”ra om i grytan i Buenos Aires. Genom att konvertera tv† gemensamma fiender, kommer v†r kyrka 
+ta kontrollen ”ver hela staden.\n
+\c5\n
+V†ra br”der och systrar i Sydamerika har samlat in information anv„ndbar f”r v†r sak. De har 
+identifierat Juan Ormandoz, en h”gre EuroCorp lakej fr†n Buenos Aires, som f”rs”ker bibeh†lla stadens 
+stabilitet trots de Ostyrdas aktiviteter. Ledaren i denna grupp, Chico Ramirez, „r d†raktig nog att tro 
+han kan ta och beh†lla kontrollen ”ver ett EuroCorp-kommersiellt omr†de av l†g kategori. Konvertera dem 
+b†da, och vi kommer lyckas d„r EuroCorp s† h„r l†ngt har misslyckats.\n
+\n
+Sprid de goda nyheterna.\n
+\n
+\c4Virgil\n
+\n
+\c1Trofasta sj„lar „r inte nog. Ge oss hj„rnorna ocks†.\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hV†ra b”ner „r med dig, \l.\n
+\c2\n
+Tiden „r inne att prova styrkan i v†r tro. En ensam agent fr†n syndikatet har setts smyga omkring i 
+Santiagos skuggor. Konvertera honom.\n
+\c5\n
+Finns det n†gon b„ttre plats att hitta de med den styrka vi s”ker „n bland v†ra fiender? Deras agenter 
+„r v†ra v„ntande medhj„lpare. Precis som du en g†ng var en av dem, innan vi visade dig ljuset, kommer du
+ snart leda EuroCorps elit fr†n den m”rka v„g de vandrar. En EuroCorp agent har s„nts till Santiago f”r 
+att underminera v†rt arbete d„r. Du kommer inte l†ta detta h„nda.\n
+\n
+Innan du ”verl„mnar dina medhj„lpare till Santiago, se till att de b„r med sig Indoktrinatorn och att de
+ anv„nder den s† att andra kan f† se ljuset. N„r en „kta anh„ngare anv„nder Indoktrinatorn, blir UTOPIAs
+ grymhet s”nderbruten av v†r tro. De som d„refter ser ljuset ,samlas och f”ljer efter dit medhj„lparna 
+leder. N„r deras antal „r tillr„ckligt stort, kommer till och med EuroCorps agent h”ra deras s†ng och 
+glatt g† med.\n
+\n
+Frid vare med dig.\n
+\n
+\c4Virgil\n
+\n
+\c1M„rk din fiende, f”r allt som separerar de f”rd”mda fr†n de utvalda „r en punkt av monokromt ljus 
+projicerat p† nackens baksida.\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hDu „r v„lsignad, \l.\n
+\c2\n
+V†r grund „r stark och dyr. De tv† guldbelagda bilarna vi sp†rar i Johannesburg kommer f”da v†ra kistor.
+ Ta dem. Din sak „r r„ttf„rdig.\n
+\c5\n
+V†r sak forts„tter snabbt. Sj„lf”rvr„ngarna p† syndikatet kommer snart f† sona f”r sina brott. Vi 
+f”rs”ker komma n„rmare denna domens dag, men vi beh”ver kapital f”r att kunna matcha den v„rldsliga 
+styrkan hos EuroCorp.\n
+\n
+De Nio har givit oss Kodexen. Denna heliga bok „r ritningarna till v†r fr„lsning. nd† m†ste vi betala 
+ett pris f”r varje kapitel vi g”r om till verklighet. Detta kallar vi forskning. S† ju st”rre materiellt
+ v„lst†nd vi skaffar, desto n„rmare kommer vi till att f† gudars sinnen.\n
+\n
+k till Johannesburg d„r EuroCorps logistiska flaskhals har resulterat i en orderanhopning f”r guld. 
+Detta guld kommer tj„na v†r sak v„l. Guldet levereras i bepansrade bilar till valv vilka st†r under 
+st„ndig bevakning. Det beh”vs tv† bepansrade bilar f”r att klara en leverans. Kapa de bepansrade bilarna
+ och ta dem till den best„mda uppsamlingsplatsen. Vi uppmanar dig att inte g† in i eller attackera de 
+tungt beskyddade f„stena. Det finns andra s„tt att l„gga vantarna p† pengarna. Anv„nd din hj„rna och 
+inte bara dina vapen.\n
+\n
+\c4Virgil\n
+\n
+\c1Kom ih†g, de undergivna skola inte „rva n†gonting.\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hHa frid, \l.\n
+\c2\n
+Den valda l„rjungen Mirabelle Lucy De Saxo har invigits av De Nio. Led henne in till hj„rtat av ett 
+EuroCorp-laboratorium s† att hon kan indoktrinera en vetenskapsman d„r, vars forskning kompletterar v†r 
+egen.\n
+\n
+F”r vetenskapsmannen till v†rt n„rmaste tempel, d„r fader Svart kommer h”ra hans bikt.\n
+\n
+S„nd De Saxo dit vetenskapsmannen s„ger och ta med hans hemligheter till oss.\n
+\c5\n
+H”r De Nio. Det finns de med fantastiska hj„rnor men f”rlorade sj„lar. De vandrar i den m”rka 
+vildmarken, inte „nnu kapabla att se v†r tros ljus. En s†dan man utk„mpar nu kriget mot Harbinger †t 
+EuroCorp. De Nio t„nker r„dda hans sj„l genom att anv„nda hans intellekt till den gudomliga uppgiften 
+att omvandla Kodexen till ny teknologi.\n
+\n
+Ditt m†l, Dr Schweizer, arbetar i ett EuroCorp-labb i Geneve. Det „r f”r starkt bevakat f”r medhj„lparna
+ att ta sig in i, s† du kommer leda v†r speciella infiltrationsagent - Mirabelle Lucy De Saxo - genom 
+s„kerhetssp„rren. N„r hon har konverterat Schweizer, m†ste hon se till att han f†r skydd i det gamla 
+templet vi tagit ”ver. Smygning „r Mirabelles kraftfullaste vapen. Ta hand om henne †t oss.\n
+\n
+Fader Svart, v†r lokala minister, kommer h”ra doktorns bikt s† snart Schweizer kommer till templet. 
+Detta kommer ge Mirabelle den information hon beh”ver f”r att kunna sp†ra upp doktorns arbete. S„nd 
+henne till denna plats och led v†r dotter att sk”rda frukterna av doktorns vederm”dor. Se till att hon 
+levererar dem till oss.\n
+\n
+Din sj„l blir mer v„lsignad f”r varje d†d du utf”r.\n
+\n
+\c4Virgil\n
+\n
+\c1All kunskap finns lagrad n†gonstans. Vara det i b”cker, huvud eller djupt under glaci„rer. N„r vi 
+finner den, g”r vi den till v†r. Tro „r byggstenar; kunskap „r murbruk.\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hV„lsigne dig, L„rjunge.\n
+\c2\n
+N„r Kataklysmens vindar av kaos viner i v†ra ansikten, m†ste vi st† stadigt. Skydda templet i Hong Kong 
+fr†n den Ostyrda storm som n„rmar sig ”n.\n
+\c5\n
+De Nio har haft en vision. De Ostyrda f”rs”ker underminera v†ra planer f”r Stillahavsomr†det. En k„ttare
+ k„nd som Ko-Paull Vissick perverterar v†ra meddelanden genom att uts„tta p”beln f”r den hemskaste 
+kunskap avsl”jad av De Nio. S†dan sj„lvsv†ldig v†rdsl”shet kan bara skada det of”rberedda sinnet och, 
+genom denna uppvigling, skapar Vissick st”rre fientlighet mot kyrkan.\n
+\n
+Nu n†r rapporter oss om landningar av stora grupper Ostyrda i Hong Kong. Vi tror att de „r p† v„g mot 
+v†r kyrka. Det faller p† dig och dina medhj„lpare att n† kyrkan innan de Ostyrda, och f”rsvara den mot 
+det oundvikliga angreppet.\n
+\n
+Trofasta tj„nare, h„r kommer mer. Vi kommer att bli gudar. En maskin lovar att skaka om v„rlden. Beh†ll 
+tron och du k”per din plats till s„kerhet. Alla andra kommer att g† f”rlorade.\n
+\n
+R„ttf„rdighetens dag kommer n„rmare.\n
+\n
+\c4Virgil\n
+\n
+\c1Han som skriker h”gst kan bara h”ra sin egen r”st. De med „kta kunskap lyssnar p† de med „kta tro, 
+och de med st„ngda ”ron kommer aldrig h”ra liemannens blad.\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hH”r mig, L„rjunge.\n
+\c2\n
+™det testar oss, \l. Vi ”nskar se ett slut p† de Ostyrdas h„rjningar i staden Rom. Befria denna plats 
+fr†n otrogna.\n
+\c5\n
+N„rvaron av denna p”bel har varit anv„ndbar tills nu, eftersom den har anstr„ngt EuroCorps resurser i 
+denna region. Men nu beh”vs de inte l„ngre. Eliminera p”beln s† fort du ser den.\n
+\n
+Du „r verkligen utvald.\n
+\n
+\c4Virgil\n
+\n
+\c1D†liga arbetare skyller p† sina verktyg. Bra arbetare bygger b„ttre verktyg. De b„sta arbetarna f†r 
+sina verktyg att g”ra arbetet †t dem.\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hMottag v†r v„lsignelse, du ljusets son.\n
+\c2\n
+Genom att anstr„nga oss d„r v†r fiende „r som svagast, har vi b”rjat etablera v†r kyrka. De Nio 
+f”rutsp†r nu motoffensiver av EuroCorp mot de st„der vi nu kontrollerar.\n
+\n
+Redan har syndikatet b”rjat med spaningsoperationer i Johannesburg, Buenos Aires, Santiago och Tripoli. 
+Detta „r oaccepterbart. De som infiltrerar v†ra st„der m†ste g† med oss eller f”rg†s.\n
+\c5\n
+Vi har bekr„ftade observationer av inkr„ktarna i Johannesburg, Buenos Aires, Santiago och Tripoli. V†r 
+permanenta n„rvaro i dessa st„der „r otillr„cklig f”r att g”ra mer „n ”vervaka fiendens f”rehavanden.\n
+\n
+Dina medhj„lpare m†ste se till att ingen EuroCorp spion n†gonsin †terv„nder till syndikatet. Slappna 
+inte av f”rr„ns du har tagit hand om alla cyborginkr„ktare.\n
+\n
+R„kensskapens dag kommer n„rmare f”r varje ny anh„ngare vi rekryterar. Gudsmaskinen beh”ver troende. Och
+ de som vill ”verleva Kataklysmen m†ste tro.\n
+\n
+Var modig, medhj„lpare. Var brutal. Det „r den enda v„gen.\n
+\n
+\c4Virgil\n
+\n
+\c1Det finns njutning i att stj„la maskiners sj„lar.\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hM† tron brinna inom dig, favoritson.\n
+\c2\n
+V†ra orakel s„ger oss att en extremt viktig syndikatledare kallad Koto Sek bes”ker Kairo. Han har ett 
+kraftfullt f”lje och „r v„lbevakad. Men i namnet av allt som „r r„tt, han m†ste d”.\n
+\c5\n
+Koto Sek planerar att g† ombord p† en f„rja, av vilken anledning vi inte vet. Stoppa honom s† snart du 
+kan. Se till att han „r d”d innan du rapporterar tillbaka. Om det skulle bli n†gra andra offer, „r det 
+s† det „r. Jag „r s„ker p† att du vid det h„r laget „r van vid det.\n
+\n
+G† vidare.\n
+\n
+\c4Virgil\n
+\n
+\c1Inte bara kommer alla ”gon att vara p† ledaren bland m„nnen, utan „ven alla stridssikten.\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hDu skiner starkt, apostel.\n
+\c2\n
+I Bahrain f”rbereder sig EuroCorp f”r ett angrepp mot v†r v„g av upplysning. Det skall komma v„l till 
+pass att du „r den tull med vilken de stoppas.\n
+\c5\n
+Av v†r tros frikostighet har vi h†llit dig med m†nga m†l h„r. Och f”r din anv„ndning „r h„r en 
+stridvagn. Var vis, medhj„lpare. Anv„nd v†r utrustning v„l, och se till att du f”rg”r r”sten av EuroCorp
+ h„r och alla dess underhuggare. S† m†ste det bli om vi skall kunna triumfera och befria v„rlden.\n
+\n
+Ljuset upp av din uppenbarelse lyser starkare.\n
+\n
+\c4Virgil\n
+\n
+\c1Folket stod som v„xande s„d i det h”ga f„ltet och lyssnade p† sin herre. N„r liemannens blad mejade 
+ned dem alla, f”ll herren tyst. L„xan skulle l„ras av andra.\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hGratulerar till dina framsteg, l„rjunge.\n
+\c2\n
+Du tilldelas den heliga uppgiften att till„gna dig h†rdvaluta fr†n tv† guldbilar, med vilka v†ra k„llor 
+s„ger oss att det kommer utf”ras leveranser till Singapores centralbanks huvudkontor.\n
+\c5\n
+Sj„lvklart kommer EuroCorp vara p† sin vakt, och vakter kommer finnas ”verallt. Vi k„nner att ett direkt
+ angrepp inte „r vist, eftersom det „r vad syndikatet f”rv„ntar sig. Vi har bett om ett annat s„tt att 
+komma ”ver dessa tillg†ngar, och v†ra b”ner kommer att besvaras. Resten „r upp till dig, medhj„lpare.\n
+\n
+Kom ih†g de under pengar †stadkommer.\n
+\n
+\c4Virgil\n
+\n
+\c1Herren har inget behov av penningar. Men han sitter „nd† och r„knar dem. Som meditation.\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hH„lsningar, medhj„lpare.\n
+\c2\n
+Vi har en dj„rv plan †t dig. Vi vill att du skall kidnappa en h”g syndikatledare fr†n deras huvudkontor 
+i London, direkt framf”r n„san p† EuroCorps s„kerhetsfolk.\n
+\c5\n
+Professor Kurt Drennan „r en nyckelmedlem av EuroCorps forsknings- och utvecklingsprogram. EuroCorps 
+agenter har h”rt talas om v†ra uppt„ckter i Reykjavik. Drennan skall ha en genomg†ng med EuroCorps 
+chefer p† ett m”te i London. Samtidigt skall han tilldelas en ny assistent. Ta best„mt hand om detta 
+ubyte. Led den beg†vade Mirabelle att ta hennes plats vid l„mplig tidpunkt, s† Drennan kan ”verl„mnas 
+till oss.\n
+\n
+S† fort Mirabelle framg†ngsrikt ”vertagit den riktiga assistentens plats, kommer hon vara inkognito och 
+uppf”ra sig korrekt medans Drennan g”r sin presentation. Direkt efter skall professorn med bil l„mna 
+platsen f”r ett annat uppdrag. Bara du ser till att Mirabelle l„mnar i samma bil, kommer Drennan aldrig 
+att komma till n„sta uppdrag. Med v†ra b”ner kommer Drennan att vara h”gst villig att bikta sig.\n
+\n
+Din ande skall vandra med De Nio i all evighet.\n
+\n
+\c4Virgil\n
+\n
+\c1Ett hundra elefanter kan riva ytterv„ggarna till ett fort. En smittad r†tta kan d”da alla p† fortets 
+insida.\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hMeditera med oss, l„rjunge.\n
+\c2\n
+Stj„l planer f”r ett nytt syndikatvapen fr†n EuroCorps installation i New York.\n
+\c5\n
+Professor Drennan „r d”d. Hans motst†nd till v†ra neurala inkvisatorer orsakade att han r†kade ut f”r en
+ massiv hj„rnbl”dning. Besvikelse. Genom v†ra b”ner ”verlevde han „nd† tillr„ckligt l„nge f”r att f”rse 
+oss med p†litlig information om att syndikatet planerar en st”rre motoffensiv mot v†r helgade kyrka. 
+F”rberedelser f”r motoffensiven g”rs p† EuroCorp baser i New York.\n
+\n
+I New York har skyddade vakter testat ett handvapen av termonukle„r typ som vi sj„lva f”rutser att vi 
+skulle ha anv„ndning f”r. F”r tv† dagar sedan bevittnade v†ra br”der och systrar - som ockuperar stadens
+ katedral trotsande EuroCorps n„rvaro - en f”rf„rlig sm„ll inuti fiendens omr†de. Det „r i detta omr†de 
+Drennan sa att vi skulle hitta experimentell data om dessa manicker. Men omr†det „r tungt bevakat. En 
+avledande man”ver kommer antagligen att kr„vas.\n
+\n
+Broder Methuselah kommer l„mna den fristad katedralen erbjuder och m”ta dig vid IMLen. Han kommer leda 
+dig till en bostads- och handelssektor d„r han kommer starta ett upplopp, genom att administrera ett 
+r”kelsemoln av psykogas mitt ibland den civila befolkningen. N„r detta h„nder, kommer du s„kert komma p†
+ n†got s„tt att ta dig in p† omr†det. Syndikatets svar p† upproret b”r l†sa upp ett antal av deras 
+vakter ett tag.\n
+\n
+\c4Virgil\n
+\n
+\c1De modiga ger sig in m”rka grottor ensamma. De kloka s„nder in de modiga f”rst. De klokaste v„ntar 
+bakom de kloka.\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hDyrbare troende,\n
+\c2\n
+F”rst”r EuroCorps vapenbunkrar i Riyadh. Genom att utgjuta s†dan ”del„ggelse hyllar vi Kataklysmen.\n
+\c5\n
+Harbinger har f†tt UTOPIA att g† p† kn„na. EuroCorps fortsatta str„van att bygga en ny arme, forts„tter 
+bevisa effektiviteten i v†ra slag mot dem. M†nga av syndikatets vapen „r lagda p† lager, f”r att ge de 
+t”mda kryofaten tid att reparera deras krympande k„rna av agenter. Drennan bek„nde f”r oss den st”rsta 
+f”rvaringsplatsen av vapen. Den ligger innanf”r Riyadhs forntida v„ggar.\n
+\n
+Det „r De Nios heliga ”nskan att denna arsenal begravs f”r evigt under ”kensanden. Lokalisera 
+m†lbunkrarna och f”rst”r dem. Konvertera eller utpl†na de agenter som v†gar st„lla sig i v„gen. Anv„nd 
+ditt eget omd”me i detta „rende. N„r syndikatets lager bara „r ett minne blott, skall ditt namn sjungas 
+av de trogna.\n
+\n
+V†ra maskiner kommer f”r„ndra v„rlden, medhj„lpare. De kommer st”rta planeten i oordning. St”rsta delen 
+av befolkningen kommer d”, men det „r f”rnyandet av liv som kallar oss. T„nk dig en v„rld utan syndikat,
+ utan tankekontroll, utan v†ld. Det kommer att h„nda, l„rjunge. Fler sj„lar beh”vs.\n
+\n
+Tempus fugit.\n
+\n
+\c4Virgil\n
+\n
+\c1L„rlingarna fr†gade herren. "N„r skall jag uppn† od”dlighet?"\n
+\n
+Och herren svarade, "Inte i detta liv."\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hDj„rva apostel.\n
+\c2\n
+V†r dotter av den Nya epoken, Mirabelle Lucy De Saxo, har kraschlandat p† de Ostyrdas territorium, n„ra 
+hennes tillflyktsort i Kapstaden. Dina medhj„lpare m†ste skynda till hennes sida. Hon m†ste leva f”r att
+ kunna fullf”lja sitt ”de som den f”rsta att betr„da v„gen till fr„slning.\n
+\c5\n
+Vi vet att hon fortfarande lever, men hon „r i desperat behov av r„ddning. Du „r s† klart hennes f”rsta 
+val f”r denna farliga kallelse. Ta dig in i p† de Ostyrdas omr†de och leta r„tt p† De Saxo. Evakuera 
+henne i all hast. Hon kan vara i d”dlig fara. Var best„md mot de som st„ller sig i din v„g.\n
+\n
+\c4Virgil\n
+\n
+\c1Tapperhet kommer ta dig till de farligaste av platser. F”rkrossande eldkraft kommer ta dig s„kert 
+genom dem.\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hM† tron vara med dig, \l.\n
+\c2\n
+S”k r„tt p† och utpl†na en farlig, kl†fingrig hacker som g”mmer sig bland de Ostyrda. Han har tagit 
+kontroll ”ver en strategisk vapensatellit ovanf”r Peking.\n
+\c5\n
+En utst”tt hacker med tillg†ng till UTOPIAs satellitf”rsvar startar st†lregn fr†n himlen var och n„r han
+ ”nskar. Han m†ste stoppas. Han m†ste hittas och elimineras.\n
+\n
+Var p† din vakt, l„rjunge. Peking „r en trol”s plats, full av utst”tta som bara ser genom sina 
+vapensikten.\n
+\n
+G† med starkt sinne.\n
+\n
+\c4Virgil\n
+\n
+\c1Han som lever i stormens ”ga, „r ett dammkorn i ”gat p† en vredgad gud.\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hL„rjunge, din aura f”der v†r styrka.\n
+\c2\n
+Syndikatet har f”rlorat kontrollen ”ver Sevastopol till de Ostyrda. Genom att k”ra pansarbilar stulna 
+fr†n deras besegrade fiender, bringar de Ostyrda k„ttarna f”r”delse i alla kvarter. De „r falska 
+profeter, alla av dem. S„nd dem till kataklysmen.\n
+\c5\n
+De som anv„nder s†dana dj„vulska vapen mot oss, m†ste betala det ultimata priset. Det finns ingen heder 
+i att f”rst”ra vapen, och det finns betydande fara.\n
+\n
+Ta dig f”rsiktigt fram d† du n„rmar dig ”n. S„kra den f”rst.\n
+\n
+Var full av andlighet.\n
+\n
+\c4Virgil\n
+\n
+\c1De modiga g”mmer sig bakom teknologi. De dumma g”mmer sig f”r den. De kloka har teknologi, men g”mmer
+ den.\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hV„lsignelser, du utvalda.\n
+\c2\n
+Ge oss den hemlighet EuroCorp skyddar i Bangkok, och vi kommer be f”r din fr„lsning.\n
+\c5\n
+Kaosets stank sprider sig till alla gath”rn, d† UTOPIA ”verger befolkningen i stort och tar sina gynnade
+ barn l„ngre ned under marken. I Bangkok har syndikatet gett upp alla f”rs”k att †terst„lla regimen. 
+Ist„llet har de skapat en d”d zon d„r. Vad som f”rsigg†r d„r vet vi inte mycket om.\n
+\n
+En av v†ra br”der f”rs”kte nyligen ta reda p† vad det „r EuroCorp s† ih„rdigt f”rs”ker d”lja. Han fick 
+reda p† att fiendens agenter ibland ger sig in i den d”da zonen f”r att r”va bort skurkar, av vilka 
+m†nga fortfarande kl„nger sig fast vid de som „r d”mda att misslyckas bland de s”nderslagna resterna. 
+Agenterna †terv„nder sedan till sina f„sten med sina f†ngar. De Nio f”rst†r inte varf”r syndikatet g”r 
+detta, n„r de eliminerar de Ostyrda p† alla andra platser.\n
+\n
+Vi s”ker upplysning i detta „rende. Led dina medhj„lpare genom stadens fientliga utkanter och in till 
+den d”da zonen. Ta reda p† vad EuroCorp h†ller p† med, och g”r vad du anser vara n”dv„ndigt f”r att ta 
+hand om den situation du hittar. terv„nd sedan och bek„nn f”r oss allt du l„rt, s† vi kan rensa bort 
+det onda du har utsatts f”r.\n
+\n
+F”rl†t ingenting.\n
+\n
+\c4Virgil\n
+\n
+\c1En krigsflykting s”kte herren. Han sa, "Du „r vis och fridfull. L„r mig att fly undan hemskheterna i 
+denna v„rld." Och herren f”rblindade honom med ett br„nnj„rn.\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hLyssna noga, medhj„lpare.\n
+\c2\n
+Vi beh”ver en IML-l„nk till Reykjavik, d„r sakramentet av v†r grundade religion „r i fara. V†r gynnade 
+dotter, Mirabelle Lucy De Saxo, m†ste reaktivera denna v„g. Det „r upp till dig att fixa en v„g till 
+IML-stationen nordost om Christchurch.\n
+\c5\n
+Var f”rsiktig, pilgrim. Det vimlar av f„llor och bakh†ll, och du m†ste anv„nda eldkraft fr†n v†r tro f”r
+ att klara dig mot alla som st†r i v„gen. De Saxo „r speciell och f†r inte skadas. Be f”r detta och g”r 
+ditt b„sta f”r att se till att det s† blir.\n
+\n
+N„r tillr„ckligt m†nga m„nniskor „r av v†r tro, skall vi ”ppna en grind i jordens jonosf„r med en 
+radiolins av ultral†g frekvens. Effekten av oh„mmade kosmiska str†lar p† de delar av jordens yta som 
+uts„tts f”r jongrinden, kommer att f”rg”ra n„stan allt. Endast de som st†r f”r v†r sak kommer sparas. Vi
+ skall †terst„lla v„rlden och den skall resas, s„kert i v†r religion.\n
+\n
+Slit f”r v†r sak.\n
+\n
+\c4Virgil\n
+\n
+\c1F”lj den framg†ngsrikare tjuven och stj„l hans id‚er.\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hDu v„lsignade,\n
+\c2\n
+F”rst”r EuroCorps avancerade forskningsanl„ggning n„ra Reykjavik. Eliminera de av EuroCorps agenter du 
+ser.\n
+\c5\n
+Denna platsens historia „r sj„lva fundamentet i Nya Epokens kyrka. H„r kommer du se den r†a essens som 
+leder oss alla att tro. EuroCorp h†ller p† att vanhelga denna plats. Du m†ste med extrem kraft utrota 
+alla agenter du hittar h„r.\n
+\n
+Du m†ste ocks† f”rst”ra alla platser d„r De Nio f”rberedde sina sinnen f”r vishetens fr”. Det „r bara 
+materiell substans, och v†r tro lever och sl†r i v†ra hj„rtan. Vackla inte. F”rst”r. Ingen skada kommer 
+drabba kyrkan nu, f”r Kodexen lever djupt i De Nios sinnen. Bara skuggor av visdom finns kvar i 
+Reykjavik. Var grundlig i ditt arbete, f”r precisionens skull.\n
+\n
+I heliga fotsp†r.\n
+\n
+\c4Virgil\n
+\n
+\c1"H„r!" sade herren. "Bygg mig ett fantastisk gravvalv p† denna plats." Hans l„rlingar gjorde det. Den
+ glittrade i solen. "G† nu in." De gick in. En jordb„vning f”rst”rde sedan gravvalvet, och begravde de 
+som fanns d„r i.\n
+\n
+Herren log. "Inte ens alla trogna „r alltid utvalda.\n
+\n
+"Detta kallas uppoffring."\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hVandra i ljus, l„rjunge.\n
+\c2\n
+Eliminera Mirabelle Lucy De Saxo omedelbart. Du kommer finna henne i den fristad vid Kapsstaden vi gav 
+henne, och vilken vi nu tar bort.\n
+\c5\n
+Ditt hj„rta sl†r bara f”r oss. Ifr†gas„tt aldrig tron n„r den kr„ver handlingar du „nnu inte f”rst†r. De
+ Saxo har inkr„ktat p† oss. De Nio har avsl”jat henne som v†r fiende f”rkroppsligad. Res dit med h„mnd i
+ ditt br”st, och f”rg”r henne.\n
+\n
+De svagsinta kommer vara vid hennes sida. L†t dem k„nna kraften av den riktiga v„gen.\n
+\n
+Vi har n„stan gjort tillr„ckligt f”r att p†b”rja det sista steget i Kataklysmen och f”r„ndra v„rlden 
+bortom alla gr„nser. K„mpa f”r det, medhj„lpare. Du „r utvald och kommer sparas. Miljoner av otrogna 
+kommer att g† under. Vi kommer rensa denna planet.\n
+\n
+H†ll fast vid tron.\n
+\n
+\c4Virgil\n
+\n
+\c1ven salamandern br„nner sig ibland.\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hLyssna p† dessa ord, apostel.\n
+\c2\n
+Den fantastiska kyrkan i Johannesburg har vanhelgats av en sv„rm Ostyrda. En av dem, Rene Galact, „r 
+tydligen den som styr skocken. Han m†ste f”rg”ras i r„ttvisans namn.\n
+\c5\n
+Det „r en of”rl†tligt stor f”rekomst av Ostyrda i staden. Det resta omr†det i stadens sydv„stra del „r 
+nu de utst”ttas f„ste. En stor seger kommer f”das fr†n f”rintelsen av alla dessa som skulle g”mma sig 
+bakom dess irrelevanta v„ggar, och kyrkan kommer rulla n„rmare den slutliga dagen. Det st†r skrivet i 
+Kodexen, l„rjunge.\n
+\n
+G† med eld och j„mnmod.\n
+\n
+\c4Virgil\n
+\n
+\c1Att ta ett liv „r synd. Att ta ett tusen liv „r religion.\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hV„lsignelser, medhj„lpare.\n
+\c2\n
+En n”dsituation har uppst†tt f”r att pr”va oss. En av De Nio har tillf†ngatagits. Han h†lls f”rvarad i 
+ett interneringsl„ger i Adelaide. Du m†ste frita honom och eskortera honom till fristaden.\n
+\c5\n
+Du m†ste be f”r en v„g in till l„gret, och du m†ste bev„pna dig f”r att kunna expediera de otrogna som 
+skulle hugga ned dig p† v„gen. Det „r h„r din tro s„tts p† prov, l„rjunge. Var alert. Lita p† den „kta 
+v„gen och, om det „r meningen, du skall lyckas.\n
+\n
+Res p† heliga v„gar.\n
+\n
+\c4Virgil\n
+\n
+\c1I de m”rkaste tider slipar den „kta troende sin stridsf”rm†ga.\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hL„rjunge.\n
+\c2\n
+Du har tj„nat oss v„l. Nu „r stunden v†r. Stanna d„r du „r och f”lj inte efter oss. Vi kommer forts„tta 
+till jonlinsuppst„llningen sj„lva. N„r vi aktiverar den kommer de som finns kvar p† jorden att f”rg†s. 
+Frukta inte - ditt namn kommer f”r evigt att kommas ih†g och vi skall kalla dig ett helgon av den Nya 
+Epoken.\n
+\c5\n
+M„nskligt liv p† denna planet kommer praktiskt taget att utrotas, och vi skall †terv„nda f”r att 
+†terbefolka jorden med v†ra likar. Detta „r v†rt ”de, och vi skall g”ra det ensamma.\n
+\n
+Alla som nu f”rs”ker stoppa oss kommer utpl†nas av det heligaste protektoratets vakter. Acceptera ditt 
+”de - var inte d†raktig och l„gg dig i. Det heligaste protektoratets makt „r oerh”rd. Stanna d„r du „r 
+och l„gg ned dina vapen, f”r det „r ”ver och vi har vunnit.\n
+\n
+\c4Virgil\n
+\n
+\c1V„rlden skall f”r„ndras och den m„nskliga rasen skall bytas.\n
+\n
+Allt b”rjar om p† nytt. Tron har haft sin g†ng och det „r ”ver.\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hShine, Selfless One.\n
+\c2\n
+Demolish a UTOPIA ground station and wipe out its security garrison.\n
+\c5\n
+Your guidance is required in Bangkok, which we shall soon save from the Syndicate.\n
+\n
+EuroCorp's presence has been contained to a UTOPIA ground station and its security garrison. Already, 
+your brother and sisters gather on the other side of the river, in preparation for making the greatest 
+sacrifice.\n
+\n
+Lead the way. Destroy the buildings which link the chain of slavery EuroCorp calls UTOPIA. Show our 
+followers the way of the Cataclysm by eliminating the security personnel.\n
+\n
+Do this for the Nine.\n
+\n
+\c4Virgil\n
+\n
+\c1The Master held his palms aloft. "Behold my wounds," said He. The onlookers observed the 
+cauterization and the sunlight that shone through His great hands.\n
+\n
+"Let there be pain."\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+\hApostle of the New Epoch.\n
+\c2\n
+There is a task you must perform for us. The Unguided are foolish enough to think they can use our 
+belief against us. Our sources have told us that a contingent of punks have taken civilians hostage. 
+Your team will be sent in against them.\n
+\c5\n
+We have the element of surprise. The Unguided expect us to rescue the hostages. All you must do is 
+destroy the Unguided causing this irritation. Do not worry about the public held to ransom. They are not
+ Churchmembers and mean nothing. Just stop the Unguided in whichever way you choose. Make sure it is 
+permanent.\n
+\n
+\c4Virgil\n
+\n
+\c1When tact is required, use brute force. When force is required, use greater force. When the greatest 
+force is required, use your head. Surprise is everything.\n
+\n
+- Kataklysmens bok.\n
+\c5\n
+# Names.txt
+# Contains all city drop names in the mission number order.
+
+1.
+2.Mission„r
+3.
+4.
+5.
+6.Roms plundring
+7.
+8.
+9.
+10.Ett m”te mellan sinnen
+11.Ormens „gg
+12.Ett dammkorn i guds ”ga
+13.Dj„rvhet
+14.Utj„mnarna
+15.Terrorns regn
+16.Gudars pansar
+17.Grundval
+18.Dekonstruktion
+19.De f”rd”mdas dag
+20.
+21.
+22.
+23.
+24.
+25.
+26.
+27.Test av tron
+28.
+29.
+30.
+31.K„ttare
+32.
+33.Ingen av oss
+34.
+35.
+36.
+37.
+38.
+39.Sj„lens korsriddare
+40.
+41.
+42.
+43.D”dliga sk”rd
+44.Kraftspridare
+45.Vederg„llning
+46.
+47.
+48.Harbinger
+49.
+50.
+51.Konverteringar
+52.Observat”r
+53.Etablera l„nken
+54.
+55.
+56.
+57.
+58.
+59.
+60.
+61.
+62.
+63.
+64.
+65.
+66.
+67.
+68.
+69.
+70.
+71.terta
+72.Gudomliga ljus
+73.Donation
+74.
+75.
+76.
+77.
+78.
+79.
+80.
+81.
+82.
+83.
+84.
+85.Den d”da zonen
+86.
+87.Fallen bland tjuvar
+88.
+89.
+90.
+91.
+92.
+93.
+94.
+95.
+96.
+97.
+98.
+99.
+100.Uppenbarelser
+101.
+102.Kataklysm
+103.
+104.
+105.
+106.
+107.
+108.The Shining
+109.
+110.Unrest
+# Netscan.txt
+# Master file containing all OBJ****.txt files.
+# Files indexed Sn and Cn in Miss***.txt order.
+# Scan entries listed by Points Of Significance (POS).
+[3502]
+Landningsplats: Detroits IML-l„nk
+M†lbyggnad: EuroCorps AI-markstation
+tg„rder mot EuroCorp vakter
+Fristad: Detroits IML-l„nk
+Avlyssning: rekommenderade medel f”r tilltr„de till syndikatets markstation
+[0310]
+Landing Ground: Bangkok Cathedral
+Support acolytes in A-grav APC
+Target installations
+IML branch connections
+tg„rder mot EuroCorp vakter
+Local police have recently escorted armoured cars to the city vault
+[2516]
+Landningsplats: Tripolis IML-l„nk
+V†r meditationstr„dg†rd
+[2546]
+Landningsplats: Tripolis IML-l„nk
+V†r meditationstr„dg†rd
+De du skall skydda fr†n skada
+Fristad: Tripolis IML-l„nk
+Valv: ber„knat v„rde Cr 800,000
+Satellitvarning: agent ID-nycklar av EuroCorp-typ detekterade, sp†r ostabila
+[2602]
+Landningsplats: Buenos Aires IML-l„nk
+Juan Ormandoz arbetar p† detta kontorsomr†de f”r ledningspersonal
+Chico Ramirez och hans g„ng ockuperar denna Gamla Kalender huvudgata
+Fristad: Buenos Aires IML-l„nk
+Avlyssning: stadsvalvet ber„knas inneh†lla Cr 1,000,000
+[2603]
+Landningsplats: Buenos Aires IML-l„nk
+EuroCorp milisgarnisoner
+Fristad: Buenos Aires IML-l„nk
+[0703]
+Landningsplats: APC f”r att avl„mna dina medhj„lpare
+EuroCorp agenters s”komr†de
+Fristad: Santiagos klosterkomplex
+Broar har f”rst”rts i en syndikatattack
+Avlyssning IML-rutt till m†let vaktas av EuroCorp-styrkor
+[2203]
+Landningsplats: Johannesburgs IML-l„nk
+EuroCorp valv
+Guldkonvoj
+M†linvisa fordon
+Konvojens destination
+Fristad: Johannesburgs IML-l„nk
+[2202]
+Landningsplats: Johannesburgs IML-l„nk
+Stadsdistrikt under v†r kontroll
+Dina br”der
+Avlyssning: mixtra med UTOPIA-identitetssignalen uppt„ckt - med fokus kring ing†ngar till transportr”r och detektering av b„rande explosiva anordningar
+[2204]
+Landningsplats: Johannesburgs IML-l„nk
+De Ostyrda
+Rene Galact
+Fristad: Johannesburgs IML-l„nk
+[2146]
+Landningsplats: Geneves IML-l„nk
+EuroCorps konferenscenter
+Dr Schweizer
+Fader Svarts tempel
+[5047]
+Landningsplats: Vancouvers IML-l„nk
+Dr Schweizers laboratorium
+Fristad: Vancouvers IML-l„nk
+Avlyssning: Syndikatagenter detekterade
+[0103]
+Landningsplats: Hong Kongs IML-l„nk
+V†rt tempel och v†ra br”der
+Ostyrdas landningszoner
+Avlyssning: EuroCorp specialagenter (zappare) uts„nda till Hong Kong
+[2831]
+Landningsplats: Roms IML-l„nk
+L†gniv†s bostadszoner invaderade av de Ostyrda
+EuroCorp garnison
+EuroCorp agenter
+Avlyssning: ber„knat valvinneh†ll Cr 400,000
+[0705]
+Landningsplats: Santiagos IML-l„nk
+V†rt tempel
+Fristad: Santiagos IML-l„nk
+Avlyssning: Anfallsgrupp fr†n syndikatet ber„knade att anl„nda p† garnisonerna inom 48 timmar
+[4501]
+Landningsplats: APC destination
+EuroCorp HK
+Ledningsf„rja transporterande Koto Sek
+Fristad: Kairo IML-l„nk
+[4402]
+Landningsplats: APC destination
+H„daren Mirabelle Lucy De Saxo
+Fristad: Cape Town IML-l„nk
+[4147]
+Landningsplats: Bahrains IML-l„nk
+EuroCorp omarbetningszon
+Avlyssning: polisen har f†tt till uppdrag att eskortera en finanschef fr†n EuroCorp p† aff„rer till stadens nordostsida
+[0903]
+Landningsplats: Singapores IML-l„nk
+Valv (tomt)
+M†linvisa fordon A och B
+M”tesplats
+Avlyssning: Fordon As destination
+Avlyssning: Fordon Bs destination
+[3002]
+Landningsplats: London IML-l„nk
+Professor Drennans assistent
+Professor Drennan
+Presentationspodium
+Fristad: London utloppsv„g
+Avlyssning: professorns resplaner inkluderar insamling av data fr†n denna byggnad
+Avlyssning: invasion av de Ostyrda fr†n nordsidan ”verh„ngande
+[0403]
+Landningsplats: New Yorks IML-l„nk
+EuroCorp installationens portar
+Explosionsplats
+M†linvisa byggnad
+Skenman”ver kommer skapas i denna kommersiella zon
+V†rt tempel och satellitl„nken
+Fristad: New Yorks IML-l„nk
+Avlyssning: ber„knat v„rde av valvet Cr 2,000,000
+[2016]
+Landningsplats: Riyadhs IML-l„nk
+M†linvisa bunkrar
+Fristad: Riyadhs IML-l„nk
+[4403]
+Landningsplats: Kapstadens APC destination
+De Saxos kraschplats
+Fristad: Cape Town IML-l„nk
+Avlyssning: EuroCorp-styrka ber„knad ankomst -36 timmar
+[3202]
+Landningsplats: Pekings IML-l„nk
+Hackerns uppeh†llsplats
+Fristad: Pekings IML-l„nk
+Avlyssning: stadsvalvet ber„knas inneh†lla Cr 1,500,000
+[2701]
+Landningsplats: Delhis IML-l„nk
+EuroCorp styrkor p† flodports”n
+De Ostyrda
+Fristad: Delhis IML-l„nk
+[0302]
+Landningsplats: Bangkoks IML-l„nk
+D”da zonens utkanter
+EuroCorp utpost
+Fristad: Bangkoks IML-l„nk
+Ett kommersiellt valv st†r fortfarande h„r
+Satellitvarning: bevis f”r vapentestning vid utpost
+[3602]
+Landningsplats: Christchurchs IML-l„nk A
+Christchurchs IML-l„nk B
+[0603]
+Landningsplats: Adelaides IML-l„nk
+Inh„gnaden h†llande Broder IX
+M”tesplats
+Syndikat MBT utplacering
+[4602]
+Landningsplats: Colombos skyttelplats f”r ledningspersoner
+Din r„tta plats
+Colombo omloppsbanehiss
+Anti-missil system f”r hiss
+[1002]
+Landningsplats: Phoenixtemplet
+Ostyrdas gisslantagare
+Sanctuary: Phoenix Temple
+[6503]
+[7931]
+[0801]
+[1101]
+[6502]
+[7902]
+ELIMINERA DE OSTYRDA
+TERVND TILL HK
+™VERTALA YAMAGUCHIS TEKNIKER
+EVAKUERA
+TEKNIKERS D™DSOLYCKA
+™VERTALA YAMAGUCHIS LEDNING
+LEDARES D™DSOLYCKA
+NEUTRALISERA YAMAGUCHIS AGENTER
+AGENTS D™DSOLYCKA
+™VERTALA BLUESKYS VETENSKAPSMN
+™VERTALA BLUESKYS VETENSKAPSMAN
+UPPDRAGSUPPDATERING: ELIMINERA OSTYRDA HOT
+ESKORTERA VETENSKAPSMN TILL IML-LNK
+STJL GULDBIL
+GULDBILEN HAR F™RST™RTS
+GULDBILEN HAR NTT TANGS HK
+LEVERERA BILEN TILL EVAKUERINGSZONEN
+STJL ARTEFAKT FRN TEMPLET
+LEVERERA ARTEFAKT TILL EVAKUERINGSZON
+AVLGSNA OSTYRDAS FSTEN
+ELIMINERA UPPRORSMAKARE
+STERILISERA SEKTOR
+ELIMINERA VAKTER
+ELIMINERA AGENT
+™VERTALA AGENT
+MLAGENT HAR D™TT
+MLAGENT HAR FLYTT
+™VERTALA NAA ANSTLLD
+™VERTALA JENNIFER TAKS
+ESKORTERA TAKS TILL IML-LNK
+JENNIFER TAKS R D™D
+ELIMINERA FANATIKER
+™VERTALA GEL DATAS VETENSKAPSMAN
+™VERTALA GEL DATAS VETENSKAPSMN
+™VERTALA HEXAGONS VETENSKAPSMAN
+™VERTALA HEXAGONS VETENSKAPSMN
+ESKORTERA VETENSKAPSMAN TILL IML-LNK
+ESKORTERA VETENSKAPSMN TILL IML-LNK
+UPPDATERING: ELIMINERA FANATIKERHOT
+FORDON F™RST™RT: AGENTER STRANDSATTA
+VETENSKAPSMAN F™RLORAD
+™VERTALA C3 VETENSKAPSMN
+C3 VETENSKAPSMN ELIMINERADE
+LABORATORIUM F™RST™RT
+FACILITET F™RST™RD
+STERILISERA STAD
+SKYDDA DRENNAN
+SKYDDA PROFESSORNS ASSISTENT
+SKYDDA LEDARE
+PROFESSOR DRENNAN R D™D
+PROFESSOR DRENNANS MEDHJLPARE R D™D
+EUROCORP LEDARE HAR SLAGITS UT
+RDDA PROFESSOR DRENNAN
+ESKORTERA PROFESSOR DRENNAN TILL EUROCORP FACILITET
+UPPDRAGSUPPDATERING: EVAKUERA ALL PERSONAL
+EVAKUERING MISSLYCKAD
+™VERTALA MIRABELLE LUCY DE SAXO
+DE SAXO HAR FLYTT: NYA ORDER TILLGNGLIGA
+ELIMINERA MIRABELLE LUCY DE SAXO
+KROSSA UPPRORET
+ELIMINERA OSTYRDA REBELLER
+SKYDDA BAHRAINS AI
+BAHRAINS AI HAR F™RST™RTS
+SKRA OMLOPPSBANANS HISS
+OTILLRCKLIGT MED AGENTER F™R ATT AVSLUTA UPPDRAG
+OMLOPPSBANANS HISS HAR F™RST™RTS
+RYMDSTATIONEN HAR F™RST™RTS
+SKAFFA RYMDFRJANS NAVIGATIONSDATOR
+STATIONENS SJLVF™RST™RELSE AKTIVERAD: AVAKTIVERA
+SKAFFA RYMDFRJANS LIVSST™DSMODUL
+TILLTRD MNFRJAN
+ELIMINERA DE NIO
+DE NIO HAR AKTIVERAT JONGRINDEN. DU HAR BESEGRATS.
+ELIMINERA DE OSTYRDA HEDNINGARNA
+VR TRDGRD F™R MEDITATION HAR F™RST™RTS
+KONVERTERA EUROCORP AGENT
+ESKORTERA AGENT TILL IML-LNKEN
+DITT ML HAR ELIMINERATS
+DITT ML HAR FLYTT
+SKAFFA EKONOMISKA MEDEL
+DITT BYTE HAR F™RLORATS
+TA DR SCHWEIZER TILL FADER SVART
+DR SCHWEIZER R D™D
+FADER SVART R D™D
+SKYDDA DINA BR™DER OCH TEMPLET
+ALLA DIN BR™DER R D™DA
+TEMPLET HAR F™RST™RTS
+KUVA DE OTROGNA
+STRAFFA UPPRORSMAKARNA
+F™RINTA KAOSENS STYRKOR
+F™RST™R DEN OSTYRDA OHYRAN
+SL UT EUROCORPS PERSONAL
+ELIMINERA EUROCORPS AGENTER
+ASSISTERA FANATIKER
+D™DA SABOT™REN
+BESEGRA SKNDARNA
+SKYDDA MEDHJLPARNAS ORDEN
+MEDHJLPARNAS ORDEN HAR ELIMINERATS HELT
+LEVERERA GULDBIL TILL SAMLINGSPUNKTEN
+GULDBILEN HAR F™RST™RTS
+D™DA PROFESSORNS ASSISTENT
+TA ASSISTENTENS PLATS VID PROFESSORNS SIDA
+SAMLA VIDEODATA TILL F™RELSNING
+G TILL PODIUM
+NRVAR VID F™RELSNING
+ESKORTERA PROFESSOR DRENNAN
+PROFESSORN HAR M™TT SIN ASSISTENT
+PROFESSORN R D™D
+MIRABELLE LUCY DE SAXO R D™D
+F™RST™R EUROCORPS VAPENBUNKER
+STJL EUROCORPS VAPENDESIGN
+LADDA UPP VAPENDESIGN
+TERVND
+MEDHJLPARNA STRANDSATTA: KAN INTE FULLF™LJA UPPDRAG
+D™DA HACKER
+ELIMINERA STYRKORNA SOM KONTROLLERAR FLODPORT
+TERVND TILL IML-LNK
+KIDNAPPA EUROCORPS FNGE
+MLET HAR ELININERATS
+F™RST™R FORSKNINGSFACILITETER
+ELIMINERA AGENTER FRN EUROCORP
+DE SAXO MSTE G UNDER
+LMNA DENNA PLATS
+UNDERKUVA DE OSTYRDA
+S™K UPP OCH F™RG™R UPPRORETS LEDARE
+RDDA IX OCH F™R HONOM TILL M™TESPLATSEN
+SKYDDA IX
+DU HAR LTIT IX G UNDER
+INGET KAN STOPPA DE NIO NU. DU HAR BESEGRATS.
+G™R INGENTING: LYD DE NIO
+KONTROLLEN ™VER STADEN F™RLORAD: KYRKFANATIKER HAR KONVERTERAT ALLA MEDBORGARE
+ELIMINERA INKRKTAREN
+ELIMINERA INKRKTARE
+™VERTALA INFILTRAT™R
+FORTSTT TILL IML-LNK
+MLET ELIMINERAT
+AKTIVERA IML-LNK
+IML-LNK F™RST™RD
+ELIMINERA AGENTER
+TA DIG IN I BUNKER: FRIG™R VIRUS
+AVVIK
+RETRTT
+KONVERTERA ORMANDOZ
+KONVERTERA RAMIREZ
+TA DEM ALLA TILL OSS
+DU HAR LTIT ORMANDOZ G UNDER
+DU HAR LTIT RAMIREZ G UNDER
+STJL DR SCHWEIZERS ARBETE
+TERVND TILL OSS
+EUROCORP AGENTER MSTE G MED OSS ELLER D™
+NEUTRALISERA EUROCORP AGENTER
+D™DA KOTO SEK
+NEUTRALISERA ALLA EUROCORP AGENTER
+LT INGENTING HNDA DE SAXO
+TA KONTROLL ™VER IML-LNKEN
+VR VLSIGNADE DOTTER R D™D
+DU KOMMER D™ F™R DETTA KTTERI!
+EUROCORP MSTE VLJA MELLAN VRT ™DE OCH D™DEN
+S™K FRISTAD
+HOPPA IN
+™VERTALA BLUESKYS VETENSKAPSMAN
+DITT ML HAR FLYTT
+ML ™VERTALAT
+OSKADLIGG™R AGENT
+S™K OCH F™RST™R - KATEGORI U - OSTYRDA MEDBORGARE
+UPPDATERING AV UPPDRAGET: ELIMINERA SEKTMEDLEMMAR
+PROFESSOR KLEIN UPPTCKT - ™VERTALA PROFESSORN
+SKYDDA PROFESSOR KLEIN - EVAKUERA
+PROFESSOR KLEIN R D™D
+F™RST™R MARKSTATIONEN
+SL VR FIENDE
+[header_win]
+[message_win]
+S† din tro p† dig sj„lv har visat sig vara triumferande. Du har inte bara omintetgjort De Nios vanvettiga plan att omskapa den m„nskliga rasen genom att klona sig sj„lva, du har dessutom tagit besittning ”ver det mest destruktiva vapen som n„gonsin byggts.
+
+P† jorden ligger syndikatets UTOPIA i ruiner. Miljoner h”r Ko-Paull Vissicks r”st kalla p† en anledning att segra.
+
+Men l†t din vilja ske.
+[weapons]
+UZI
+Gammalmodigt personligt f”rsvarsvapen. De sk”t fr†n b”rjan kemiskt framdrivande kinetisk ammunition. Denna uppdaterade version „r mer p†litlig, eftersom den anv„nder sig av en personlig energicell f”r att avfyra varje salva. Trots det „r Uzin en †terg†ng till det f”rg†ngna, och d„rf”r anser vi den vara praktiskt taget f”rlegad. Nya Epokens kyrka arbetar p† m†nga helt ”verl„gsna vapen att erbjuda sina l„rjungar.
+MINIGUN
+ven om den „r n†got av ett museif”rem†l, „r denna kinetiska roterande kanon klart ”verl„gsen Uzin och effektivare mot fiender till v†r tro. Precis som Uzin har den uppdaterats med en personlig energicell. Dess nackdelar „r att den „r otymplig och ljudlig, men detta uppv„gs av dess r„ckvidd och f”rst”relsekraft. N„r flera anv„nds samtidigt, „r de effektiva mot fordon.
+ELLASER
+De Nio har sett ljusets sub-fotons struktur och frisl„ppt dess hemligheter. Deras heliga forskning har utvecklat en jonfokus som ”verf”r blixtar p† ett m†l. Detta vapens r„ckvidd „r vida ”verl„gsen kinetiska energivapens, och den fungerar speciellt effektivt p† ledande st†l.
+LASER
+V†ra skriftl„rda har utvecklat ett effektivt vapen baserat p† den konventionella lasern. TriSodium 89 sprutas in i pulslaserns avfyrningskammare d„r den lasras elektriskt. Gasets tryck i avfyrningskammaren kan ”kas genom att avtryckaren h†lls ned, vilket g”r att vapnet ”verbelastas och blir effektivare.
+BEAM
+Denna anv„nder den kombinerade energin av accelererade elektroner f”r att skjuta en str”m av ostabil energi l„ngs en magnetisk b„rv„g. Ett signifikant framsteg f”r kyrkan, och ett som bevisar v„rdet av De Nios lektioner.
+RAP
+En implosionsgranat avfyras mot m†let, och anv„nder sin egen styrning f”r att garantera detonation vid tr„ff. Avfyrare anv„nder monopol„ra acceleratorsl„dar f”r att garantera en imponerande r„ckvidd, och de som „r utsedda till m†l kan s„llan undfly det gyrom†ls”kande systemet. Detta superba vapen „r ocks† anv„ndbart f”r att skapa omr†deseld. Auto-omladdningstiden l„mnar v†ra heliga medhj„lpare tempor„rt s†rbara.
+NUCLGREN
+Trons ljus kommer synas p† m†nga mils avst†nd n„r en k„rngranat detoneras i kyrkans namn. Anv„nd den med omsorg, apostel - f”rst”relsef”rm†gan hos detta vapen „r omfattande. Se till att du l„mnar omr†det innan den faller. L„gg ocks† m„rke till dess effektivitet mot strukturer och grupper. Att anv„nda denna pryl mot en enstaka individ skulle vara det samma som att h„da.
+PERSUADER
+V†r f”rsamling v„xer f”r var dag som g„r. Vissa sj„lar „r dock motstridiga till den v„g av tro vi erbjuder. D„rf”r har vi indoktrinatorn. Den predikar direkt allt vi vet „r sant rakt in i sinnena p† de som inte tror. Hur skulle n†gon kunna motst† denna st”rtskur av kunskap och vishet?
+FLAMER
+De som inte godtar r„ttf„rdighetens v„g kan f”rv„nta sig att brinna f”r evigt. Dessa magnox eldkastare „r deras f”rsta smak av den eviga elden. De har l†ngt ifr†n den r„ckvidd som energi eller ens kinetiska vapen har, men de har „nd† sina anv„ndningsomr„den (som i folkmassor t.ex.). De inspirerar ocks† till den fruktan och underkastelse vi s”ker.
+H2HTASER
+Denna lilla bekv„ma produkt om-”vertalar sitt m†l eller m†lets ”vertalade f”ljare med ett minimum av br†k. ven om avbrytaren inte „r ett riktigt alternativ till de f”rst”relsevapen som tillhandah†lls av v†ra vetenskapsm„n och v„lg”rare, „r den storlslaget omst”rtande.
+CRAZYGAS
+Psykogas utvinns fr†n ett fr„mmande svampnarkotikum, och „r det idealiska vapnet f”r att orsaka storskalig ”del„ggelse. Om den skjuts in i en grupp civila, kommer den direkt provocera fram ett okontrollerbart upplopp. Detta tvingar myndigheterna att ”ka sin energi p† att †terta kontrollen, vilket g”r att dina heliga medhj„lpare kan forts„tta med sitt uppdrag.
+KOGAS
+Denna r”kelse producerar ett moln som f„ller alla oskyddade m†l som tr„ffas av det. Enkelhet „r v„lkommen n„r den kan bli effektiv.
+ELEMINE
+Sm„ller av om fiendeaktivitet k„nns av i omgivningen. Jonminan s„nder ut kl„ngen av elektrisk energi i alla riktningar, och „r extremt effektiv mot trons fiender till fot eller i fordon. Dess energism„ll kommer ocks„ p†verka CHIP-statusen p† de som f†ngas upp av den.
+EXPLMINE
+En konventionell mina vilken anv„nder ett tidsstyrt t„ndr”r inb„ddad i en riktad detonationsladdning. Ett anv„ndbart vapen att anv„nda mot stridsvagnar eller andra bepansrade fordon.
+LONGRANGE
+V†rt gudomliga arbete kallar ibland p† eliminering av individer snarare „n hela grupper. L†ngdistansgev„ret skjuter uraniumt”mda kinetiska salvor med stor noggrannhet p† l†nga avst†nd. F† komponenter i kroppspansar kan st† emot den tryckchock dessa avancerade kulor ger. Normalt kommer ett skott s„nka m†let, och du kan d„refter fly obem„rkt.
+AIRSTRIKE
+Vi kan f† tag p† uppskjutningskoder f”r m†nga av de geostation„ra satelliter som h„nger ovanf”r v†r planet, men de datorkostnader som „r involverade i att kn„cka syndikatets krypterade s„kerhetsl†s „r h”ga. N„r du aktiverar ett slag, kommer den satellit som „r n„rmast m†linvisa din best„mda position och skjuta ner †skviggar av blandningen tungsten-uranium vilka kommer superupphettas i atmosf„ren och orsaka massiv f”rst”relse runt hela omr†det.
+QDEVASTATOR
+Detta „r det vapen med st”rst f”rst”relsekraft som De Nio kunnat g”ra mobilt. Gravitonvapnet kan frig”ra tillr„ckligt mycket energi f”r att reducera ett berg till stenblock. Sk†da De Nios vrede!
+RAZORWIRE
+En spole av h”gelastisk wire med motsatt spunna hullingar. Rakbladswire „r sv†r att uppt„cka, speciellt i stridsituationer. Placera den p† strategiska platser, s† g”r motst„ndarna resten sj„lva d† de traskar in i den. Ett vapen vilket har klarat tidens test v„l.
+STASISFLD
+Endast verkliga gudar skulle kunna ta fram en sak som denna. N„r du aktiverar den, skapas en kupol av atomiskt stabilt subtemporalt utrymme. Denna har en effekt att dramtiskt sl”a ner den eller det som f†ngas i kupolen, vilket under †rhundraden som h„xerier n„r det upptr„tt naturligt. Det „r en syn att be f”r.
+SOULGUN
+V†ra vetenskapsm„n har nystat upp fler av Kodexens mystiska hemligheter, och byggt en manick som kan exportera de naturliga elektrokemiska krafter som finns inuti celler hos alla organiska strukturer. Denna suger upp energin fr†n allt levande och d”tt, s† l„nge som den cellul„ra inte har f”rst”rts. Prisa De Nio f”r deras vision, medhj„lpare.
+TIMEGUN
+Kodexen har givit oss denna. Genom att anv„nda h„xtid „nnu mer, kan du nu transportera fiender till andra temporala plan. Effektivt en tidsvridare, denna „r perfekt f”r att f† ett m†l att f”rsvinna. Den kan anv„ndas p† din egen grupp, men var f”rsiktig; effekterna „r inte helt klarlagda.
+CEREBUSIFF
+En vaktrobot p† vilken en h”gkraftslaser „r fastsatt. En termor”relsedetektor inbyggd i basenheten „r ansluten till en l„sare f”r ID-nycklar, och om den plockar upp ok„nda r”relser avfyrar den. Dessa vaktenheter „r effektivast p† ”ppna ytor med ett brett synf„lt.
+MEDI1
+Tro p† kyrkan s† tar den hand om dig. N„r en eller flera av dina l„rjungar skadas i det heliga kriget mot EuroCorp, kan du anv„nda denna enhet f”r att †terst„lla deras h„lsa och kondition. En s†dan h„r enhet demonstrerar den v†rd och omsorg p† vilken Nya Epokens kyrka „r grundad.
+MEDI2
+En avancerad †terst„llningsenhet vilken kan ta hand om dina s†r och skador utan att distrahera n†gon medlem av din grupp. Ett ov„rdebart till„gg f”r alla utrustningspaket som anv„nds av de som „r verksamma med att sprida trons ord i Kataklysmen.
+EXPLWIRE
+En f”rs†tf„lla vilken, om den s„tts p† r„tt plats, kommer f”rg”ra alla som v†gar sig genom den molekyl„ra kabelspridningen mellan tv† punkter. Omedvetet kommer fienden s„tta ig†ng en sm„ll, vilken g”r dem till ett hinder mindre f”r spridningen av v†r religion.
+CLONESHLD
+Denna manick kan g”ra en av dina grupper om”jliga att uppt„cka. F”r EuroCorp och andra kommer de se ut som en harml”s direkt”r, och kommer att kunna g† genom vapenkontrollzoner d„r v†ra medhj„lpare nomalt inte skulle kunna ta sig igenom. Den perfekta f”rkl„dnanden och extremt anv„ndbar f”r hemliga operationer i kyrkans namn.
+[mods]
+LEGS1
+V†r tid „r nu. Vi f†r inte sl”sa bort den. Varje nanosekund „r helig. Dina medhj„lpare m†ste agera med snabbhet och vig”r. Genom att ta bort deras d”dliga k”tt och byta ut det med denna makal”sa teknologi, enligt beskrivningen i Kodexens l„ror, kommer du ge dem mer av b†da.
+LEGS2
+M† lektionerna av de fraktala psalmerna alltid upplysa oss. Kosmos hemligheter har frisl„ppts f”r att skapa material p† s„tt som f”rnekas av gravitationens lagar. Genom f”rst†ndig anv„ndning av v†rt kapital, har vi anv„nt s†dana s„llsynta substanser f”r att skapa dessa ”verl„gsna benproteser.
+LEGS3
+F”r att spara en sj„l m†ste man f”rst investera i den fr„msta teknologin i den. V„lsignade „r de som vandrar p† fast mark med det heliga „ndam†let i sina steg. L†t dem personifiera allting kyrkan st†r f”r; utrusta dina medhj„lpare med De Nios finaste arbete.
+ARMS1
+M† ditt m†lsikte alltid vara „kta. Till detta kan cybernetiska armf”rb„ttringar vara en signifikant f”rb„ttring. Den extra pansar de erbjuder, ”kar ocks„ dina medhj„lpares ”verlevnadsf”rm†ga. Medhj„lpare med armproteser kan ocks† kasta objekt l„ngre.
+ARMS2
+V†rt s„tt „r att binda mannen och maskinen. Om man f”rb„ttrar mannen, skall man ocks† f”rb„ttra maskinen. De nya konstruktionstekniker dessa armmodeller anv„nder sig av, f”rb„ttrar alla de f”rdelar cybernetiska armar ger dina medhj„lpare. Tacka De Nio.
+ARMS3
+Nu n„r Kataklysmen n„rmar sig, „r det bara de starkaste som talar. De massiva vapen vi anv„nder kr„ver massiv styrka att anv„nda. Med dessa armar kommer dina medhj„lpare att kunna hantera hj„lpmedlen till v†r seger och ha kraften att l„gga ned alla som f”rs”ker f”rhindra Kataklysmen.
+CHEST1
+De trognas v„g „r markerad av kontinuerlig cybernetisk f”rb„ttring. S†lunda b”rjar resan till fr„lsning h„r. Denna sofistikerade artificiella torso, vilken f”rb„ttrar uth†lligheten och h„lsan f”r en l„rjunge, tj„nstg”r ocks„ som ankaret f”r andra proteser.
+CHEST2
+Sj„len kanske „r of”rst”rbar men kroppen „r det inte. Om f”r m†nga av v†ra medhj„lpare g”r den ultimata uppoffringen, v„lsigna dem med dessa l„ttvikts, skummetallskl„dda, br”st och andningssystem.
+CHEST3
+En stor tid av f”r„ndring „r p† v„g; en s†dan tid kr„ver att stor styrka tas fram. En l„rjunge modifierad med detta sofistikerade, heliga material „r inte r„dd f”r n„got. Dina upplysta br”der kommer att kunna g† genom moln av nervgas utan att bli p†verkade. Sk†da, pansaret av dem som ger oss Kataklysmen!
+BRAIN1
+D† v†rt uppdrag forts„tter, v„xer utmaningen mot v†ra aktiviteter. ™ka dina medhj„lpares uppfattningsf”rm†ga och h„lsa, s† kommer massorna sl† sig sj„lva till marken. D† skall sedan den Nya epokens kyrka bli k„nd.
+BRAIN2
+K„nn din fiende och k„nn honom p† l†ngt avst†nd, s† du kan f”rbereda utpl†ningen av honom. De Nio har v„nt sin uppm„rksamhet till kraven p† v†ra medhj„lpare, d† de f”rbereder v„gen f”r Kataklysmen. F”rb„ttra dina medhj„lpares intellekt med nya hj„rnor.
+BRAIN3
+Sinnet av en gud „r sinnet av en maskin. F”r f”rst„rkt medvetenhet bortom gr„nserna f”r vad biologi klarar, utrusta dina medhj„lpare med det ultimata inom mobil AI. Med f”rst†else kommer fantastisk kraft. F”rkroppsliga denna f”rst†else och anv„nd kraften.
+SKIN1
+Ibland lyckas v†ran EuroCorp fiende skapa n†gon innovativ teknologi. Fr†n denna cyberskinnsritning kan vi producera en b„ttre hud „n traditionellt plaskinn. Ett foder av molekylv„v fastsatt p† antischocktypen av mikroskum kommer g”ra de medhj„lpare som b„r det n„stan o”vervinnliga vid beskjutning av kinetiska slavor.
+SKIN2
+Hetta „r en av de stridandes fiender. V†ra fiender har anst„ngt sig och funnit den l”sning som beskrivs i dessa dokument. Genom att anv„nda rymdmaterial har de en fungerade ritning p† ett cyberskinn som kan g”ra v†ra medhj„lpare resistenta mot eld och termisk energi.
+SKIN3
+Till och med De Nio var imponerade av konceptet bakom dessa forskningsuppt„ckter. Genom att anv„nda viss Kodexteknologi - f”rvr„ngd genom deras s„mre f”rst†nd - var EuroCorp v„ldigt n„ra att v„va spektral vaskteknologi till cyberskinn, vilket skulle skyddat deras agenter fr†n den fulla effekten av elektromagnetiska vapen. Intressant. Vi kan nu avsluta deras arbete och anv„nda denna teknologi sj„lva.
+SKIN4
+EuroCorp ger aldrig upp med att f”rs”ka t„vla mot v†r ”verl„gsnare teknologi. Trots det indikerar dessa dokument att de kommit upp med n†gonting speciellt. Detta „r instruktionerna f”r hur man tillverkar cyberskinn med viss klonssk”ldsteknik; n„rmare best„mt, detta skinn reflekterar signalen av en civil ledare till UTOPIAs scanners, och lyckas d„rmed d”lja ett hot tills det blir synligt. Vi kan anv„nda denna teknik sj„lva.

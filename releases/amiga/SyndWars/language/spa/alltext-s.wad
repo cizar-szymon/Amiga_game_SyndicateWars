@@ -1,0 +1,1647 @@
+# == map screen text ==
+# map screen title
+#UTOPIA
+# map screen headings
+Inicio
+Claves UTOPIA
+Infra-structura
+Dialecto
+Comercio
+Poluci¢n
+
+# city data
+
+Londres
+21.13 M
+Post-industrial
+InglÇs Com£n
+Software, Finanzas
+Desechos Qu°micos y Humanos
+
+Detroit
+10.98 M
+Urbana Compleja
+Nuevo Americano
+Fabricaci¢n de Veh°culos
+Industria Pesada, Residuos Radiactivos
+
+Hong Kong
+17.55 M
+Urbana Compleja
+Indochino
+Pl†sticos con Memoria
+Industria Ligera
+
+Beijing
+38.89 M
+Ultra-ciudad
+Proto-Mandar°n
+Pl†sticos, Hardware
+Residuos Radiactivos y Humanos
+
+Viena
+6.99 M
+Urbana Sencilla
+C.E.C. (Centro Europeo Com£n)
+Reprocesado de Minerales
+Industria Ligera
+
+Ginebra
+7.65 M
+Urbana Sencilla
+C.E.C. (Centro Europeo Com£n)
+Depuraci¢n de Agua y Aire
+Residuos Radiactivos
+
+Salzburgo
+9.27 M
+Urbana Compleja
+Nuevo-Eslavo
+Repoblaci¢n Vegetal
+Industria Ligera
+
+Singapur
+21.71 M
+Ultra-ciudad
+Pseudo-Malayo
+Hardware, Depuraci¢n de Agua
+Residuos Humanos Industria Pesada
+
+Phoenix
+13.26 M
+Urbana Compleja
+Americano Continen-tal
+Generaci¢n Energ°a
+Residuos Radiactivos
+
+Roma
+10.92 M
+Post-Industrial
+Lat°n Com£n
+Bienes de Consumo
+Industria Pesada
+
+Al Manamah
+10.98 M
+Urbana Compleja
+Nuevo †rabe
+Refinado de Petr¢leo, Procesado de Minerales
+Desechos Qu°micos
+
+Nueva York
+25.24 M
+Post-Industrial
+InglÇs Culto
+Fabricaci¢n de Armamento
+Industria Ultra-Pesada, Residuos Radiactivos y Humanos
+
+Santiago
+7.81 M
+Urbana Compleja
+Nuevo Espa§ol
+Producci¢n de Caucho
+Desechos Qu°micos
+
+Buenos Aires
+15.71 M
+Ultra-ciudad
+Modul
+Manufactura de Alimentos
+Industria Pesada, Residuos Humanos
+
+Ciudad del Cabo
+10.27 M
+Urbana Compleja
+Afrikaans (Antiguo)
+Procesado de Minerales
+Industria Pesada
+
+Adelaida
+8.7 M
+Urbana Sencilla
+Sub-InglÇs
+Manufacturas, Ganader°a
+Desechos Qu°micos y Animales
+
+Christchurch
+4.9 M
+Urbana Sencilla
+Bahasa
+Textil, Manufactura de Alimentos
+Desechos Qu°micos
+
+Reikiavik
+4.37 M
+Urbana Sencilla
+Demi-Scando
+Depuraci¢n de Agua y Aire
+Residuos Radiactivos
+
+Mosc£
+16.54 M
+Urbana Compleja
+Moldavo
+Textil, Destiler°as
+Lluvia Radiactiva, Residuos Humanos
+
+Tokio
+16.70 M
+Ultra-ciudad
+Neo-Japones
+Alta Tecnolog°a, Finanzas
+Industria Pesada
+
+Bangkok
+24.37 M
+Ultra-ciudad
+Pseudo-Thai
+Simulantes, Turismo
+Desechos Qu°micos y Humanos
+
+Honolulu
+7.01 M
+Urbana Sencilla
+Nuevo Americano
+Depuraci¢n de Agua y Aire
+Industria Ligera
+
+Johannesburgo
+15.64 M
+Urbana Compleja
+Afrikaans (Antiguo)
+Procesado de Minerales
+Industria Pesada
+
+El Cairo
+3.16 M
+Urbana Sencilla
+Nuevo †rabe
+AntigÅedades, Turismo
+Desechos Qu°micos
+
+Nueva Delhi
+28.73 M
+Ultra-ciudad
+Proto-Hind£
+Ropa Inteligente
+Industria Pesada, Desechos Qu°micos y Humanos
+
+Sevastopol
+9.26 M
+Urbana Compleja
+Moldavo
+Destilaci¢n
+Lluvia Radiactiva
+
+Tr°poli
+8.73 M
+Urbana Compleja
+µrabe (antiguo)
+Refinado de Petr¢leo
+Lluvia Radiactiva
+
+Riyadh
+2.03 M
+Urbana Sencilla
+Nuevo †rabe
+Refinado de Petr¢leo
+Industria Pesada
+
+Colombo
+3.35 M
+Urbana Sencilla
+Nuevo Sinhalese
+Depuraci¢n de Agua y Aire
+Residuos Radiactivos
+
+Estaci¢n Orbital Colombo
+0.0001 M
+Experimental
+TÇcnico EuroCorp
+Transporte Interestelar, Microgravedad
+Nada
+
+Matochkin Shar
+0.017 M
+Urbana Sencilla
+Proto-Moldavo
+Reprocesado de Aire
+Industria Ligera
+
+Voss
+0.023 M
+Urbana Subdesa-rrollada
+Omni-Scando
+Silvi-cultura
+Industria Ligera
+
+Omsk
+0.48 M
+Urbana Sencilla
+Ruso (Antiguo)
+Destilaci¢n
+Lluvia Radiactiva
+
+Beirut
+0.75 M
+Urbana Subdesa-rrollada
+Nuevo †rabe
+Fabricaci¢n de Armamento
+Desechos Qu°micos y Humanos
+
+Ulan Bator
+0.274 M
+Urbana Subdesa-rrollada
+Mongol-Chino
+Extracci¢n de mineral
+Lluvia Radiactiva
+
+Se£l
+6.5 M
+Urbana Compleja
+Coreano Unificado
+Procesado Qu°mico, Autom¢viles
+Desechos Qu°micos, Industria Pesada
+
+Hanoi
+3.3 M
+Urbana Sencilla
+Mandar°n Zonal
+Ganader°a, Reprocesado de Vegetales
+Residuos Animales y Qu°micos
+
+Manila
+8.5 M
+Urbana Compleja
+Mandar°n Zonal
+Carpinter°a
+Industria Ligera
+
+Freetown
+0.18 M
+Urbana Subdesa-rrollada
+Afrikaans
+Procesado de Minerales
+Industria Ligera
+
+Monrovia
+0.65 M
+Urbana Subdesa-rrollada
+Afrikaans
+Destilaci¢n
+Industria Ligera
+
+Lagos
+1.25 M
+Urbana Sencilla
+Afrikaans
+Extracci¢n de mineral
+Industria Pesada
+
+Nairobi
+2.3 M
+Urbana Sencilla
+Somal° Neutral
+Animal Husbandry, Curtidos
+Industria Ligera
+
+Port Moresby
+0.93 M
+Urbana Subdesa-rrollada
+Bahasa
+Extracci¢n de mineral
+Desechos Qu°micos
+
+Anchorage
+2.2 M
+Urbana Sencilla
+Anglocir°lico
+Depuraci¢n de Agua
+Alta Radiaci¢n, Industria Ligera
+
+Vancouver
+3.5 M
+Urbana Compleja
+Lingvo Pseud
+Procesado MagnÇtico
+Industria Pesada
+
+Nuuk
+0.065 M
+Municipio
+Demi-Scando
+Aire
+Radiactividad Baja
+
+Georgetown
+0.08 M
+Urbana Subdesa-rrollada
+Espania
+Extracci¢n de Minerales
+Desechos Qu°micos
+
+Lima
+3.4 M
+Urbana Compleja
+Espania
+Fabricaci¢n de Armamento
+Industria Pesada, Residuos Radiactivos
+
+Sao Paulo
+18.9 M
+Ultra-ciudad
+PortuguÇs (Antiguo)
+Extracci¢n de Minerales
+Residuos Radiactivos Industria Ligera
+ACCIDENTE EN LABORATORIO
+CAUSAS NATURALES
+INFECCION VIRICA
+ERROR EXPERIMENTAL
+ERROR DE CALCULO
+DEDUCCION ILOGICA
+ILUSION TERMINAL
+JUICIO PRECIPITADO
+RAZONAMIENTO EQUIVOCADO
+DEMENCIA
+NEGLIGENCIA
+PROCEDER ARRIESGADO
+COLAPSO MENTAL
+AVERIA DEL EQUIPO
+PRUEBA SIN EXITO
+PARO CARDIACO
+ASUNCION INCORRECTA
+ELECTROCUCION
+DESINTEGRACION
+ACCIDENTE
+\hTipo de Mensaje: DIRECTO\n
+\n
+Prioridad: 3\n
+\n
+Principio del mensaje:\n
+\c2\n
+Ordenes\n
+\n
+Londres: Se ha informado de la violaci¢n de c¢digos de comportamiento de civiles de categor°a D, dentro 
+de un †rea kilomÇtrica de esta subestaci¢n. Seleccionar agentes. Sofocar el desorden.\n
+\c5\n
+Se ha informado de un extra§o mal funcionamiento de los chips de UTOPIA. El mal funcionamiento consiste 
+en un totalabandono, fallo total del CHIP. La categor°a de los ciudadanos es D: Descontrolados.\n
+\n
+\c4N£cleo EuroCorp 0-1-0/171261/26D: Inteligencia Artificial de Londres, UTOPIA\n
+\n
+\c4U\c3niversal \c4T\c3ransferred \c4O\c3rganic \c4P\c3rocessing \c4I\c3nterface \c4A\c3rchitecture\n
+\c5\n
+\hTipo de Mensaje: HARDWIRED\n
+\n
+Prioridad: 1 - Emergencia\n
+\n
+Principio del mensaje:\n
+\c2\n
+Ordenes\n
+\n
+Detroit: Buscar miembros de la Iglesia de la Nueva Era y terminar con ellos. Categor°a neutral D: 
+Ciudadanos Descontrolados.\n
+\c5\n
+Atenci¢n, Ejecutivo \l. Soy el Agente de UTOPIA Maritz, de Inteligencia EuroCorp.\n
+\n
+La situaci¢n es cr°tica. UTOPIA ha sido atacada. La infraestructura de informaci¢n de EuroCorp est† 
+comprometida. Se ha iniciado el proceso de emergencia.\n
+\n
+Estoy enviando todas las decisiones de mando de EuroCorpa las copias de seguridad de I.A. Te transmitirÇ
+ los an†lisis y ¢rdenes. Repito, el mando supremo de EuroCorp se est† transfiriendo a Inteligencia 
+Artificial de Londres. La primera orden en pie es reconstruir UTOPIA, si es necesario, desde el 
+principio.\n
+\n
+Ya se est† haciendo una valoraci¢n inicial de la situaci¢n. La formulaci¢n de misiones continuar†.\n
+\n
+Dirigir†s agentes para ejecutar estas misiones.\n
+\n
+La situaci¢n general parece mala. Se ha lanzado un ataque global Sobre el Sindicato. La base de I. A. 
+deUTOPIA en Detroit, fue alcanzada y mi hom¢logo eliminado. Los agresores de Detroit liberaron un 
+sofisticado virus en UTOPIA. Los seguros de fallos no est†n activados. Mientras el virus estÇ ah°, se 
+est† desplazandode I.A. a I.A. m†s deprisa de lo que podemos seguirle.\n
+\n
+Un grupo no autorizado llamados as° mismos La Iglesia de la Nueva Era reivindica su responsabilidad 
+porel virus - lo llaman "Harbinger" - y han declarado la guerra a EuroCorp. El Harbinger, el cual esta 
+experimentando un crecimiento exponencial en el abandono de CHIPS. La Iglesia de la Nueva êpoca tambiÇn 
+ha iniciado una campa§a de propaganda que incita a la violencia contra EuroCorp, que se transmite a 
+travÇs de canales secuestrados de UTOPIA.\n
+\n
+Los seguidores de esta "Iglesia", se llamana ellos mismos "Disc°pulos" y visten una distintiva 
+capa-armadura de cuerpo entero.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTipo de Mensaje: HARDWIRED\n
+\n
+Prioridad: 1\n
+\n
+Principio del mensaje:\n
+\c2\n
+Ordenes\n
+\n
+Hong Kong: Persuadir a tÇcnicos de planta elÇctrica Yamaguchi.\n
+\n
+Beijing: Persuadir a ejecutivos de la corporaci¢n Yamaguchi.\n
+\c5\n
+Enhorabuena, \l. Detroit se ha estabilizado satisfactoriamente. Sin embargo, el caos suscitado por el 
+virus Harbinger se ha extendido a otra parte. Las comunicaciones del Sindicato est†n siendo 
+interceptadas mundialmente y se han dado c¢digos de ¢rdenes no autorizadas por todo UTOPIA. Las 
+divisiones Regionales de EuroCorp est†n aislando por su propia seguridad, creando eficazmente nuevos 
+sindicatos durante el proceso. Donde sea posible, deben ser devueltos al control de EuroCorp. De otra 
+forma, deber†n ser destruidos.\n
+\n
+En Hong Kong, Yamaguchi Holodata, el principal fabricante de chips de UTOPIA en el Anillo del Pac°fico ,
+ est† intentado establecer un Sindicato independiente. Tenemos la intenci¢n de minar los planes de 
+Yamaguchi con dos ataques claves.\n
+\n
+La corporaci¢n Yamaguchi principalmente suministra electricidad desde su planta de fusi¢n de Hong Kong. 
+Env°a un equipo de agentes para penetrar en ese sitio y persuadir a los tÇcnicos para que se unan a 
+nosotros. Sin la atenci¢n de los tÇcnicos, el n£cleo tendr† una sobrecarga, causando una explosi¢n. La 
+destrucci¢n de esta estaci¢n ser† suficiente para tener a Yamaguchi ocupado una temporada.\n
+\n
+Para completar el golpe contra Yamaguchi, haz una visita a sus oficinas de Beijing. Localiza y persuade 
+a su jefes ejecutivos. Neutraliza a los agentes que te encuentres. Como la simulaci¢n de la misi¢n de 
+I.A. de Londres indica una necesidad de m†s agentes, est†s autorizado a utilizar el persuasor a 
+discrecci¢n.\n
+\n
+Hasta que completes tus objetivos, Yamaguchi debe estar ansioso por desechar alguna propuesta para 
+abandonar el redil EuroCorp.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTipo de Mensaje: HARDWIRED\n
+\n
+Prioridad: 1\n
+\n
+Principio del mensaje:\n
+\c2\n
+Ordenes\n
+\n
+Ginebra, Vancouver y Matochkin Shar: Buscar y persuadir a cient°ficos de Bluesky Tendencies en estas 
+ciudades. Evacuarlos a sus enlaces IML m†s cercanos.\n
+\c5\n
+Saludos, \l. Tu triunfo es alentador.\n
+\n
+Tu pr¢xima misi¢n es proporcionarnos los cerebros que necesitamos para construir un nuevo departamento 
+de I+D. Los laboratorios de Bluesky Tendencies en Ginebra, Vancouver y Matochkin Shar tienen personal de
+ Grado A asignado a ellos. Tan pronto como tus agentes lleguen a alguno de estos destinos, una identidad
+ de rastreo de UTOPIA en la red local debe escoger a uno de estos cerebros.\n
+\n
+Estos cient°ficos son algunos de los cerebros m†s premiados en el Sindicato. Es imprescindible que no 
+lleguen heridos.\n
+\n
+Ultimas datos: La misteriosa Iglesia de la Nueva Era gana consigue m†s adeptos cada hora, convirtiendo a
+ ciudadanos con una combinaci¢n de lavados de cerebro y tÇcnicas de manipulaci¢n de Chips. La conversi¢n
+ demuestra poca evidencia de genuina motivaci¢n religiosa. La Iglesia de la Nueva Era dice a sus 
+seguidores que el fin del mundo est† cerca y que solo la Iglesia posee la tecnolog°a para salvar al fiel
+ del Cataclismo. Su doctrina es desafiante al Sindicato.\n
+\n
+Significativamente, los ciudadanos Descontrolados no se unen necesariamente a este culto, incluso cuando
+ se encuentran con fan†ticos.\n
+\n
+TambiÇn parece que nuestros Persuasores no tienen efecto con los cultistas. No sabemos por quÇ. No 
+sabemos pr†cticamente nada sobre la tecnolog°a del culto, pero han empezado las investigaciones sobre 
+dicha tecnolog°a, con la m†s alta prioridad. Sus pericias tÇcnicas son indiscutiblemente 
+impresionantes.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTipo de Mensaje: HARDWIRED\n
+\n
+Prioridad: 1\n
+\n
+Principio del mensaje:\n
+\c2\n
+Ordenes\n
+\n
+Singapur: Neutralizar todas las hostilidades. Robar cami¢n de lingotes de oro. Volver a la base cuando 
+hayas completado estos objetivos.\n
+\c5\n
+\l, tu informe es interesante. Un n£mero de los mejor cualificados de la plantilla de I+D en EuroCorp, 
+siempre ha tenido a su disposici¢n permanecer en el anonimato, por eso ahora debemos saber su paradero y
+ sus actividades. Es posible que estÇn trabajando para un sindicato disidente. ContinuarÇ escuchando 
+todos los canales para m†s informaci¢n.\n
+\n
+Un problema inmediato necesita ahora mismo tu atenci¢n. La corporaci¢n de seguridad de Singapur, Tang 
+Assurance ha decidido tontamente declarar la ciudad independiente. En consecuencia, el cami¢n de 
+lingotes va a estar rodeado de escolta armada desde el banco central al cuartel general de Tang. No hay 
+tiempo para destruir el banco, los operativos de Tang llegaran antes que tus agentes. Sin embargo, esto 
+representa la oportunidad de secuestrar el convoy armado antes de que llegue a su destino.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTipo de Mensaje: HARDWIRED\n
+\n
+Prioridad: 1\n
+\n
+Principio del mensaje:\n
+\c2\n
+Ordenes\n
+\n
+Phoenix: Penetrar en las defensas de templo de los cultistas y robar secretos tecnol¢gicos.\n
+\c5\n
+Saludos, \l.\n
+\n
+La Iglesia de la Nueva Era est†n desplegando armamento cada vez m†s sofisticado, usando su propia 
+tecnolog°a completamente nueva para nuestro departamento de I+D. Queremos obtener m†s ejemplos de esta 
+tecnolog°a, para analizarla y poder determinar quien se encuentra detr†s del culto y como combatir mejor
+ esta influencia.\n
+\n
+En base a rastreos de red y barridos de satÇlite correlativos, el culto ha establecido una base 
+operacional en Phoenix. El virus Harbinger corrompi¢ completamente la I.A. de UTOPIA, permitiendo al 
+culto derrocarlas autoridades de EuroCorp. Hace poco, ac¢litos veteranos llevaron a fan†tico convertidos
+ a un templo en Phoenix para seguir un programa intensivo de entrenamiento y adoctrinamiento.\n
+\n
+Dir°gete al templo y busca cualquier cosa que pueda explicarnos m†s.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTipo de Mensaje: HARDWIRED\n
+\n
+Prioridad: 1\n
+\n
+Principio del mensaje:\n
+\c2\n
+Ordenes\n
+\n
+Roma: Todos los ciudadanos de categor°a D deben ser eliminados, para dejar claro a otras v°ctimas del 
+virus Harbinger que EuroCorp mantendr† el control.\n
+\n
+Impedir la posible alarma de sindicatos locales independientes por la aniquilaci¢n de la guarnici¢n 
+local.\n
+\c5\n
+Buen tiempo, \l.\n
+\n
+El Harbinger ha sido especialmente efectivo en Roma. Tras este paso, una oleada de caos se ha apoderado 
+de las calles. Re£nen Descontrolados y destruyen la ciudad, casa por casa.\n
+\n
+El nivel de anarqu°a en el centro de la ciudad est† creciendo. La antigua guarnici¢n de seguridad de 
+EuroCorp ha decidido encerrarse mientras los agentes apostados all° intentan recobrar el control de la 
+I.A. infectada. Sin embargo, los agentes locales infectados tienen ordenes de hacer vulnerable la 
+guarnici¢n. Aniquilar a todo el personal de la guarnici¢n. Cuando nos dejes la ciudad bajo nuestro 
+control, enviaremos guardias de reemplazo.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTipo de Mensaje: HARDWIRED\n
+\n
+Prioridad: 1\n
+\n
+Principio del mensaje:\n
+\c2\n
+Ordenes\n
+\n
+Hong Kong, Beijing y Phoenix: Dirigirse a todas las claves de identificaci¢n y persuadir a todos los 
+dobles agentes para que vuelvan a sus cryovats.\n
+\n
+Volver a la base para informaci¢n adicional.\n
+\c5\n
+Enhorabuena, \l.\n
+\n
+El mensaje siguiente fue interceptado por esc†ner de red a las 06:55 de ayer. La I.A. de Londres lo ha 
+descodificado.\n
+\n
+\c3Tipo de Mensaje: Transcripci¢n codificada\n
+\n
+Prioridad: Alta\n
+\n
+DE: Control\n
+\n
+A: Todos los Ejecutivos\n
+\n
+Principio del mensaje:\n
+\n
+Agentes d†ndose a conocer como representantes de EuroCorp han llevado a cabo operaciones en sectores de 
+interÇs para nosotros.\n
+\n
+El reconocimiento de estas †reas es el deseado. Los agentes deben incluir la valoraci¢n de sus nuevos 
+modos en el informe.\n
+\n
+Fin del mensaje.\n
+\c5\n
+Mediante este mensaje, es evidente que nuestras actividades han sido controladas por agentes dobles con 
+acceso a ciber-tecnolog°a. Parte de esta tecnolog°a puede ser m†s avanzada que la nuestra - no sabemos 
+que recursos de desarrollo dispone este grupo.\n
+\n
+Se han localizado los destinos del mensaje en Hong Kong, Beijing y Phoenix. Despliega un equipo de 
+cyborgs para seguir la pista de alg£n agente realizando actividades no autorizadas en alguna de estas 
+ciudades. Nuestra I.A. residente est† modificando los sistemas de vigilancia de estas ciudades para 
+detectar a agentes preparados con equipos cibernÇticos avanzados.\n
+\n
+El estudio de los componentes del Doctrinador que recuperaste en Phoenix ha revelado como la Iglesia de 
+la Nueva Era ganaba conversos. Los cultistas utilizan un dispositivo que contiene un circuito 
+sintonizado a la banda de ondas de UTOPIA. En otras palabras, nuestro enemigo tiene una cosa con un 
+funcionamiento similar a nuestro Persuasor. En un estudio posterior, nuestro equipo de I+D espera 
+dise§arnos un Persuasor m†s efectivo, el cual deber°a funcionar con los fan†ticos.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTipo de Mensaje: HARDWIRED\n
+\n
+Prioridad: 1\n
+\n
+Principio del mensaje:\n
+\c2\n
+Ordenes\n
+\n
+Roma: Persuadir agente doble.\n
+\c5\n
+Saludos, \l.\n
+\n
+Los agentes que dirigiste hicieron un barrido con Çxito. Sin embargo, el l°der de los agentes dobles 
+tom¢ un enlace IML a Roma y atacaron el puesto avanzado que hab°amos establecido, probablemente en un 
+intento de romper el despliegue. Queremos que este agente se una a nuestras filas.\n
+\n
+êltimos datos: Estabamos orgullosos de descubrir el Harbinger. Por lo menos significa que tenemos una 
+I.A. intacta la cual demuestra ser muy £til. Considera esto: nuestro llamado "Descontrolado" est† 
+transformando, auna indisciplinada multitud en una fuerza de combate. Al tim¢n - llamado Ko-Paull 
+Vissick; un erudito superdotado con un coeficiente intelectual excepcional. Se supone que Vissick es uno
+ de nuestros mejores investigadores pero I.A. de Londres ha seguido su pista y se le ha encontrado donde
+ no deber°a estar.\n
+\n
+Hemos seguido la pista de todo el tr†fico de UTOPIA que hemos podido. La Iglesia de la Nueva Era ha 
+secuestrado bastantes paquetes y del resto, la mayor°a son escombros sin sentido dejados por el 
+Harbinger. Sin embargo, I.A. de Londres nos ha notificado que alg£n hacker m†s ha entrado en la red de 
+UTOPIA, ahora que es posible. Parece ser Vissick. Çltimamente, hacambiado y parece un fantasma. No hay 
+forma de saber desde donde desde estaba conectando. Pero debe haber sido Vissick. Pr†cticamente 
+cualquiera del Sindicato podr°a haber hecho lo que Çl le ordenase. S¢lo Dios sabe por quÇ est† en 
+contacto con esa canalla Descontrolada. Le seguirÇ buscando.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTipo de Mensaje: HARDWIRED\n
+\n
+Prioridad: 1\n
+\n
+Principio del mensaje:\n
+\c2\n
+Ordenes\n
+\n
+Nueva York: Persuadir a Jennifer Taks.\n
+\c5\n
+Saludos fortuitos, Ejecutivo \l.\n
+\n
+Se requiere tu presencia en Nueva York. Varias corporaciones Norteamericanas se han unido localmente 
+bajo la bandera de la Nueva Alianza Atl†ntica (NAA). El r†pido desarrollo de este sindicato es notable, 
+dada la devastaci¢n de los sistemas de comunicaciones de UTOPIA.\n
+\n
+Parece ser uno de nuestros anteriores jefes de comunicaci¢n, Jennifer Taks, quien est† usando sus 
+privilegios de acceso a la Red Global de Noticias y a las Redes de Acceso Publico para recopilar 
+informaci¢n en favor de la NAA. La Sra. Taks parece que est† ganando un crÇdito considerable gracias a 
+eso. La queremos.\n
+\n
+Env°a un equipo a Nueva York e inf°ltrate en la oficina de Manhattan de la NAA en el †rea de la Red 
+Global de Noticias. Busca a la Sra. Taks y persu†dela para que nos sea fiel y no nos mienta.\n
+\n
+El centro de seguridad es pr†cticamente hermÇtico. Puede ser pr†cticamente imposible encontrar una 
+entrada. IntentarÇ seguir la pista de se§ales de identidad de la gente del centro de UTOPIA, para ver si
+ alguien se marcha por alguna raz¢n. Todo el personal tiene pases de c¢digo injertados, as° que tendr†s 
+que persuadir a uno de ellos para que te acompa§e para pasarlas barreras de seguridad. Ten cuidado y no 
+llames la atenci¢n de las unidades de polic°a local, ya que se encuentran en estado de alerta.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTipo de Mensaje: HARDWIRED\n
+\n
+Prioridad: 1\n
+\n
+Principio del mensaje:\n
+\c2\n
+Ordenes\n
+\n
+Santiago de Chile, Buenos Aires, Ciudad El Cabo, Adelaida: Desplegar equipos de b£squeda en estas 
+ciudades. Volver con alg£n cient°fico que encuentres.\n
+\c5\n
+Saludos profundos.\n
+\n
+La I.A. de Londres ha estado perfilando-psiquicamente el contenido del mensaje sobre el incremento del 
+n£mero de transmisiones subversivas de Vissick. Es interesante leerlo.Su mensaje seminal, enviado en un 
+canal abierto, incita claramente al Descontrolado a sublevarse, no s¢lo contra el Sindicato, sino 
+tambiÇn contra la Iglesia de la Nueva Era. Desgraciadamente, la invectiva de Vissick estaba llena de 
+profec°as de condena, esto hace pensar que el estado actual de su mente no es muy estable. El exige, por
+ ejemplo, que la Iglesia de la Nueva Era no debe conducir a nada menos que Armageddon. Yo s¢lo puedo 
+especular sobre como un grupo al margen de lo religioso puede comenzar con la destrucci¢n global.\n
+\n
+La £ltima misi¢n de Vissick fue informaci¢n reservada - y UTOPIA ha estado tan afectado por el virus 
+Harbinger - que la informaci¢n de la naturaleza de su misi¢n es incompleta. Sin embargo, nosotros 
+sabemos que Çl estuvo trabajando en el equipo de los mejores investigadores de Gel Data y Hexagon 
+Corporation en un proyecto en Islandia. Hasta ahora, ninguno de los miembros delequipo de investigaci¢n 
+han sido localizados. Busca en todas las facilidades de Gel Data y Hexagon a los cient°ficos 
+desaparecidos. Estas oficinas tienen oficinas en Santiago, Buenos Aires, Ciudad El Cabo y Adelaida.\n
+\n
+Buena suerte, \l.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTipo de Mensaje: HARDWIRED\n
+\n
+Prioridad: 1\n
+\n
+Principio del mensaje:\n
+\c2\n
+Ordenes\n
+\n
+Christchurch: Enviar un equipo de agentes inmediatamente. Localizar y asegurar el enlace transpolar.\n
+\c5\n
+Parece que momentos antes de que el Harbinger penetrase en UTOPIA, Vissick estuvo ocupado en un proyecto
+ secreto de I+D en Reikiavik. El objetivo del programa era dise§ar una m†quina capaz de amplificar la 
+capacidad cognitiva humana. Aparentemente, el equipo lleg¢ s¢lo a la etapa de dise§o. Realmente 
+construyeron un dispositivo. Sin embargo, los cient°ficos a los que tu persuadiste, actuaron s¢lo como 
+tÇcnicos auxiliares del equipo principal del proyecto y no nos contaron mucho m†s.\n
+\n
+Los diez miembros claves del equipo eran conocidos como la Conferencia Cognitiva CibernÇtica o C3. Entre
+ ellos el Jefe era Ko-Paull Vissick. El resto de los miembros de C3 formaban parte de la Çlite de I+D en
+ EuroCorp.\n
+\n
+Ahora, faltan todos.\n
+\n
+Esto se corresponde con un nuevo informe sobre el fallo del enlace IML de Reikiavik el £ltimo mes, un 
+suceso que ahora parece haber sido maquinado para proporcionar al equipo de trabajo seguridad mientras 
+trabajaban. El C3, mientras, secretamente preparaba su propio enlace IML transpolar a Christchurch. 
+Aparentemente, esto fue hace poco tiempo.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTipo de Mensaje: HARDWIRED\n
+\n
+Prioridad: 1\n
+\n
+Principio del mensaje:\n
+\c2\n
+Ordenes\n
+\n
+Reikiavik: Averiguar que pas¢ con el proyecto C3. Activar el enlace IML Nuuk.\n
+\n
+Nuuk: Dirigir un barrido completo de la ciudad.\n
+\c5\n
+Enhorabuena por tus £ltimos objetivos conseguidos, \l.\n
+\n
+Es imprescindible que tus agentes se aprovechen inmediatamente del acceso al enlace IML transpolar. 
+Env°a a tu equipo a Reikiavik para estudiar el centro de investigaci¢n del C3. Es dif°cil asesorarte 
+sobre lo que te vas a encontrar all°, dada la naturaleza sensitiva del lugar, tus agentes deben estar en
+ alerta m†xima.Recoge los datos que puedas sobre el estado del programa C3.\n
+\n
+Informaci¢n adicional: Desde que el CHIP empez¢ a estar inactivo, Nuuk ha permanecido completamente 
+aislado del resto del mundo. Hubo informes de una mayor actividad de la Iglesia por los alrededores del 
+per°metro externo de la ciudad pero no nos ha llegado nada de dentro de la misma ciudad. Nuuk esta 
+conectado directamente a Reikiavik a travÇs de IML. Quiz†s este enlace todav°a estÇ abierto. Cuando 
+hayas completado la etapa de tu misi¢n en Reikiavik, busca y, si es necesario, activa el enlace IML de 
+Nuuk. Dir°gete e Nuuk e investiga la situaci¢n all°.\n
+\n
+!MantÇnte despierto!\n
+\n
+\c4Maritz\n
+\c5\n
+\hTipo de Mensaje: DIRECTO\n
+\n
+Prioridad: 1\n
+\n
+Principio del mensaje:\n
+\c2\n
+Ordenes\n
+\n
+Londres: Proporcionar seguridad m†xima a la reuni¢n de Jefes Ejecutivos. No se requiere discreci¢n con 
+las armas.\n
+\c5\n
+Escucha, Ejecutivo \l. Esto es Inteligencia Artificial de Londres. Tengo inteligencia nueva y ¢rdenes 
+para ti.\n
+\n
+Se m†s cosas sobre la Iglesia de la Nueva Era. Efectivamente el C3 construy¢ un dispositivo de 
+inteligencia mejorado m†s efectivo que cualquier otro cibernÇtico.\n
+\n
+Contra las ordenes de Ko-Paull Vissick, varios miembros del grupo usaron el amplificador cerebral 
+experimental sobre ellos mismos. El miembro de C3 Tyrone Chodak fue el primero en usar el dispositivo. 
+Chodak tambiÇn mantuvo el diario de la misi¢n. Varias de las l°neas del diario hacen referencia a un 
+segundo libro en el que Chodak empez¢ a escribir para explicar alguna de sus teor°as cient°ficas, que 
+con el cerebro mejorado, era capaz de formular. El llam¢ a este segundo libro el "Codex" y, gracias a 
+usted, ahora tenemos una copia. Los apuntes consisten de matem†tica sumamente compleja, f°sica cu†ntica,
+ genÇtica y alguna trabajo nuevo en campos tan diversos como mecanismos de fuerza unificada y 
+conocimiento evolutivo. El Codex contiene tanta ciencia revolucionaria como para mantener cada I.A. de 
+UTOPIA ocupada durante a§os. I.A. de Londres est† estudi†ndolo lo mejor que puede.\n
+\n
+En cuanto al registro de la misi¢n, parece que hay una lucha de poder entre Chodak y Vissick, alcanzando
+ su punto culminante una explosi¢n que arruin¢ las facilidades del C3 en Reikiavik. En esta notas, 
+Chodak acus¢ a Vissick - quien no fue encontrado despuÇs de la explosi¢n - de sabotaje. Chodak tambiÇn 
+acusa a EuroCorp de complicidad y amenaz¢ de usar la tecnolog°a derivada del Codex para destruir 
+completamente el Sindicato. El resto del C3 sigui¢ a Chodak.\n
+\n
+La explosi¢n de Reikiavik y la desaparici¢n de C3, sucedieron entre cuatro y ocho horas antes de que el 
+virus Harbinger afectase UTOPIA.\n
+\n
+Los an†lisis de sus agentes en el ataque a la catedral de Nuuk, descubri¢ un dogma cultista inscrito en 
+los pilares y paredes, los cuales se refer°an misteriosamente a "Los Nueve". Parece deducirse que los 
+Nueve y C3 son s¢lo uno y lo mismo y, por lo tanto, la Iglesia de la Nueva Era es simplemente una 
+fachada para llevar a cabo las amenazas de Chodak para destruir el Sindicato.\n
+\n
+Esto significa que nos enfrentamos a la anterior Çlite intelectual de EuroCorp, equipada con tecnolog°a 
+avanzada, tanto como al comod°n Vissick quien est† guiando a los Descontrolados.\n
+\n
+El profesor Kurt Drennan dar† a nuestro departamento un informe de estrategia inmediata, aqu° en 
+Londres. Drennan y su ayudante tienen previsto recoger una copia del Codex en la presentaci¢n en el 
+Nuevo Hyde Park. Nuestro grupo de Jefes Ejecutivos recientemente reconstruido asistir†. El †rea se 
+mantendr† limpia de ejecutivos de bajo nivel por la polic°a local bajo nuestro control directo.\n
+\n
+\c4Inteligencia Artificial de Londres\n
+\c5\n
+\hTipo de Mensaje: DIRECTO\n
+\n
+Prioridad: 1\n
+\n
+Principio del mensaje:\n
+\c2\n
+Ordenes\n
+\n
+Tokio: Rescatar al profesor Drennan de los cultistas.\n
+\n
+Bangkok: Escoltar al profesor al campus de EuroCorp. Asegurar que el profesor nos es entregado 
+desarmado.\n
+\c5\n
+Atenci¢n, Ejecutivo. El Profesor Drennan ha sido raptado. Un impostor fue capaz de eludir mi esc†ner, 
+matar al ayudante de Drennan, y ocupar su lugar durante la conferencia. El secuestro ocurri¢ 
+inmediatamente despuÇs de la reuni¢n. La costosa incursi¢n fan†tica en la reuni¢n y la consiguiente 
+perdida de personal fueron simplemente t†cticas de distracci¢n para llevar a cabo la fase final del 
+secuestro de Drennan.\n
+\n
+Yo todav°a sigo la pista de Drennan. El est† siendo retenido en Tokio. No se han percatado de su chip de
+ UTOPIA.\n
+\n
+Cuando haya liberado al profesor, llÇvele a un lugar seguro. Nuestro centro de operaciones en Bangkok es
+ seguro; llÇvele all°.\n
+\n
+\c4Inteligencia Artificial de Londres\n
+\c5\n
+\hTipo de Mensaje: HARDWIRED\n
+\n
+Prioridad: 1\n
+\n
+Principio del mensaje:\n
+\c2\n
+Ordenes\n
+\n
+Hawai: Tu misi¢n consiste en proporcionarnos parte de los planes de seguridad. Es cr°tico, digamos su 
+confidencia en EuroCorp, que se har† da§o a nadie del personal ejecutivo de I.A. en Hawai.\n
+\c5\n
+Enhorabuena, \l. Me alegro de estar en contacto contigo otra vez.\n
+\n
+Drennan est† en un lugar seguro y sufriendo una calibraci¢n neuronal. En este periodo de tiempo con la 
+Iglesia de la Nueva Era, el profesor se las arregl¢ para aprender m†s sobre los Nueve y sus planes 
+contra nosotros. Cuando estÇ preparado, le preguntaremos que sabe.\n
+\n
+Mientras tanto, hemos recibido un mensaje de I.A. en Hawai. La I.A. de Hawai desea confirma la alianza 
+con EuroCorp. Nunca han aprobado la estrategia de los enemigos de EuroCorp, ni el virus Harbinger. Est†n
+ preparados para transferir todos sus recursos al mando absoluto de EuroCorp. Nuestra gente y la suya se
+ reunir†n en Hawai para intercambiar claves de protocolo. La seguridad durante el procedimiento, se 
+manejar† conjuntamente.\n
+\n
+\c4Maritz\n
+\c5\n
+\hTipo de Mensaje: DIRECTO\n
+\n
+Prioridad: 1\n
+\n
+Principio del mensaje:\n
+\c2\n
+Ordenes\n
+\n
+Johannesburgo: Iniciar la conexi¢n a la red inmediatamente y tomar el control del Agente Wu. Buscar y 
+persuadir a Mirabelle Lucy De Saxo.\n
+\c5\n
+Ejecutivo, una vez m†s esto es I.A. de Londres.\n
+\n
+Yo tengo ahora el c¢digo de identidad del agente cultista que secuestr¢ al Profesor Drennan. Ella es 
+Mirabelle Lucy De Saxo IK-771.6482.2002, actualmente se encuentra en Johannesburgo.\n
+\n
+Acabo de recibir esta informaci¢n de un agente retirado de EuroCorp cuya antigua ciber-tecnolog°a sin 
+embargo le ha permitido sobrevivir independientemente desde que se retir¢. Su nombre es Wu. Debido a la 
+extrema inventiva de Wu, he hecho un pacto con Çl. Wu me dar† acceso a todas sus funciones cerebrales de
+ alto nivel para una o m†s misiones. Si el lo consigue, yo me construirÇ mas memoria de burbuja y harÇ 
+su conciencia como parte de mi mismo, tan pronto como UTOPIA sea restablecida.\n
+\n
+Quiero que Wu intente persuadir a De Saxo. Sospecho que ella puede detectar a agentes de EuroCorp. Wu ya
+ se ha preparado con uno de los Persuasores modificados de la Iglesia y est† completamente preparado 
+para la misi¢n seguir adelante. Si tiene Çxito, la conciencia eterna es casi suya.\n
+\n
+\c4Inteligencia Artificial de Londres\n
+\c5\n
+\hTipo de Mensaje: DIRECTO\n
+\n
+Prioridad: 1\n
+\n
+Principio del mensaje:\n
+\c2\n
+Ordenes\n
+\n
+El Cairo: Eliminar a Mirabelle Lucy De Saxo.\n
+\c5\n
+Ejecutivo, voy a cambiar tus ¢rdenes. El Persuasor de Wu no pudo establecer un bloqueo positivo en el 
+c¢digo de identidad de su objetivo. De Saxo nunca podr† ser una de los nuestros. Por lo tanto debe ser 
+eliminada.\n
+\n
+Wu vio a nuestra presa embarcar con destino al IML Cairo. Env°e inmediatamente un equipo de agentes al 
+Cairo. Bajo ninguna circunstancia De Saxo puede escapar.\n
+\n
+\c4Inteligencia Artificial de Londres\n
+\c5\n
+\hTipo de Mensaje: DIRECTO\n
+\n
+Prioridad: 1\n
+\n
+Principio del mensaje:\n
+\c2\n
+Ordenes\n
+\n
+Sevastopol: Queremos esterilizar Sevastopol. No dejar all° nada vivo. Lo repoblaremos m†s adelante 
+cuando nuestras f†bricas cl¢nicas vuelvan a estar operativas.\n
+\n
+Delhi: Eliminar a Deel Gonda. Aplastar la sublebaci¢n.\n
+\c5\n
+Atenci¢n, Ejecutivo. Acabas de eliminar a Anika Maritz.\n
+\n
+Ella era un agente doble. Yo sab°a esto desde el principio, desde que la Ejecutiva Maritz me inform¢ de 
+su plan para infiltrarse en la Iglesia de la Nueva Era. Sin embargo, empecÇ a sospechar de su traici¢n 
+cuando el Profesor Drennan fue secuestrado. A su vuelta, Maritz me dijo que su duplicidad hab°a sido 
+necesaria para convencer a los Nueve de su fidelidad. La credibilidad de su historia contrast¢ con la 
+convicci¢n de que usted podr°a devolvernos al profesor, lo que usted hizo. Sin embargo, yo segu°a sin 
+estar convencido.\n
+\n
+Cuando ella desapareci¢ sin avisar, una segunda vez, aceptÇ que ella hab°a sido corrompida por la 
+Iglesia de la Nueva Era. No hab°a alternativa. Anika-Mirabelle ten°a que ser eliminada.\n
+\n
+Debemos continuar para restablecer la integridad de UTOPIA. Para terminar con esto, recibir† informes 
+adicionales directamente de mi..\n
+\n
+êltimos datos: Interceptar comunicaciones entre Ko-Paull Vissick y sus lugartenientes, indicar cuales 
+son los planes del Descontrolado para estallar fuera del per°metro de la ciudad. Vissick espera reunirse
+ con sus seguidores en el Lago Margui Caka en la meseta Tibetana. Aqu°, seg£n Vissick, ellos 
+sobrevivir†n al Cataclismo. La verdad es que el final llegar† para ellos, mucho antes de llegar a su 
+destino. Sin embargo, se nos est† informando de numerosas sublevaciones en Delhi y Sevastopol, lugares 
+donde todav°a no hemos restablecido el control de EuroCorp. Debes poner esta situaci¢n bajo control.\n
+\n
+El sector pesado industrial de Sevastopol ha sido completamente invadido por la multitud Descontrolada. 
+Cualquier cosa que no ha sido destruida est† en sus manos. Afortunadamente, parecen estar esperando 
+algo, quiz†s la orden final de Vissick, antes de intentar traspasar los controles del per°metro de la 
+ciudad.\n
+\n
+En Delhi hay un problema similar. Todav°a tenemos operativos en la ciudad pero son superiores en n£mero,
+ y est†n atrapados dentro del antiguo recinto de la polic°a. Su £nico dep¢sito permanente mantiene a los
+ Descontrolados en la bah°a.\n
+\n
+Los Descontrolados se defienden ferozmente dentro del distrito del puerto del r°o de la ciudad, el que 
+tienen tomado, presumiblemente porque ser† su ruta de escape. Un ex-estratega de EuroCorp, Deel Gonda, 
+est† dirigiendo abiertamente a los Descontrolados desde ah°. Sin este experto en t†cticas, la rebeli¢n 
+deber°a estar condenada al fracaso.\n
+\n
+\c4Inteligencia Artificial de Londres\n
+\c5\n
+\hTipo de Mensaje: DIRECTO\n
+\n
+Prioridad: 1\n
+\n
+Principio del mensaje:\n
+\c2\n
+Ordenes\n
+\n
+Bahrein: Neutralizar a agentes p°caros. Buscar y destruir asaltantes Descontrolados antes de que lleguen
+ a I.A..\n
+\c5\n
+Ejecutivo \l.\n
+\n
+Nos han llegado investigaciones preocupantes de Bahrein. Restos de los Descontrolados se han equipado de
+ alguna manera con armamento pesado y han rodeado el per°metro de la ciudad. Una escalada de ataques 
+parece ser inminente. Su m†s probable objetivo es I.A. de Bahrein, el centro del sistema de control de 
+UTOPIA en Oriente Medio. Si es destruido, la reconstrucci¢n mundial de EuroCorp podr°a llevar a§os.\n
+\n
+I.A. de Bahrein controla un cuadro de antiguos agentes de EuroCorp y los ha desplegado en posiciones 
+defensivas por todo el distrito centro de la ciudad. Debemos recuperar el control de la ciudad antes de 
+que facilidades vitales se vean afectadas.\n
+\n
+\c4Inteligencia Artificial de Londres\n
+\c5\n
+\hTipo de Mensaje: DIRECTO\n
+\n
+Prioridad: 1\n
+\n
+Principio del mensaje:\n
+\c2\n
+Ordenes\n
+\n
+Colombo: Asegurar el ascensor orbital. Operativos adicionales estar†n para prestar apoyo.\n
+\c5\n
+Vissick ha escapado pero su rebeli¢n se acab¢. El y unos pocos de los suyos morir†n en el desierto 
+t¢xico m†s all† del per°metro de la ciudad. Cuando hayamos terminado de pactar con la Iglesia, podremos 
+organizar  un b£squeda de los cuerpos.\n
+\n
+He descifrado las ordenes codificadas que llevaba Anika-Mirabelle cuando acab¢ con ella. Ten°a previsto 
+reunirse con el l°der del culto - el Nueve - en Sri Lanka. Creo que la Iglesia planea apropiarse del 
+Ascensor Orbital Clarke para ir a Colombo. Desde ah°, podr°an controlar la Luna.\n
+\n
+El Profesor Drennan cree que la llave de la tecnolog°a de lavado de cerebro de los cultistas, se basa en
+ unhasta ahora, indetectable "canal" ps°quico y que los Nueve pueden necesitar este canal para mantener 
+el control sobre sus seguidores. TambiÇn teme que tengan planes para llevar a la pr†ctica alguna de las 
+teor°as propuestas en el Codex.Para mejorar el poder del equipo de la recalibraci¢n ionosfÇrica 
+experimental desarroll†ndose por cient°ficos de la Colonia de Investigaci¢n Amundsen en la superficie de
+ la luna.\n
+\n
+Los informes de otros centros de I.A. indican una reducci¢n global de la actividad fan†tica, sugiriendo 
+que la Iglesia puede estar reuniendo una fuerza de ataque tan grande como pueda juntar. Un ataque sobre 
+Colombo es inminente.\n
+\n
+Tenga cuidado: en caso de que no pueda resolver la situaci¢n en tierra, es posible que deba barrer las 
+instalaciones a travÇs del ascensor orbital. Se desaconseja encarecidamente llevar explosivos: 
+utilizarlos o transportarlos en ¢rbita corre el riesgo de cerrar permanentemente ese camino. TambiÇn se 
+espera que Los Nueve hayan tomado nuevos prototipos de armas y hayan colocado trampas. Esos pueden ser 
+un desaf°o y no hay vuelta atr†s.\n
+\n
+\c4Inteligencia Artificial de Londres\n
+\c5\n
+\hTipo de Mensaje: DIRECTO\n
+\n
+Prioridad: 3\n
+\n
+Principio del mensaje:\n
+\c2\n
+Ordenes\n
+\n
+Tokio: Armados categor°a D: ciudadanos Descontrolados denunciados en violaci¢n de los c¢digos de 
+conducta. Sofocar el desorden.\n
+\n
+\hEl arquitecto de UTOPIA, el profesor Klein, ha sido rastreado por Netscan. Vuelva a persuadir al 
+profesor para que venga a trabajar para nosotros una vez m†s.\n
+\c5\n
+Adicional: en esta zona se han detectado miembros fan†ticos del culto de la Nueva êpoca. Como nuestro 
+inventario no incluye un persuadertron, ser† necesario aliviar a los fan†ticos del suyo.\n
+\n
+\hLos efectos del virus Harbinger de la secta en el nodo UTOPIA de Tokio est†n haciendo imposible la 
+alimentaci¢n continua de Netscan. No hay mas informacion disponible.\n
+\n
+\c4N£cleo EuroCorp 0-1-0/171261/26D: Inteligencia Artificial de Londres, UTOPIA\n
+\n
+\c4U\c3niversal \c4T\c3ransferred \c4O\c3rganic \c4P\c3rocessing \c4I\c3nterface \c4A\c3rchitecture\n
+\c5\n
+\hTipo de Mensaje: DIRECTO\n
+\n
+Prioridad: 3\n
+\n
+Principio del mensaje:\n
+\c2\n
+Ordenes\n
+\n
+Tokio: Armados categor°a D: ciudadanos Descontrolados denunciados en violaci¢n de los c¢digos de 
+conducta. Sofocar el desorden.\n
+\n
+\hEl arquitecto de UTOPIA, el profesor Klein, ha sido rastreado por Netscan. Vuelva a persuadir al 
+profesor para que venga a trabajar para nosotros una vez m†s.\n
+\c5\n
+Adicional: en esta zona se han detectado miembros fan†ticos del culto de la Nueva êpoca. Como nuestro 
+inventario no incluye un persuadertron, ser† necesario aliviar a los fan†ticos del suyo.\n
+\n
+\hLos efectos del virus Harbinger de la secta en el nodo UTOPIA de Tokio est†n haciendo imposible la 
+alimentaci¢n continua de Netscan. No hay mas informacion disponible.\n
+\n
+\c4N£cleo EuroCorp 0-1-0/171261/26D: Inteligencia Artificial de Londres, UTOPIA\n
+\n
+\c4U\c3niversal \c4T\c3ransferred \c4O\c3rganic \c4P\c3rocessing \c4I\c3nterface \c4A\c3rchitecture\n
+\c5\n
+# Names.txt
+# Contains all city drop names in the mission number order.
+
+1.Alerta Ejecutiva
+2.
+3.Persuasi¢n Amistosa
+4.®Donde Est† La Sabidur°a?
+5.Saqueo de Roma
+6.
+7.Angeles Oscuros En La Arquitectura
+8.Duplicidad
+9.El Agente Especial
+10.
+11.
+12.
+13.
+14.
+15.
+16.
+17.
+18.
+19.
+20.Exodo
+21.Phoenix En Llamas
+22.Fusi¢n
+23.Traerle Vivo
+24.Borde De Las Tinieblas
+25.Paseo
+26.Conocimiento Prohibido
+27.
+28.La Colmena
+29.Mentes Perdidas
+30.
+31.
+32.
+33.
+34.Rebeli¢n Abierta
+35.Coger A Taks
+36.Mente Profunda
+37.Gur£
+38.EuroLore
+39.
+40.
+41.
+42.
+43.
+44.
+45.
+46.
+47.
+48.
+49.Detroit Ha Ca°do
+50.Secretos
+51.
+52.
+53.
+54.
+55.Sustancias Corporales
+56.Intruso
+57.Cazarecompensas
+58.Semiautom†tico
+59.Enlace Desaparecido
+60.
+61.
+62.
+63.
+64.
+65.
+66.
+67.
+68.
+69.
+70.
+71.
+72.
+73.
+74.Realineamiento
+75.
+76.
+77.
+78.
+79.
+80.
+81.
+82.
+83.Incursi¢n Lenta
+84.Confrontaci¢n
+85.
+86.
+87.
+88.Sierra Alta
+89.
+90.
+91.
+92.Agenda Arabe
+93.
+94.
+95.
+96.
+97.
+98.
+99.
+100.
+101.Iglesia De Las Mentes Envenenadas
+102.
+103.
+104.Tokyo Fuseki
+# Netscan.txt
+# Master file containing all OBJ****.txt files.
+# Files indexed Sn and Cn in Miss***.txt order.
+# Scan entries listed by Points Of Significance (POS).
+[3016]
+Destino: Estaci¢n Terrestre de IA de EuroCorp en Londres
+Categor°a D ciudadanos Descontrolados monitorizados en distrito corporativo
+Personal de la Estaci¢n terrestre: defender†n la Estaci¢n Terrestre de ataques o infiltraciones
+Escuchas: la polic°a tiene ¢rdenes de enfrentarse a cualquiera que lleve armas
+[3501]
+C†mara de vigilancia urbana grabando
+Destino: Enlace IML en Detroit
+Puerta a la Estaci¢n Terrestre atacada
+Escuchas: la polic°a informa de un aumento del n£mero de violaciones de conducta por ciudadanos Descontrolados
+[0101]
+Destino: Enlace IML en Hong Kong
+Bater°as de Fusi¢n Yamaguchi
+TÇcnicos
+Zona de Evacuaci¢n: Enlace IML
+Se han visto Fan†ticos de la Iglesia de la Nueva Epoca por la ciudad
+[0115]
+Destino: Enlace IML en Hong Kong
+Objetivo agente
+Veh°culo adecuado para conseguir acceso a la base
+[3216]
+Destino: Enlace IML en Beijing
+Yamaguchi Executive Zaibatsu
+Campo de entrenamiento de Agentes de Yamaguchi
+Zona de Evacuaci¢n: Enlace IML
+Escuchas: la polic°a reporta de disturbios por los Descontrolados
+[1001]
+Destino: Enlace IML de Phoenix
+Templo de culto de la Nueva Era
+Posici¢n estimada de la indoctrinacion de la Iglesia
+Zona de Evacuaci¢n: Enlace IML
+Escuchas: los Descontrolados est†n completamente fuera de control
+An†lisis de I.A. Londres: evitar atacar Descontrolados
+[0401]
+Destino: Enlace IML Nueva York
+C.G. Nueva Alianza Atl†ntica
+Cuerpo civil de viviendas
+Zona de Evacuaci¢n: Enlace IML
+Escuchas: la polic°a ha actualizado sus equipos de respuesta a los robos de cajas
+[0701]
+Destino: Enlace IML Santiago
+Objetivo cient°fico
+Zona de Evacuaci¢n: Enlace IML
+Zona norte invadida por fan†ticos
+[2601]
+Destino: Enlace IML Buenos Aires
+C.G. Hexagon Corporation
+Objetivo cient°fico
+Zona de Evacuaci¢n: Enlace IML
+Escuchas: Caja fuerte de Hexagon
+Detectada actividad cultista adicional
+[4401]
+Destino: Ciudad del Cabo v°a APC
+Instalaciones de investigaciones de Hexagon
+Objetivo cient°fico
+Zona de Evacuaci¢n: Enlace IML
+Escuchas: Fan†ticos han tomado el control de la instalaci¢n
+[0601]
+Destino: Enlace IML Adelaida
+Instalacion de Pruebas de Gel Data
+Objetivo cient°fico
+Zona de Evacuaci¢n: Enlace IML
+[3215]
+Destino: Enlace IML en Beijing
+Objetivo agente
+Escuchas: sistemas de seguridad del banco has sido perfeccionados
+[2131]
+Destino y zona de evacuaci¢n: Enlace IML en Ginebra
+Laboratorios Bluesky
+Escuchas: Bluesky necesita escolta policial para ejecutivos de Grado A
+[5001]
+Destino y zona de evacuaci¢n: Enlace IML en Vancouver IML
+Laboratorios Bluesky
+Escuchas: Actividad de Descontrolados monitorizada por la polic°a
+Alerta SatÇlite: Se han detectado Fan†ticos aproxim†ndose por el sudoeste de la ciudad
+[0201]
+Destino: Enlace IML en Matochkin Shar
+Instalaciones de I+D Bluesky
+Detectados permisos de conducir
+Escuchas: Transferencia de crÇditos localizada al templo de la Iglesia de la Nueva Era
+[0901]
+Destino: Enlace IML Singapur
+Banco de la Ciudad de Singapur
+Caja primaria (bajo tierra)
+Convoy de oro escoltado de Tang
+Objetivo veh°culo
+Punto de reuni¢n
+C.G. Tang
+[4001]
+Destino: Planta purificaci¢n agua en Honolulu
+Punto de reuni¢n
+[1015]
+Destino: Enlace IML de Phoenix
+Objetivo agente
+[2846]
+Destino: Enlace IML Roma
+Complejo de viviendas fortificadas de Descontrolados
+Guarnici¢n seguridad
+C†mara guarnici¢n (bajo tierra): valor estimado 0.4 MCr
+Alerta satÇlite: el control del satÇlite de Defensa EstratÇgica de Roma lo tienen fuerzas desconocidas
+[2815]
+Destino: Enlace IML Roma
+Objetivo agente
+Escuchas: polic°a de vigila a un grupo Descontrolado que se ha infiltrado en la ciudad para buscar y sublevarse
+Escuchas: detectada inestable se§al de identidad de UTOPIA - posible escondite de Descontrolados
+[3601]
+Destino: Enlace A Christchurch
+Area objetivo: Enlace IML B Christchurch
+Detectados agentes de protecci¢n de Tang
+Ordenes de los agentes de Tang interceptadas - el objetivo es la caja del banco de la ciudad
+[3046]
+Destino: (a) Podio de Presentaci¢n (b) Posici¢n del Profesor Drennan
+Caja con datos, contiene un visualizador de pel°culas digitales sobre Reikiavik
+Ejecutivo EuroCorp
+Masivas claves de identidad de Descontrolados localizados al norte del distrito del C.G.
+[4701]
+Destino: Enlace IML A de Tokio
+Fortaleza cultista
+Profesor Drennan
+Zona Evacuaci¢n: Enlace IML B de Tokio
+Torreones con l†ser bajo el control de la polic°a
+Valor estimado del contenido de la caja del banco: 2.5M Cr
+[7011]
+Destino: Enlace IML A de Tokio
+Categor°a D ciudadanos Descontrolados rastreados hasta estos lugares
+'Templo' de culto
+Ubicaci¢n actual del profesor Klein
+[4711]
+Destino: Enlace IML A de Tokio
+Categor°a D ciudadanos Descontrolados rastreados hasta estos lugares
+'Templo' de culto
+Ubicaci¢n actual del profesor Klein
+[0301]
+Destino: Enlace IML Bangkok
+Centro Operaciones Bangkok de EuroCorp
+[2216]
+Posici¢n actual del agente Wu
+Posici¢n actual de De Saxo
+Fan†ticos mantienen instalaciones
+[4502]
+Destino: Enlace IML A El Cairo
+Zona Evacuaci¢n: Enlace IML B
+Escuchas: presencia significativa por la ciudad - la polic°a no responde
+Escuchas: Ejecutivos de Industrias de Defensa Metalespuma programan reunirse con cultistas - causa desconocida
+[2702]
+Destino: Enlace IML Delhi
+Planta qu°mica
+Instalaciones de distribuci¢n de Industrias de Defensa Metalespuma
+Alerta satÇlite: Operativos de EuroCorp y MBT
+[0501]
+Destino: Puerta del lado sur
+Instalaci¢n I+D
+Escuchas: posible seguimiento fantasma - Ko-Paull Vissick
+[4103]
+Destino: Enlace IML Bahrein
+Bunker A.I.
+Disposici¢n de agentes p°caros
+Aproximaci¢n de fuerzas Descontroladas
+Un templo menor de la Iglesia de la Nueva Era permanece ocupado
+[4615]
+Destinos
+Ascensor orbital
+Ascensor orbital sistema de satÇlite antimisiles
+[6503]
+[7931]
+[0801]
+[1101]
+[6502]
+[7902]
+ELIMINAR AL DESCONTROLADO
+VOLVER AL CUARTEL GENERAL
+PERSUADIR TêCNICOS DE YAMAGUCHI
+DESOCUPAR
+TêCNICO V÷CTIMA
+PERSUADIR EJECUTIVOS DE YAMAGUCHI
+EJECUTIVO V÷CTIMA
+NEUTRALIZAR AGENTES DE YAMAGUCHI
+AGENTE V÷CTIMA
+PERSUADIR CIENT÷FICOS DE BLUESKY
+PERSUADIR CIENT÷FICO DE BLUESKY
+ACTUALIZACI‡N DE LA MISI‡N: ELIMINAR AMENAZA DE DESCONTROLADOS
+ESCOLTAR CIENT÷FICOS HASTA ENLACE IML
+ROBAR CAMI‡N LINGOTES DE ORO
+EL COCHE DE LINGOTES HA SIDO DESTRUIDO
+EL CAMI‡N DE LINGOTES DE ORO HA LLEGADO AL C.G. TANG
+LLEVAR EL COCHE HASTA ZONA DESOCUPADA
+ROBAR ARTEFACTO DEL TEMPLO
+LLEVAR ARTEFACTO A ZONA DESOCUPADA
+ELIMINAR FORTALEZA DE DESCONTROLADOS
+ELIMINAR AMOTINADOS
+ESTERILIZAR SECTOR
+ELIMINAR GUARDIAS
+ELIMINAR AGENTE
+PERSUADIR AGENTE
+AGENTE OBJETIVO HA MUERTO
+AGENTE OBJETIVO HA ESCAPADO
+PERSUADIR EMPLEADO DE NAA
+PERSUADIR JENNIFER TAKS
+ESCOLTAR A TAKS HASTA ENLACE IML
+JENNIFER TAKS ESTµ MUERTA
+ELIMINAR FANµTICO
+PERSUADIR CIENT÷FICO DE GEL DATA
+PERSUADIR CIENT÷FICOS DE GEL DATA
+PERSUADIR CIENT÷FICO DE HEXAGON
+PERSUADIR CIENT÷FICOS DE HEXAGON
+ESCOLTAR CIENT÷FICO HASTA ENLACE IML
+ESCOLTAR CIENT÷FICOS HASTA ENLACE IML
+ACTUALIZACI‡N: ELIMINAR AMENAZA FANµTICO
+VEH÷CULO DESTRUIDO: AGENTES COLGADOS
+CIENT÷FICO PERDIDO
+PERSUADIR CIENT÷FICOS DE C3
+CIENT÷FICOS DE C3 ELIMINADOS
+LABORATORIO DESTRUIDO
+FACILIDAD DESTRUIDA
+ESTERILIZAR CIUDAD
+PROTEGER A DRENNAN
+PROTEGER ASISTENTE DEL PROFESOR
+PROTEGER EJECUTIVOS
+EL PROFESOR DRENNAN ESTµ MUERTO
+EL AYUDANTE DEL PROFESOR DRENNAN ESTµ MUERTO
+EJECUTIVOS DE EUROCORP HAN SIDO LIQUIDADOS
+RESCATAR AL PROFESOR DRENNAN
+ESCOLTAR AL PROFESOR DRENNAN A FACILIDAD EUROCORP
+ACTUALIZACI‡N DE LA MISI‡N: EVACUAR A TODO EL PERSONAL
+EVACUACI‡N FALLIDA
+PERSUADIR A MIRABELLE LUCY DE SAXO
+DE SAXO HA HUIDO: NUEVAS ORDENES DISPONIBLES
+ELIMINAR A MIRABELLE LUCY DE SAXO
+APLASTAR LA SUBLEVACI‡N
+ELIMINAR REBELDES DESCONTROLADOS
+PROTEGER LA I.A. DE BAHREIN
+LA I.A. DE BAHREIN HA SIDO DESTRUIDA
+ASEGURAR ASCENSOR ORBITAL
+AGENTES INSUFICIENTES PARA COMPLETAR LA MISI‡N
+EL ASCENSOR ORBITAL HA SIDO DESTRUIDO
+LA ESTACI‡N ESPACIAL HA SIDO DESTRUIDA
+OBTENER ORDENADOR DE NAVEGACI‡N DE LANZADERA
+ESTACI‡N ARMADA PARA AUTODESTRUCCI‡N: DESACTIVAR
+OBTENER M‡DULO DE SOPORTE DE VIDA DE LA LANZADERA
+ACCEDER A CABINA DE LANZADERA LUNAR
+ELIMINAR A LOS NUEVE
+LOS NUEVE HAN ACTIVADO LA PUERTA I‡NICA. HAS SIDO VENCIDO.
+ELIMINAR PAGANOS DESCONTROLADOS
+NUESTRO JARD÷N DE MEDITACIONES HA SIDO DESTRUIDO
+CONVERTIR A AGENTE DE EUROCORP
+ESCOLTAR AGENTE HASTA ENLACE IML
+SU OBJETIVO HA SIDO ELIMINADO
+TU OBJETIVO HA ESCAPADO
+ADQUIRIR RESERVAS
+SU PRESA SE HA PERDIDO
+LLEVAR AL DR. SCHWEIZER A VER A PADRE NEGRO
+EL DR. SCHWEIZER ESTµ MUERTO
+PADRE NEGRO ESTµ MUERTO
+PROTEGE A TU HERMANO Y AL TEMPLO
+TUS HERMANOS ESTµN MUERTOS
+EL TEMPLO HA SIDO DESTRUIDO
+ELIMINA A LOS DESCONTROLADOS
+CASTIGAR A LOS AMOTINADOS
+ANIQUILAR LAS FUERZAS DEL CAOS
+DESTRUIR LAS SABANDIJAS DESCONTROLADAS
+LIQUIDAR AL PERSONAL DE EUROCORP
+ELIMINAR AGENTES DE EUROCORP
+AYUDAR A AC‡LITOS
+ASESINAR A SABOTEADORES
+ELIMINAR A LOS DESERTORES
+PROTEGER LA ORDEN DE AC‡LITOS
+LA ORDEN DE AC‡LITOS HA SIDO COMPLETAMENTE ELIMINADA
+LLEVAR COCHE DE LINGOTES AL PUNTO DE RECOGIDA
+EL COCHE DE LINGOTES HA SIDO DESTRUIDO
+ASESINAR AL AYUDANTE DEL PROFESOR
+REEMPLAZAR EL LUGAR DEL AYUDANTE DEL PROFESOR
+RECOGER DATOS DE V÷DEO PARA LECTURA
+IR AL PODIO
+PRESTAR ATENCI‡N A LA LECTURA
+ESCOLTAR AL PROFESOR DRENNAN
+EL PROFESOR SE HA ENCONTRADO CON SU AYUDANTE
+EL PROFESOR ESTµ MUERTO
+MIRABELLE LUCY DE SAXO ESTµ MUERTA
+DESTRUIR BUNKER DE ARMAS DE EUROCORP
+ROBAR DISE•OS DE ARMAS DE EUROCORP
+CARGAR DISE•O DE ARMA
+VOLVER
+AC‡LITOS COLGADOS: NO SE PUEDE COMPLETAR LA MISI‡N
+ASESINAR HACKER
+ELIMINAR LAS FUERZAS QUE CONTROLAN EL PUERTO DEL R÷O
+VOLVER A ENLACE IML
+RAPTAR CAUTIVO DE EUROCORP
+EL OBJETIVO HA SIDO ELIMINADO
+DESTRUIR INSTALACIONES DE I+D
+ELIMINAR AGENTES DE EUROCORP
+DE SAXO DEBE MORIR
+ABANDONAR ESTE LUGAR
+DOMINAR AL DESCONTROLADO
+BUSCAR Y DESTRUIR AL L÷DER DE LA SUBLEVACI‡N
+RESCATAR A IX Y CONDUCIRLE AL PUNTO DE REUNI‡N
+PROTEGER A IX
+SE LE PERMITE PERDER A UN IX
+NADA PUEDE PARAR YA A LOS NUEVE. HAS SIDO VENCIDO.
+NO HACER NADA: OBEDECER A LOS NUEVE
+FANµTICO HAN CONVERTIDO A TODOS LOS CIUDADANOS
+ELIMINAR INTRUSO
+ELIMINAR INTRUSOS
+PERSUADIR INFILTRADO
+PROCEDER A ENLACE IML
+OBJETIVO ELIMINADO
+ACTIVAR ENLACE IML
+ENLACE IML DESTRUIDO
+ELIMINAR AGENTES
+PENETRAR EN BUNKER: LIBERAR VIRUS
+MARCHARSE
+RETIRADA
+CONVERTIR A ORMANDOZ
+CONVERTIR A RAM÷REZ
+TRAêRNOSLOS
+SE LE PERMITE ECHAR A PERDER A ORMANDOZ
+SE LE PERMITE ECHAR A PERDER A RAM÷REZ
+ROBAR EL TRABAJO DEL DR. SCHWEIZER
+VOLVER CON NOSOTROS
+LOS AGENTES DE EUROCORP DEBEN UNIRSE A NOSOTROS O MORIR
+NEUTRALIZAR AGENTES DE EUROCORP
+ASESINAR A KOTO SEK
+NEUTRALIZAR A TODOS LOS AGENTES DE EUROCORP
+NO PERMITIR QUE HIERAN A DE SAXO
+TOMAR EL CONTROL DEL ENLACE IML
+NUESTRA HERMANA BENDITA ESTµ MUERTA
+!MORIRµ POR ESTA HEREJ÷A!
+EUROCORP DEBE ESCOGER ENTRE NUESTRA FE Y LA MUERTE
+BUSCAR SANTUARIO
+ENTRAR
+PERSUADIR CIENT÷FICO DE BLUESKY
+TU OBJETIVO HA ESCAPADO
+OBJETIVO PERSUADIDO
+AGENTE NEUTRALIZADO
+BUSCAR Y DESTRUIR - CATEGOR÷A U - DESCONTROLADO
+ACTUALIZACI‡N: ELIMINAR CULTISTAS
+EL PROFESOR KLEIN DETECT‡ - PERSUADIR AL PROFESOR
+PROTEGER AL PROFESOR KLEIN - EVACUAR
+EL PROFESOR KLEIN ESTµ MUERTO
+DESTRUIR LA ESTACI‡N TERRESTRE
+GOLPEA A NUESTRO ENEMIGO
+[header_win]
+[message_win]
+Has vencido a los Nueve. Has conseguido vencer por completo a La Iglesia de la Nueva Era y evitado el Cataclismo. UTOPIA est† reconstruida. Enhorabuena por tu ascenso, Ejecutivo Jefe.
+[weapons]
+UZI
+Forjada en el caos de las luchas callejeras de mediados del siglo 20, la ametralladora Uzi 9mm de perdigones energÇticos modificados sigue siendo la base para operaciones tecnol¢gicas de EuroCorp. Un suplemento ligero y barato para agentes relacionados con casos de marginados psic¢ticos.
+MINIGUN
+A travÇs del Nuevo Calendario del sindicato el despliegue de ca§ones de cadenas de balas han adquirido un lugar m†s com£n. Este disparador de c†psulas de 20 mm, tiene un ca§¢n estabilizado realizado en una aleaci¢n de espuma para reducir costes de producci¢n.
+ELLASER
+Este es el t°pico ejemplo del pensamiento cient°fico revolucionario de La Iglesia. En pocas palabras, una especie de l†tigo elÇctrico. Estos dispositivos nunca han sido pr†cticos, el consumo de energ°a fue siempre prohibitivo. Este dispositivo emplea un sofisticado sistema de conmutadores subat¢micos para asegurar el m°nimo gasto posible de la fuente de energ°a, sin embargo puede ser sobrecargado. Efectivamente, una tecnolog°a impresionante.
+LASER
+Este l†ser hace uso del gas b†sico TriS¢dio 89 (desarrollado circa - 20 NC). El arma puede ser sobrecargada desplazando el seguro del gatillo. En situaciones de cerca, la fuente de energ°a puede ser sobrecargada a una velocidad de diez veces por minuto.
+BEAM
+Las tÇcnicas de aniquilaci¢n electr¢nicas nos han llevado hasta esta poderosa arma. Utiliza un foco monopolar para proyectar un campo de haz estructurado que convierte las molÇculas de la atm¢sfera en plasma. La materia s¢lida en contacto con el plasma se vaporiza, liberando m†s energ°a. El campo puede causar una devastaci¢n total desde una distancia considerable. Sobrecarga el foco monopolar para obtener mejores resultados contra materiales densos o templados.
+RAP
+Designado para encarar el reto de la cyberproliferaci¢n del Nuevo Calendario, este lanzacohetes dispara una granada buscadora que libera tras su impacto un racimo de bombas. El sistema de guiado del cohete se caracteriza por su giroestabilizaci¢n de b£squeda de objetivos.
+NUCLGREN
+Stressed Techium en el revestimiento de este dispositivo termonuclear que amortigua las explosiones , manteniendo la reacci¢n en cadena dentro de una †rea fuertemente contenida. El n£cleo de is¢topos a medida, asegura una ca°da de los niveles de radiaci¢n a l°mites tolerables instantes despuÇs de la explosi¢n. Estos avances permiten que el detonador quepa por primera vez en un encapsulado de mano.
+PERSUADER
+Una utilidad est†ndar para aprovechar la funciones de alto nivel del cerebro de los ciudadanos equipados con CHIPs UTOPIA. A pesar de su poca potencia y ligereza, la transcendencia hist¢rica del Persuasor no deber°a ser subestimada, ya que fue el art°fice/responsable en ocasionar la dominaci¢n global de EuroCorp. Los sujetos persuadidos siguen al agente controlador sin hacer preguntas, hasta el extremo de equiparse ellos mismos para el combate y entablar hostilidades sin miedo.
+FLAMER
+Retroinvestigaciones recomiendan este chorro de napalm de mano de corto alcance. Al ser activado, lanza un chorro de gelatina de petr¢leo encendida. En contacto con materia org†nica, el napalm se pega y arde violentamente. Una soluci¢n muy efectiva para el control de multitudes.
+H2HTASER
+Este dispositivo de proximidad activa una onda de iones en resonancia que interfiere con la programaci¢n del CHIP de aquellos que son cogidos en el frente de onda. En pocas palabras, tiene el efecto de despersuadir individuos persuadidos. El perturbador se muestra m†s efectivo contra el usuario del persuasor, donde la onda de iones puede atacar al origen de la se§al persuasora devolviendo a todos los seguidores persuadidos a un estado no-persuadido.
+CRAZYGAS
+Las investigaciones sobre las propiedades narc¢ticas de los hongos del planeta Creaci¢n han producido el ingrediente activo de este peligroso alucin¢geno. El bote de mano contiene una mezcla de esporas del hongo y un agente oxidante que se libera en forma de humo produciendo un comportamiento psic¢tico a todo aquel que se encuentre en su interior. Esta arma proporciona una t†ctica de distracci¢n muy £til cuando el n£mero de agentes hostiles es demasiado grande para otras formas de neutralizaci¢n, aunque los resultados son impredecibles.
+KOGAS
+Las m†scaras de gas no sirven frente a esta granada de mano, ya que contiene un agente nervioso asfixiante. El humo emitido por la explosi¢n deja inconsciente a todo aquel que se encuentre en los alrededores durante un tiempo limitado.
+ELEMINE
+Una mina de pulso electromagnÇtico disparada por proximidad. El equipamiento afectado por el campo del pulso es inutilizado temporal o incluso permanentemente y los mecanismos elÇctricos del tejido org†nico quedan agotados. La peor parte le la llevan los conductores as° como veh°culos, mobiliario de la calle y cyborgs. Puede afectar al estado de persuasi¢n de cualquiera que quede atrapado en el †rea afectado.
+EXPLMINE
+Con una impresionante †rea de efectividad y suficiente potencia explosiva como para destruir veh°culos y da§ar seriamente edificios, es una arma b†sica pero efectiva. Col¢calo en una posici¢n estratÇgica en la zona de la misi¢n y aleja tus agentes a una distancia segura. La detonaci¢n del explosivo se produce gracias a un temporizador.
+LONGRANGE
+El nuevo Rifle de L.A. emplea tecnolog°a de trineo monopolar para acelerar munici¢n de uranio reducido de alto calibre hasta Mach 3.2. Los condensadores de trineo se descargan completamente en un £nico disparo y se deben recargar completamente para poder de disparar de nuevo, pero su precisi¢n y alcance operativo no son igualados por ning£n otro sistema. Manteniendo las especificaciones de dise§o, el sacrificio de la velocidad de disparo contrasta con el r†pido calibraje, convirtiÇndose el arma optima de un francotirador.
+AIRSTRIKE
+Cada satÇlite de la red de plataformas geosincr¢nicas de la red de UTOPIA est† equipada con una reserva de varillas de aleaci¢n tungsteno-uranio en un montaje controlable. Cuando estas varillas son lanzadas, el proceso de reentrada en la atm¢sfera las calienta hasta el punto en que se lic£an, produciendo una lluvia de plasma con una verdadera potencia en el campo de batalla. Ahora podemos lograr dominar los sistemas bloqueados por el Harginger. Transmitiendo protocolos de reinicializaci¢n, el sistema puede ser puesto a disposici¢n de tus agentes. Esto puede ser hecho usando un activador manual aunque debe hacerse con moderaci¢n, el coste por usar este sistema es extremadamente alto.
+QDEVASTATOR
+Dos prismas gemelos de gravitones en una c†mara Noxon act£an como catalizadores de una reacci¢n en cadena que invierte la fuerza de atracci¢n molecular fuerte a lo largo de un camino definido por polarizaci¢n gravitatoria. La reacci¢n en cadena comienza cuando se aprieta el gatillo y queda contenida en la c†mara Noxon, donde crece hasta que se suelta el gatillo. La materia donde hace blanco es totalmente destruida molÇcula a molÇcula. El arma puede causar da§os colaterales ya que emite virutas por el exceso de energ°a.
+RAZORWIRE
+Este cable de aleaci¢n titanio-acero esta formado por una espiral de clavos muy finos, muy largos y muy afilados. Su uso previene el acceso a †reas aseguradas contra civiles sin autorizaci¢n y presenta un obst†culo considerable para vencer incluso a intrusos cibernÇticamente mejorados. Su naturaleza letal queda mejorada al ser pr†cticamente invisible a ojos no modificados.
+PERSUADER2
+El Profesor Drennan continu¢ con las investigaciones la tecnolog°a de la Iglesia que termin¢ con el desarrollo del Persuasor II. Este dispositivo es capaz de infiltrarse en las mentes de hasta el fan†tico m†s duro de pelar. Una vez expuesto a su influencia, los cultistas obedecer†n tus ¢rdenes tan tenazmente como segu°an las retorcidas ense§anzas de la Iglesia.
+STASISFLD
+Este generador de blindaje port†til altera la velocidad a la que transcurre el tiempo dentro del campo. Mantenido en cuasi-animaci¢n suspendida, la velocidad de reacci¢n de quien o cualquier cosa que se halle dentro del campo es insignificante, haciendo as° al objetivo mucho m†s vulnerable a otras formas de ataque. La energ°a requerida para activar el campo es considerable y el momento de su operaci¢n deber°a ser escogido con cuidado.
+SOULGUN
+En uno de los adelantos m†s esotÇricos de los Nueve, aprendieron como desbloquear las fuerzas electroqu°micas todav°a bloqueadas fuera de los cuerpos de organismos eliminados. La explicaci¢n de este mecanismo que tenemos nosotros ahora, nos da un completo poder sobre ellos. El Chromotap est† basado en esta tecnolog°a. El extrae la energ°a de materia org†nica a nivel celular y la transfiere a controlador de dispositivos. El Chromotap es especialmente £til para recargar a agentes despuÇs de un combate, de forma que el todav°a puede utilizar la energ°a celular de sus v°ctimas.
+TIMEGUN
+El Profesor Drennan propuso productos otra vez. El Displacertron utiliza un n£cleo de materia ultradensa rodeada por una capa de stasis estroboscopica para proporcionar acceso limitado al tiempo dimensional m†s alto. Esto hace desaparecer completamente al objetivo y reaparecer en un punto del futuro cercano. Nunca hab°a tenido el saboteador una herramienta tan poderosa.
+CEREBUSIFF
+Este guardi†n electr¢nico puede crear una gran diferencia entre las acciones defensivas y ofensivas de tus agentes. Colocado en un †rea apropiada y armado con un l†ser de pulsos, en manos de un centinela de guardia, abrir† fuego sobre cualquier blanco hostil insospechado que se ponga a su alcance, hasta que se llena de carga o es destruido.
+MEDI1
+Este paquete multifunci¢n puede usarse para reparar r†pidamente cualquier tipo de herida y da§os en combate. El kit esta compuesto de un parche de injerto de piel endurecido impregnado con anestesia y nanobots quir£rgicos. S¢lo se puede utilizar una vez.
+MEDI2
+Es como el Kit Medico, excepto que esta es una versi¢n actualizada la lleva el usuario, de tal forma que puede autom†ticamente detectar el nivel de da§o sufrido. Si decae a un nivel cr°tico, el Auto Kit Medico se activa y realiza operaciones quir£rgicas aceleradas. El Auto Kit Medico tarda un poco en empezar a trabajar, por lo tanto el usuario que est† sufriendo continuamente da§os, podr°a perecer antes del que el kit tenga oportunidad de trabajar.
+EXPLWIRE
+Similar al Cable Cortante, el cable disparadores una herramienta excelente para impedir el paso. Con solo unas molÇculas de grosor, el Cable Disparador es muy dif°cil de ver incluso con la ultima modificaci¢n de ojos, ya que cuando se toca se producen explosiones a lo largo de su longitud.
+CLONESHLD
+Presenta un disfraz tan efectivo que enga§a incluso a los escaners de lectura de UTOPIA. El Blindaje Clon, org†nicamente altera la ropa y las caracter°sticas de un agente, convirtiendo al usuario en un ejecutivo corriente durante un tiempo. Esto puede ser de gran utilidad para agentes con ordenes de infiltrarse, as° se pueden infiltrar en una zona de ejecutivos.
+[mods]
+LEGS1
+Basado en un n£cleo de plastiacero con una cubierta de material org†nico, estas piernas artificiales proporcionan una mejora de la salud y de la velocidad punta de un agente. TambiÇn mejora la resistencia, incrementando la arrancada de un agente, lo que permite cubrir una distancia a la m†xima velocidad.
+LEGS2
+Los avances en tecnolog°as de metal-espuma han producido este sistema de miembros cibernÇticos. Las Piernas 2 proporcionan un impresionante empuje de velocidad, resistencia y salud, lo que concede a tus agentes todav°a una mas completa capacidad operacional m†xima.
+LEGS3
+El nivel 3 de piernas reemplaza los nervios de transmisi¢n de fibra ¢ptica, que se encuentran en los niveles m†s internos, por memoria pl†stica Super-Synapse. El despliege de los agentes modificados con el nivel 3 de piernas, tiene un profundo impacto en la zona de combate.
+ARMS1
+Con los tendones de tungsteno y nervios de acero de brazos cibernÇticas, tus agentes experimentar†n una mejora inmediata de precisi¢n al disparar y como consecuencia un ahorro de munici¢n. La vida operacional de un agente equipado con estos brazos tambiÇn se prolonga por las caracter°sticas de empuje de salud que conlleva la mejora cibernÇtica.
+ARMS2
+El proceso de fabricaci¢n de metal-espuma se empieza a aplicar con Çxito a la precisi¢n cibernÇtica. Con menos tendencia a vencer, estos ligeros brazos no s¢lo otorgan una mejor°a de la precisi¢n, tambiÇn en alcance de tiro.
+ARMS3
+Lo ultimo en tecnolog°a puntera de miembros est† a tu disposici¢n. Como nuestros agentes, cada vez mas, se tienen que enfrentar a punks y cultistas cada vez mejor equipados, las mejoras tangibles en la efectividad de combate de estos brazos, proporcionara una ayuda para conseguir un Çxito en los objetivos de nuestra misi¢n.
+CHEST1
+Para aumentar la supervivencia en entornos hostiles, encaja a un agente ¢rganos vitales de aleaci¢n de titanio de triple placa. Una modificaci¢n mejorada de cuerpo, proporciona la mayor protecci¢n de castigos que puede sufrir un cyborg. Hay que tener en cuenta que la modificaci¢n debe ser adecuada para que el cyborg soporte cualquier otro modos.
+CHEST2
+Esta mejora utiliza la superestructura de panal de metal-espuma, forjada en la microgravedad de baja ¢rbita, para hacerlo m†s ligero y m†s resistente que el cuerpo protÇsico actualmente en uso. Mejora la energ°a de reserva es una de las ventajas de una actualizaci¢n a cuerpo 2. Operacionalmente, esto se traduce en tener m†s energ°a y reduce el riesgo de da§o cr°tico. Con un cuerpo de nivel 2, la forma de actualizar a nivel 3 es la m†s sencilla de todas las categor°as.
+CHEST3
+Compra el modo de nivel 3 para volver a mejorar la salud de tus operativos. Tendones de memoria pl†stica reemplazan las microfibras de acero de modelos anteriores, haciendo al cyborg m†s resistente que con alguna otra actualizaci¢n inferior. Lo mas notable, es que esta mejora protege a un agente de todas las armar con gases nerviosos conocidos.
+BRAIN1
+Tiene la habilidad de tomar decisiones independientes del control Ejecutivo, lo que diferencia a un agente decidido de un agente muerto. Como el agente es ahora dos veces m†s inteligente, el tiene la mitad de probabilidades de ser asesinado. Esta unidad contiene procesadores de diamante en una matriz 3D integrada con la biomasa cognitiva de los cyborgs convencionales. Incrementa las percepciones b†sicas y contiene software de manejo de traumas para mejorar la resistencia a la habilidad de los cyborgs en el caso de un da§o critico.
+BRAIN2
+Una memoria con n£cleo hologr†fico reduce el retardo en las reacciones y estimula el alcance y la resistencia del Persuasor. TambiÇn aumenta la resistencia del cyborg para persuadir. Este tipo de cerebro mejora las percepciones en el tablero y mejoras adicionales al software de traumas, aumentando el margen de supervivencia del cyborg.
+BRAIN3
+El apogeo de la tecnolog°a de inteligencia artificial port†til. En el nivel 3 un cerebro modificado no solo mejora la salud sino que tambiÇn garantiza una precisi¢n mejorada con los blancos; alto alcance y beneficios de energ°a. El cyborg puede estar expuesto en entornos en los cuales un cerebro biol¢gico deber°a destruirse instant†neamente; esta unidad puede hacer una copia de seguridad de los datos biol¢gicos y permitir al agente continuar con su funci¢n.
+SKIN1
+Este es un anteproyecto de piel de cyborg; un complejo tejido celular destinado para proporcionar una empidermis resistente a las balas que reduce radicalmente el da§o de los proyectiles de las armas. Es un desarrollo de una malla h°brida de paquidermo/acero y cuidadosamente maquillada produce una sustancia que es extraordinariamente dura, pero tan flexible como la carne de un cyborg normal.
+SKIN2
+Este anteproyecto de piel de cyborg, se aprovecha de los £ltimos no t¢xicos asbestos dise§ados para usar en los reingresos de naves espaciales. Cuando se realizan operaciones en condiciones de tormenta de fuego, un agente con esta piel debe sufrir menos quemaduras que un colega sin ella.
+SKIN3
+Este es un anteproyecto de piel de cyborg, basado en una variaci¢n de pol°meros de hidrocarburo aumentados por microfilamentos de fibra ¢ptica. Este tipo de piel debe absorber la mayor°a de la carga destructiva de un sistema de armas basado en energ°a. La energ°a se dispersa desde el punto de impacto por todo el cuerpo modificado del agente, y reciclada para mantener las propiedades de protecci¢n de esta piel.
+SKIN4
+Este documento describe filo cortante de la tecnolog°a de piel de cyborg. La mayor°a de esto es especulativo pero esta lejos de ser un cielo azul. Hay una descripci¢n de como construir un tejido fotom¢rfico con varias caracter°sticas del Blindaje Clon. Nosotros podemos fabricar esta especificaci¢n. Debe hacer que un agente parezca para los escaners de UTOPIA un ejecutivo continuamente.

@@ -20,6 +20,7 @@
 
 #include "bffile.h"
 #include "bfstrut.h"
+#include "bfendian.h"
 #include <assert.h>
 
 #include "bfjoyst.h"
@@ -41,6 +42,133 @@
 #include "swlog.h"
 #include "fncheck.h"
 #include "wrcities.h"
+
+/******************************************************************************/
+/* The save files are little endian (the PC's order) on every platform, so
+ * that saves and settings go between the PC, the 68k Amiga and the Warp ARM
+ * builds.  On a big endian CPU the fields are converted here: scalars by
+ * their size, the save buffer by the layouts of its structs. */
+
+/* layouts for lb_le_fix_struct() (tools/amiga/struct_layout.py; MissionStatus
+ * with the single player member of its union, as the saves hold) */
+#define SAVE_LAYOUT_AgentInfo     "32d32wd193b"
+#define SAVE_LAYOUT_ResearchInfo  "640w64b2d4b4d"
+#define SAVE_LAYOUT_PlayerInfo    "d2bw2b12wd2bw2b12wd2bw2b12wd2bw2b12w9d12bw2bw18b4d19w148b8w"
+#define SAVE_LAYOUT_MissionStatus "4d6wdd4b"
+#define SAVE_FMTVER_CURRENT 12
+
+static void le_fix_scalar(void *p, ulong size)
+{
+    if (size == 2)
+        lb_le_fix16_array(p, 1);
+    else if (size == 4)
+        lb_le_fix32_array(p, 1);
+}
+
+/** Reads a scalar (1, 2 or 4 bytes) stored little endian. */
+static long file_read_le(TbFileHandle fh, void *p, ulong size)
+{
+    long n = LbFileRead(fh, p, size);
+    le_fix_scalar(p, size);
+    return n;
+}
+
+/** Writes a scalar (1, 2 or 4 bytes) little endian. */
+static long file_write_le(TbFileHandle fh, const void *p, ulong size)
+{
+    u32 tmp = 0;
+    if (size > sizeof(tmp))
+        return LbFileWrite(fh, p, size);
+    memcpy(&tmp, p, size);
+    le_fix_scalar(&tmp, size);
+    return LbFileWrite(fh, &tmp, size);
+}
+
+/** Reads an array of count values of esize (2 or 4) bytes, little endian. */
+static long file_read_le_arr(TbFileHandle fh, void *p, ulong count, ulong esize)
+{
+    long n = LbFileRead(fh, p, count * esize);
+    if (esize == 2)
+        lb_le_fix16_array(p, count);
+    else if (esize == 4)
+        lb_le_fix32_array(p, count);
+    return n;
+}
+
+/** Writes an array of count values of esize (2 or 4) bytes, little endian. */
+static long file_write_le_arr(TbFileHandle fh, const void *p, ulong count, ulong esize)
+{
+#if LB_BIG_ENDIAN
+    ubyte buf[256];
+    const ubyte *src = (const ubyte *)p;
+    ulong left = count * esize;
+    long total = 0;
+
+    while (left > 0) {
+        ulong k = (left < sizeof(buf)) ? left : sizeof(buf);
+        memcpy(buf, src, k);
+        if (esize == 2)
+            lb_le_fix16_array(buf, k / 2);
+        else if (esize == 4)
+            lb_le_fix32_array(buf, k / 4);
+        total += LbFileWrite(fh, buf, k);
+        src += k;
+        left -= k;
+    }
+    return total;
+#else
+    return LbFileWrite(fh, p, count * esize);
+#endif
+}
+
+/** Converts the save buffer (format SAVE_FMTVER_CURRENT) between the CPU's
+ * order and little endian, in place (the same both ways); from_le says in
+ * which order the counts inside it are now. */
+static TbBool save_buf_fix_order(ubyte *buf, u32 len, TbBool from_le)
+{
+#if LB_BIG_ENDIAN
+    u32 o = 0;
+    int ne, nb, nm, nmis;
+
+    lb_le_fix32_array(buf + o, 1); // Credits
+    o += 4;
+    lb_le_fix_struct(buf + o, 1, sizeof(struct AgentInfo), SAVE_LAYOUT_AgentInfo);
+    o += sizeof(struct AgentInfo);
+    lb_le_fix_struct(buf + o, 1, sizeof(struct ResearchInfo), SAVE_LAYOUT_ResearchInfo);
+    o += sizeof(struct ResearchInfo);
+    lb_le_fix_struct(buf + o, 1, sizeof(PlayerInfo), SAVE_LAYOUT_PlayerInfo);
+    o += sizeof(PlayerInfo);
+    o += 3 * sizeof(struct SynTime);
+    ne = buf[o + 0];
+    nb = buf[o + 2];
+    nm = buf[o + 10];
+    o += 12;
+    lb_le_fix_struct(buf + o, 1, sizeof(struct MissionStatus), SAVE_LAYOUT_MissionStatus);
+    o += sizeof(struct MissionStatus);
+    o += sizeof(struct EmailItem) * (ne + nb + nm);
+    lb_le_fix16_array(buf + o, 1); // ingame.MissionStatus
+    o += 2;
+    lb_le_fix16_array(buf + o, 2 * MISSION_STATE_SLOTS_COUNT); // mission_open, mission_state
+    o += 4 * MISSION_STATE_SLOTS_COUNT;
+    if (from_le)
+        nmis = buf[o] | (buf[o + 1] << 8);
+    else
+        nmis = (buf[o] << 8) | buf[o + 1];
+    lb_le_fix16_array(buf + o, 1); // next_mission
+    o += 2;
+    if (nmis > 1)
+        o += (nmis - 1) * (sizeof(mission_list[0].SpecialTrigger) + 1);
+    // login name, cities info, auto research: bytes
+    if (o > len) {
+        LOGERR("save buffer shorter (%lu) than its contents (%lu)", (ulong)len, (ulong)o);
+        return false;
+    }
+#else
+    (void)buf; (void)len; (void)from_le;
+#endif
+    return true;
+}
+/******************************************************************************/
 
 /******************************************************************************/
 
@@ -286,7 +414,8 @@ void save_crypto_docrypt(ubyte *save_buf, u32 save_buf_len)
             break;
         }
         gbpos += 4;
-        *cryptpos ^= key;
+        // the key as the PC applies it, bytes in little endian order
+        *cryptpos ^= lb_le32(key);
     }
 }
 
@@ -335,7 +464,7 @@ void resave_salt_to_keys(void)
     i = sizeof(save_mortal_salt);
     // Add salts at end, storing all salts ever used with this copy
     LbFileSeek(fh, 0, Lb_FILE_SEEK_END);
-    LbFileWrite(fh, &save_mortal_salt, i);
+    file_write_le(fh, &save_mortal_salt, i);
     LbFileClose(fh);
 }
 
@@ -359,7 +488,7 @@ TbResult reload_salt_from_keys(void)
     }
     i = sizeof(save_mortal_salt);
     LbFileSeek(fh, -i, Lb_FILE_SEEK_END);
-    LbFileRead(fh, &save_mortal_salt, i);
+    file_read_le(fh, &save_mortal_salt, i);
     LbFileClose(fh);
     return Lb_SUCCESS;
 }
@@ -419,7 +548,7 @@ void read_user_settings(void)
         assert(sizeof(locflags) == sizeof(ingame.UserFlags));
 
         if (LbFileLengthHandle(fh) > 126)
-            LbFileRead(fh, &fmtver, sizeof(u32));
+            file_read_le(fh, &fmtver, sizeof(u32));
         else
             fmtver = 0;
 
@@ -427,68 +556,68 @@ void read_user_settings(void)
             // In original game, the last key (agent 4 select) is not saved at all
             set_default_game_keys();
             ushort jskeys_old[23];
-            LbFileRead(fh, kbkeys, 23 * sizeof(ushort));
-            LbFileRead(fh, jskeys_old, 23 * sizeof(ushort));
+            file_read_le_arr(fh, kbkeys, 23, sizeof(ushort));
+            file_read_le_arr(fh, jskeys_old, 23, sizeof(ushort));
             for (i = 0; i < 23; i++)
                 jskeys[i] = jskeys_old[i];
         } else if (fmtver == 1) {
             set_default_game_keys();
             ushort jskeys_old[29];
-            LbFileRead(fh, kbkeys, 29 * sizeof(ushort));
-            LbFileRead(fh, jskeys_old, 29 * sizeof(ushort));
+            file_read_le_arr(fh, kbkeys, 29, sizeof(ushort));
+            file_read_le_arr(fh, jskeys_old, 29, sizeof(ushort));
             for (i = 0; i < 29; i++)
                 jskeys[i] = jskeys_old[i];
         } else if (fmtver == 2) {
             set_default_game_keys();
             ushort jskeys_old[50];
-            LbFileRead(fh, kbkeys, 50 * sizeof(ushort));
-            LbFileRead(fh, jskeys_old, 50 * sizeof(ushort));
+            file_read_le_arr(fh, kbkeys, 50, sizeof(ushort));
+            file_read_le_arr(fh, jskeys_old, 50, sizeof(ushort));
             for (i = 0; i < 50; i++)
                 jskeys[i] = jskeys_old[i];
         } else {
             assert(sizeof(JoyButtonSet) == 4);
             if (fmtver != 3)
                 LOGWARN("Settings may be invalid, as \"%s\" has unrecognized format version %d", fname, (int)fmtver);
-            LbFileRead(fh, kbkeys, GKey_KEYS_COUNT * sizeof(ushort));
-            LbFileRead(fh, jskeys, GKey_KEYS_COUNT * sizeof(JoyButtonSet));
+            file_read_le_arr(fh, kbkeys, GKey_KEYS_COUNT, sizeof(ushort));
+            file_read_le_arr(fh, jskeys, GKey_KEYS_COUNT, sizeof(JoyButtonSet));
         }
 
-        LbFileRead(fh, &ctl_joystick_type, sizeof(ctl_joystick_type));
+        file_read_le(fh, &ctl_joystick_type, sizeof(ctl_joystick_type));
         LbFileRead(fh, &players[local_player_no].DoubleMode,
           sizeof(players[local_player_no].DoubleMode));
         for (i = 0; i != 4; i++)
         {
             PlayerInfo *p_locplayer;
             p_locplayer = &players[local_player_no];
-            LbFileRead(fh, &p_locplayer->UserInput[i].ControlMode,
+            file_read_le(fh, &p_locplayer->UserInput[i].ControlMode,
               sizeof(p_locplayer->UserInput[i].ControlMode));
         }
-        LbFileRead(fh, &startscr_samplevol, sizeof(startscr_samplevol));
-        LbFileRead(fh, &startscr_midivol, sizeof(startscr_midivol));
-        LbFileRead(fh, &startscr_cdvolume, sizeof(startscr_cdvolume));
-        LbFileRead(fh, &game_gfx_advanced_lights, sizeof(game_gfx_advanced_lights));
-        LbFileRead(fh, &game_billboard_movies, sizeof(game_billboard_movies));
-        LbFileRead(fh, &game_gfx_deep_radar, sizeof(game_gfx_deep_radar));
-        LbFileRead(fh, &ingame.DetailLevel, sizeof(ingame.DetailLevel));
-        LbFileRead(fh, &game_high_resolution, sizeof(game_high_resolution));
-        LbFileRead(fh, &game_projector_speed, sizeof(game_projector_speed));
-        LbFileRead(fh, &game_perspective, sizeof(game_perspective));
-        LbFileRead(fh, &ingame.PanelPermutation, sizeof(ingame.PanelPermutation));
-        LbFileRead(fh, &ingame.TrenchcoatPreference, sizeof(ingame.TrenchcoatPreference));
-        LbFileRead(fh, &ingame.CDTrack, sizeof(ingame.CDTrack));
-        LbFileRead(fh, &ingame.DangerTrack, sizeof(ingame.DangerTrack));
-        LbFileRead(fh, &ingame.UseMultiMedia, sizeof(ingame.UseMultiMedia));
-        LbFileRead(fh, &locflags, sizeof(locflags));
+        file_read_le(fh, &startscr_samplevol, sizeof(startscr_samplevol));
+        file_read_le(fh, &startscr_midivol, sizeof(startscr_midivol));
+        file_read_le(fh, &startscr_cdvolume, sizeof(startscr_cdvolume));
+        file_read_le(fh, &game_gfx_advanced_lights, sizeof(game_gfx_advanced_lights));
+        file_read_le(fh, &game_billboard_movies, sizeof(game_billboard_movies));
+        file_read_le(fh, &game_gfx_deep_radar, sizeof(game_gfx_deep_radar));
+        file_read_le(fh, &ingame.DetailLevel, sizeof(ingame.DetailLevel));
+        file_read_le(fh, &game_high_resolution, sizeof(game_high_resolution));
+        file_read_le(fh, &game_projector_speed, sizeof(game_projector_speed));
+        file_read_le(fh, &game_perspective, sizeof(game_perspective));
+        file_read_le(fh, &ingame.PanelPermutation, sizeof(ingame.PanelPermutation));
+        file_read_le(fh, &ingame.TrenchcoatPreference, sizeof(ingame.TrenchcoatPreference));
+        file_read_le(fh, &ingame.CDTrack, sizeof(ingame.CDTrack));
+        file_read_le(fh, &ingame.DangerTrack, sizeof(ingame.DangerTrack));
+        file_read_le(fh, &ingame.UseMultiMedia, sizeof(ingame.UseMultiMedia));
+        file_read_le(fh, &locflags, sizeof(locflags));
         locflags &= ~UsrF_Cheats; // Cheats are per-session setting, not per-user
         ingame.UserFlags |= locflags; // Do not replace these, add to them
-        LbFileRead(fh, &save_mortal_salt, sizeof(save_mortal_salt));
+        file_read_le(fh, &save_mortal_salt, sizeof(save_mortal_salt));
         {   // speed options, added at the end: older files keep the defaults
             ubyte opt;
-            if (LbFileRead(fh, &opt, sizeof(opt)) == sizeof(opt) && (opt <= 3))
+            if (file_read_le(fh, &opt, sizeof(opt)) == sizeof(opt) && (opt <= 3))
                 game_far_pedestrians = opt;
-            if (LbFileRead(fh, &opt, sizeof(opt)) == sizeof(opt) && (opt <= 1))
+            if (file_read_le(fh, &opt, sizeof(opt)) == sizeof(opt) && (opt <= 1))
                 game_scanner_half_rate = opt;
-            if (LbFileRead(fh, &opt, sizeof(opt)) == sizeof(opt) && (opt <= 1))
+            if (file_read_le(fh, &opt, sizeof(opt)) == sizeof(opt) && (opt <= 1))
                 game_auto_detail = opt;
         }
         LbFileClose(fh);
@@ -523,39 +652,39 @@ TbBool save_user_settings(void)
     if (fh == INVALID_FILE)
         return 1;
 
-    LbFileWrite(fh, &fmtver, sizeof(fmtver));
-    LbFileWrite(fh, kbkeys, GKey_KEYS_COUNT * sizeof(ushort));
-    LbFileWrite(fh, jskeys, GKey_KEYS_COUNT * sizeof(JoyButtonSet));
-    LbFileWrite(fh, &ctl_joystick_type, sizeof(ctl_joystick_type));
+    file_write_le(fh, &fmtver, sizeof(fmtver));
+    file_write_le_arr(fh, kbkeys, GKey_KEYS_COUNT, sizeof(ushort));
+    file_write_le_arr(fh, jskeys, GKey_KEYS_COUNT, sizeof(JoyButtonSet));
+    file_write_le(fh, &ctl_joystick_type, sizeof(ctl_joystick_type));
     LbFileWrite(fh, &players[local_player_no].DoubleMode,
       sizeof(players[local_player_no].DoubleMode));
     for (i = 0; i < 4; i++)
     {
         PlayerInfo *p_locplayer;
         p_locplayer = &players[local_player_no];
-        LbFileWrite(fh, &p_locplayer->UserInput[i].ControlMode,
+        file_write_le(fh, &p_locplayer->UserInput[i].ControlMode,
           sizeof(p_locplayer->UserInput[i].ControlMode));
     }
-    LbFileWrite(fh, &startscr_samplevol, sizeof(startscr_samplevol));
-    LbFileWrite(fh, &startscr_midivol, sizeof(startscr_midivol));
-    LbFileWrite(fh, &startscr_cdvolume, sizeof(startscr_cdvolume));
-    LbFileWrite(fh, &game_gfx_advanced_lights, sizeof(game_gfx_advanced_lights));
-    LbFileWrite(fh, &game_billboard_movies, sizeof(game_billboard_movies));
-    LbFileWrite(fh, &game_gfx_deep_radar, sizeof(game_gfx_deep_radar));
-    LbFileWrite(fh, &ingame.DetailLevel, sizeof(ingame.DetailLevel));
-    LbFileWrite(fh, &game_high_resolution, sizeof(game_high_resolution));
-    LbFileWrite(fh, &game_projector_speed, sizeof(game_projector_speed));
-    LbFileWrite(fh, &game_perspective, sizeof(game_perspective));
-    LbFileWrite(fh, &ingame.PanelPermutation, sizeof(ingame.PanelPermutation));
-    LbFileWrite(fh, &ingame.TrenchcoatPreference, sizeof(ingame.TrenchcoatPreference));
-    LbFileWrite(fh, &ingame.CDTrack, sizeof(ingame.CDTrack));
-    LbFileWrite(fh, &ingame.DangerTrack, sizeof(ingame.DangerTrack));
-    LbFileWrite(fh, &ingame.UseMultiMedia, sizeof(ingame.UseMultiMedia));
-    LbFileWrite(fh, &ingame.UserFlags, sizeof(ingame.UserFlags));
-    LbFileWrite(fh, &save_mortal_salt, sizeof(save_mortal_salt));
-    LbFileWrite(fh, &game_far_pedestrians, sizeof(game_far_pedestrians));
-    LbFileWrite(fh, &game_scanner_half_rate, sizeof(game_scanner_half_rate));
-    LbFileWrite(fh, &game_auto_detail, sizeof(game_auto_detail));
+    file_write_le(fh, &startscr_samplevol, sizeof(startscr_samplevol));
+    file_write_le(fh, &startscr_midivol, sizeof(startscr_midivol));
+    file_write_le(fh, &startscr_cdvolume, sizeof(startscr_cdvolume));
+    file_write_le(fh, &game_gfx_advanced_lights, sizeof(game_gfx_advanced_lights));
+    file_write_le(fh, &game_billboard_movies, sizeof(game_billboard_movies));
+    file_write_le(fh, &game_gfx_deep_radar, sizeof(game_gfx_deep_radar));
+    file_write_le(fh, &ingame.DetailLevel, sizeof(ingame.DetailLevel));
+    file_write_le(fh, &game_high_resolution, sizeof(game_high_resolution));
+    file_write_le(fh, &game_projector_speed, sizeof(game_projector_speed));
+    file_write_le(fh, &game_perspective, sizeof(game_perspective));
+    file_write_le(fh, &ingame.PanelPermutation, sizeof(ingame.PanelPermutation));
+    file_write_le(fh, &ingame.TrenchcoatPreference, sizeof(ingame.TrenchcoatPreference));
+    file_write_le(fh, &ingame.CDTrack, sizeof(ingame.CDTrack));
+    file_write_le(fh, &ingame.DangerTrack, sizeof(ingame.DangerTrack));
+    file_write_le(fh, &ingame.UseMultiMedia, sizeof(ingame.UseMultiMedia));
+    file_write_le(fh, &ingame.UserFlags, sizeof(ingame.UserFlags));
+    file_write_le(fh, &save_mortal_salt, sizeof(save_mortal_salt));
+    file_write_le(fh, &game_far_pedestrians, sizeof(game_far_pedestrians));
+    file_write_le(fh, &game_scanner_half_rate, sizeof(game_scanner_half_rate));
+    file_write_le(fh, &game_auto_detail, sizeof(game_auto_detail));
     LbFileClose(fh);
     return 0;
 }
@@ -570,7 +699,7 @@ int save_game_write(ubyte slot, char *desc)
     TbBool simple_salt;
     int i;
 
-    fmtver = 12;
+    fmtver = SAVE_FMTVER_CURRENT;
     gblen = 0;
     memcpy(&save_game_buffer[gblen], &ingame.Credits, sizeof(ingame.Credits));
     assert(sizeof(ingame.Credits) == 4);
@@ -683,6 +812,9 @@ int save_game_write(ubyte slot, char *desc)
     }
 
     simple_salt = ((ingame.Flags & GamF_MortalGame) == 0);
+    // the PC's byte order in the file; the hash and the crypto work on
+    // the bytes as they are then
+    save_buf_fix_order(save_game_buffer, gblen, false);
     decrypt_verify = save_game_encrypt(fmtver, simple_salt, save_game_buffer, gblen);
 
     if ((ingame.Flags & GamF_MortalGame) != 0)
@@ -697,9 +829,10 @@ int save_game_write(ubyte slot, char *desc)
         return 1;
     }
     LbFileWrite(fh, desc, 25);
-    LbFileWrite(fh, &gblen, sizeof(gblen));
-    LbFileWrite(fh, &fmtver, sizeof(fmtver));
+    file_write_le(fh, &gblen, sizeof(gblen));
+    file_write_le(fh, &fmtver, sizeof(fmtver));
     LbFileWrite(fh, save_game_buffer, gblen);
+    // the hash is a xor of the bytes in 4 lanes: stored as it is
     LbFileWrite(fh, &decrypt_verify, sizeof(decrypt_verify));
     LbFileClose(fh);
 
@@ -755,14 +888,24 @@ ubyte load_game(int slot, char *desc)
     if (fh == INVALID_FILE)
         return 1;
     LbFileRead(fh, desc, 25);
-    LbFileRead(fh, &gblen, 4);
-    LbFileRead(fh, &fmtver, sizeof(u32));
+    file_read_le(fh, &gblen, 4);
+    file_read_le(fh, &fmtver, sizeof(u32));
     LbFileRead(fh, save_game_buffer, gblen);
     LbFileRead(fh, &decrypt_verify, 4);
     LbFileClose(fh);
 
     ok = save_game_decrypt_and_verify(fmtver, slot != 0, save_game_buffer, gblen, decrypt_verify);
     if (!ok) return 2;
+#if LB_BIG_ENDIAN
+    // older formats have parts of structs: not converted here
+    if (fmtver != SAVE_FMTVER_CURRENT) {
+        LOGERR("save format %lu cannot be read on this CPU, only %d", (ulong)fmtver,
+          SAVE_FMTVER_CURRENT);
+        return 2;
+    }
+#endif
+    if (!save_buf_fix_order(save_game_buffer, gblen, true))
+        return 2;
 
     gblen = 0;
     memcpy(&ingame.Credits, &save_game_buffer[gblen], sizeof(ingame.Credits));

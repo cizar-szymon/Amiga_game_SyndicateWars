@@ -354,3 +354,22 @@ Otwarte: odsłuch na prawdziwej Amidze, koszt CPU (pomiar na Amidze 1), `AIL_ms_
   zatrzymuje; muzykę czyta z dysku; budzi się co 20 ms. Opcje Paula/AHI/muzyka czyta `swhost`
   z ENV: i odsyła w `SND_OPEN`. `swhost` zostaje na vbcc (nagłówki `cswarp.library` tylko dla vbcc).
 - Koszt na ARM: 0,4 ms (Paula) – 1,4 ms (AHI) na turę.
+
+### Zapisy gry i ustawienia: jeden format, little endian (15.11.2026)
+
+- Decyzja użytkownika: zapisy (`qdata/savegame/*.sav`), ustawienia (`default.ini`) i `keys.dat`
+  mają na wszystkich platformach format PC (little endian), więc są wymienne między PC, 68060 i ARM.
+- `src/game_save.c`: pola ustawień czytane i pisane przez `file_read_le`/`file_write_le` (i wersje
+  tablicowe); bufor zapisu (format 12) przestawiany przez `save_buf_fix_order()` według układów
+  struktur (`tools/amiga/struct_layout.py`: AgentInfo, ResearchInfo, PlayerInfo, MissionStatus)
+  przed szyfrowaniem i po odszyfrowaniu. Klucz szyfru nakładany jako `lb_le32(key)`; suma kontrolna
+  to XOR bajtów w 4 torach, więc zapisywana bez zmian. Na big endian starsze formaty (< 12) są
+  odrzucane (zawierają fragmenty struktur).
+- `PlayerInfo.MyAgent[4]` to wskaźniki, ważne tylko w misji (tak w oryginale); w zapisie różnią się
+  między platformami i przebiegami, nie mają znaczenia po wczytaniu w menu.
+- Test: `ENV:SyndWarsSaveTest=N` (PC `SW_SAVETEST`) w misji od tury N zapisuje grę do slotu 12
+  (`swars011.sav`), wczytuje i zapisuje do slotu 13, porównuje pliki i kończy grę;
+  `SyndWarsSaveTestLoad=1` (`SW_SAVETESTLOAD`) tylko wczytuje slot 12 (zapis z innej platformy).
+  Bufor zapisu menu to strona tekstur, a przy `-m` nie jest ustawiony – test używa własnego.
+- `tools/amiga/save_decrypt.py FILE.sav` odszyfrowuje zapis, `--diff A B` pokazuje różniące się
+  bajty z nazwą pola.

@@ -204,6 +204,22 @@ def init():
         CONSTS[m.group(1)] = int(m.group(2), 0)
     for m in re.finditer(r"typedef\s+((?:unsigned\s+|signed\s+|struct\s+|union\s+)?\w+)\s+(\w+)\s*;", SRC):
         TYPEDEFS.setdefault(m.group(2), m.group(1))
+    # enum constants (array sizes like WFRPK_COUNT): consecutive values,
+    # explicit "= number" restarts the count
+    for m in re.finditer(r"\benum\s+\w*\s*\{([^}]*)\}", SRC):
+        body = re.sub(r"//[^\n]*|/\*.*?\*/", "", m.group(1), flags=re.S)
+        val = 0
+        for item in body.split(","):
+            item = item.strip()
+            if not item:
+                continue
+            mm = re.match(r"(\w+)\s*(?:=\s*(-?(?:0x[0-9a-fA-F]+|\d+)))?$", item)
+            if mm is None:
+                break   # an expression: stop guessing this enum
+            if mm.group(2) is not None:
+                val = int(mm.group(2), 0)
+            CONSTS.setdefault(mm.group(1), val)
+            val += 1
 
 
 def main():

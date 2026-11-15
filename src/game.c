@@ -7472,7 +7472,9 @@ static int amiga_getenv_int(const char *name, int dflt)
 {
     // the PC names: SW_BANGTEST, SW_BANGLO
     const char *s = getenv((strcmp(name, "SyndWarsBangTest") == 0) ? "SW_BANGTEST" :
-      (strcmp(name, "SyndWarsBangLo") == 0) ? "SW_BANGLO" : name);
+      (strcmp(name, "SyndWarsBangLo") == 0) ? "SW_BANGLO" :
+      (strcmp(name, "SyndWarsSaveTest") == 0) ? "SW_SAVETEST" :
+      (strcmp(name, "SyndWarsSaveTestLoad") == 0) ? "SW_SAVETESTLOAD" : name);
     return (s != NULL) ? atoi(s) : dflt;
 }
 #endif
@@ -7507,6 +7509,66 @@ static void amiga_bang_test(void)
     seed = seed * 1103515245u + 12345u;
     dz = (s32)((seed >> 8) % 4096) - 2048;
     bang_new4(p_agent->X + (dx << 8), p_agent->Y, p_agent->Z + (dz << 8), 0x0F);
+}
+
+static long amiga_save_test_read(int slot, ubyte *buf, long size)
+{
+    char fname[DISKPATH_SIZE];
+    TbFileHandle fh;
+    long n;
+
+    get_saved_game_fname(fname, slot);
+    fh = LbFileOpen(fname, Lb_FILE_MODE_READ_ONLY);
+    if (fh == INVALID_FILE)
+        return -1;
+    n = LbFileRead(fh, buf, size);
+    LbFileClose(fh);
+    return n;
+}
+
+/** Save test (ENV:SyndWarsSaveTest=N, PC: SW_SAVETEST): at game turn N
+ * the game is saved to slot 12 (swars011.sav), loaded back and saved
+ * again to slot 13 (swars012.sav); the files must be the same, and the
+ * first must be the same as the PC's at the same turn.  Then the game
+ * ends. */
+static void amiga_save_test(void)
+{
+    static int at = -1;
+    static ubyte f1[16384], f2[16384], sbuf[16384];
+    ubyte *old_buf;
+    char desc[25], desc2[25];
+    int r1, r2, r3;
+    long n1, n2;
+
+    if (at < 0)
+        at = amiga_getenv_int("SyndWarsSaveTest", 0);
+    if ((at <= 0) || (gameturn < (ulong)at))
+        return;
+    if (ingame.DisplayMode != DpM_ENGINEPLY)
+        return;
+    LOGWARN("savetest: at turn %lu, next_mission %d", (ulong)gameturn, (int)next_mission);
+    at = 0;
+    // the menu's buffer is a texture page; with -m it is not set at all
+    old_buf = save_game_buffer;
+    save_game_buffer = sbuf;
+    memset(desc, 0, sizeof(desc));
+    strcpy(desc, "SAVETEST");
+    // ENV:SyndWarsSaveTestLoad=1: slot 12 is a save from another platform,
+    // only loaded and saved again
+    if (amiga_getenv_int("SyndWarsSaveTestLoad", 0) == 1)
+        r1 = -1;
+    else
+        r1 = save_game_write(12, desc);
+    r2 = load_game(12, desc2);
+    memcpy(desc, desc2, sizeof(desc));
+    r3 = save_game_write(13, desc);
+    n1 = amiga_save_test_read(12, f1, sizeof(f1));
+    n2 = amiga_save_test_read(13, f2, sizeof(f2));
+    LOGWARN("savetest: write %d load %d write %d sizes %ld %ld %s",
+      r1, r2, r3, n1, n2,
+      ((n1 > 0) && (n1 == n2) && (memcmp(f1, f2, n1) == 0)) ? "SAME" : "DIFFER");
+    save_game_buffer = old_buf;
+    exit_game = 1;
 }
 
 void game_process_orbital_station_explode(void)
@@ -7636,6 +7698,7 @@ void game_process(void)
         update_unkn_changing_colors();
         game_process_orbital_station_explode();
         amiga_bang_test();
+        amiga_save_test();
         gameturn++;
         scene_post_effect_prepare();
     }

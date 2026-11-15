@@ -1004,6 +1004,11 @@ struct Music {
     UWORD vol;
     BOOL playing;
     BOOL ahi_loaded;
+    /** a stream (the sound of a video) instead of the file, se_stream_open() */
+    SeStreamFill src;
+    void *src_ctx;
+    /** the file's path, to open it again after a stream */
+    char path[128];
 };
 
 static struct Music music;
@@ -1028,6 +1033,12 @@ static ULONG rd_be32(const UBYTE *p)
 static BOOL music_read_block(UBYTE *dst)
 {
     LONG n = 2 * music.block;
+
+    if (music.src != NULL) {
+        music.src(dst, music.block, music.src_ctx);
+        snd_cnt.music_blocks++;
+        return TRUE;
+    }
 
     if (music.next_block >= music.nblocks) {
         music.next_block = 0;
@@ -1150,6 +1161,8 @@ void se_music_close(void)
 {
     music_release();
     music.playing = FALSE;
+    music.src = NULL;
+    music.path[0] = '\0';
     if (music.fh != 0)
         Close(music.fh);
     music.fh = 0;
@@ -1187,10 +1200,62 @@ BOOL se_music_open(const char *path)
     }
     music.next_block = 0;
     music.per = rate_to_period(music.rate);
+    strncpy(music.path, path, sizeof(music.path) - 1);
+    music.path[sizeof(music.path) - 1] = '\0';
     return TRUE;
 err:
     se_music_close();
     return FALSE;
+}
+
+BOOL se_stream_open(ULONG rate, ULONG block, SeStreamFill fill, void *ctx)
+{
+    se_music_close();
+    if ((backend == SE_NONE) || (fill == NULL) || (block < 256) ||
+      (block > MUSIC_BLOCK_MAX) || (block & 1) || (rate < 1000))
+        return FALSE;
+    music.rate = rate;
+    music.block = block;
+    music.nblocks = 0xFFFFFFFF;
+    if (backend == SE_PAULA) {
+        music.buf = AllocVec(NREQ * 2 * music.block, MEMF_CHIP | MEMF_PUBLIC);
+        if (music.buf == NULL)
+            return FALSE;
+    } else {
+        if (!music.ahi_loaded)
+            return FALSE;
+        music.half = MUSIC_HALF_BLOCKS * music.block;
+    }
+    music.src = fill;
+    music.src_ctx = ctx;
+    music.next_block = 0;
+    music.per = rate_to_period(music.rate);
+    return TRUE;
+}
+
+void se_music_suspend(struct SeMusicState *st)
+{
+    st->path[0] = '\0';
+    if ((music.fh != 0) && (music.src == NULL)) {
+        strcpy(st->path, music.path);
+        st->block = music.next_block;
+        st->playing = music.playing;
+        st->vol = music.vol;
+    }
+    se_music_close();
+}
+
+void se_music_resume(const struct SeMusicState *st)
+{
+    se_music_close();
+    if ((st->path[0] == '\0') || !se_music_open(st->path))
+        return;
+    if ((st->block > 0) && (st->block < music.nblocks)) {
+        music.next_block = st->block;
+        Seek(music.fh, 16 + st->block * 2 * music.block, OFFSET_BEGINNING);
+    }
+    if (st->playing)
+        se_music_play(st->vol);
 }
 
 void se_music_rewind(void)
@@ -1257,7 +1322,7 @@ void se_music_update(void)
 {
     BOOL ok = TRUE;
 
-    if ((music.fh == 0) || !music.playing)
+    if (((music.fh == 0) && (music.src == NULL)) || !music.playing)
         return;
     if (music.vol == 0) {
         music_release();

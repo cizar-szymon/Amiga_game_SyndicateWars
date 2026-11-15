@@ -110,6 +110,11 @@ struct smk_huff8_t {
 		with N=256 for 8 bits) */
 	size_t size;
 	unsigned short tree[511];
+
+	/* Amiga port: for each value of the next 8 bits (first bit lowest),
+		(bits taken << 12) | the node reached; has_fast 0: not made. */
+	int has_fast;
+	unsigned short fast[256];
 };
 
 /* ************************************************************************* */
@@ -191,6 +196,7 @@ static int smk_huff8_build(struct smk_huff8_t * const t, struct smk_bit_t * cons
 
 	/* OK to fill out the struct now */
 	t->size = 0;
+	t->has_fast = 0;
 
 	/* First bit indicates whether a tree is present or not. */
 	/*  Very small or audio-only files may have no tree. */
@@ -214,6 +220,24 @@ static int smk_huff8_build(struct smk_huff8_t * const t, struct smk_bit_t * cons
 		return 0;
 	}
 
+	/* Amiga port: the lookup table of the first 8 bits (the walk of
+		smk_huff8_lookup() on the bits of i) */
+	{
+		unsigned int i;
+		for (i = 0; i < 256; i ++) {
+			unsigned int index = 0, d = 0;
+			while ((t->tree[index] & SMK_HUFF8_BRANCH) && (d < 8)) {
+				if ((i >> d) & 1)
+					index = t->tree[index] & SMK_HUFF8_LEAF_MASK;
+				else
+					index ++;
+				d ++;
+			}
+			t->fast[i] = (unsigned short)((d << 12) | index);
+		}
+		t->has_fast = 1;
+	}
+
 	return 1;
 }
 
@@ -225,6 +249,17 @@ static int smk_huff8_lookup(const struct smk_huff8_t * const t, struct smk_bit_t
 	/* null check */
 	assert(t);
 	assert(bs);
+
+	/* Amiga port: the first 8 bits at once, when 2 bytes are there */
+	if (t->has_fast && (bs->buffer + 2 <= bs->end)) {
+		unsigned int bits = ((unsigned int) bs->buffer[0] |
+			((unsigned int) bs->buffer[1] << 8)) >> bs->bit_num;
+		unsigned int e = t->fast[bits & 0xFF];
+		unsigned int pos = bs->bit_num + (e >> 12);
+		bs->buffer += pos >> 3;
+		bs->bit_num = pos & 7;
+		index = e & 0xFFF;
+	}
 
 	while (t->tree[index] & SMK_HUFF8_BRANCH) {
 		if ((bit = smk_bs_read_1(bs)) < 0) {

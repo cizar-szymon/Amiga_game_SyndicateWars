@@ -5,7 +5,12 @@
  * As the PC's play_smk_direct(): each frame decoded and put into the middle
  * of WScreen, the palette set when it changes, the screen shown; the video's
  * own rate kept by the clock; Esc, Return, Space or the left mouse button
- * end it (unless SMK_NoStopOnUserInput).  No sound yet.
+ * end it (unless SMK_NoStopOnUserInput).
+ *
+ * Sound (68k): the video's track 0 (16-bit, 22 kHz) made 8-bit and put in a
+ * queue, which the music voices of the sound engine take as a stream (Paula
+ * or AHI); the game's music is put aside meanwhile.  The Warp ARM: no sound
+ * of the videos yet.
  *
  * ENV:SyndWarsSmkLog (68k) / the error.log line at the end: frames, how many
  * were late, the decode and copy time per frame - to see how a 68060 does. */
@@ -24,6 +29,71 @@
 #include "../../third_party/libsmacker/smacker.h"
 
 extern int game_hacky_update(void);
+
+#if !defined(SW_WARP)
+#include "snd_engine.h"
+
+extern short startscr_samplevol;
+#define STARTSCR_VOLUME_MAX 322
+
+/* the queue of the video's sound: 8-bit signed, left and right */
+#define AQ_SIZE 65536
+#define AQ_MASK (AQ_SIZE - 1)
+#define AQ_BLOCK 2048
+static signed char aq_l[AQ_SIZE], aq_r[AQ_SIZE];
+static volatile ulong aq_w, aq_r_pos;
+static ulong aq_under;
+
+static void aq_push(smk s, unsigned char ch, unsigned char bits)
+{
+    const unsigned char *a = smk_get_audio(s, 0);
+    ulong size = smk_get_audio_size(s, 0);
+    ulong n, i, w = aq_w;
+
+    if ((a == NULL) || (size == 0))
+        return;
+    if (bits == 16) {
+        const short *v = (const short *)a;
+        n = size / (2 * ch);
+        for (i = 0; i < n; i++, w++) {
+            if (w - aq_r_pos >= AQ_SIZE)
+                break;          // full: the rest dropped
+            aq_l[w & AQ_MASK] = (signed char)(v[i * ch] >> 8);
+            aq_r[w & AQ_MASK] = (signed char)(v[i * ch + ch - 1] >> 8);
+        }
+    } else {
+        // 8-bit Smacker sound is unsigned
+        n = size / ch;
+        for (i = 0; i < n; i++, w++) {
+            if (w - aq_r_pos >= AQ_SIZE)
+                break;
+            aq_l[w & AQ_MASK] = (signed char)(a[i * ch] ^ 0x80);
+            aq_r[w & AQ_MASK] = (signed char)(a[i * ch + ch - 1] ^ 0x80);
+        }
+    }
+    aq_w = w;
+}
+
+/** The engine's stream source: a block of the queue, silence when empty. */
+static void aq_fill(UBYTE *dst, ULONG block, void *ctx)
+{
+    ulong i, r = aq_r_pos;
+
+    (void)ctx;
+    for (i = 0; i < block; i++) {
+        if (r != aq_w) {
+            dst[i] = (UBYTE)aq_l[r & AQ_MASK];
+            dst[block + i] = (UBYTE)aq_r[r & AQ_MASK];
+            r++;
+        } else {
+            dst[i] = 0;
+            dst[block + i] = 0;
+            aq_under++;
+        }
+    }
+    aq_r_pos = r;
+}
+#endif
 
 static void put_frame(const unsigned char *frame, unsigned long w, unsigned long h,
   unsigned char yscale)
@@ -95,6 +165,12 @@ TbResult play_smk(char *fname, u32 smkflags, ushort plyflags)
     ulong late = 0, decode_ms = 0, show_ms = 0, shown = 0;
     TbBool finish = false;
     int i;
+#if !defined(SW_WARP)
+    unsigned char amask, ach[7], abits[7];
+    unsigned long arate[7];
+    struct SeMusicState mstate;
+    TbBool sound = false;
+#endif
 
     (void)smkflags;
     lbDisplay.MLeftButton = 0;
@@ -106,7 +182,15 @@ TbResult play_smk(char *fname, u32 smkflags, ushort plyflags)
     smk_info_all(s, NULL, &frames, NULL);
     usf = smk_frame_us(fname);
     smk_info_video(s, &w, &h, &yscale);
+#if !defined(SW_WARP)
+    smk_info_audio(s, &amask, ach, abits, arate);
+    if ((amask & SMK_AUDIO_TRACK_0) && (se_backend() != SE_NONE) &&
+      (ach[0] >= 1) && (ach[0] <= 2) && ((abits[0] == 8) || (abits[0] == 16)))
+        sound = true;
+    smk_enable_all(s, SMK_VIDEO_TRACK | (sound ? SMK_AUDIO_TRACK_0 : 0));
+#else
     smk_enable_all(s, SMK_VIDEO_TRACK);
+#endif
     LbWarnLog("smk: %s, %lux%lu, %lu frames, %ld us a frame\n", fname, w, h,
       frames, (long)usf);
 
@@ -117,6 +201,18 @@ TbResult play_smk(char *fname, u32 smkflags, ushort plyflags)
         smk_close(s);
         return Lb_FAIL;
     }
+#if !defined(SW_WARP)
+    if (sound) {
+        aq_w = aq_r_pos = 0;
+        aq_under = 0;
+        aq_push(s, ach[0], abits[0]);
+        se_music_suspend(&mstate);
+        if (se_stream_open(arate[0], AQ_BLOCK, aq_fill, NULL))
+            se_music_play((UWORD)(64L * startscr_samplevol / STARTSCR_VOLUME_MAX));
+        else
+            sound = false;
+    }
+#endif
     for (n = 0; (n < frames) && !finish; n++)
     {
         now = LbTimerClock();
@@ -143,6 +239,10 @@ TbResult play_smk(char *fname, u32 smkflags, ushort plyflags)
         now = LbTimerClock();
         show_ms += now - t0;
         while (LbTimerClock() < due) {
+#if !defined(SW_WARP)
+            if (sound)
+                se_music_update();
+#endif
             game_hacky_update();
             if (skip_pressed(plyflags)) {
                 finish = true;
@@ -154,8 +254,22 @@ TbResult play_smk(char *fname, u32 smkflags, ushort plyflags)
         t0 = LbTimerClock();
         if (smk_next(s) < 0)
             break;
+#if !defined(SW_WARP)
+        if (sound) {
+            aq_push(s, ach[0], abits[0]);
+            se_music_update();
+        }
+#endif
     }
     smk_close(s);
+#if !defined(SW_WARP)
+    if (sound) {
+        se_music_close();
+        se_music_resume(&mstate);
+        LbWarnLog("smk: sound %lu Hz, %u ch, %u bit; %lu samples short\n",
+          arate[0], ach[0], abits[0], aq_under);
+    }
+#endif
     now = LbTimerClock();
     LbWarnLog("smk: %lu of %lu frames in %lu ms, %lu not shown (late); "
       "decode %lu ms, copy+show %lu ms a frame\n", n, frames,

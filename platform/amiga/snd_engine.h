@@ -81,6 +81,23 @@ void se_music_rewind(void);
 /** Reads the next blocks as the voices need them; call often. */
 void se_music_update(void);
 
+/** A stream on the music voices instead of a file (the sound of a video):
+ * fill gives a block of 8-bit signed samples, `block` left then `block`
+ * right, when the voices need one. se_music_play() starts it,
+ * se_music_close() ends it. */
+typedef void (*SeStreamFill)(UBYTE *dst, ULONG block, void *ctx);
+BOOL se_stream_open(ULONG rate, ULONG block, SeStreamFill fill, void *ctx);
+
+/** The music of the game put aside for a stream, and back where it was. */
+struct SeMusicState {
+    char path[128];
+    ULONG block;
+    BOOL playing;
+    UWORD vol;
+};
+void se_music_suspend(struct SeMusicState *st);
+void se_music_resume(const struct SeMusicState *st);
+
 /** With ENV:SyndWarsSoundLog, writes the counters to the file every 5 s. */
 void se_log(const char *path);
 

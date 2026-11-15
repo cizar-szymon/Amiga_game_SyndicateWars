@@ -601,6 +601,15 @@ main (int argc, char **argv)
     ingame.LowerMemoryUse = 0;
     ingame.Flags = 0;
     setup_log();
+#if defined(SW_AMIGA) && !defined(SW_WARP)
+    {
+        // Tool Type / Shell word ARM: the game on the Warp's ARM (swhost)
+        int amiga_arm_start(int *argc, char **argv);
+        int rc = amiga_arm_start(&argc, argv);
+        if (rc >= 0)
+            return rc;
+    }
+#endif
 #if defined(SW_AMIGA)
     {
         void amiga_sampler_start(void);

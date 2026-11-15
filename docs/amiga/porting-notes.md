@@ -373,3 +373,15 @@ Otwarte: odsłuch na prawdziwej Amidze, koszt CPU (pomiar na Amidze 1), `AIL_ms_
   Bufor zapisu menu to strona tekstur, a przy `-m` nie jest ustawiony – test używa własnego.
 - `tools/amiga/save_decrypt.py FILE.sav` odszyfrowuje zapis, `--diff A B` pokazuje różniące się
   bajty z nazwą pola.
+
+### Wybór wersji ARM (15.11.2026)
+
+- Decyzja użytkownika: jedna ikona `SyndWars`, Tool Type `ARM` (w ikonie jako podpowiedź `(ARM)`)
+  uruchamia wersję ARM; bez niego gra na 68060. Z Shella: `SyndWars ARM [argumenty gry]`.
+- ARM z własną pamięcią (SDRAM) mają tylko Warp 1260 Extreme i Warp 7060; `cswarp.library` bywa
+  zainstalowana i na innych Warpach. Test (`platform/amiga/arm_launch.c`): `extXchg` bez danych –
+  płyta bez SDRAM albo ze starym firmware odpowiada `CSWEXT_ERR_NODEV`, płyta z ARM `NOTREADY`
+  (nic nie działa) / `OK` / `BUSY`. Bez ARM: okienko z wyjaśnieniem i gra na 68060.
+- `swhost` jest uruchamiany przez `SystemTags` z wejściem/wyjściem `NIL:` (bez okna konsoli przy
+  starcie z ikony), pełną ścieżką z `GetProgramDir()` i z katalogiem programu jako bieżącym
+  (`PROGDIR:` nie istnieje w nowym procesie Shella). `SyndWars` czeka na jego koniec.

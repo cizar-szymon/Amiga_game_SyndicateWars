@@ -6159,6 +6159,22 @@ ubyte do_user_interface(void)
         }
     }
 
+#if defined(SW_AMIGA)
+    // Esc in a mission: asked whether to abort it (the Amiga port; the
+    // original aborts only from the pause screen)
+    if (!in_network_game && is_key_pressed(KC_ESCAPE, KMod_NONE)
+      && (ingame.MissionStatus == ObvStatu_UNDECIDED))
+    {
+        clear_key_pressed(KC_ESCAPE);
+        if (ingame_ask_yes_no("ABORT MISSION?")) {
+            SetMusicVolume(100, 0);
+            StopAllSamples();
+            StopCD();
+            return GINPUT_EXIT;
+        }
+    }
+#endif
+
     // Entering pause screen
     if (!in_network_game)
     {

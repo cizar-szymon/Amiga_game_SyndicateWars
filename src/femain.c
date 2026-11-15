@@ -17,6 +17,7 @@
  */
 /******************************************************************************/
 #include "femain.h"
+#include "fepause.h"
 
 #include "bfgentab.h"
 #include "bftext.h"
@@ -257,6 +258,11 @@ void reload_background(void)
 
 ubyte main_do_my_quit(ubyte click)
 {
+#if defined(SW_AMIGA)
+    // the Amiga port asks first (Esc and the QUIT button)
+    if (!ingame_ask_yes_no("QUIT GAME?"))
+        return 1;
+#endif
     stop_sample_using_heap(0, 122);
     exit_game = 1;
     return 1;

@@ -694,3 +694,102 @@ TbBool pause_screen_handle(void)
 }
 
 /******************************************************************************/
+
+/** A question in a box in the style of the pause screen, with YES and NO
+ * buttons; Y or Return answer yes, N or Esc no.  It has its own loop, as
+ * the pause screen, over the last frame.  Added for the Amiga port (Esc in
+ * a mission asks whether to abort it, in the main menu whether to quit). */
+TbBool ingame_ask_yes_no(const char *question)
+{
+    struct ScreenBox box;
+    struct ScreenButton yes_btn, no_btn;
+    struct TbSprite *old_font;
+    TbBool answer, done;
+    short scale, text_w, line_h;
+    int x, y;
+
+    old_font = lbFontPtr;
+    if ((ingame.PanelPermutation != 2) && (ingame.PanelPermutation != -3)) {
+        ingame_boxes_colr1 = 20;
+        ingame_boxes_colr2 = 15;
+    } else {
+        ingame_boxes_colr1 = 40;
+        ingame_boxes_colr2 = 35;
+    }
+    // the menu is 640 wide with the in-game sprites' scale of 1
+    scale = lbDisplay.GraphicsScreenWidth / 320;
+    if (scale < pop1_sprites_scale)
+        scale = pop1_sprites_scale;
+    if (scale < 1)
+        scale = 1;
+    lbFontPtr = small_font;
+    my_set_text_window(0, 0, lbDisplay.PhysicalScreenWidth,
+      lbDisplay.PhysicalScreenHeight);
+    text_w = my_string_width(question);
+    line_h = my_char_height('A');
+
+    box.Width = text_w + 40 * scale;
+    if (box.Width < 140 * scale)
+        box.Width = 140 * scale;
+    box.Height = 46 * scale;
+    box.X = (lbDisplay.GraphicsScreenWidth - box.Width) / 2;
+    box.Y = (lbDisplay.GraphicsScreenHeight - box.Height) / 2;
+    box.Flags = 0;
+
+    y = box.Y + box.Height * 30 / 46;
+    init_ingame_screen_button(&yes_btn, box.X + box.Width * 3 / 10, y, "YES", small_font, 0);
+    init_ingame_screen_button(&no_btn, box.X + box.Width * 7 / 10, y, "NO", small_font, 0);
+
+    // wait for the key which asked to be released
+    clear_key_pressed(KC_ESCAPE);
+    lbDisplay.LeftButton = 0;
+    lbDisplay.RightButton = 0;
+
+    draw_box_cutedge(&box, ingame_boxes_colr1);
+    lbFontPtr = small_font;
+    if ((ingame.PanelPermutation == 2) || (ingame.PanelPermutation == -3)) {
+        lbDisplay.DrawFlags |= Lb_TEXT_ONE_COLOR;
+        lbDisplay.DrawColour = ingame_boxes_colr2;
+    }
+    x = box.X + (box.Width - text_w) / 2;
+    y = box.Y + box.Height * 9 / 46 + (line_h > 8 ? 0 : 2);
+    my_draw_text(x, y, question, 0);
+    lbDisplay.DrawFlags = 0;
+
+    answer = false;
+    done = false;
+    while (!done)
+    {
+        JoyUpdateInputs(&joy);
+
+        lbFontPtr = small_font;
+        draw_ingame_button(&yes_btn, 0);
+        draw_ingame_button(&no_btn, 0);
+        lbDisplay.DrawFlags = 0;
+
+        if (input_ingame_button(&yes_btn, 0) || is_key_pressed(KC_Y, KMod_DONTCARE)
+          || is_key_pressed(KC_RETURN, KMod_DONTCARE)) {
+            answer = true;
+            done = true;
+        }
+        else if (input_ingame_button(&no_btn, 0) || is_key_pressed(KC_N, KMod_DONTCARE)
+          || is_key_pressed(KC_ESCAPE, KMod_DONTCARE)) {
+            done = true;
+        }
+        if (exit_game)
+            done = true;
+
+        process_sound_heap();
+        PlayCDTrack(ingame.CDTrack);
+        swap_wscreen();
+        game_update();
+    }
+    clear_key_pressed(KC_Y);
+    clear_key_pressed(KC_N);
+    clear_key_pressed(KC_RETURN);
+    clear_key_pressed(KC_ESCAPE);
+    lbDisplay.LeftButton = 0;
+    lbDisplay.RightButton = 0;
+    lbFontPtr = old_font;
+    return answer;
+}

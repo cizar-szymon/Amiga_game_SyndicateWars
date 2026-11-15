@@ -729,14 +729,16 @@ TbResult sound_banks_fname(char *fname, const char *dir, const char *lang)
     return Lb_FAIL;
 }
 
-/* Paula plays samples only from Chip RAM, so on the Amiga the sound heap
- * is there, and smaller (the heap keeps the most recent samples). */
+/* Paula plays samples only from Chip RAM, so on the Amiga with Paula the
+ * sound heap is there, and smaller (the heap keeps the most recent samples);
+ * see platform/amiga/snd_amiga.c. */
 #if defined(SW_AMIGA) && !defined(SW_WARP)
-void *amiga_chip_alloc(ulong size);
-void amiga_chip_free(void *ptr);
-#define SOUND_HEAP_ALLOC(sz) amiga_chip_alloc(sz)
-#define SOUND_HEAP_FREE(ptr) amiga_chip_free(ptr)
-#define SOUND_HEAP_MAX 800000
+ulong amiga_sound_heap_max(void);
+void *amiga_sound_heap_alloc(ulong size);
+void amiga_sound_heap_free(void *ptr);
+#define SOUND_HEAP_ALLOC(sz) amiga_sound_heap_alloc(sz)
+#define SOUND_HEAP_FREE(ptr) amiga_sound_heap_free(ptr)
+#define SOUND_HEAP_MAX amiga_sound_heap_max()
 #else
 #define SOUND_HEAP_ALLOC(sz) LbMemoryAlloc(sz)
 #define SOUND_HEAP_FREE(ptr) LbMemoryFree(ptr)

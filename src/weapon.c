@@ -3819,10 +3819,63 @@ void init_time_gun(struct Thing *p_owner)
     }
 }
 
-void init_c_iff(struct Thing *p_owner)
+#ifdef SW_FNCHK
+static void init_c_iff_asm(struct Thing *p_owner)
 {
     asm volatile ("call ASM_init_c_iff\n"
-        : : "a" (p_owner));
+        : "+a" (p_owner) : : "cc", "memory");
+}
+#endif
+
+/** A c_iff (a small gun creature of the owner's group) is made in front
+ * of the owner.  Remade from init_c_iff. */
+static void init_c_iff_c(struct Thing *p_owner)
+{
+    struct Thing *p_ciff;
+    s32 x, y, z;
+    ThingIdx thing;
+    ubyte dir;
+
+    play_dist_sample(p_owner, 0x27, 0x7F, 0x40, 100, 0, 1);
+    dir = p_owner->U.UPerson.Angle;
+    x = p_owner->X + (angle_direction[dir].DiX << 7);
+    z = p_owner->Z + (angle_direction[dir].DiY << 7);
+    y = p_owner->Y;
+    thing = get_new_thing();
+    if (thing == 0)
+        return;
+    p_ciff = &things[(ushort)thing];
+    p_ciff->Z = z;
+    p_ciff->Y = y;
+    p_ciff->Timer1 = 30;
+    p_ciff->Owner = p_owner - things;
+    p_ciff->X = x;
+    p_ciff->StartFrame = 0x408;
+    p_ciff->Frame = nstart_ani[0x408];
+    p_ciff->Flag = TngF_Unkn0004;
+    add_node_thing((ushort)thing);
+    p_ciff->Type = 0x0F;
+    p_ciff->SubType = 0x30;
+    p_ciff->Radius = 50;
+    p_ciff->U.UPerson.Energy = 0x400;
+    p_ciff->U.UPerson.MaxEnergy = 0x400;
+    p_ciff->U.UPerson.Stamina = 0;
+    p_ciff->U.UPerson.MaxStamina = 0;
+    p_ciff->Health = 0xC00;
+    p_ciff->U.UPerson.MaxHealth = 0xC00;
+    p_ciff->U.UPerson.AnimMode = 0;
+    p_ciff->U.UPerson.CurrentWeapon = 3;
+    p_ciff->U.UPerson.OnFace = 1;
+    p_ciff->U.UPerson.UMod.Mods = 0;
+    p_ciff->PTarget = NULL;
+    p_ciff->State = 5;
+    p_ciff->U.UPerson.EffectiveGroup = p_owner->U.UPerson.EffectiveGroup;
+    p_ciff->U.UPerson.Group = p_owner->U.UPerson.EffectiveGroup;
+}
+
+void init_c_iff(struct Thing *p_owner)
+{
+    FNCHK_VOID("init_c_iff", init_c_iff_asm(p_owner), init_c_iff_c(p_owner));
 }
 
 void init_grenade(struct Thing *p_owner, ushort gtype)

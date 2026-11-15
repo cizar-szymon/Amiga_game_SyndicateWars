@@ -170,6 +170,8 @@ void rotate_object(struct Thing *p_object);
 void init_mgun_explode(struct Thing *p_thing);
 void process_tasered_person(struct Thing *p_person);
 void set_angle_to_avoid_group(struct Thing *p_person);
+void init_c_iff(struct Thing *p_owner);
+short create_a_pod(struct Thing *p_thing, struct Thing *p_loader, ushort pod_id);
 
 void set_player_peeps_to_run(struct Thing *p_leader, ushort plyr)
 {
@@ -2032,6 +2034,22 @@ static void test_cmds_process(void)
         break;
     case 72:
         map_things_unkn_func_04(0);
+        break;
+    case 86:
+        init_c_iff(p_agent);
+        break;
+    case 87:
+        if ((gameturn % 480) < 120)
+        {
+            struct Thing *p_pers, *p_bld;
+
+            // the person nearest to the agent is put into a pod
+            p_pers = test_cmds_nearest_thing(p_agent, TT_PERSON, false);
+            p_bld = test_cmds_nearest_thing(p_agent, TT_BUILDING, false);
+            if ((p_pers != NULL) && (p_bld != NULL) &&
+              ((p_pers->Flag & (TngF_PlayerAgent | TngF_Unkn4000 | TngF_InVehicle)) == 0))
+                create_a_pod(p_pers, p_bld, 0);
+        }
         break;
     case 80:
     case 81:

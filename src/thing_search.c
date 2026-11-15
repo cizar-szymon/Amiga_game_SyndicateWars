@@ -31,6 +31,7 @@
 #include "weapon.h"
 #include "game.h"
 #include "fncheck.h"
+#include "game_options.h"
 #include "enginsngobjs.h"
 #include <stdlib.h>
 
@@ -834,11 +835,62 @@ ThingIdx find_person_which_can_be_persuaded_now(short X, short Z, ushort R,
 
 /** Nearest person of the playable groups (network game; still in asm).
  */
+#ifdef SW_FNCHK
+static short find_nearest_player_asm(struct Thing *p_person)
+{
+    int ret;
+    asm volatile ("call ASM_find_nearest_player\n"
+        : "=a" (ret) : "0" (p_person) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** The living person of the network players' groups nearest to the
+ * person; 0 if none.  Remade from find_nearest_player. */
+static short find_nearest_player_c(struct Thing *p_person)
+{
+    u32 best;
+    short found;
+    ushort plyr;
+
+    best = 0xFFFFFFFF;
+    found = 0;
+    for (plyr = 0; plyr < 8; plyr++)
+    {
+        short thing;
+
+        if ((ingame.InNetGame_UNSURE & (1 << plyr)) == 0)
+            continue;
+        for (thing = same_type_head[256 + level_def.PlayableGroups[plyr]]; thing != 0;
+          thing = things[thing].LinkSameGroup)
+        {
+            struct Thing *p_thing;
+            s32 dx, dz;
+            u32 dist;
+
+            p_thing = &things[thing];
+            if ((p_thing->Flag & TngF_Destroyed) != 0)
+                continue;
+            dx = abs(p_person->X - p_thing->X) >> 8;
+            dz = abs(p_person->Z - p_thing->Z) >> 8;
+            if (dx > dz)
+                dist = dx + (dz >> 1);
+            else
+                dist = dz + (dx >> 1);
+            if (dist < best) {
+                best = dist;
+                found = thing;
+            }
+        }
+    }
+    return found;
+}
+
 static short find_nearest_player(struct Thing *p_person)
 {
     short ret;
-    asm volatile ("call ASM_find_nearest_player\n"
-        : "=a" (ret) : "a" (p_person) : "cc", "memory");
+    FNCHK_RET("find_nearest_player", ret, find_nearest_player_asm(p_person),
+      find_nearest_player_c(p_person));
     return ret;
 }
 

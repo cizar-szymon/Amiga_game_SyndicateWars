@@ -1112,12 +1112,57 @@ void collapse_building(short x, short y, short z, struct Thing *p_building)
     }
 }
 
+#ifdef SW_FNCHK
+static short create_a_pod_asm(struct Thing *p_thing, struct Thing *p_loader, ushort pod_id)
+{
+    int ret;
+    asm volatile (
+      "call ASM_create_a_pod\n"
+        : "=a" (ret), "+d" (p_loader), "+b" (pod_id) : "0" (p_thing) : "cc", "memory");
+    return ret;
+}
+#endif
+
+/** A pod (vehicle subtype 41) of the loader is made and the person (if
+ * any) is put into it, off the map, at the middle of its tile; returns the
+ * thing which was next to the person on the map.  pod_id is always 0 (the
+ * asm does not handle anything else).  Remade from create_a_pod. */
+static short create_a_pod_c(struct Thing *p_thing, struct Thing *p_loader, ushort pod_id)
+{
+    struct Thing *p_pod;
+    ThingIdx thing;
+    short next;
+
+    if (p_thing != NULL)
+        delete_node(p_thing);
+    thing = get_new_thing();
+    if (thing == 0)
+        return 0;
+    p_pod = &things[(ushort)thing];
+    p_pod->Type = TT_VEHICLE;
+    p_pod->SubType = 0x29;
+    p_pod->U.UVehicle.TNode = p_loader->ThingOffset;
+    if (p_thing == NULL) {
+        p_pod->U.UVehicle.PassengerHead = 0;
+        return 0;
+    }
+    if ((p_thing->Flag & TngF_PlayerAgent) != 0)
+        play_dist_sample(p_pod, 9, 0x7F, 0x40, 100, -1, 1);
+    next = p_thing->Next;
+    p_thing->Next = p_pod->U.UVehicle.PassengerHead;
+    p_thing->U.UPerson.Vehicle = p_pod->ThingOffset;
+    p_pod->U.UVehicle.PassengerHead = p_thing->ThingOffset;
+    p_thing->U.UPerson.GotoX = ((p_thing->X >> 8) & ~0xFF) + 0x80;
+    p_thing->Flag |= TngF_Unkn4000;
+    p_thing->U.UPerson.GotoZ = ((p_thing->Z >> 8) & ~0xFF) + 0x80;
+    return next;
+}
+
 short create_a_pod(struct Thing *p_thing, struct Thing *p_loader, ushort pod_id)
 {
     short ret;
-    asm volatile (
-      "call ASM_create_a_pod\n"
-        : "=r" (ret) : "a" (p_thing), "d" (p_loader), "b" (pod_id));
+    FNCHK_RET("create_a_pod", ret, create_a_pod_asm(p_thing, p_loader, pod_id),
+      create_a_pod_c(p_thing, p_loader, pod_id));
     return ret;
 }
 

@@ -8,7 +8,8 @@
  *     address and words.
  * @par Purpose:
  *     Files of a report and its sending; the 68k build sends it by a
- *     process of its own (platform/amiga/amiga_report.c).
+ *     process of its own (platform/amiga/amiga_report.c), the Warp ARM
+ *     build through swhost (SWL_REPORT), which uses the same.
  * @author   The Amiga port
  * @date     15 Nov 2026
  * @par  Copying and copyrights:
@@ -20,16 +21,11 @@
 /******************************************************************************/
 #include "amiga_bugreport.h"
 
-#if defined(SW_AMIGA) && !defined(SW_WARP)
+#if defined(SW_AMIGA)
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <exec/execbase.h>
-#include <exec/memory.h>
-#include <dos/dos.h>
-#include <proto/exec.h>
-#include <proto/dos.h>
 
 #include "bfscreen.h"
 #include "bfpalette.h"
@@ -39,23 +35,180 @@
 #include "game_options.h"
 #include "game_speed.h"
 #include "swlog.h"
+
+#define REPORT_SCREEN "RAM:SyndWars-screen.iff"
+#define REPORT_STATE  "RAM:SyndWars-state.txt"
+#define REPORT_EMAIL  "qdata/savegame/report_email.txt"
+
+extern const char amiga_port_version[];
+static char report_version[32];
+#define REPORT_VERSION (snprintf(report_version, sizeof(report_version), \
+  "SyndWars-%s", amiga_port_version), report_version)
+extern long lbSpeedMeter;
+
+static void machine_text(char *buf, int size);
+
+/* a short state of the game, for the report */
+static char state_text[600];
+
+static void make_state_text(void)
+{
+    char mach[120];
+
+    machine_text(mach, sizeof(mach));
+    snprintf(state_text, sizeof(state_text),
+      "version %s, built %s %s\n"
+      "machine %s\n"
+      "screen %dx%d, display mode %d, screen type %d\n"
+      "mission %d \"%s\", status %d, game turn %lu, credits %ld\n"
+      "options: detail %d, far pedestrians %d, radar half rate %d, "
+      "auto detail %d, show speed %d (now %ld%%)\n",
+      REPORT_VERSION, __DATE__, __TIME__, mach,
+      (int)lbDisplay.GraphicsScreenWidth, (int)lbDisplay.GraphicsScreenHeight,
+      (int)ingame.DisplayMode, (int)screentype,
+      (int)ingame.CurrentMission, mission_name, (int)ingame.MissionStatus,
+      (ulong)gameturn, (long)ingame.Credits,
+      (int)ingame.DetailLevel, (int)game_far_pedestrians, (int)game_scanner_half_rate,
+      (int)game_auto_detail, (int)game_show_speed, lbSpeedMeter);
+}
+
+#if defined(SW_WARP)
+#include "wlink.h"
+#endif
+
+/* the files of a report: the screen (before the box is drawn) and the state;
+ * on the ARM swhost saves the screen and gets the state with the report */
+void bug_report_capture(void)
+{
+    make_state_text();
+#if defined(SW_WARP)
+    wl_request(SWL_REPORT_SNAP, NULL, 0, NULL, 0, NULL);
+#else
+    {
+        ubyte pal[768];
+        FILE *f;
+
+        LbPaletteGet(pal);
+        if (lbDisplay.WScreen != NULL)
+            LbIffSave(REPORT_SCREEN, lbDisplay.WScreen, lbDisplay.GraphicsScreenWidth,
+              lbDisplay.GraphicsScreenHeight, pal, true);
+        f = fopen(REPORT_STATE, "w");
+        if (f != NULL) {
+            fputs(state_text, f);
+            fclose(f);
+        }
+    }
+#endif
+}
+
+void bug_report_load_email(char *buf, int size)
+{
+    FILE *f;
+
+    buf[0] = '\0';
+    f = fopen(REPORT_EMAIL, "r");
+    if (f == NULL)
+        return;
+    if (fgets(buf, size, f) == NULL)
+        buf[0] = '\0';
+    fclose(f);
+    buf[strcspn(buf, "\r\n")] = '\0';
+}
+
+#if !defined(SW_WARP)
+static void save_email(const char *email)
+{
+    FILE *f = fopen(REPORT_EMAIL, "w");
+    if (f == NULL)
+        return;
+    fprintf(f, "%s\n", email);
+    fclose(f);
+}
+#endif
+
+#if defined(SW_WARP)
+/******************************************************************************/
+/* The Warp ARM: swhost sends it (SWL_REPORT), with its own files - error.log,
+ * the settings and its log - and is asked for the result (SWL_REPORT_POLL). */
+#include "wlink.h"
+
+static void machine_text(char *buf, int size)
+{
+    snprintf(buf, size, "ARM build (the game on the Warp's ARM)");
+}
+
+static const char *reason(int code)
+{
+    switch (code) {
+    case SWL_REP_NONET: return "NO TCP/IP STACK RUNNING";
+    case SWL_REP_BUSY:  return "A REPORT IS STILL BEING SENT";
+    case SWL_REP_NOANSWER: return "THE GAME SERVER DID NOT ANSWER";
+    default:            return "THE GAME SERVER DID NOT TAKE IT";
+    }
+}
+
+int bug_report_start(const char *email, const char *text, char *why, int size)
+{
+    static char rec[SWL_REC_MAX];
+    char mach[120];
+    int n = 0, r;
+    int32_t code = 0;
+
+    machine_text(mach, sizeof(mach));
+    /* version, e-mail, text, machine, state: strings one after the other
+     * (swhost writes the state and keeps the e-mail) */
+    n += snprintf(rec + n, sizeof(rec) - n, "%s", REPORT_VERSION) + 1;
+    n += snprintf(rec + n, sizeof(rec) - n, "%s", email) + 1;
+    n += snprintf(rec + n, sizeof(rec) - n, "%.1500s", text) + 1;
+    n += snprintf(rec + n, sizeof(rec) - n, "%s", mach) + 1;
+    n += snprintf(rec + n, sizeof(rec) - n, "%s", state_text) + 1;
+    if (n > (int)sizeof(rec))
+        n = sizeof(rec);
+    LOGSYNC("bug report through swhost");
+    r = wl_request(SWL_REPORT, rec, n, NULL, 0, &code);
+    if (r != 1) {
+        snprintf(why, size, "%s", reason(code));
+        return 0;
+    }
+    return 1;
+}
+
+int bug_report_poll(char *msg, int size, int *ok)
+{
+    int32_t extra = 0;
+    int r = wl_request(SWL_REPORT_POLL, NULL, 0, NULL, 0, &extra);
+
+    if (r == SWL_REP_GOING)
+        return 0;
+    if (r == SWL_REP_SENT) {
+        snprintf(msg, size, "%ld", (long)extra);
+        *ok = 1;
+    } else {
+        snprintf(msg, size, "%s", reason(extra));
+        *ok = 0;
+    }
+    return 1;
+}
+
+void bug_report_quit(void)
+{
+    /* swhost waits for a report on its way when it ends */
+}
+
+#else
+/******************************************************************************/
+/* The 68k game: sent by a process of its own (platform/amiga/amiga_report.c) */
+#include <exec/execbase.h>
+#include <exec/memory.h>
+#include <dos/dos.h>
+#include <proto/exec.h>
+#include <proto/dos.h>
 #include "../platform/amiga/amiga_report.h"
 
 /* The game server of the Amiga ports (Settlers server/, on the Pi400);
  * ENV:SyndWarsReportServer="host[:port]" sets another. */
 #define REPORT_HOST "83.12.152.135"
 #define REPORT_PORT 6810
-
-#define REPORT_SCREEN "RAM:SyndWars-screen.iff"
-#define REPORT_STATE  "RAM:SyndWars-state.txt"
-#define REPORT_EMAIL  "qdata/savegame/report_email.txt"
-
-extern const char amiga_version_tag[];
-extern const char amiga_port_version[];
-static char report_version[32];
-#define REPORT_VERSION (snprintf(report_version, sizeof(report_version), \
-  "SyndWars-%s", amiga_port_version), report_version)
-extern long lbSpeedMeter;
 
 static char prog_dir[256];
 static char file_log[300], file_ini[300];
@@ -89,67 +242,11 @@ static void machine_text(char *buf, int size)
       (ulong)(AvailMem(MEMF_FAST) / 1024));
 }
 
-void bug_report_capture(void)
-{
-    ubyte pal[768];
-    char mach[120];
-    FILE *f;
-
-    find_prog_dir();
-    LbPaletteGet(pal);
-    if (lbDisplay.WScreen != NULL)
-        LbIffSave(REPORT_SCREEN, lbDisplay.WScreen, lbDisplay.GraphicsScreenWidth,
-          lbDisplay.GraphicsScreenHeight, pal, true);
-
-    machine_text(mach, sizeof(mach));
-    f = fopen(REPORT_STATE, "w");
-    if (f == NULL)
-        return;
-    fprintf(f, "version %s (%s), built %s %s\n", REPORT_VERSION,
-      amiga_version_tag + 6, __DATE__, __TIME__);
-    fprintf(f, "machine %s\n", mach);
-    fprintf(f, "screen %dx%d, display mode %d, screen type %d\n",
-      (int)lbDisplay.GraphicsScreenWidth, (int)lbDisplay.GraphicsScreenHeight,
-      (int)ingame.DisplayMode, (int)screentype);
-    fprintf(f, "mission %d \"%s\", status %d, game turn %lu, credits %ld\n",
-      (int)ingame.CurrentMission, mission_name, (int)ingame.MissionStatus,
-      (ulong)gameturn, (long)ingame.Credits);
-    fprintf(f, "options: detail %d, far pedestrians %d, radar half rate %d, "
-      "auto detail %d, show speed %d (now %ld%%)\n", (int)ingame.DetailLevel,
-      (int)game_far_pedestrians, (int)game_scanner_half_rate,
-      (int)game_auto_detail, (int)game_show_speed, lbSpeedMeter);
-    fclose(f);
-}
-
-void bug_report_load_email(char *buf, int size)
-{
-    FILE *f;
-
-    buf[0] = '\0';
-    f = fopen(REPORT_EMAIL, "r");
-    if (f == NULL)
-        return;
-    if (fgets(buf, size, f) == NULL)
-        buf[0] = '\0';
-    fclose(f);
-    buf[strcspn(buf, "\r\n")] = '\0';
-}
-
-static void save_email(const char *email)
-{
-    FILE *f = fopen(REPORT_EMAIL, "w");
-    if (f == NULL)
-        return;
-    fprintf(f, "%s\n", email);
-    fclose(f);
-}
-
 int bug_report_start(const char *email, const char *text, char *why, int size)
 {
     const char *files[4];
     char mach[120], host[64];
     int port = REPORT_PORT;
-
     static int quit_set;
 
     find_prog_dir();
@@ -194,6 +291,7 @@ void bug_report_quit(void)
 {
     report_quit();
 }
+#endif
 
 #endif
 /******************************************************************************/

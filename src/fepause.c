@@ -794,7 +794,7 @@ TbBool ingame_ask_yes_no(const char *question)
     return answer;
 }
 
-#if defined(SW_AMIGA) && !defined(SW_WARP)
+#if defined(SW_AMIGA)
 #include "amiga_bugreport.h"
 #include "game_speed.h"
 
@@ -942,6 +942,7 @@ void ingame_bug_report(void)
     state = 0;          // 0 writing, 1 sending, 2 done
     status[0] = '\0';
     done = false;
+    LOGWARN("bugbox: open");
     while (!done)
     {
         JoyUpdateInputs(&joy);
@@ -1000,6 +1001,7 @@ void ingame_bug_report(void)
         else if ((state == 0) && (input_ingame_button(&send_btn, 0)
           || is_key_pressed(KC_F12, KMod_DONTCARE))) {
             clear_key_pressed(KC_F12);
+            LOGWARN("bugbox: send");
             if (bug_report_start(email, text, status, sizeof(status))) {
                 strcpy(status, "SENDING...");
                 state = 1;
@@ -1010,6 +1012,7 @@ void ingame_bug_report(void)
           || is_key_pressed(KC_RETURN, KMod_DONTCARE)))
           || is_key_pressed(KC_ESCAPE, KMod_DONTCARE)) {
             clear_key_pressed(KC_ESCAPE);
+            LOGWARN("bugbox: closed, state %d", state);
             // a report on its way goes on without the box
             done = true;
         }

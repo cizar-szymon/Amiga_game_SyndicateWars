@@ -70,6 +70,20 @@
 #define SWL_SND_HEADERS  42       /* -> the first SWL_SND_HDR_BYTES of each sample in
                                      SWL_BUF_XFER, RESULT samples */
 #define SWL_SND_HDR_BYTES 64
+#define SWL_REPORT       44       /* version NUL e-mail NUL text NUL machine NUL: swhost
+                                     sends a bug report -> RESULT 1 started / 0, extra
+                                     SWL_REP_* why not */
+#define SWL_REPORT_POLL  45       /* -> RESULT SWL_REP_GOING / _SENT (extra: its number)
+                                     / _FAILED (extra: SWL_REP_* why) */
+#define SWL_REPORT_SNAP  46       /* -> RESULT 0: the host saved its screen for a report
+                                     (RAM:SyndWars-screen.iff) */
+#define SWL_REP_GOING    0
+#define SWL_REP_SENT     1
+#define SWL_REP_FAILED   2
+#define SWL_REP_NONET    1        /* why: no TCP/IP stack */
+#define SWL_REP_BUSY     2        /*      one is still being sent */
+#define SWL_REP_NOANSWER 3        /*      the server did not answer */
+#define SWL_REP_REFUSED  4        /*      the server did not take it */
 #define SWL_SMK_PLAY     43       /* u16 flags (SMK_*), u16 volume 0..64, name: the 68k
                                      plays the Smacker video -> RESULT 0 / -1 */
 

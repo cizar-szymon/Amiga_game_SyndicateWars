@@ -12,7 +12,13 @@ the version and add the file error.log of the game's drawer (the ARM
 version: also RAM:swarm-log.txt).
 
 
-@VERSION@ (@DATE@) - the first release (beta)
+@VERSION@ (@DATE@)
+--------------------------------------------
+
+- Bug reports with the Help key in the ARM version too.
+
+
+0.220 (16.11.2026) - the first release (beta)
 --------------------------------------------
 
 - The whole of Syndicate Wars (SyndWarsFX) on an Amiga with a 68060 and a

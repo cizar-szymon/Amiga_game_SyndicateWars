@@ -115,8 +115,7 @@ write your e-mail (to hear when it is fixed) and what happened, and SEND
 running TCP/IP stack (e.g. Roadshow). The version of the game is in the
 corner of the main menu and in the Shell: Version SyndWars
 
-Bug reports from the ARM version: not yet (next release) - for a problem
-with the ARM version, describe it with the version number.
+In the ARM version swhost (the 68060) sends the report - the same box.
 
 
 LICENCES

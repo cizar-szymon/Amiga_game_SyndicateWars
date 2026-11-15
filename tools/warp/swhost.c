@@ -56,6 +56,9 @@ static CSWarpExtReq xreq;    /* fetches and feeds: their own, so that the main
 static struct Screen *scr;
 static struct Window *win;
 static void do_smk_play(const UBYTE *p, UWORD len);
+static void do_report(const UBYTE *p, UWORD len);
+static void do_report_poll(void);
+static void do_report_snap(void);
 static UWORD *blank_pointer;
 static int scr_w, scr_h;
 
@@ -189,10 +192,14 @@ static int open_display(int w, int h)
     return 1;
 }
 
+/* the last palette set (6 bits a colour): for the screen of a bug report */
+static UBYTE cur_pal[768];
+
 static void set_palette(const UBYTE *pal)
 {
     static ULONG table[1 + 256 * 3 + 1];
     ULONG i;
+    memcpy(cur_pal, pal, 768);
     if (!scr)
         return;
     table[0] = (256UL << 16) | 0;
@@ -429,6 +436,15 @@ static void handle(UWORD type, const UBYTE *p, UWORD len)
     case SWL_SMK_PLAY:
         do_smk_play(p, len);
         break;
+    case SWL_REPORT:
+        do_report(p, len);
+        break;
+    case SWL_REPORT_POLL:
+        do_report_poll();
+        break;
+    case SWL_REPORT_SNAP:
+        do_report_snap();
+        break;
     case SWL_FOPEN: do_fopen(p, len); break;
     case SWL_FREAD: do_fread(p); break;
     case SWL_FWRITE: do_fwrite(p, len); break;
@@ -581,6 +597,166 @@ static void do_smk_play(const UBYTE *p, UWORD len)
     hlog("swhost: video %s\n", name);
     r = smk_core_play(name, &out);
     result(r, 0);
+}
+
+/******************************************************************************/
+/* Bug reports of the ARM game (SWL_REPORT): sent by the 68k's process of
+ * platform/amiga/amiga_report.c, with the files of this host */
+
+#include "amiga_report.h"
+
+#define REPORT_HOST "83.12.152.135"
+#define REPORT_PORT 6810
+
+static int report_used;
+
+static void wr_be32(UBYTE *p, ULONG v)
+{
+    p[0] = (UBYTE)(v >> 24); p[1] = (UBYTE)(v >> 16); p[2] = (UBYTE)(v >> 8); p[3] = (UBYTE)v;
+}
+
+/** The screen as it is now to RAM:SyndWars-screen.iff (IFF PBM, as the 68k
+ * game saves it): SWL_REPORT_SNAP, when the box opens, before it is drawn.
+ * The ARM game writes no files for a report (its file writes through this
+ * host hung there). */
+static void do_report_snap(void)
+{
+    APTR lock;
+    UBYTE *base = NULL;
+    ULONG bpr = 0, w = scr_w, h = scr_h, row = (scr_w + 1) & ~1UL, y, i;
+    UBYTE hd[48 + 8 + 768 + 8], *line;
+    BPTR f;
+
+    if (!scr) {
+        result(-1, 0);
+        return;
+    }
+    line = AllocVec(row, MEMF_ANY | MEMF_CLEAR);
+    f = Open((STRPTR)"RAM:SyndWars-screen.iff", MODE_NEWFILE);
+    if (!line || !f) {
+        if (line) FreeVec(line);
+        if (f) Close(f);
+        result(-1, 0);
+        return;
+    }
+    memcpy(hd, "FORM", 4);
+    wr_be32(hd + 4, 4 + 8 + 20 + 8 + 768 + 8 + row * h);
+    memcpy(hd + 8, "PBM BMHD", 8);
+    wr_be32(hd + 16, 20);
+    memset(hd + 20, 0, 20);
+    hd[20] = (UBYTE)(w >> 8); hd[21] = (UBYTE)w;
+    hd[22] = (UBYTE)(h >> 8); hd[23] = (UBYTE)h;
+    hd[28] = 8;                                /* planes */
+    hd[34] = 1; hd[35] = 1;                    /* aspect */
+    hd[36] = (UBYTE)(w >> 8); hd[37] = (UBYTE)w;
+    hd[38] = (UBYTE)(h >> 8); hd[39] = (UBYTE)h;
+    memcpy(hd + 40, "CMAP", 4);
+    wr_be32(hd + 44, 768);
+    for (i = 0; i < 768; i++)
+        hd[48 + i] = (UBYTE)((cur_pal[i] & 0x3F) << 2);
+    memcpy(hd + 48 + 768, "BODY", 4);
+    wr_be32(hd + 48 + 768 + 4, row * h);
+    Write(f, hd, 48 + 768 + 8);
+    lock = LockBitMapTags(scr->RastPort.BitMap, LBMI_BASEADDRESS, (ULONG)&base,
+      LBMI_BYTESPERROW, (ULONG)&bpr, TAG_DONE);
+    for (y = 0; y < h; y++) {
+        if (lock)
+            CopyMem(base + y * bpr, line, w);
+        Write(f, line, row);
+    }
+    if (lock)
+        UnLockBitMap(lock);
+    Close(f);
+    FreeVec(line);
+    result(0, 0);
+}
+
+static void write_text_file(const char *name, const char *text)
+{
+    BPTR f = Open((STRPTR)name, MODE_NEWFILE);
+    if (f) {
+        Write(f, (APTR)text, strlen(text));
+        Close(f);
+    }
+}
+
+static void do_report(const UBYTE *p, UWORD len)
+{
+    static char rec[SWL_REC_MAX + 1];
+    static char dir[256], flog[300], fini[300], mach[200];
+    const char *f[5], *s[5];
+    char host[64];
+    int port = REPORT_PORT, i, n;
+    ULONG pos = 0;
+
+    if (len > SWL_REC_MAX)
+        len = SWL_REC_MAX;
+    memcpy(rec, p, len);
+    rec[len] = 0;
+    for (i = 0; i < 5; i++) {
+        s[i] = rec + pos;
+        while (pos < len && rec[pos]) pos++;
+        if (pos < len) pos++;
+    }
+    if (!NameFromLock(GetProgramDir(), (STRPTR)dir, sizeof(dir)))
+        strcpy(dir, "PROGDIR:");
+    /* the state of the game and the e-mail for next time, from the ARM */
+    write_text_file("RAM:SyndWars-state.txt", s[4]);
+    {
+        static char fe[300], line[100];
+        strcpy(fe, dir);
+        AddPart((STRPTR)fe, (STRPTR)"qdata/savegame/report_email.txt", sizeof(fe));
+        sprintf(line, "%.90s\n", s[1]);
+        write_text_file(fe, line);
+    }
+    if (!report_network()) {
+        result(0, SWL_REP_NONET);
+        return;
+    }
+    strcpy(flog, dir);
+    AddPart((STRPTR)flog, (STRPTR)"error.log", sizeof(flog));
+    strcpy(fini, dir);
+    AddPart((STRPTR)fini, (STRPTR)"qdata/savegame/default.ini", sizeof(fini));
+    n = 0;
+    f[n++] = "RAM:SyndWars-state.txt";
+    f[n++] = "RAM:SyndWars-screen.iff";
+    f[n++] = flog;
+    f[n++] = fini;
+    f[n++] = "RAM:swarm-log.txt";
+    sprintf(mach, "%s; 68k host: %s", s[3],
+      (SysBase->AttnFlags & 0x80) ? "68060" : "68040 or older");
+    strcpy(host, REPORT_HOST);
+    if (GetVar((STRPTR)"SyndWarsReportServer", (STRPTR)host, sizeof(host), 0) > 0) {
+        char *c = strchr(host, ':');
+        if (c) {
+            *c = 0;
+            port = atoi(c + 1);
+        }
+    }
+    hlog("swhost: bug report to %s:%d\n", host, port);
+    if (!report_send(host, port, s[0], "Help", s[1], s[2], mach, f, n)) {
+        result(0, SWL_REP_BUSY);
+        return;
+    }
+    report_used = 1;
+    result(1, 0);
+}
+
+static void do_report_poll(void)
+{
+    char text[64];
+    int ok;
+
+    if (!report_result(text, sizeof(text), &ok)) {
+        result(SWL_REP_GOING, 0);
+        return;
+    }
+    hlog("swhost: bug report %s: %s\n", ok ? "sent" : "not sent", text);
+    if (ok)
+        result(SWL_REP_SENT, atoi(text));
+    else
+        result(SWL_REP_FAILED, strstr(text, "did not answer") ? SWL_REP_NOANSWER :
+          SWL_REP_REFUSED);
 }
 
 static void parse_rx(void)
@@ -855,6 +1031,8 @@ out:
         hlog("swhost: stopped, state %lu, exit %ld\n", req.state, req.exitCode);
     }
     hsnd_close();
+    if (report_used)
+        report_quit();      /* a report on its way: waited for */
     if (door_sig >= 0) {
         if (csWarpBase) unitSigUnregister(FindTask(NULL), CSWARP_UNIT_EXT);
         FreeSignal(door_sig);

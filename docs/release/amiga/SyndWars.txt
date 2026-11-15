@@ -111,8 +111,7 @@ ponownie Help) wysyla to na serwer autora portu. Potrzebny dzialajacy stos
 TCP/IP (np. Roadshow). Numer wersji gry jest w rogu menu glownego i w Shellu:
 Version SyndWars
 
-Zgloszenie bledu w wersji ARM: jeszcze nie dziala (bedzie w nastepnym
-wydaniu) - w razie problemu z wersja ARM opisz go razem z numerem wersji.
+W wersji ARM zgloszenie wysyla program swhost (68060) - tak samo z okna gry.
 
 
 LICENCJE

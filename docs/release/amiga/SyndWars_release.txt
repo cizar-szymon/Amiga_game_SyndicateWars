@@ -11,7 +11,13 @@ Bez sieci: opisz blad z numerem wersji i dolacz plik error.log z szuflady
 gry (wersja ARM: takze RAM:swarm-log.txt).
 
 
-@VERSION@ (@DATE@) - pierwsze wydanie (beta)
+@VERSION@ (@DATE@)
+-------------------------------------------
+
+- Zgloszenie bledu klawiszem Help takze w wersji ARM.
+
+
+0.220 (16.11.2026) - pierwsze wydanie (beta)
 -------------------------------------------
 
 - Cala gra Syndicate Wars (SyndWarsFX) na Amige z 68060 i karta Picasso96:

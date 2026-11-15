@@ -17,7 +17,8 @@
  * Its own bsdsocket.library base (a library base belongs to the task that
  * opened it).
  */
-#if defined(SW_AMIGA) && !defined(SW_WARP)
+/* the 68k game, and swhost for the ARM version (SW_HOST) */
+#if (defined(SW_AMIGA) && !defined(SW_WARP)) || defined(SW_HOST)
 #define SocketBase ReportSocketBase
 
 #include <exec/types.h>

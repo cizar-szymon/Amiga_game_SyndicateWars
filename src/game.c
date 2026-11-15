@@ -6159,7 +6159,7 @@ ubyte do_user_interface(void)
         }
     }
 
-#if defined(SW_AMIGA) && !defined(SW_WARP)
+#if defined(SW_AMIGA)
     // Help (KC_F12 on the Amiga): the bug report box
     if (is_key_pressed(KC_F12, KMod_DONTCARE))
     {
@@ -7010,7 +7010,7 @@ void show_menu_screen(void)
 
     if (is_key_pressed(KC_F12, KMod_DONTCARE)) {
         clear_key_pressed(KC_F12);
-#if defined(SW_AMIGA) && !defined(SW_WARP)
+#if defined(SW_AMIGA)
         // Help on the Amiga: the bug report box (it has the screen too)
         ingame_bug_report();
 #else

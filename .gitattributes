@@ -1,1 +1,5 @@
 *.sh text eol=lf
+# the release tree is kept byte for byte as in the release ZIP: WARP HUB
+# downloads these files one by one, and alltext-*.idx holds offsets into the
+# CRLF alltext-*.wad files
+releases/** -text
